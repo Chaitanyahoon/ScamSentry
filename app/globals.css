@@ -3,6 +3,21 @@
 @tailwind utilities;
 
 @layer base {
+  /* More robust reset for html and body */
+  html {
+    @apply w-full h-full; /* Ensure html takes full width and height */
+  }
+  body {
+    @apply bg-background text-foreground min-h-screen w-full; /* Ensure body takes full width and height */
+  }
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box; /* Consistent box model */
+    margin: 0;
+    padding: 0;
+  }
+
   :root {
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
@@ -60,6 +75,11 @@
 }
 
 @layer base {
+  /* This block is now redundant due to the more comprehensive reset above,
+     but keeping it for clarity if you prefer to separate.
+     The `*` rule is already covered by the new `*, *::before, *::after` rule.
+     The `body` rule is also covered by the new `body` rule.
+  */
   * {
     @apply border-border;
   }
