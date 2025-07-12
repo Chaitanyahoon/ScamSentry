@@ -74,20 +74,6 @@
   }
 }
 
-@layer base {
-  /* This block is now redundant due to the more comprehensive reset above,
-     but keeping it for clarity if you prefer to separate.
-     The `*` rule is already covered by the new `*, *::before, *::after` rule.
-     The `body` rule is also covered by the new `body` rule.
-  */
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
 @layer utilities {
   .line-clamp-2 {
     overflow: hidden;

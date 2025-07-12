@@ -14,8 +14,12 @@ export const metadata: Metadata = {
   title: "ScamSentry - Protecting Freelancers, One Report at a Time",
   description:
     "Report, view, and discuss scam job offers. Help protect the freelancer community from fraudulent clients and companies.",
-     icons: {
-    icon: "/icons8-shield-48.png",
+  // Added viewport meta tag for responsiveness
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
   },
 }
 
@@ -30,16 +34,10 @@ export default function RootLayout({
         <link rel="icon" href="/shield.png" sizes="any" />
       </head>
       <body className={`${inter.className} flex flex-col min-h-screen`}>
-        {" "}
-        {/* Added flex flex-col min-h-screen */}
         {/* ThemeProvider removed */}
         <ReportsProvider>
           <Header />
-          <main className="flex-1 w-full">
-            {" "}
-            {/* Added flex-1 w-full */}
-            {children}
-          </main>
+          <main className="flex-1 w-full">{children}</main>
           <Footer />
           <Toaster />
         </ReportsProvider>
