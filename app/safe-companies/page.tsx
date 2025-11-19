@@ -5,7 +5,8 @@ import Link from "next/link"
 import { Building, CheckCircle, Star, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { supabase } from "@/lib/supabase"
+import { db } from "@/lib/firebase"
+import { collection, query, where, orderBy, getDocs } from "firebase/firestore"
 
 interface SafeCompany {
   id: string
@@ -46,30 +47,41 @@ export default function SafeCompaniesPage() {
   useEffect(() => {
     const fetchSafeCompanies = async () => {
       // If env vars are missing, use mock data immediately
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        console.info("Supabase disabled in preview – using mock safe companies.")
+      if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+        console.info("Firebase config missing – using mock safe companies.")
         setCompanies(mockSafeCompanies)
         setIsLoading(false)
         return
       }
 
-      const { data, error } = await supabase
-        .from("safe_companies")
-        .select("*")
-        .eq("status", "approved")
-        .order("verified_score", { ascending: false })
+      try {
+        const q = query(
+          collection(db, "safe_companies"),
+          where("status", "==", "approved"),
+          orderBy("verified_score", "desc")
+        )
 
-      if (error) {
-        // Table missing (42P01) or any other fetch issue ➜ fall back to mock
-        if (error.code === "42P01" || /does not exist/i.test(error.message)) {
-          console.warn('Table "safe_companies" not found. Using mock data.')
-          setCompanies(mockSafeCompanies)
-        } else {
-          console.error("Error fetching safe companies:", error)
-          setCompanies([])
-        }
-      } else {
-        setCompanies(data as SafeCompany[])
+        const querySnapshot = await getDocs(q)
+        const fetchedCompanies: SafeCompany[] = []
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data()
+          fetchedCompanies.push({
+            id: doc.id,
+            name: data.name,
+            industry: data.industry,
+            description: data.description,
+            website: data.website,
+            verified_score: data.verified_score,
+            tags: data.tags,
+          })
+        })
+
+        setCompanies(fetchedCompanies)
+      } catch (error) {
+        console.error("Error fetching safe companies:", error)
+        // Fallback to mock data on error
+        setCompanies(mockSafeCompanies)
       }
 
       setIsLoading(false)

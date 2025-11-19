@@ -4,8 +4,7 @@ import { memo, useRef, useEffect, useState } from "react"
 import type { ScamReport } from "@/contexts/reports-context"
 import maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
-import { AlertTriangle } from "lucide-react"
-import { Loader2 } from "@/components/ui/loader"
+import { AlertTriangle, Loader2 } from "lucide-react"
 
 interface InteractiveMapProps {
   centerLat: number
@@ -14,9 +13,6 @@ interface InteractiveMapProps {
   currentLocation?: { lat: number; lng: number } | null
 }
 
-/* -------------------------------------------------------------------------- */
-/*  InteractiveMap component                                                  */
-/* -------------------------------------------------------------------------- */
 export const InteractiveMap = memo(function InteractiveMap({
   centerLat,
   centerLng,
@@ -27,23 +23,25 @@ export const InteractiveMap = memo(function InteractiveMap({
   const map = useRef<maplibregl.Map | null>(null)
   const [mapLoaded, setMapLoaded] = useState(false)
 
-  /* --------------------------- INITIALISE MAP -------------------------------- */
+  /* --------------------------- INITIALIZE MAP -------------------------------- */
   useEffect(() => {
     if (map.current || !mapContainer.current) return
 
     try {
       map.current = new maplibregl.Map({
         container: mapContainer.current,
-        style: "https://demotiles.maplibre.org/style.json", // Open-source street style
+        style: "https://demotiles.maplibre.org/style.json",
         center: [centerLng, centerLat],
         zoom: 4,
         attributionControl: false,
       })
 
+      // Add navigation controls
+      map.current.addControl(new maplibregl.NavigationControl(), "top-right")
+
       map.current.on("load", () => setMapLoaded(true))
     } catch (err) {
-      // Silently fail & keep placeholder if WebGL is unavailable
-      console.error("Map initialisation failed:", err)
+      console.error("Map initialization failed:", err)
     }
 
     return () => {
@@ -55,7 +53,12 @@ export const InteractiveMap = memo(function InteractiveMap({
   /* ------------------------- KEEP CENTER IN SYNC ----------------------------- */
   useEffect(() => {
     if (map.current && mapLoaded) {
-      map.current.flyTo({ center: [centerLng, centerLat], essential: true, zoom: 8 })
+      map.current.flyTo({
+        center: [centerLng, centerLat],
+        essential: true,
+        zoom: 8,
+        duration: 1500
+      })
     }
   }, [centerLat, centerLng, mapLoaded])
 
@@ -63,83 +66,171 @@ export const InteractiveMap = memo(function InteractiveMap({
   useEffect(() => {
     if (!map.current || !mapLoaded) return
 
-    // Remove all existing markers (MapLibre stores them as custom layers, so iterate DOM)
+    // Remove all existing markers
     document.querySelectorAll(".maplibregl-marker").forEach((m) => m.remove())
 
     // Current-location marker (blue)
     if (currentLocation) {
-      new maplibregl.Marker({ color: "#3B82F6" })
+      new maplibregl.Marker({ color: "#6366f1" })
         .setLngLat([currentLocation.lng, currentLocation.lat])
         .setPopup(
-          new maplibregl.Popup({ offset: 25 }).setHTML(
-            `<h3 class="font-semibold">Your location</h3><p class="text-sm text-gray-500">Nearby scam reports</p>`,
-          ),
+          new maplibregl.Popup({ offset: 25, className: "custom-popup" }).setHTML(`
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-2xl min-w-[200px]">
+              <h3 class="font-bold text-purple-600 dark:text-purple-400 mb-1">Your Location</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300">Nearby scam reports</p>
+            </div>
+          `),
         )
         .addTo(map.current)
     }
 
-    // Scam-report markers
+    // Scam-report markers with pulse animation
     reports.forEach((r) => {
       if (r.lat == null || r.lng == null) return
 
-      const riskColorClass =
-        r.riskLevel === "high" ? "bg-red-500" : r.riskLevel === "medium" ? "bg-yellow-500" : "bg-green-500"
+      const riskColor =
+        r.riskLevel === "high" ? "#EF4444" :
+          r.riskLevel === "medium" ? "#F59E0B" :
+            "#10B981"
 
       const el = document.createElement("div")
+      el.className = "custom-marker"
       el.style.cssText = `
-        width:16px;height:16px;border-radius:50%;border:2px solid white;
-        background:${r.riskLevel === "high" ? "#EF4444" : r.riskLevel === "medium" ? "#FACC15" : "#22C55E"};cursor:pointer;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 3px solid white;
+        background: ${riskColor};
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 0 0 ${riskColor};
+        transition: all 0.3s ease;
+        animation: ${r.riskLevel === "high" ? "pulse-marker 2s infinite" : "none"};
       `
+
+      el.addEventListener("mouseenter", () => {
+        el.style.transform = "scale(1.3)"
+        el.style.boxShadow = `0 6px 20px rgba(0,0,0,0.4), 0 0 20px ${riskColor}`
+      })
+
+      el.addEventListener("mouseleave", () => {
+        el.style.transform = "scale(1)"
+        el.style.boxShadow = `0 4px 12px rgba(0,0,0,0.3), 0 0 0 0 ${riskColor}`
+      })
+
+      const riskBadgeClass =
+        r.riskLevel === "high" ? "bg-gradient-to-r from-red-500 to-pink-600" :
+          r.riskLevel === "medium" ? "bg-gradient-to-r from-yellow-500 to-orange-600" :
+            "bg-gradient-to-r from-green-500 to-emerald-600"
 
       new maplibregl.Marker(el)
         .setLngLat([r.lng, r.lat])
         .setPopup(
-          new maplibregl.Popup({ offset: 25 }).setHTML(
-            `
-            <div class="p-2 text-gray-900 dark:text-gray-100">
-              <h3 class="text-base font-bold mb-1">${r.title}</h3>
-              <p class="text-xs text-gray-600 dark:text-gray-400 mb-1 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" class="lucide lucide-map-pin mr-1"><path d="M12 12.2A4 4 0 1 0 12 4a4 4 0 0 0 0 8.2Z"/><path d="M20 12c0 7-8 12-8 12s-8-5-8-12a8 8 0 1 1 16 0Z"/></svg>
-                ${r.city}, ${r.state}
-              </p>
-              <div class="flex items-center gap-2 text-xs mb-2">
-                <span class="px-2 py-0.5 rounded-full text-white ${riskColorClass}">
-                  ${r.riskLevel} Risk
+          new maplibregl.Popup({
+            offset: 25,
+            closeButton: false,
+            className: "custom-popup"
+          }).setHTML(`
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-2xl min-w-[280px] max-w-[320px]">
+              <div class="flex items-start justify-between mb-3">
+                <h3 class="text-base font-bold text-gray-900 dark:text-white flex-1 pr-2">${r.title}</h3>
+                <span class="px-2 py-1 rounded-full text-white text-xs font-semibold ${riskBadgeClass} whitespace-nowrap">
+                  ${r.riskLevel.toUpperCase()}
                 </span>
-                <span class="text-gray-700 dark:text-gray-300">Trust: ${r.trustScore}%</span>
               </div>
-              <p class="text-xs text-gray-700 dark:text-gray-300 line-clamp-2">${r.description}</p>
-              <a href="/reports/${r.id}" class="text-blue-600 hover:underline text-xs mt-2 block">View Details</a>
+              
+              <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span>${r.city}, ${r.state}</span>
+              </div>
+
+              <div class="space-y-2 mb-3">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-gray-600 dark:text-gray-400">Company:</span>
+                  <span class="font-medium text-gray-900 dark:text-white">${r.company}</span>
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-gray-600 dark:text-gray-400">Trust Score:</span>
+                  <span class="font-semibold text-green-600 dark:text-green-400">${r.trustScore}%</span>
+                </div>
+              </div>
+
+              <p class="text-sm text-gray-700 dark:text-gray-300 mb-3 line-clamp-2">${r.description}</p>
+              
+              <a 
+                href="/reports/${r.id}" 
+                class="block w-full text-center px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-all text-sm font-medium"
+              >
+                View Full Report
+              </a>
             </div>
-            `,
-          ),
+          `),
         )
-        .addTo(map.current)
+        .addTo(map.current!)
     })
   }, [reports, currentLocation, mapLoaded])
 
   /* ------------------------------- RENDER ------------------------------------ */
   return (
-    <div
-      ref={mapContainer}
-      className="relative rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shadow"
-      style={{ width: "100%", height: 500 }} // Increased height and removed max-width/margin
-    >
-      {!mapLoaded && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 z-10">
-          <Loader2 className="h-8 w-8 animate-spin mb-3" />
-          Loading map…
-        </div>
-      )}
+    <>
+      {/* Add custom styles for markers */}
+      <style jsx global>{`
+        @keyframes pulse-marker {
+          0% {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 0 0 rgba(239, 68, 68, 0.7);
+          }
+          70% {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 0 10px rgba(239, 68, 68, 0);
+          }
+          100% {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 0 0 rgba(239, 68, 68, 0);
+          }
+        }
 
-      {mapLoaded && reports.length === 0 && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-600 dark:text-gray-300 text-center space-y-2 z-10 bg-white/80 dark:bg-gray-900/80">
-          <AlertTriangle className="h-8 w-8 text-yellow-500" />
-          <p className="font-medium">No scam reports found in this area.</p>
-          <p className="text-sm">Try another city or add a new report.</p>
-        </div>
-      )}
-    </div>
+        .maplibregl-popup-content {
+          padding: 0 !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+
+        .maplibregl-popup-tip {
+          display: none;
+        }
+
+        .custom-popup .maplibregl-popup-content {
+          border-radius: 0.75rem;
+        }
+      `}</style>
+
+      <div
+        ref={mapContainer}
+        className="relative rounded-2xl overflow-hidden glass border border-gray-200/50 dark:border-gray-700/50 shadow-2xl"
+        style={{ width: "100%", height: 600 }}
+      >
+        {!mapLoaded && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center glass z-10">
+            <Loader2 className="h-12 w-12 animate-spin text-purple-600 mb-4" />
+            <p className="text-gray-600 dark:text-gray-300 font-medium">Loading interactive map...</p>
+          </div>
+        )}
+
+        {mapLoaded && reports.length === 0 && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center space-y-3 z-10 glass">
+            <div className="h-16 w-16 rounded-full bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center">
+              <AlertTriangle className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <p className="font-semibold text-gray-900 dark:text-white text-lg">No scam reports found</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                This area appears to be safe! Try searching another location.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   )
 })
 

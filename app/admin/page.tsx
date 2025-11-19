@@ -1,23 +1,41 @@
-// THIS FILE MUST NOT HAVE "use client" AT THE TOP.
-// It is a Server Component responsible for server-side authentication and rendering the client dashboard.
+"use client"
 
-import { redirect } from "next/navigation"
-import { createServerClient } from "@/lib/supabase/server" // This import is for server-side only
-import AdminDashboardClient from "@/components/admin-dashboard-client" // This is your client-side dashboard component
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { onAuthStateChanged } from "firebase/auth"
+import { auth } from "@/lib/firebase"
+import AdminDashboardClient from "@/components/admin-dashboard-client"
+import { Loader2 } from "lucide-react"
 
-export default async function AdminPage() {
-  // This code runs exclusively on the server during the request lifecycle.
-  const supabase = createServerClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+export default function AdminPage() {
+  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<any>(null)
+  const router = useRouter()
 
-  // If no session, redirect to login page (server-side redirect)
-  if (!session) {
-    redirect("/admin/login")
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.push("/admin/login")
+      } else {
+        setUser(user)
+      }
+      setLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [router])
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      </div>
+    )
   }
 
-  // If a session exists, render the client-side dashboard component.
-  // All interactive elements and client-side data fetching will happen within AdminDashboardClient.
+  if (!user) {
+    return null // Will redirect
+  }
+
   return <AdminDashboardClient />
 }

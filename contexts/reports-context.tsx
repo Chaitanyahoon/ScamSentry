@@ -2,11 +2,25 @@
 
 import type React from "react"
 import { createContext, useContext, useEffect, useState, useCallback } from "react"
-import { supabase } from "@/lib/supabase" // Import Supabase client
-import { toast } from "sonner"
+import { db } from "@/lib/firebase" // Import Firebase db
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  increment,
+  query,
+  orderBy,
+  Timestamp
+} from "firebase/firestore"
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
+import { storage } from "@/lib/firebase"
+import { useToast } from "@/hooks/use-toast"
 
 export interface ScamReport {
-  id: string // Supabase UUID will be string
+  id: string
   title: string
   company: string
   scamType: string
@@ -28,13 +42,14 @@ export interface ScamReport {
   views: number
   riskLevel: "low" | "medium" | "high"
   trustScore: number
+  evidenceUrls?: string[]
 }
 
 interface ReportsContextType {
   reports: ScamReport[]
   addReport: (
-    report: Omit<ScamReport, "id" | "createdAt" | "helpfulVotes" | "flagCount" | "views" | "trustScore" | "status">, // status is now defaulted by DB
-  ) => Promise<ScamReport | null> // Changed to return Promise
+    report: Omit<ScamReport, "id" | "createdAt" | "helpfulVotes" | "flagCount" | "views" | "trustScore" | "status">,
+  ) => Promise<ScamReport | null>
   approveReport: (id: string) => Promise<void>
   rejectReport: (id: string) => Promise<void>
   deleteReport: (id: string) => Promise<void>
@@ -43,7 +58,8 @@ interface ReportsContextType {
   incrementViews: (id: string) => Promise<void>
   getReportsByLocation: (lat: number, lng: number, radius?: number) => ScamReport[]
   searchReportsByCity: (cityName: string) => ScamReport[]
-  isLoadingReports: boolean // New loading state
+  uploadEvidence: (file: File) => Promise<string>
+  isLoadingReports: boolean
 }
 
 const ReportsContext = createContext<ReportsContextType | undefined>(undefined)
@@ -51,30 +67,34 @@ const ReportsContext = createContext<ReportsContextType | undefined>(undefined)
 /* -------------------------------------------------------------------------- */
 /*  helpers: snake-case ↔ camel-case                                           */
 /* -------------------------------------------------------------------------- */
-const dbRowToScamReport = (row: any): ScamReport => ({
-  id: row.id,
-  title: row.title,
-  company: row.company ?? "Unknown Company",
-  scamType: row.scam_type,
-  industry: row.industry ?? "Other",
-  location: row.location ?? "",
-  city: row.city ?? "",
-  state: row.state ?? "",
-  country: row.country ?? "",
-  lat: row.lat ?? undefined,
-  lng: row.lng ?? undefined,
-  description: row.description,
-  tags: row.tags ?? [],
-  anonymous: row.anonymous ?? true,
-  email: row.email ?? undefined,
-  status: row.status,
-  createdAt: row.created_at,
-  helpfulVotes: row.helpful_votes,
-  flagCount: row.flag_count,
-  views: row.views,
-  riskLevel: row.risk_level as "low" | "medium" | "high",
-  trustScore: row.trust_score,
-})
+const firestoreDocToScamReport = (docSnap: any): ScamReport => {
+  const data = docSnap.data()
+  return {
+    id: docSnap.id,
+    title: data.title,
+    company: data.company ?? "Unknown Company",
+    scamType: data.scam_type,
+    industry: data.industry ?? "Other",
+    location: data.location ?? "",
+    city: data.city ?? "",
+    state: data.state ?? "",
+    country: data.country ?? "",
+    lat: data.lat ?? undefined,
+    lng: data.lng ?? undefined,
+    description: data.description,
+    tags: data.tags ?? [],
+    anonymous: data.anonymous ?? true,
+    email: data.email ?? undefined,
+    status: data.status,
+    createdAt: data.created_at?.toDate ? data.created_at.toDate().toISOString() : (data.created_at || new Date().toISOString()),
+    helpfulVotes: data.helpful_votes || 0,
+    flagCount: data.flag_count || 0,
+    views: data.views || 0,
+    riskLevel: data.risk_level as "low" | "medium" | "high",
+    trustScore: data.trust_score || 50,
+    evidenceUrls: data.evidence_urls || [],
+  }
+}
 
 const scamReportToDbInsert = (
   r: Omit<ScamReport, "id" | "createdAt" | "helpfulVotes" | "flagCount" | "views" | "trustScore" | "status">,
@@ -87,17 +107,24 @@ const scamReportToDbInsert = (
   city: r.city,
   state: r.state,
   country: r.country,
-  lat: r.lat,
-  lng: r.lng,
+  lat: r.lat ?? null,
+  lng: r.lng ?? null,
   description: r.description,
   tags: r.tags,
   anonymous: r.anonymous,
-  email: r.email,
+  email: r.email ?? null,
   risk_level: r.riskLevel,
+  created_at: Timestamp.now(),
+  helpful_votes: 0,
+  flag_count: 0,
+  views: 0,
+  trust_score: 50,
+  status: "approved", // Default to approved for now
+  evidence_urls: r.evidenceUrls || [],
 })
 
 // -----------------------------------------------------------------------------
-// Local mock data used when Supabase is unavailable (preview mode)
+// Local mock data used when Firebase is unavailable (preview mode)
 // -----------------------------------------------------------------------------
 const initialReports: ScamReport[] = [
   {
@@ -148,38 +175,39 @@ const initialReports: ScamReport[] = [
     riskLevel: "medium",
     trustScore: 87,
   },
-  // … (include the rest of your previous mock reports 3-5 here, unchanged)
 ]
 
 export function ReportsProvider({ children }: { children: React.ReactNode }) {
+  const { toast } = useToast()
   const [reports, setReports] = useState<ScamReport[]>([])
-  const [isLoadingReports, setIsLoadingReports] = useState(true) // Initialize loading state
+  const [isLoadingReports, setIsLoadingReports] = useState(true)
 
-  // Fetch reports from Supabase on mount
+  // Fetch reports from Firebase on mount
   useEffect(() => {
     const fetchReports = async () => {
       setIsLoadingReports(true)
 
-      // If env vars aren’t present we already know we’re in “local fallback” mode
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        console.info("Supabase disabled in preview – using local mock data.")
-        setReports(initialReports)
-        setIsLoadingReports(false)
-        return
-      }
-
-      const { data, error } = await supabase.from("scam_reports").select("*").order("created_at", { ascending: false })
-
-      if (error) {
-        // Table missing (error code 42P01) ➜ fall back to mock data
-        if (error.code === "42P01" || /does not exist/i.test(error.message)) {
-          console.warn('Supabase table "scam_reports" not found. Using local mock data for this preview build.')
+      try {
+        // Check if Firebase config is present
+        if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+          console.info("Firebase config missing – using local mock data.")
           setReports(initialReports)
-        } else {
-          console.error("Error fetching reports:", error)
+          setIsLoadingReports(false)
+          return
         }
-      } else {
-        setReports((data as any[]).map(dbRowToScamReport))
+
+        const q = query(collection(db, "scam_reports"), orderBy("created_at", "desc"))
+        const querySnapshot = await getDocs(q)
+
+        const fetchedReports: ScamReport[] = []
+        querySnapshot.forEach((doc) => {
+          fetchedReports.push(firestoreDocToScamReport(doc))
+        })
+
+        setReports(fetchedReports)
+      } catch (error) {
+        console.error("Error fetching reports from Firebase:", error)
+        setReports(initialReports) // Fallback
       }
 
       setIsLoadingReports(false)
@@ -195,138 +223,129 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
         "id" | "createdAt" | "helpfulVotes" | "flagCount" | "views" | "trustScore" | "status"
       >,
     ): Promise<ScamReport | null> => {
-      const payload = {
-        ...scamReportToDbInsert(reportData),
-        helpful_votes: 0,
-        flag_count: 0,
-        views: 0,
-        trust_score: 50,
-        status: "approved",
-      }
+      try {
+        const payload = scamReportToDbInsert(reportData)
+        const docRef = await addDoc(collection(db, "scam_reports"), payload)
 
-      const { data, error } = await supabase.from("scam_reports").insert([payload]).select().single()
+        // Construct the new report object to update local state immediately
+        const newReport: ScamReport = {
+          id: docRef.id,
+          ...reportData,
+          status: "approved",
+          createdAt: new Date().toISOString(),
+          helpfulVotes: 0,
+          flagCount: 0,
+          views: 0,
+          trustScore: 50,
+        }
 
-      if (error) {
+        setReports((prev) => [newReport, ...prev])
+        return newReport
+      } catch (error) {
         console.error("Error adding report:", error)
         return null
       }
-
-      const newReport = dbRowToScamReport(data)
-      setReports((prev) => [newReport, ...prev])
-      return newReport
     },
     [],
   )
 
   const approveReport = useCallback(async (id: string) => {
-    const { error } = await supabase.from("scam_reports").update({ status: "approved" }).eq("id", id)
-
-    if (error) {
-      console.error("Error approving report:", error)
-    } else {
+    try {
+      const reportRef = doc(db, "scam_reports", id)
+      await updateDoc(reportRef, { status: "approved" })
       setReports((prev) => prev.map((r) => (r.id === id ? { ...r, status: "approved" as const } : r)))
+    } catch (error) {
+      console.error("Error approving report:", error)
     }
   }, [])
 
   const rejectReport = useCallback(async (id: string) => {
-    const { error } = await supabase.from("scam_reports").update({ status: "rejected" }).eq("id", id)
-
-    if (error) {
-      console.error("Error rejecting report:", error)
-    } else {
+    try {
+      const reportRef = doc(db, "scam_reports", id)
+      await updateDoc(reportRef, { status: "rejected" })
       setReports((prev) =>
         prev.map((report) => (report.id === id ? { ...report, status: "rejected" as const } : report)),
       )
+    } catch (error) {
+      console.error("Error rejecting report:", error)
     }
   }, [])
 
   const deleteReport = useCallback(async (id: string) => {
-    console.log("Attempting to delete report with ID:", id) // Add this line
-    const { error } = await supabase.from("scam_reports").delete().eq("id", id)
-
-    if (error) {
-      console.error("Error deleting report:", error)
-      // Add a toast notification for the error
-      toast({
-        title: "Deletion Failed",
-        description: `Could not delete report: ${error.message}. Please check Supabase logs.`,
-        variant: "destructive",
-      })
-    } else {
+    console.log("Attempting to delete report with ID:", id)
+    try {
+      await deleteDoc(doc(db, "scam_reports", id))
       setReports((prev) => prev.filter((report) => report.id !== id))
-      // Add a toast notification for success (optional, but good for consistency)
       toast({
         title: "Report Deleted",
         description: "The report has been permanently removed.",
+      })
+    } catch (error: any) {
+      console.error("Error deleting report:", error)
+      toast({
+        title: "Deletion Failed",
+        description: `Could not delete report: ${error.message}.`,
+        variant: "destructive",
       })
     }
   }, [])
 
   const voteHelpful = useCallback(async (id: string) => {
-    // Increment helpful_votes and trust_score directly in DB
-    const { error } = await supabase.rpc("increment_helpful_votes", { report_id: id })
+    try {
+      const reportRef = doc(db, "scam_reports", id)
+      await updateDoc(reportRef, {
+        helpful_votes: increment(1),
+        trust_score: increment(2)
+      })
 
-    if (error) {
-      console.error("Error voting helpful:", error)
-    } else {
       setReports((prev) =>
         prev.map((report) =>
           report.id === id
             ? {
-                ...report,
-                helpfulVotes: report.helpfulVotes + 1,
-                trustScore: Math.min(100, report.trustScore + 2),
-              }
+              ...report,
+              helpfulVotes: report.helpfulVotes + 1,
+              trustScore: Math.min(100, report.trustScore + 2),
+            }
             : report,
         ),
       )
+    } catch (error) {
+      console.error("Error voting helpful:", error)
     }
   }, [])
 
   const flagReport = useCallback(async (id: string) => {
-    // Increment flag_count and decrement trust_score directly in DB
-    const { error } = await supabase.rpc("increment_flag_count", { report_id: id })
+    try {
+      const reportRef = doc(db, "scam_reports", id)
+      await updateDoc(reportRef, {
+        flag_count: increment(1),
+        trust_score: increment(-5)
+      })
 
-    if (error) {
-      console.error("Error flagging report:", error)
-    } else {
       setReports((prev) =>
         prev.map((report) =>
           report.id === id
             ? {
-                ...report,
-                flagCount: report.flagCount + 1,
-                trustScore: Math.max(0, report.trustScore - 5),
-              }
+              ...report,
+              flagCount: report.flagCount + 1,
+              trustScore: Math.max(0, report.trustScore - 5),
+            }
             : report,
         ),
       )
+    } catch (error) {
+      console.error("Error flagging report:", error)
     }
   }, [])
 
   const incrementViews = useCallback(async (id: string) => {
-    // 1. Try to call the stored procedure (preferred – atomic & safe)
-    const { error: rpcError } = await supabase.rpc("increment_views", { report_id: id })
-
-    // 2. If the RPC is missing (code 42883) fall back to a normal update
-    if (rpcError) {
-      if (rpcError.code === "42883" || /function.*increment_views/i.test(rpcError.message)) {
-        // Fallback: increment directly
-        const { error: updateError } = await supabase
-          .from("scam_reports")
-          .update({ views: supabase.literal("views + 1") })
-          .eq("id", id)
-
-        if (updateError) {
-          console.error("Fallback update (views) failed:", updateError)
-        }
-      } else {
-        console.error("Error incrementing views:", rpcError)
-      }
+    try {
+      const reportRef = doc(db, "scam_reports", id)
+      await updateDoc(reportRef, { views: increment(1) })
+      setReports((prev) => prev.map((r) => (r.id === id ? { ...r, views: r.views + 1 } : r)))
+    } catch (error) {
+      console.error("Error incrementing views:", error)
     }
-
-    // Update local state so the UI reflects the change immediately
-    setReports((prev) => prev.map((r) => (r.id === id ? { ...r, views: r.views + 1 } : r)))
   }, [])
 
   // Helper function for distance calculation (remains client-side)
@@ -373,6 +392,17 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
     incrementViews,
     getReportsByLocation,
     searchReportsByCity,
+    uploadEvidence: async (file: File) => {
+      try {
+        const storageRef = ref(storage, `evidence/${Date.now()}_${file.name}`)
+        const snapshot = await uploadBytes(storageRef, file)
+        const downloadURL = await getDownloadURL(snapshot.ref)
+        return downloadURL
+      } catch (error) {
+        console.error("Error uploading evidence:", error)
+        throw error
+      }
+    },
     isLoadingReports,
   }
 

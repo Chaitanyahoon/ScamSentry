@@ -1,9 +1,7 @@
-"use client" // This directive is CRUCIAL here, marking it as a Client Component.
+"use client"
 
 import { useEffect } from "react"
-
 import { useState } from "react"
-
 import { Shield, Eye, Check, X, Flag, TrendingUp, AlertTriangle, Trash2, Building, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,7 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast"
 import { useReports } from "@/contexts/reports-context"
 import LogoutButton from "@/components/logout-button"
-import { supabase } from "@/lib/supabase" // Import Supabase client
+import { db } from "@/lib/firebase"
+import { collection, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore"
 
 // Define SafeCompany type for client-side use
 interface SafeCompany {
@@ -39,20 +38,42 @@ export default function AdminDashboardClient() {
   useEffect(() => {
     const fetchSafeCompanies = async () => {
       setIsLoadingSafeCompanies(true)
-      const { data, error } = await supabase
-        .from("safe_companies")
-        .select("*")
-        .order("created_at", { ascending: false })
 
-      if (error) {
+      // Check if Firebase config is present
+      if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+        console.info("Firebase config missing – skipping safe companies fetch.")
+        setIsLoadingSafeCompanies(false)
+        return
+      }
+
+      try {
+        const q = query(collection(db, "safe_companies"), orderBy("created_at", "desc"))
+        const querySnapshot = await getDocs(q)
+
+        const fetchedCompanies: SafeCompany[] = []
+        querySnapshot.forEach((doc) => {
+          const data = doc.data()
+          fetchedCompanies.push({
+            id: doc.id,
+            name: data.name,
+            industry: data.industry,
+            description: data.description,
+            website: data.website,
+            verified_score: data.verified_score,
+            tags: data.tags,
+            created_at: data.created_at?.toDate ? data.created_at.toDate().toISOString() : (data.created_at || new Date().toISOString()),
+            status: data.status,
+          })
+        })
+
+        setSafeCompanies(fetchedCompanies)
+      } catch (error) {
         console.error("Error fetching safe companies:", error)
         toast({
           title: "Error",
           description: "Failed to load safe companies.",
           variant: "destructive",
         })
-      } else {
-        setSafeCompanies(data as SafeCompany[])
       }
       setIsLoadingSafeCompanies(false)
     }
@@ -100,35 +121,37 @@ export default function AdminDashboardClient() {
 
   // Safe Company Actions
   const handleApproveSafeCompany = async (id: string) => {
-    const { error } = await supabase.from("safe_companies").update({ status: "approved" }).eq("id", id)
-    if (error) {
-      console.error("Error approving safe company:", error)
-      toast({ title: "Error", description: "Failed to approve company.", variant: "destructive" })
-    } else {
+    try {
+      const companyRef = doc(db, "safe_companies", id)
+      await updateDoc(companyRef, { status: "approved" })
       setSafeCompanies((prev) => prev.map((c) => (c.id === id ? { ...c, status: "approved" } : c)))
       toast({ title: "Company Approved", description: "The company has been added to the safe list." })
+    } catch (error) {
+      console.error("Error approving safe company:", error)
+      toast({ title: "Error", description: "Failed to approve company.", variant: "destructive" })
     }
   }
 
   const handleRejectSafeCompany = async (id: string) => {
-    const { error } = await supabase.from("safe_companies").update({ status: "rejected" }).eq("id", id)
-    if (error) {
-      console.error("Error rejecting safe company:", error)
-      toast({ title: "Error", description: "Failed to reject company.", variant: "destructive" })
-    } else {
+    try {
+      const companyRef = doc(db, "safe_companies", id)
+      await updateDoc(companyRef, { status: "rejected" })
       setSafeCompanies((prev) => prev.map((c) => (c.id === id ? { ...c, status: "rejected" } : c)))
       toast({ title: "Company Rejected", description: "The company has been rejected." })
+    } catch (error) {
+      console.error("Error rejecting safe company:", error)
+      toast({ title: "Error", description: "Failed to reject company.", variant: "destructive" })
     }
   }
 
   const handleDeleteSafeCompany = async (id: string) => {
-    const { error } = await supabase.from("safe_companies").delete().eq("id", id)
-    if (error) {
-      console.error("Error deleting safe company:", error)
-      toast({ title: "Error", description: "Failed to delete company.", variant: "destructive" })
-    } else {
+    try {
+      await deleteDoc(doc(db, "safe_companies", id))
       setSafeCompanies((prev) => prev.filter((c) => c.id !== id))
       toast({ title: "Company Deleted", description: "The company has been permanently removed." })
+    } catch (error) {
+      console.error("Error deleting safe company:", error)
+      toast({ title: "Error", description: "Failed to delete company.", variant: "destructive" })
     }
   }
 

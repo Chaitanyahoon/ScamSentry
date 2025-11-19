@@ -11,7 +11,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/lib/supabase" // Import Supabase client
+import { db } from "@/lib/firebase"
+import { collection, addDoc, Timestamp } from "firebase/firestore"
 
 const commonTags = [
   "transparent",
@@ -83,33 +84,17 @@ export default function SubmitSafeCompanyPage() {
     }
 
     try {
-      // Insert into Supabase
-      const { data, error } = await supabase
-        .from("safe_companies")
-        .insert([
-          {
-            name: formData.name,
-            industry: formData.industry,
-            description: formData.description,
-            website: formData.website || null,
-            tags: selectedTags.length > 0 ? selectedTags : null,
-            verified_score: 50, // Default score, can be adjusted by admins
-            status: "pending", // New companies need to be approved
-          },
-        ])
-        .select() // Select the newly inserted row
-        .single()
-
-      if (error) {
-        console.error("Error submitting safe company:", error)
-        toast({
-          title: "Submission Error",
-          description: "Failed to submit company. Please try again.",
-          variant: "destructive",
-        })
-        setIsSubmitting(false)
-        return
-      }
+      // Insert into Firebase
+      await addDoc(collection(db, "safe_companies"), {
+        name: formData.name,
+        industry: formData.industry,
+        description: formData.description,
+        website: formData.website || null,
+        tags: selectedTags.length > 0 ? selectedTags : null,
+        verified_score: 50, // Default score, can be adjusted by admins
+        status: "pending", // New companies need to be approved
+        created_at: Timestamp.now(),
+      })
 
       toast({
         title: "Company Submitted Successfully!",

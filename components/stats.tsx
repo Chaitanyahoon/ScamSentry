@@ -1,6 +1,46 @@
+"use client"
+
+import { useEffect, useState, useRef } from "react"
 import { TrendingUp, Shield, Users, MapPin } from "lucide-react"
 import { useReports } from "@/contexts/reports-context"
 import { Card, CardContent } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
+
+// Animated Counter Hook
+function useCountUp(end: number, duration: number = 2000) {
+  const [count, setCount] = useState(0)
+  const [hasAnimated, setHasAnimated] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasAnimated) {
+          setHasAnimated(true)
+          let startTime: number | null = null
+          const animate = (currentTime: number) => {
+            if (!startTime) startTime = currentTime
+            const progress = Math.min((currentTime - startTime) / duration, 1)
+            setCount(Math.floor(progress * end))
+            if (progress < 1) {
+              requestAnimationFrame(animate)
+            }
+          }
+          requestAnimationFrame(animate)
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (ref.current) {
+      observer.observe(ref.current)
+    }
+
+    return () => observer.disconnect()
+  }, [end, duration, hasAnimated])
+
+  return { count, ref }
+}
 
 export function Stats() {
   const { reports } = useReports()
@@ -13,77 +53,107 @@ export function Stats() {
   const stats = [
     {
       name: "Reports Submitted",
-      value: reports.length.toLocaleString(),
+      value: reports.length,
       icon: Shield,
       change: "+12%",
-      changeType: "increase",
-      color: "text-red-500",
-      bgColor: "bg-red-900/20",
+      gradient: "from-red-500 to-pink-600",
+      glowColor: "group-hover:shadow-red-500/50",
     },
     {
       name: "Total Views",
-      value: totalViews.toLocaleString(),
+      value: totalViews,
       icon: Users,
       change: "+8%",
-      changeType: "increase",
-      color: "text-blue-500",
-      bgColor: "bg-blue-900/20",
+      gradient: "from-blue-500 to-cyan-600",
+      glowColor: "group-hover:shadow-blue-500/50",
     },
     {
       name: "Cities Covered",
-      value: uniqueCities.toString(),
+      value: uniqueCities,
       icon: MapPin,
       change: "+23%",
-      changeType: "increase",
-      color: "text-orange-500",
-      bgColor: "bg-orange-900/20",
+      gradient: "from-orange-500 to-yellow-600",
+      glowColor: "group-hover:shadow-orange-500/50",
     },
     {
       name: "Community Votes",
-      value: totalHelpfulVotes.toLocaleString(),
+      value: totalHelpfulVotes,
       icon: TrendingUp,
       change: "+15%",
-      changeType: "increase",
-      color: "text-green-500",
-      bgColor: "bg-green-900/20",
+      gradient: "from-green-500 to-emerald-600",
+      glowColor: "group-hover:shadow-green-500/50",
     },
   ]
 
   return (
-    <section className="py-16 bg-gray-950">
-      <div className="container px-4 sm:px-6 lg:px-8">
+    <section className="relative py-20 bg-gradient-to-b from-gray-900 to-gray-950 overflow-hidden">
+      {/* Background Glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.1),transparent_70%)]" />
+
+      <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Community Impact</h2>
-            <p className="mt-4 text-lg text-gray-400">Together, we're building a safer freelancing ecosystem</p>
+          {/* Section Header */}
+          <div className="text-center mb-16 animate-slide-up">
+            <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+              Community <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Impact</span>
+            </h2>
+            <p className="mt-4 text-xl text-gray-400">
+              Together, we're building a safer freelancing ecosystem
+            </p>
           </div>
 
+          {/* Stats Grid */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {stats.map((stat) => (
-              <Card
-                key={stat.name}
-                className="relative overflow-hidden bg-gray-800 border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <CardContent className="p-6 flex items-center">
-                  <div
-                    className={`flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-lg ${stat.bgColor}`}
-                  >
-                    <stat.icon className={`h-6 w-6 ${stat.color}`} />
+            {stats.map((stat, index) => {
+              const { count, ref } = useCountUp(stat.value)
+              return (
+                <Card
+                  key={stat.name}
+                  ref={ref}
+                  className={cn(
+                    "group relative overflow-hidden bg-gray-800/50 border-gray-700/50 backdrop-blur-sm hover-lift transition-all duration-500",
+                    stat.glowColor,
+                    `animate-slide-up stagger-${index + 1}`
+                  )}
+                >
+                  {/* Gradient Border on Hover */}
+                  <div className={cn(
+                    "absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br p-[1px]",
+                    stat.gradient
+                  )}>
+                    <div className="h-full w-full rounded-lg bg-gray-800" />
                   </div>
-                  <div className="ml-4 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-400 truncate">{stat.name}</dt>
-                      <dd className="flex items-baseline mt-1">
-                        <div className="text-2xl font-semibold text-white">{stat.value}</div>
-                        <div className="ml-2 flex items-baseline text-sm font-semibold text-green-500">
-                          {stat.change}
-                        </div>
+
+                  <CardContent className="relative p-6">
+                    <div className="flex items-center justify-between">
+                      {/* Icon */}
+                      <div className={cn(
+                        "flex-shrink-0 flex items-center justify-center h-14 w-14 rounded-xl bg-gradient-to-br shadow-lg transition-all duration-300 group-hover:scale-110",
+                        stat.gradient
+                      )}>
+                        <stat.icon className="h-7 w-7 text-white" />
+                      </div>
+
+                      {/* Change Badge */}
+                      <div className="flex items-center space-x-1 text-sm font-semibold text-green-400">
+                        <TrendingUp className="h-4 w-4" />
+                        <span>{stat.change}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <dt className="text-sm font-medium text-gray-400">{stat.name}</dt>
+                      <dd className="mt-2 text-4xl font-bold text-white animate-pulse-glow">
+                        {count.toLocaleString()}
                       </dd>
-                    </dl>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    </div>
+                  </CardContent>
+
+                  {/* Shimmer Effect */}
+                  <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-100 pointer-events-none" />
+                </Card>
+              )
+            })}
           </div>
         </div>
       </div>

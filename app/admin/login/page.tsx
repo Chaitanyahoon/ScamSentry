@@ -4,7 +4,8 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { auth } from "@/lib/firebase"
+import { signInWithEmailAndPassword } from "firebase/auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,7 +15,6 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function AdminLoginPage() {
   const router = useRouter()
-  const supabase = createClient()
   const { toast } = useToast()
 
   const [email, setEmail] = useState("")
@@ -25,26 +25,24 @@ export default function AdminLoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-
-    if (error) {
-      toast({
-        title: "Login Failed",
-        description: error.message,
-        variant: "destructive",
-      })
-    } else {
+    try {
+      await signInWithEmailAndPassword(auth, email, password)
       toast({
         title: "Login Successful",
         description: "Redirecting to admin dashboard...",
       })
       router.push("/admin")
-      router.refresh() // Refresh session on client
+      router.refresh()
+    } catch (error: any) {
+      console.error("Login error:", error)
+      toast({
+        title: "Login Failed",
+        description: error.message || "An error occurred during login",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
     }
-    setIsLoading(false)
   }
 
   return (

@@ -1,7 +1,8 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { auth } from "@/lib/firebase"
+import { signOut } from "firebase/auth"
 import { Button } from "@/components/ui/button"
 import { LogOut, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
@@ -9,29 +10,29 @@ import { useState } from "react"
 
 export default function LogoutButton() {
   const router = useRouter()
-  const supabase = createClient()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleLogout = async () => {
     setIsLoading(true)
-    const { error } = await supabase.auth.signOut()
+    try {
+      await signOut(auth)
 
-    if (error) {
-      toast({
-        title: "Logout Failed",
-        description: error.message,
-        variant: "destructive",
-      })
-    } else {
       toast({
         title: "Logged Out",
         description: "You have been successfully logged out.",
       })
       router.push("/admin/login")
-      router.refresh() // Refresh session on client
+      router.refresh()
+    } catch (error: any) {
+      toast({
+        title: "Logout Failed",
+        description: error.message,
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
     }
-    setIsLoading(false)
   }
 
   return (

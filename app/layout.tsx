@@ -14,7 +14,23 @@ export const metadata: Metadata = {
   title: "ScamSentry - Protecting Freelancers, One Report at a Time",
   description:
     "Report, view, and discuss scam job offers. Help protect the freelancer community from fraudulent clients and companies.",
-  // Added viewport meta tag for responsiveness
+  keywords: ["scam reports", "freelancer protection", "job scams", "fraud prevention", "community safety"],
+  authors: [{ name: "ScamSentry Team" }],
+  icons: {
+    icon: [
+      { url: "/favicon.png", sizes: "any" },
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: [
+      { url: "/favicon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/site.webmanifest",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#6366f1" },
+    { media: "(prefers-color-scheme: dark)", color: "#1f2937" },
+  ],
   viewport: {
     width: "device-width",
     initialScale: 1,
@@ -30,9 +46,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <head>
-        <link rel="icon" href="/shield.png" sizes="any" />
-      </head>
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         {/* ThemeProvider removed */}
         <ReportsProvider>
