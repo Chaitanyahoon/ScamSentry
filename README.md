@@ -108,4 +108,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## 📞 Contact
 
-Project Link: [https://github.com/yourusername/scam-sentry](https://github.com/yourusername/scam-sentry)
+Project Link: [https://github.com/yourusername/scam-sentry](https://github.com/Chaitanyahoon/scam-sentry)
