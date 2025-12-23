@@ -103,57 +103,38 @@ export function Stats() {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {stats.map((stat, index) => {
               const { count, ref } = useCountUp(stat.value)
               return (
-                <Card
+                <div
                   key={stat.name}
                   ref={ref}
-                  className={cn(
-                    "group relative overflow-hidden bg-gray-800/50 border-gray-700/50 backdrop-blur-sm hover-lift transition-all duration-500",
-                    stat.glowColor,
-                    `animate-slide-up stagger-${index + 1}`
-                  )}
+                  className={`relative overflow-hidden glass-card p-6 transition-all duration-300 hover:translate-y-[-4px] hover:shadow-lg ${stat.glowColor.replace('shadow-', 'hover:shadow-')}`}
                 >
-                  {/* Gradient Border on Hover */}
-                  <div className={cn(
-                    "absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br p-[1px]",
-                    stat.gradient
-                  )}>
-                    <div className="h-full w-full rounded-lg bg-gray-800" />
+                  <div className="flex items-center justify-between mb-4">
+                    {/* Icon */}
+                    <div className={`flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.gradient} bg-opacity-10 backdrop-blur-md shadow-inner`}>
+                      <stat.icon className="w-6 h-6 text-white" />
+                    </div>
+
+                    {/* Change Badge */}
+                    <div className="flex items-center space-x-1 text-sm font-medium text-green-400 bg-green-400/10 px-2 py-1 rounded-full border border-green-400/20">
+                      <TrendingUp className="w-3 h-3" />
+                      <span>{stat.change}</span>
+                    </div>
                   </div>
 
-                  <CardContent className="relative p-6">
-                    <div className="flex items-center justify-between">
-                      {/* Icon */}
-                      <div className={cn(
-                        "flex-shrink-0 flex items-center justify-center h-14 w-14 rounded-xl bg-gradient-to-br shadow-lg transition-all duration-300 group-hover:scale-110",
-                        stat.gradient
-                      )}>
-                        <stat.icon className="h-7 w-7 text-white" />
-                      </div>
-
-                      {/* Change Badge */}
-                      <div className="flex items-center space-x-1 text-sm font-semibold text-green-400">
-                        <TrendingUp className="h-4 w-4" />
-                        <span>{stat.change}</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-4">
-                      <dt className="text-sm font-medium text-gray-400">{stat.name}</dt>
-                      <dd className="mt-2 text-4xl font-bold text-white animate-pulse-glow">
-                        {count.toLocaleString()}
-                      </dd>
-                    </div>
-                  </CardContent>
-
-                  {/* Shimmer Effect */}
-                  <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-100 pointer-events-none" />
-                </Card>
+                  <div>
+                    <dt className="text-sm font-medium text-gray-400">{stat.name}</dt>
+                    <dd className="mt-2 text-3xl font-bold text-white tracking-tight">
+                      {count.toLocaleString()}
+                    </dd>
+                  </div>
+                </div>
               )
             })}
+
           </div>
         </div>
       </div>

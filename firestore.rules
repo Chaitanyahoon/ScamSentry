@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Match the reports collection
+    match /scam_reports/{reportId} {
+      
+      // READ: Allow anyone to view reports 
+      allow read: if true;
+      
+      // CREATE: Allow anyone to submit a new report (Anonymous reporting)
+      allow create: if true;
+      
+      // UPDATE: Securely allow interaction (Voting, Flagging, Viewing)
+      allow update: if 
+        // 1. Allow updating ONLY specific counter fields (for anonymous users)
+        (request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['helpful_votes', 'flag_count', 'trust_score', 'views', 'status'])) 
+        ||
+        // 2. OR allow full updates if the user is signed in (Admin/Moderator)
+        request.auth != null;
+      
+      // DELETE: Only allow signed-in users (Admins) to delete reports
+      allow delete: if request.auth != null;
+    }
+
+    // Match the safe_companies collection
+    match /safe_companies/{companyId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+
+    // Default deny for other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

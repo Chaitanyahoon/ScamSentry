@@ -2,10 +2,11 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { Shield, Menu, Search, AlertTriangle, MapPin, Users, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 
 export function Header() {
@@ -13,7 +14,6 @@ export function Header() {
   const pathname = usePathname()
 
   const navigation = [
-    { name: "Report Scam", href: "/report", icon: AlertTriangle },
     { name: "Browse Reports", href: "/reports", icon: Search },
     { name: "Scam Map", href: "/map", icon: MapPin },
     { name: "Safe Companies", href: "/safe-companies", icon: CheckCircle },
@@ -26,10 +26,14 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full glass border-b border-white/10 backdrop-blur-xl">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="group flex items-center space-x-2 transition-transform hover:scale-105">
-          <div className="relative">
-            <Shield className="h-8 w-8 text-purple-500 group-hover:text-purple-400 transition-colors" />
-            <div className="absolute inset-0 bg-purple-500 blur-lg opacity-0 group-hover:opacity-50 transition-opacity" />
+        <Link href="/" className="group flex items-center space-x-3 transition-transform hover:scale-105">
+          <div className="relative h-10 w-10 overflow-hidden rounded-xl">
+            <Image
+              src="/logo.png"
+              alt="ScamSentry Logo"
+              fill
+              className="object-cover"
+            />
           </div>
           <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             ScamSentry
@@ -82,6 +86,7 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px] glass border-l border-white/10">
+              <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
               <div className="flex flex-col space-y-4 mt-8">
                 {navigation.map((item) => (
                   <Link

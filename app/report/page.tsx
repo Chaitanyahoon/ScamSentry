@@ -200,8 +200,21 @@ export default function ReportPage() {
       } else {
         throw new Error("Failed to create report")
       }
-    } catch (error) {
-      toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" })
+    } catch (error: any) {
+      console.error("Submission error:", error)
+      if (error.code === "permission-denied" || error.message?.includes("Missing or insufficient permissions")) {
+        toast({
+          title: "Submission Failed",
+          description: "Database permissions denied. Please contact the administrator.",
+          variant: "destructive"
+        })
+      } else {
+        toast({
+          title: "Error",
+          description: "Something went wrong. Please try again.",
+          variant: "destructive"
+        })
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -233,7 +246,7 @@ export default function ReportPage() {
                   <p className="text-sm text-gray-500">Select the category that best fits your experience.</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto sm:max-w-none">
                   {scamTypes.map((type) => {
                     const Icon = type.icon
                     const isSelected = formData.scamType === type.id

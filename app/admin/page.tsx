@@ -1,29 +1,20 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { onAuthStateChanged } from "firebase/auth"
-import { auth } from "@/lib/firebase"
+import { useAuth } from "@/contexts/auth-context"
 import AdminDashboardClient from "@/components/admin-dashboard-client"
 import { Loader2 } from "lucide-react"
 
 export default function AdminPage() {
-  const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<any>(null)
+  const { user, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.push("/admin/login")
-      } else {
-        setUser(user)
-      }
-      setLoading(false)
-    })
-
-    return () => unsubscribe()
-  }, [router])
+    if (!loading && !user) {
+      router.push("/admin/login")
+    }
+  }, [user, loading, router])
 
   if (loading) {
     return (

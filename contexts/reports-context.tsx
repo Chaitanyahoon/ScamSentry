@@ -241,9 +241,11 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
 
         setReports((prev) => [newReport, ...prev])
         return newReport
+        setReports((prev) => [newReport, ...prev])
+        return newReport
       } catch (error) {
         console.error("Error adding report:", error)
-        return null
+        throw error
       }
     },
     [],

@@ -77,7 +77,7 @@ export function RecentReports() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {recentReports.length === 0 && (
               <div className="col-span-full text-center py-12">
                 <p className="text-gray-400">No reports available yet. Be the first to report a scam!</p>
@@ -86,72 +86,45 @@ export function RecentReports() {
             {recentReports.map((report) => (
               <Card
                 key={report.id}
-                className="bg-gray-800 border-gray-700 hover:shadow-xl transition-shadow duration-300"
+                className="glass-card border-white/5 hover:border-white/10 hover:shadow-2xl transition-all duration-300 group hover:-translate-y-1 flex flex-col justify-between"
               >
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <Link href={`/reports/${report.id}`} className="hover:underline">
-                        <CardTitle className="text-lg line-clamp-2 mb-2 text-white">{report.title}</CardTitle>
-                      </Link>
-                      <div className="flex items-center space-x-4 text-sm text-gray-400">
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-1 text-gray-500" />
-                          {report.location}
-                        </div>
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1 text-gray-500" />
-                          {getTimeAgo(report.createdAt)}
-                        </div>
-                      </div>
-                    </div>
-                    <Badge variant={getRiskColor(report.riskLevel)} className="text-xs px-2 py-1">
-                      {report.riskLevel} risk
+                <div className="p-6">
+                  <div className="flex items-center justify-between gap-4 mb-4">
+                    <Badge variant={getRiskColor(report.riskLevel)} className="rounded-full px-2.5 py-0.5 text-[10px] bg-white/5 border-white/10 backdrop-blur-sm shadow-sm">
+                      {report.riskLevel.toUpperCase()}
                     </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-400 mb-4 line-clamp-3">{report.description}</p>
-
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {report.tags.map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs border-gray-600 text-gray-300">
-                        {tag}
-                      </Badge>
-                    ))}
+                    <span className="text-xs text-gray-500 font-mono">{getTimeAgo(report.createdAt)}</span>
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-700">
-                    <div className="flex items-center space-x-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-green-500 hover:text-green-400"
-                        onClick={() => handleHelpfulVote(report.id)}
-                      >
-                        <ThumbsUp className="h-4 w-4 mr-1" />
-                        {report.helpfulVotes}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500 hover:text-red-400"
-                        onClick={() => handleFlag(report.id)}
-                      >
-                        <Flag className="h-4 w-4 mr-1" />
-                        Flag
-                      </Button>
+                  <Link href={`/reports/${report.id}`} className="block group-hover:text-purple-300 transition-colors mb-3">
+                    <CardTitle className="text-lg font-bold leading-snug text-white line-clamp-2">{report.title}</CardTitle>
+                  </Link>
+
+                  <p className="text-sm text-gray-400 line-clamp-3 leading-relaxed mb-4">{report.description}</p>
+
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <div className="flex items-center bg-white/5 rounded-full px-2 py-1">
+                      <MapPin className="h-3 w-3 mr-1.5" />
+                      {report.location || "Online"}
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
-                      className="border-gray-600 text-gray-200 hover:bg-gray-700 bg-transparent"
-                    >
-                      <Link href={`/reports/${report.id}`}>Read More</Link>
-                    </Button>
                   </div>
-                </CardContent>
+                </div>
+
+                <div className="px-6 py-4 border-t border-white/5 bg-white/[0.02] flex items-center justify-between">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 rounded-full text-gray-400 hover:text-green-400 hover:bg-green-400/10 -ml-2 text-xs"
+                    onClick={() => handleHelpfulVote(report.id)}
+                  >
+                    <ThumbsUp className="h-3.5 w-3.5 mr-1.5" />
+                    {report.helpfulVotes > 0 ? `${report.helpfulVotes} Helpful` : "Helpful?"}
+                  </Button>
+
+                  <Link href={`/reports/${report.id}`} className="text-xs font-medium text-purple-400 hover:text-purple-300 transition-colors">
+                    Read More →
+                  </Link>
+                </div>
               </Card>
             ))}
           </div>

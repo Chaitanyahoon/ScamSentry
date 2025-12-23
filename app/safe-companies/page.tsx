@@ -6,6 +6,7 @@ import { Building, CheckCircle, Star, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { db } from "@/lib/firebase"
+import { useToast } from "@/hooks/use-toast"
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore"
 
 interface SafeCompany {
@@ -41,6 +42,7 @@ const mockSafeCompanies: SafeCompany[] = [
 ]
 
 export default function SafeCompaniesPage() {
+  const { toast } = useToast()
   const [companies, setCompanies] = useState<SafeCompany[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -78,8 +80,17 @@ export default function SafeCompaniesPage() {
         })
 
         setCompanies(fetchedCompanies)
-      } catch (error) {
-        console.error("Error fetching safe companies:", error)
+      } catch (error: any) {
+        if (error.code === "permission-denied" || error.message?.includes("Missing or insufficient permissions")) {
+          console.warn("Firebase permissions missing. Falling back to mock data.")
+          toast({
+            title: "Live Data Access Restricted",
+            description: "Showing preview data. Admin rules need to be updated in Firebase Console.",
+            variant: "default",
+          })
+        } else {
+          console.error("Error fetching safe companies:", error)
+        }
         // Fallback to mock data on error
         setCompanies(mockSafeCompanies)
       }

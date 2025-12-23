@@ -35,9 +35,20 @@ export default function AdminLoginPage() {
       router.refresh()
     } catch (error: any) {
       console.error("Login error:", error)
+
+      let errorMessage = "An error occurred during login"
+      let errorTitle = "Login Failed"
+
+      if (error.code === "auth/invalid-credential" || error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
+        errorTitle = "Invalid Credentials"
+        errorMessage = "User not found or incorrect password. Did you create this user in Firebase Console?"
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
       toast({
-        title: "Login Failed",
-        description: error.message || "An error occurred during login",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       })
     } finally {
