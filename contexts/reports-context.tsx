@@ -188,13 +188,7 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
       setIsLoadingReports(true)
 
       try {
-        // Check if Firebase config is present
-        if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-          console.info("Firebase config missing – using local mock data.")
-          setReports(initialReports)
-          setIsLoadingReports(false)
-          return
-        }
+
 
         const q = query(collection(db, "scam_reports"), orderBy("created_at", "desc"))
         const querySnapshot = await getDocs(q)

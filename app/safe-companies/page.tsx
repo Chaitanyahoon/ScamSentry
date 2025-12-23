@@ -48,13 +48,7 @@ export default function SafeCompaniesPage() {
 
   useEffect(() => {
     const fetchSafeCompanies = async () => {
-      // If env vars are missing, use mock data immediately
-      if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-        console.info("Firebase config missing – using mock safe companies.")
-        setCompanies(mockSafeCompanies)
-        setIsLoading(false)
-        return
-      }
+
 
       try {
         const q = query(

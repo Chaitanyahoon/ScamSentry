@@ -39,12 +39,7 @@ export default function AdminDashboardClient() {
     const fetchSafeCompanies = async () => {
       setIsLoadingSafeCompanies(true)
 
-      // Check if Firebase config is present
-      if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-        console.info("Firebase config missing – skipping safe companies fetch.")
-        setIsLoadingSafeCompanies(false)
-        return
-      }
+
 
       try {
         const q = query(collection(db, "safe_companies"), orderBy("created_at", "desc"))
