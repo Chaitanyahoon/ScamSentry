@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Building, CheckCircle, Star, Loader2 } from "lucide-react"
+import { Building, CheckCircle, Star, Loader2, ShieldCheck, Terminal } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { db } from "@/lib/firebase"
@@ -19,7 +19,6 @@ interface SafeCompany {
   tags: string[] | null
 }
 
-// --- Local mock data for preview / fallback ---
 const mockSafeCompanies: SafeCompany[] = [
   {
     id: "sc1",
@@ -48,8 +47,6 @@ export default function SafeCompaniesPage() {
 
   useEffect(() => {
     const fetchSafeCompanies = async () => {
-
-
       try {
         const q = query(
           collection(db, "safe_companies"),
@@ -78,14 +75,11 @@ export default function SafeCompaniesPage() {
         if (error.code === "permission-denied" || error.message?.includes("Missing or insufficient permissions")) {
           console.warn("Firebase permissions missing. Falling back to mock data.")
           toast({
-            title: "Live Data Access Restricted",
-            description: "Showing preview data. Admin rules need to be updated in Firebase Console.",
+            title: "API_RESTRICTED",
+            description: "FALLBACK TO LOCAL CACHE. DATABASE KERNEL PANIC.",
             variant: "default",
           })
-        } else {
-          console.error("Error fetching safe companies:", error)
         }
-        // Fallback to mock data on error
         setCompanies(mockSafeCompanies)
       }
 
@@ -96,94 +90,99 @@ export default function SafeCompaniesPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
-      <div className="container px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background py-16 relative overflow-hidden">
+      {/* Dynamic Cyber Grid */}
+      <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.2]"></div>
+
+      <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20">
-                <CheckCircle className="h-6 w-6 text-green-600" />
-              </div>
+          <div className="flex flex-col items-center mb-12 text-center">
+            <div className="mb-6 inline-flex p-4 border border-success/50 bg-success/10 text-success shadow-[0_0_15px_hsla(var(--success),0.3)]">
+              <ShieldCheck className="h-8 w-8 drop-shadow-[0_0_8px_hsla(var(--success),1)]" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-              Safe Companies List
+            <h1 className="text-4xl sm:text-6xl font-extrabold tracking-widest text-foreground uppercase drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+              VERIFIED <span className="text-success drop-shadow-[0_0_10px_hsla(var(--success),0.5)]">NODES</span>
             </h1>
-            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-              Community-curated list of verified legitimate clients and companies.
+            <p className="mt-4 text-lg text-muted-foreground font-mono uppercase tracking-widest">
+              WHITELISTED CLIENT INFRASTRUCTURE. SECURE WORKSPACES.
             </p>
           </div>
 
-          {/* Loader */}
-          {isLoading && (
-            <div className="flex items-center justify-center py-24">
-              <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-            </div>
-          )}
-
-          {/* Companies grid */}
-          {!isLoading && (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {companies.map((company) => (
-                  <Card key={company.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-xl mb-1">{company.name}</CardTitle>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
-                            <Building className="h-4 w-4 mr-1" />
-                            {company.industry}
-                          </p>
-                        </div>
-                        <Badge variant="outline" className="flex items-center gap-1 text-base px-3 py-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          {company.verified_score}%
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">{company.description}</p>
-                      {/* tags may be null */}
-                      {company.tags && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {company.tags.map((tag) => (
-                            <Badge key={tag} variant="secondary" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                      {company.website && (
-                        <Link
-                          href={company.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline text-sm font-medium"
-                        >
-                          Visit Website →
-                        </Link>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+          <div className="glass-strong mb-10 overflow-hidden shadow-[0_0_20px_hsla(var(--border),0.5)] rounded-none">
+            <div className="bg-card/80 border-b border-border p-4">
+              <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground tracking-widest uppercase font-mono">
+                <Terminal className="h-4 w-4 text-success" /> SECURE_LEDGER_QUERY
               </div>
+            </div>
+            
+            <div className="p-6 bg-background/50">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-24">
+                  <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="h-8 w-8 animate-spin text-success drop-shadow-[0_0_10px_currentColor]" />
+                    <span className="text-success font-mono uppercase tracking-widest animate-pulse">ESTABLISHING_HANDSHAKE...</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {companies.map((company) => (
+                    <div key={company.id} className="glass-card flex flex-col justify-between group overflow-hidden border-t-2 border-t-success/50 hover:border-t-success transition-all duration-300">
+                      <div className="p-6 border-b border-border/50 bg-card/40">
+                        <div className="flex items-start justify-between mb-2">
+                          <h2 className="text-xl font-bold uppercase tracking-wider text-foreground drop-shadow-[0_0_5px_rgba(255,255,255,0.1)]">{company.name}</h2>
+                          <Badge variant="outline" className="flex items-center gap-1 text-xs px-2 py-1 rounded-none border-success bg-success/10 text-success shadow-[0_0_5px_hsla(var(--success),0.3)]">
+                            <Star className="h-3 w-3 fill-success" />
+                            {company.verified_score}%
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground font-mono flex items-center tracking-widest uppercase font-bold">
+                          <Building className="h-3 w-3 mr-2 text-success" />
+                          {company.industry}
+                        </p>
+                      </div>
+                      
+                      <div className="p-6 bg-background/50 space-y-4">
+                        <p className="text-sm text-foreground line-clamp-3 leading-relaxed font-mono tracking-wide px-4 border-l-2 border-border">
+                          {company.description}
+                        </p>
+                        
+                        {company.tags && (
+                          <div className="flex flex-wrap gap-2 text-xs font-mono font-bold tracking-widest uppercase">
+                            {company.tags.map((tag) => (
+                              <Badge key={tag} variant="outline" className="rounded-none bg-card border-border px-2 py-1 text-muted-foreground">
+                                #{tag.replace(/\s+/g, '_')}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {company.website && (
+                          <div className="pt-4 mt-2 border-t border-border">
+                            <Link
+                              href={company.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-success hover:text-success/80 text-xs font-bold uppercase tracking-widest flex items-center transition-colors drop-shadow-[0_0_5px_currentColor]"
+                            >
+                              INITIALIZE_CONNECTION →
+                            </Link>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
 
-              {/* Empty state */}
-              {companies.length === 0 && (
-                <Card className="mt-8">
-                  <CardContent className="text-center py-12">
-                    <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      No safe companies listed yet
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Be the first to contribute to our list of trusted clients!
-                    </p>
-                  </CardContent>
-                </Card>
+                  {companies.length === 0 && (
+                    <div className="col-span-full border border-border p-12 text-center bg-card/50 glass-card">
+                      <CheckCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]" />
+                      <h3 className="text-lg font-bold font-mono tracking-widest uppercase text-foreground mb-2">WHITELIST_EMPTY</h3>
+                      <p className="text-muted-foreground font-mono uppercase tracking-widest text-sm">NO_VERIFIED_NODES_FOUND_IN_SYSTEM_LEDGER.</p>
+                    </div>
+                  )}
+                </div>
               )}
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

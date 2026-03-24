@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Shield, AlertTriangle, Users, MapPin, Sparkles } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Shield, Database, Terminal, Globe, AlertTriangle, Radar, Hexagon } from "lucide-react"
 
 export function Hero() {
   const [mounted, setMounted] = useState(false)
@@ -14,114 +12,114 @@ export function Hero() {
   }, [])
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-indigo-900 to-purple-900 py-24 sm:py-32 lg:py-40">
-      {/* Animated Gradient Background */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 animated-gradient opacity-30" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
-      </div>
-
-      {/* Floating Orbs */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-float" />
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-float" style={{ animationDelay: '4s' }} />
-      </div>
-
-      {/* Grid Pattern */}
-      <div className="absolute inset-0 z-0 opacity-[0.03]">
-        <svg
-          className="absolute inset-0 h-full w-full stroke-white/20 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]"
-          aria-hidden="true"
-        >
-          <defs>
-            <pattern id="grid-pattern" width="80" height="80" x="50%" y="-1" patternUnits="userSpaceOnUse">
-              <path d="M.5 80V.5H80" fill="none" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" strokeWidth="0" fill="url(#grid-pattern)" />
-        </svg>
-      </div>
+    <section className="relative overflow-hidden bg-background py-24 sm:py-32 lg:py-40 border-b border-border">
+      {/* Dynamic Cyber Grid */}
+      <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.3]"></div>
+      
+      {/* Background Glow Orbs */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px] pointer-events-none"></div>
+      <div className="absolute bottom-0 right-1/4 w-[30rem] h-[30rem] bg-secondary/10 rounded-full blur-[128px] pointer-events-none"></div>
 
       <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
-          {/* Badge with animation */}
-          <div className={`mb-8 inline-block ${mounted ? 'animate-slide-up' : 'opacity-0'}`}>
-            <Badge variant="outline" className="glass-card border-white/10 text-white bg-white/5 px-6 py-2 text-sm backdrop-blur-md rounded-full">
-              <Shield className="mr-2 h-4 w-4 text-purple-300" />
-              Community-Driven Protection
-              <Sparkles className="ml-2 h-4 w-4 text-yellow-300 animate-pulse-glow" />
-            </Badge>
+        <div className="mx-auto max-w-5xl text-center">
+          {/* Badge */}
+          <div className={`mb-8 inline-block ${mounted ? 'animate-fade-in' : 'opacity-0'}`}>
+            <div className="inline-flex items-center px-4 py-1.5 border border-primary/50 bg-primary/10 text-primary font-bold text-xs uppercase tracking-[0.2em] shadow-[0_0_15px_hsla(var(--primary),0.3)]">
+              <Terminal className="mr-2 h-4 w-4" />
+              SYSTEM.ONLINE()
+              <span className="ml-3 h-2 w-2 bg-primary rounded-full animate-pulse shadow-[0_0_8px_hsla(var(--primary),1)]"></span>
+            </div>
           </div>
 
-          {/* Main Heading with gradient */}
-          <h1 className={`text-4xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl ${mounted ? 'animate-slide-up stagger-1' : 'opacity-0'}`}>
-            <span className="block bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent pb-2">
-              ScamSentry
+          {/* Main Heading */}
+          <h1 className={`text-4xl font-extrabold tracking-tighter sm:text-6xl lg:text-7xl text-foreground uppercase ${mounted ? 'animate-fade-in stagger-1' : 'opacity-0'}`}>
+            <span className="block mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+              CROWD-SOURCED
             </span>
-            <span className="mt-4 block text-xl sm:text-3xl font-medium text-gray-200 tracking-wide">
-              Protecting Freelancers,
-              <br />
-              <span className="text-purple-200/80">One Report at a Time</span>
+            <span className="mt-4 block text-2xl sm:text-5xl lg:text-6xl break-words sm:break-normal font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] animate-[gradient-flow_4s_linear_infinite]">
+              THREAT_INTELLIGENCE
             </span>
           </h1>
 
           {/* Description */}
-          <p className={`mx-auto mt-6 max-w-2xl text-base leading-relaxed text-gray-300/80 ${mounted ? 'animate-slide-up stagger-2' : 'opacity-0'}`}>
-            Join thousands of freelancers in building a safer work environment. Report scam job offers, view community
-            alerts, and protect yourself.
+          <p className={`mx-auto mt-8 max-w-3xl text-sm sm:text-base leading-relaxed text-muted-foreground font-mono ${mounted ? 'animate-fade-in stagger-2' : 'opacity-0'}`}>
+            <span className="text-foreground font-bold">DEFEND THE NETWORK.</span> Investigate suspicious links using our 5-Layer AI URL Forensics Engine, or query the global community databank of verified scam reports to protect your operations.
           </p>
 
-          {/* CTA Buttons */}
-          <div className={`mt-12 flex flex-col sm:flex-row items-center justify-center gap-6 ${mounted ? 'animate-slide-up stagger-3' : 'opacity-0'}`}>
-            <Button
-              asChild
-              size="lg"
-              className="group w-3/4 max-w-xs sm:w-auto bg-white/10 hover:bg-white/20 text-white border border-white/10 hover:border-white/20 transition-all duration-300 px-8 py-7 text-lg font-medium rounded-2xl backdrop-blur-sm"
-            >
-              <Link href="/report">
-                <AlertTriangle className="mr-2 h-5 w-5 text-red-400 group-hover:text-red-300 transition-colors" />
-                Report a Scam
+          {/* Dual CTAs - Split Purpose */}
+          <div className={`mt-14 flex flex-col sm:flex-row items-start justify-center gap-10 sm:gap-6 max-w-3xl mx-auto ${mounted ? 'animate-fade-in stagger-3' : 'opacity-0'}`}>
+            
+            {/* Proactive CTA — Scan a URL */}
+            <div className="flex-1 w-full relative pt-4 sm:pt-0">
+              <div className="absolute top-0 sm:-top-3 left-1/2 -translate-x-1/2 bg-background px-2 text-[10px] font-mono tracking-widest text-primary font-bold z-10 border border-primary/50 uppercase whitespace-nowrap">PROACTIVE DEFENSE</div>
+              <Link href="/validator" className="w-full">
+                <div className="cyber-button w-full flex items-center justify-center h-16 shadow-[0_0_20px_hsla(var(--primary),0.4)] border-2 border-primary group">
+                  <Radar className="mr-3 h-5 w-5 group-hover:animate-ping" />
+                  INIT URL FORENSICS
+                </div>
               </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="group w-3/4 max-w-xs sm:w-auto glass-card border-white/10 text-white hover:bg-white/10 transition-all duration-300 px-8 py-7 text-lg font-medium rounded-2xl"
-            >
-              <Link href="/reports">
-                <Users className="mr-2 h-5 w-5 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
-                Browse Reports
-              </Link>
-            </Button>
+            </div>
+
+            {/* Reactive CTA — Report a Scam (Red Alert) */}
+            <div className="flex-1 w-full relative pt-4 sm:pt-0">
+              <div className="absolute top-0 sm:-top-3 left-1/2 -translate-x-1/2 bg-background px-2 text-[10px] font-mono tracking-widest text-destructive font-bold z-10 border border-destructive/50 uppercase whitespace-nowrap">REPORT THREAT</div>
+              <div className="flex flex-col items-center gap-3 w-full">
+                <Link href="/report" className="w-full">
+                  <div className="group w-full flex items-center justify-center h-16 border-2 border-destructive text-destructive font-bold uppercase tracking-widest transition-all hover:bg-destructive hover:text-white hover:shadow-[0_0_20px_hsla(var(--destructive),0.6)] bg-destructive/5 font-mono text-sm">
+                    <AlertTriangle className="mr-3 h-5 w-5 group-hover:animate-bounce" />
+                    REPORT A SCAM
+                  </div>
+                </Link>
+                <Link href="/reports" className="text-[10px] font-mono tracking-widest text-muted-foreground hover:text-foreground transition-colors border-b border-muted-foreground/30 hover:border-foreground pb-0.5">
+                  browse {">"}2,400 community reports →
+                </Link>
+              </div>
+            </div>
+            
           </div>
 
-          {/* Feature Cards */}
-          <div className={`mt-20 grid grid-cols-1 gap-6 sm:grid-cols-3 place-items-center ${mounted ? 'animate-fade-in stagger-4' : 'opacity-0'}`}>
-            <div className="group glass rounded-2xl p-6 hover-lift transition-smooth hover:bg-white/15 w-full max-w-xs">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-pink-600 shadow-lg group-hover:shadow-red-500/50 transition-shadow">
-                <AlertTriangle className="h-7 w-7 text-white" />
+          {/* Feature Cards - Mixed */}
+          <div className={`mt-24 grid grid-cols-1 gap-6 sm:grid-cols-3 place-items-stretch ${mounted ? 'animate-fade-in stagger-4' : 'opacity-0'}`}>
+            
+            <div className="glass-card p-6 text-left group border-t-2 border-t-primary/50 relative overflow-hidden">
+               <div className="absolute right-0 top-0 translate-x-1/4 -translate-y-1/4 text-primary/5 group-hover:text-primary/10 transition-colors">
+                <Globe className="h-32 w-32" />
+               </div>
+              <div className="mb-6 relative z-10 inline-flex p-3 border border-primary/30 bg-primary/10 text-primary shadow-[0_0_15px_hsla(var(--primary),0.2)] group-hover:shadow-[0_0_20px_hsla(var(--primary),0.6)] transition-all">
+                <Shield className="h-6 w-6" />
               </div>
-              <h3 className="mt-6 text-lg font-semibold text-white">Anonymous Reporting</h3>
-              <p className="mt-2 text-sm text-gray-300">Report scams without revealing your identity</p>
+              <h3 className="text-lg relative z-10 font-bold text-foreground mb-3 uppercase tracking-widest border-b border-border pb-2">LIVE_URL_SCANNER</h3>
+              <p className="text-xs relative z-10 font-mono text-muted-foreground tracking-widest leading-relaxed">
+                Scan suspicious URLs through our 5-layer heuristic engine. Gemini-backed semantic analysis prevents phishing traps.
+              </p>
             </div>
 
-            <div className="group glass rounded-2xl p-6 hover-lift transition-smooth hover:bg-white/15 w-full max-w-xs">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-yellow-600 shadow-lg group-hover:shadow-orange-500/50 transition-shadow">
-                <MapPin className="h-7 w-7 text-white" />
+            <div className="glass-card p-6 text-left group border-t-2 border-t-secondary/50 relative overflow-hidden">
+               <div className="absolute right-0 top-0 translate-x-1/4 -translate-y-1/4 text-secondary/5 group-hover:text-secondary/10 transition-colors">
+                <Hexagon className="h-32 w-32" />
+               </div>
+              <div className="mb-6 relative z-10 inline-flex p-3 border border-secondary/30 bg-secondary/10 text-secondary shadow-[0_0_15px_hsla(var(--secondary),0.2)] group-hover:shadow-[0_0_20px_hsla(var(--secondary),0.6)] transition-all">
+                <Database className="h-6 w-6" />
               </div>
-              <h3 className="mt-6 text-lg font-semibold text-white">Scam Heatmap</h3>
-              <p className="mt-2 text-sm text-gray-300">Visualize scam hotspots in your area</p>
+              <h3 className="text-lg relative z-10 font-bold text-foreground mb-3 uppercase tracking-widest border-b border-border pb-2">COMMUNITY_LEDGER</h3>
+              <p className="text-xs relative z-10 font-mono text-muted-foreground tracking-widest leading-relaxed">
+                Log and query verified threat reports from freelancers globally. A decentralized database of known rogue actors.
+              </p>
             </div>
 
-            <div className="group glass rounded-2xl p-6 hover-lift transition-smooth hover:bg-white/15 w-full max-w-xs">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 shadow-lg group-hover:shadow-purple-500/50 transition-shadow">
-                <Users className="h-7 w-7 text-white" />
+            <div className="glass-card p-6 text-left group border-t-2 border-t-accent/50 relative overflow-hidden">
+               <div className="absolute right-0 top-0 translate-x-1/4 -translate-y-1/4 text-accent/5 group-hover:text-accent/10 transition-colors">
+                <Radar className="h-32 w-32" />
+               </div>
+              <div className="mb-6 relative z-10 inline-flex p-3 border border-accent/30 bg-accent/10 text-accent shadow-[0_0_15px_hsla(var(--accent),0.2)] group-hover:shadow-[0_0_20px_hsla(var(--accent),0.6)] transition-all">
+                <AlertTriangle className="h-6 w-6" />
               </div>
-              <h3 className="mt-6 text-lg font-semibold text-white">Community Ratings</h3>
-              <p className="mt-2 text-sm text-gray-300">Help verify and rate scam reports</p>
+              <h3 className="text-lg relative z-10 font-bold text-foreground mb-3 uppercase tracking-widest border-b border-border pb-2">RISK_DETECTION</h3>
+              <p className="text-xs relative z-10 font-mono text-muted-foreground tracking-widest leading-relaxed">
+                Real-time DNS Spoofing checks combined with the Google SafeBrowsing API to ensure maximum operational security.
+              </p>
             </div>
+            
           </div>
         </div>
       </div>

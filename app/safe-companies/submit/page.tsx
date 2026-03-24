@@ -3,9 +3,8 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Building, CheckCircle, Send, Loader2, Tag } from "lucide-react"
+import { Building, Send, Loader2, Tag, Terminal } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -43,7 +42,6 @@ export default function SubmitSafeCompanyPage() {
   const [captchaAnswer, setCaptchaAnswer] = useState<number | null>(null)
   const [userCaptchaInput, setUserCaptchaInput] = useState("")
 
-  // Generate CAPTCHA on component mount
   useEffect(() => {
     generateCaptcha()
   }, [])
@@ -53,30 +51,28 @@ export default function SubmitSafeCompanyPage() {
     const num2 = Math.floor(Math.random() * 10) + 1 // 1-10
     setCaptchaQuestion(`${num1} + ${num2} = ?`)
     setCaptchaAnswer(num1 + num2)
-    setUserCaptchaInput("") // Clear user input for new question
+    setUserCaptchaInput("") 
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // CAPTCHA validation
     if (Number.parseInt(userCaptchaInput) !== captchaAnswer) {
       toast({
-        title: "CAPTCHA Error",
-        description: "Please solve the math problem correctly.",
+        title: "SYS_ERR: CAPTCHA_MISMATCH",
+        description: "HANDSHAKE FAILED. INVALID MATHEMATICAL PROOF.",
         variant: "destructive",
       })
-      generateCaptcha() // Generate a new CAPTCHA on failure
+      generateCaptcha() 
       setIsSubmitting(false)
       return
     }
 
-    // Basic validation
     if (!formData.name || !formData.industry || !formData.description) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
+        title: "SYS_ERR: MISSING_PARAMETERS",
+        description: "REQUIRED METADATA MISSING FROM PAYLOAD.",
         variant: "destructive",
       })
       setIsSubmitting(false)
@@ -84,24 +80,22 @@ export default function SubmitSafeCompanyPage() {
     }
 
     try {
-      // Insert into Firebase
       await addDoc(collection(db, "safe_companies"), {
         name: formData.name,
         industry: formData.industry,
         description: formData.description,
         website: formData.website || null,
         tags: selectedTags.length > 0 ? selectedTags : null,
-        verified_score: 50, // Default score, can be adjusted by admins
-        status: "pending", // New companies need to be approved
+        verified_score: 50, 
+        status: "pending", 
         created_at: Timestamp.now(),
       })
 
       toast({
-        title: "Company Submitted Successfully!",
-        description: "Thank you for contributing! Your submission is now under review.",
+        title: "SUCCESS: PAYLOAD_RECEIVED",
+        description: "NODE DATA SUBMITTED TO QUARANTINE FOR ADMIN REVIEW.",
       })
 
-      // Reset form
       setFormData({
         name: "",
         industry: "",
@@ -109,15 +103,14 @@ export default function SubmitSafeCompanyPage() {
         website: "",
       })
       setSelectedTags([])
-      generateCaptcha() // Generate new CAPTCHA after successful submission
+      generateCaptcha() 
 
-      // Optionally redirect to the safe companies list or a success page
       router.push("/safe-companies")
     } catch (error) {
       console.error("Unexpected error during submission:", error)
       toast({
-        title: "Submission Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: "SYS_ERR: KERNEL_PANIC",
+        description: "UNABLE TO WRITE TO MAINFRAME DB.",
         variant: "destructive",
       })
     } finally {
@@ -130,167 +123,178 @@ export default function SubmitSafeCompanyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
-      <div className="container px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background py-16 relative overflow-hidden">
+      <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.2]" />
+
+      <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20">
-                <CheckCircle className="h-6 w-6 text-green-600" />
+          <div className="text-center mb-10">
+            <div className="flex items-center justify-center mb-6">
+              <div className="flex h-16 w-16 items-center justify-center border border-success/50 bg-success/10 shadow-[0_0_15px_hsla(var(--success),0.3)]">
+                <Building className="h-8 w-8 text-success drop-shadow-[0_0_8px_currentColor]" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Suggest a Safe Company</h1>
-            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-              Help us build a list of trusted clients and companies for the freelancer community.
+            <h1 className="text-3xl font-extrabold tracking-widest uppercase text-foreground sm:text-4xl drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+              PROPOSE <span className="text-success drop-shadow-[0_0_10px_hsla(var(--success),0.5)]">WHITELIST_NODE</span>
+            </h1>
+            <p className="mt-4 text-xs font-mono tracking-widest uppercase text-muted-foreground">
+              SUBMIT A LEGITIMATE ORGANIZATION FOR PEER-REVIEW INTO THE SYSTEM LEDGER.
             </p>
           </div>
 
-          <Card className="mx-auto">
-            {" "}
-            {/* Added mx-auto for explicit centering */}
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Building className="mr-2 h-5 w-5" />
-                Company Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Company Name */}
+          <div className="glass-strong mb-10 overflow-hidden rounded-none shadow-[0_0_20px_hsla(var(--border),0.5)] border-t-2 border-t-success">
+            <div className="bg-card/80 border-b border-border p-4">
+              <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground tracking-widest uppercase font-mono">
+                <Terminal className="h-4 w-4 text-success" /> NEW_NODE_REGISTRATION
+              </div>
+            </div>
+            
+            <div className="p-6 bg-background/50">
+              <form onSubmit={handleSubmit} className="space-y-6 font-mono">
                 <div>
-                  <Label htmlFor="name">Company Name *</Label>
+                  <Label htmlFor="name" className="text-xs font-bold tracking-widest uppercase text-foreground mb-2 block">
+                    TARGET_ORG_NAME <span className="text-success">*</span>
+                  </Label>
                   <Input
                     id="name"
-                    placeholder="e.g., Acme Corp"
+                    placeholder="ENTER DESIGNATION..."
                     value={formData.name}
                     onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                     required
                     disabled={isSubmitting}
+                    className="bg-card border-border rounded-none tracking-widest text-xs h-12 focus-visible:ring-success focus-visible:border-success"
                   />
                 </div>
 
-                {/* Industry */}
                 <div>
-                  <Label htmlFor="industry">Industry *</Label>
+                  <Label htmlFor="industry" className="text-xs font-bold tracking-widest uppercase text-foreground mb-2 block">
+                    SECTOR_CLASSIFICATION <span className="text-success">*</span>
+                  </Label>
                   <Input
                     id="industry"
-                    placeholder="e.g., Web Development, Digital Marketing"
+                    placeholder="E.G. DEVELOPMENT, DESIGN, MARKETING..."
                     value={formData.industry}
                     onChange={(e) => setFormData((prev) => ({ ...prev, industry: e.target.value }))}
                     required
                     disabled={isSubmitting}
+                    className="bg-card border-border rounded-none tracking-widest text-xs h-12 focus-visible:ring-success focus-visible:border-success"
                   />
                 </div>
 
-                {/* Website */}
                 <div>
-                  <Label htmlFor="website">Website (Optional)</Label>
+                  <Label htmlFor="website" className="text-xs font-bold tracking-widest uppercase text-foreground mb-2 block">
+                    ROOT_DOMAIN_URL <span className="text-muted-foreground font-normal">(OPTIONAL)</span>
+                  </Label>
                   <Input
                     id="website"
                     type="url"
-                    placeholder="https://www.example.com"
+                    placeholder="https://..."
                     value={formData.website}
                     onChange={(e) => setFormData((prev) => ({ ...prev, website: e.target.value }))}
                     disabled={isSubmitting}
+                    className="bg-card border-border rounded-none tracking-widest text-xs h-12 focus-visible:ring-success focus-visible:border-success"
                   />
                 </div>
 
-                {/* Description */}
                 <div>
-                  <Label htmlFor="description">Description *</Label>
+                  <Label htmlFor="description" className="text-xs font-bold tracking-widest uppercase text-foreground mb-2 block">
+                    TRUST_HEURISTIC_EVIDENCE <span className="text-success">*</span>
+                  </Label>
                   <Textarea
                     id="description"
-                    placeholder="Describe why this company is trustworthy, your experience working with them, etc."
+                    placeholder="PROVIDE LOGICAL PROOF FOR TRUST STATUS..."
                     value={formData.description}
                     onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                     rows={5}
                     required
                     disabled={isSubmitting}
+                    className="bg-card border-border rounded-none tracking-widest text-xs focus-visible:ring-success focus-visible:border-success resize-y"
                   />
                 </div>
 
-                {/* Tags */}
                 <div>
-                  <Label className="flex items-center mb-3">
-                    <Tag className="mr-2 h-4 w-4" />
-                    Tags (Select all that apply)
+                  <Label className="flex items-center mb-3 text-xs font-bold tracking-widest uppercase text-foreground">
+                    <Tag className="mr-2 h-4 w-4 text-success" />
+                    SELECT_TAG_VECTORS
                   </Label>
                   <div className="flex flex-wrap gap-2">
                     {commonTags.map((tag) => (
                       <Badge
                         key={tag}
                         variant={selectedTags.includes(tag) ? "default" : "outline"}
-                        className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
+                        className={`cursor-pointer rounded-none border text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 transition-all ${
+                          selectedTags.includes(tag) 
+                            ? "bg-success/20 text-success border-success shadow-[0_0_5px_hsla(var(--success),0.5)]" 
+                            : "bg-card border-border text-muted-foreground hover:border-success/50 hover:bg-success/10"
+                        }`}
                         onClick={() => !isSubmitting && toggleTag(tag)}
                       >
-                        {tag}
+                        #{tag}
                       </Badge>
                     ))}
                   </div>
                 </div>
 
-                {/* CAPTCHA */}
-                <div>
-                  <Label htmlFor="captcha">CAPTCHA: {captchaQuestion} *</Label>
+                <div className="bg-success/5 border border-success/30 p-4 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-success"></div>
+                  <Label htmlFor="captcha" className="text-xs font-bold tracking-widest uppercase text-success mb-3 block drop-shadow-[0_0_5px_currentColor]">
+                    ANTI_BOT_PROTCOL: SOLVE [ {captchaQuestion} ] <span className="text-foreground">*</span>
+                  </Label>
                   <Input
                     id="captcha"
                     type="number"
-                    placeholder="Your answer"
+                    placeholder="EVALUATE..."
                     value={userCaptchaInput}
                     onChange={(e) => setUserCaptchaInput(e.target.value)}
                     required
                     disabled={isSubmitting}
+                    className="bg-black/50 border-success/50 text-success rounded-none tracking-widest font-bold text-lg h-12 focus-visible:ring-success focus-visible:border-success w-full sm:w-1/3"
                   />
                 </div>
 
-                {/* Submit Button */}
-                <div className="flex justify-end">
-                  <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={isSubmitting}>
+                <div className="flex justify-end pt-4 border-t border-border">
+                  <Button 
+                    type="submit" 
+                    size="lg" 
+                    className="w-full sm:w-auto rounded-none font-bold uppercase tracking-widest bg-success text-black hover:bg-success/80 border border-transparent hover:border-success hover:shadow-[0_0_15px_hsla(var(--success),0.5)] transition-all h-12" 
+                    disabled={isSubmitting}
+                  >
                     {isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Submitting...
+                        UPLOADING...
                       </>
                     ) : (
                       <>
                         <Send className="mr-2 h-4 w-4" />
-                        Submit Company
+                        TRANSMIT_PAYLOAD
                       </>
                     )}
                   </Button>
                 </div>
               </form>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {/* Guidelines */}
-          <Card className="mt-8 mx-auto">
-            {" "}
-            {/* Added mx-auto for explicit centering */}
-            <CardHeader>
-              <CardTitle className="text-lg">Submission Guidelines</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-              <p>
-                • <strong>Be accurate:</strong> Provide truthful and verifiable information about the company.
+          <div className="glass-card bg-card/50 border border-border p-6 shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+            <h3 className="text-sm font-bold text-foreground mb-4 uppercase tracking-widest border-b border-border pb-2 flex items-center gap-2">
+              <Terminal className="h-4 w-4 text-muted-foreground" /> SYSTEM_GUIDELINES
+            </h3>
+            <div className="space-y-3 text-[10px] font-mono tracking-widest text-muted-foreground leading-relaxed">
+              <p className="flex items-start gap-2">
+                <span className="text-primary mt-0.5">{'>'}</span> 
+                <strong>PRECISE_DATA:</strong> ONLY UPLOAD VERIFIABLE METADATA REGARDING ORG STRUCTURE.
               </p>
-              <p>
-                • <strong>Be descriptive:</strong> Explain clearly why you recommend this company.
+              <p className="flex items-start gap-2">
+                <span className="text-primary mt-0.5">{'>'}</span> 
+                <strong>NO_SELF_PROMOTION:</strong> CONFLICTS OF INTEREST WILL TRIGGER AUTO-DELETION PROTOCOLS.
               </p>
-              <p>
-                • <strong>No self-promotion:</strong> Do not submit your own company or companies you have a direct
-                financial interest in.
+              <p className="flex items-start gap-2">
+                <span className="text-primary mt-0.5">{'>'}</span> 
+                <strong>MODERATOR_OVERSIGHT:</strong> ALL UPLOADS MUST CLEAR HUMAN SYS-ADMIN AUDITING BEFORE LEDGER INCLUSION.
               </p>
-              <p>
-                • <strong>Quality over quantity:</strong> Focus on providing detailed insights for a few trusted
-                companies.
-              </p>
-              <p>
-                • <strong>Review process:</strong> All submissions will be reviewed by our moderation team before being
-                published.
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
