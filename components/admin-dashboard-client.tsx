@@ -2,9 +2,8 @@
 
 import { useEffect } from "react"
 import { useState } from "react"
-import { Shield, Eye, Check, X, Flag, TrendingUp, AlertTriangle, Trash2, Building, Loader2 } from "lucide-react"
+import { Shield, Eye, Check, X, Flag, TrendingUp, AlertTriangle, Trash2, Building, Loader2, Terminal } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -13,8 +12,8 @@ import { useReports } from "@/contexts/reports-context"
 import LogoutButton from "@/components/logout-button"
 import { db } from "@/lib/firebase"
 import { collection, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore"
+import { cn } from "@/lib/utils"
 
-// Define SafeCompany type for client-side use
 interface SafeCompany {
   id: string
   name: string
@@ -34,13 +33,9 @@ export default function AdminDashboardClient() {
   const [safeCompanies, setSafeCompanies] = useState<SafeCompany[]>([])
   const [isLoadingSafeCompanies, setIsLoadingSafeCompanies] = useState(true)
 
-  // Fetch safe companies on component mount
   useEffect(() => {
     const fetchSafeCompanies = async () => {
       setIsLoadingSafeCompanies(true)
-
-
-
       try {
         const q = query(collection(db, "safe_companies"), orderBy("created_at", "desc"))
         const querySnapshot = await getDocs(q)
@@ -65,8 +60,8 @@ export default function AdminDashboardClient() {
       } catch (error) {
         console.error("Error fetching safe companies:", error)
         toast({
-          title: "Error",
-          description: "Failed to load safe companies.",
+          title: "SYS_ERR: QUEREY_FAILED",
+          description: "UNABLE TO LOAD WHITELIST CANDIDATES.",
           variant: "destructive",
         })
       }
@@ -77,22 +72,22 @@ export default function AdminDashboardClient() {
 
   const pendingReports = reports.filter((report) => report.status === "pending")
   const flaggedReports = reports.filter((report) => report.flagCount > 0 && report.status === "approved")
-  const approvedReports = reports.filter((report) => report.status === "approved") // All approved reports
+  const approvedReports = reports.filter((report) => report.status === "approved")
   const pendingSafeCompanies = safeCompanies.filter((company) => company.status === "pending")
 
   const handleApprove = async (id: string) => {
     await approveReport(id)
     toast({
-      title: "Report Approved",
-      description: "The report has been published successfully.",
+      title: "NODE_APPROVED",
+      description: "LOG HAS BEEN COMMITTED TO MAIN LEDGER.",
     })
   }
 
   const handleReject = async (id: string) => {
     await rejectReport(id)
     toast({
-      title: "Report Rejected",
-      description: "The report has been rejected and will not be published.",
+      title: "NODE_REJECTED",
+      description: "LOG HAS BEEN PURGED. NOT PUBLISHED.",
       variant: "destructive",
     })
   }
@@ -100,30 +95,27 @@ export default function AdminDashboardClient() {
   const handleDelete = async (id: string) => {
     await deleteReport(id)
     toast({
-      title: "Report Deleted",
-      description: "The report has been permanently removed.",
+      title: "NODE_DELETED",
+      description: "PERMANENT DATA WIPE COMPLETE ERASURE.",
       variant: "destructive",
     })
   }
 
   const handleResolveFlagged = async (id: string) => {
-    // In a real app, you might reset flagCount or change status
     toast({
-      title: "Flag Resolved",
-      description: "The flagged report has been reviewed and resolved.",
+      title: "FLAG_CLEARED",
+      description: "QUARANTINE LIFTED.",
     })
   }
 
-  // Safe Company Actions
   const handleApproveSafeCompany = async (id: string) => {
     try {
       const companyRef = doc(db, "safe_companies", id)
       await updateDoc(companyRef, { status: "approved" })
       setSafeCompanies((prev) => prev.map((c) => (c.id === id ? { ...c, status: "approved" } : c)))
-      toast({ title: "Company Approved", description: "The company has been added to the safe list." })
+      toast({ title: "WHITELIST_UPDATED", description: "NODE ADDED TO VERIFIED DB." })
     } catch (error) {
-      console.error("Error approving safe company:", error)
-      toast({ title: "Error", description: "Failed to approve company.", variant: "destructive" })
+      toast({ title: "SYS_ERR", description: "FAILED TO COMMIT OVERRIDE.", variant: "destructive" })
     }
   }
 
@@ -132,10 +124,9 @@ export default function AdminDashboardClient() {
       const companyRef = doc(db, "safe_companies", id)
       await updateDoc(companyRef, { status: "rejected" })
       setSafeCompanies((prev) => prev.map((c) => (c.id === id ? { ...c, status: "rejected" } : c)))
-      toast({ title: "Company Rejected", description: "The company has been rejected." })
+      toast({ title: "WHITELIST_DENIED", description: "NODE REJECTED FROM SYSTEM." })
     } catch (error) {
-      console.error("Error rejecting safe company:", error)
-      toast({ title: "Error", description: "Failed to reject company.", variant: "destructive" })
+      toast({ title: "SYS_ERR", description: "FAILED TO REJECT.", variant: "destructive" })
     }
   }
 
@@ -143,161 +134,157 @@ export default function AdminDashboardClient() {
     try {
       await deleteDoc(doc(db, "safe_companies", id))
       setSafeCompanies((prev) => prev.filter((c) => c.id !== id))
-      toast({ title: "Company Deleted", description: "The company has been permanently removed." })
+      toast({ title: "DATA_WIPED", description: "NODE DELETED FROM ALL DATABASES." })
     } catch (error) {
-      console.error("Error deleting safe company:", error)
-      toast({ title: "Error", description: "Failed to delete company.", variant: "destructive" })
+      toast({ title: "SYS_ERR", description: "DELETE OPERATION FAILED.", variant: "destructive" })
     }
   }
 
   const stats = [
     {
-      name: "Pending Reports",
+      name: "QUARANTINED_LOGS",
       value: pendingReports.length,
       icon: Eye,
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-100 dark:bg-yellow-900/20",
+      color: "text-warning",
+      bgColor: "bg-warning/10 border-warning/50",
+      shadow: "shadow-[0_0_10px_hsla(var(--warning),0.3)]"
     },
     {
-      name: "Flagged Reports",
+      name: "RADAR_FLAGS",
       value: flaggedReports.length,
       icon: Flag,
-      color: "text-red-600",
-      bgColor: "bg-red-100 dark:bg-red-900/20",
+      color: "text-destructive",
+      bgColor: "bg-destructive/10 border-destructive/50",
+      shadow: "shadow-[0_0_10px_hsla(var(--destructive),0.3)]"
     },
     {
-      name: "Pending Safe Companies",
+      name: "PENDING_WHITELIST",
       value: pendingSafeCompanies.length,
       icon: Building,
-      color: "text-green-600",
-      bgColor: "bg-green-100 dark:bg-green-900/20",
+      color: "text-success",
+      bgColor: "bg-success/10 border-success/50",
+      shadow: "shadow-[0_0_10px_hsla(var(--success),0.3)]"
     },
     {
-      name: "Total Reports",
+      name: "TOTAL_SYSTEM_LOGS",
       value: reports.length,
       icon: Shield,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100 dark:bg-blue-900/20",
+      color: "text-primary",
+      bgColor: "bg-primary/10 border-primary/50",
+      shadow: "shadow-[0_0_10px_hsla(var(--primary),0.3)]"
     },
   ]
 
   const getRiskColor = (level: string) => {
     switch (level) {
-      case "high":
-        return "destructive"
-      case "medium":
-        return "default"
-      case "low":
-        return "secondary"
-      default:
-        return "outline"
+      case "high": return "bg-destructive/20 text-destructive border-destructive"
+      case "medium": return "bg-warning/20 text-warning border-warning"
+      case "low": return "bg-secondary/20 text-secondary border-secondary"
+      default: return "bg-border text-muted-foreground border-border"
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
-      <div className="container px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background py-10 relative overflow-hidden">
+      <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.2]" />
+
+      <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6 glass-strong p-6 border-l-4 border-l-primary shadow-[0_0_20px_rgba(0,0,0,0.5)]">
             <div className="text-left">
-              <div className="flex items-center mb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
-                  <Shield className="h-6 w-6 text-blue-600" />
-                </div>
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white ml-4">
-                  Admin Dashboard
+              <div className="flex items-center mb-2">
+                <Terminal className="h-6 w-6 text-primary mr-3" />
+                <h1 className="text-2xl font-extrabold tracking-widest text-foreground uppercase drop-shadow-[0_0_5px_rgba(255,255,255,0.1)]">
+                  SYS_ADMIN <span className="text-primary">OVERWATCH</span>
                 </h1>
               </div>
-              <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-                Manage reports, moderate content, and monitor platform health
+              <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
+                ROOT DIRECTORY ACCESS / MANAGE QUARANTINE PROTOCOLS
               </p>
             </div>
             <LogoutButton />
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-10">
             {stats.map((stat) => (
-              <Card key={stat.name}>
-                <CardContent className="p-6">
-                  <div className="flex items-center">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${stat.bgColor}`}>
-                      <stat.icon className={`h-6 w-6 ${stat.color}`} />
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.name}</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
-                    </div>
+              <div key={stat.name} className="glass-card p-6 border border-border/50 rounded-none bg-card/40 transition-transform hover:-translate-y-1">
+                <div className="flex items-center">
+                  <div className={cn("flex h-12 w-12 items-center justify-center border", stat.bgColor, stat.shadow)}>
+                    <stat.icon className={cn("h-5 w-5", stat.color)} />
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="ml-4 font-mono">
+                    <p className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground">{stat.name}</p>
+                    <p className={cn("text-2xl font-extrabold tracking-widest mt-1", stat.color)}>{stat.value}</p>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
 
           {/* Tabs */}
           <Tabs defaultValue="pending-reports" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-4">
-              <TabsTrigger value="pending-reports">Reports ({pendingReports.length})</TabsTrigger>
-              <TabsTrigger value="flagged-reports">Flagged ({flaggedReports.length})</TabsTrigger>
-              <TabsTrigger value="approved-reports">Approved ({approvedReports.length})</TabsTrigger> {/* New tab */}
-              <TabsTrigger value="pending-companies">Companies ({pendingSafeCompanies.length})</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsList className="flex flex-wrap h-auto w-full justify-start p-1 glass-strong border border-border rounded-none shadow-none bg-black/50">
+              <TabsTrigger value="pending-reports" className="font-mono text-xs uppercase tracking-widest rounded-none data-[state=active]:bg-primary data-[state=active]:text-black">
+                Q_REPORTS ({pendingReports.length})
+              </TabsTrigger>
+              <TabsTrigger value="flagged-reports" className="font-mono text-xs uppercase tracking-widest rounded-none data-[state=active]:bg-destructive data-[state=active]:text-white">
+                FLAGGED ({flaggedReports.length})
+              </TabsTrigger>
+              <TabsTrigger value="approved-reports" className="font-mono text-xs uppercase tracking-widest rounded-none data-[state=active]:bg-success data-[state=active]:text-black">
+                MAIN_LEDGER ({approvedReports.length})
+              </TabsTrigger>
+              <TabsTrigger value="pending-companies" className="font-mono text-xs uppercase tracking-widest rounded-none data-[state=active]:bg-secondary data-[state=active]:text-black">
+                WHITELIST_Q ({pendingSafeCompanies.length})
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="font-mono text-xs uppercase tracking-widest rounded-none data-[state=active]:bg-background data-[state=active]:text-primary border data-[state=active]:border-primary">
+                TELEMETRY
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="pending-reports">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Reports Awaiting Review</CardTitle>
-                </CardHeader>
-                <CardContent>
+            <TabsContent value="pending-reports" className="mt-6">
+              <div className="glass-strong border border-border rounded-none overflow-hidden">
+                <div className="bg-card/80 border-b border-border p-4">
+                  <h3 className="text-xs font-bold font-mono uppercase tracking-widest text-primary flex items-center gap-2">
+                    <Terminal className="h-4 w-4" /> THREAT_LOGS_AWAITING_REVIEW
+                  </h3>
+                </div>
+                <div className="p-0">
                   {pendingReports.length > 0 ? (
                     <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Report Title</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Risk Level</TableHead>
-                            <TableHead>Created At</TableHead>
-                            <TableHead>Actions</TableHead>
+                      <Table className="font-mono text-xs">
+                        <TableHeader className="bg-background/80 hover:bg-background/80">
+                          <TableRow className="border-border">
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">THREAT_IDENTIFIER</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">VECTOR</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">SEVERITY</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">TIMESTAMP</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground text-right">ADMIN_AUTH</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {pendingReports.map((report) => (
-                            <TableRow key={report.id}>
-                              <TableCell className="font-medium">{report.title}</TableCell>
+                            <TableRow key={report.id} className="border-border/50 hover:bg-card/50">
+                              <TableCell className="font-bold text-foreground max-w-[200px] truncate">{report.title}</TableCell>
                               <TableCell>
-                                <Badge variant="outline">{report.scamType}</Badge>
+                                <Badge variant="outline" className="rounded-none border-border bg-background text-[10px] tracking-widest">{report.scamType}</Badge>
                               </TableCell>
                               <TableCell>
-                                <Badge variant={getRiskColor(report.riskLevel)}>{report.riskLevel}</Badge>
+                                <Badge className={cn("rounded-none border text-[10px] tracking-widest px-2 py-0", getRiskColor(report.riskLevel))}>{report.riskLevel}</Badge>
                               </TableCell>
-                              <TableCell className="text-sm text-gray-600 dark:text-gray-400">
+                              <TableCell className="text-muted-foreground">
                                 {new Date(report.createdAt).toLocaleString()}
                               </TableCell>
-                              <TableCell>
-                                <div className="flex space-x-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleApprove(report.id)}
-                                    className="text-green-600 hover:text-green-700"
-                                  >
-                                    <Check className="h-4 w-4 mr-1" />
-                                    Approve
+                              <TableCell className="text-right">
+                                <div className="flex justify-end space-x-2">
+                                  <Button size="icon" variant="outline" onClick={() => handleApprove(report.id)} className="h-8 w-8 rounded-none border-success/50 text-success hover:bg-success hover:text-black">
+                                    <Check className="h-4 w-4" />
                                   </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleReject(report.id)}
-                                    className="text-red-600 hover:text-red-700"
-                                  >
-                                    <X className="h-4 w-4 mr-1" />
-                                    Reject
+                                  <Button size="icon" variant="outline" onClick={() => handleReject(report.id)} className="h-8 w-8 rounded-none border-warning/50 text-warning hover:bg-warning hover:text-black">
+                                    <X className="h-4 w-4" />
                                   </Button>
-                                  <Button size="sm" variant="destructive" onClick={() => handleDelete(report.id)}>
+                                  <Button size="icon" variant="destructive" onClick={() => handleDelete(report.id)} className="h-8 w-8 rounded-none bg-destructive/10 text-destructive border border-destructive/50 hover:bg-destructive hover:text-white">
                                     <Trash2 className="h-4 w-4" />
-                                    <span className="sr-only">Delete</span>
                                   </Button>
                                 </div>
                               </TableCell>
@@ -307,51 +294,52 @@ export default function AdminDashboardClient() {
                       </Table>
                     </div>
                   ) : (
-                    <div className="text-center py-12">
-                      <Check className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">All caught up!</h3>
-                      <p className="text-gray-600 dark:text-gray-400">No reports pending review at the moment.</p>
+                    <div className="text-center py-16 bg-card/30">
+                      <Check className="h-10 w-10 text-success mx-auto mb-4 drop-shadow-[0_0_8px_currentColor]" />
+                      <h3 className="text-sm font-bold font-mono tracking-widest text-foreground mb-1 uppercase">QUARANTINE_EMPTY</h3>
+                      <p className="text-[10px] font-mono tracking-widest text-muted-foreground uppercase">NO UNVERIFIED LOGS FOUND IN SYSTEM.</p>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </TabsContent>
 
-            <TabsContent value="flagged-reports">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Flagged Reports</CardTitle>
-                </CardHeader>
-                <CardContent>
+            <TabsContent value="flagged-reports" className="mt-6">
+              <div className="glass-strong border border-border rounded-none overflow-hidden">
+                <div className="bg-card/80 border-b border-border p-4">
+                  <h3 className="text-xs font-bold font-mono uppercase tracking-widest text-destructive flex items-center gap-2">
+                    <Flag className="h-4 w-4" /> CRITICAL_RADAR_FLAGS
+                  </h3>
+                </div>
+                <div className="p-0">
                   {flaggedReports.length > 0 ? (
                     <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Report Title</TableHead>
-                            <TableHead>Flag Count</TableHead>
-                            <TableHead>Trust Score</TableHead>
-                            <TableHead>Actions</TableHead>
+                      <Table className="font-mono text-xs">
+                        <TableHeader className="bg-background/80 hover:bg-background/80">
+                          <TableRow className="border-border">
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">THREAT_IDENTIFIER</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">FLAG_DENSITY</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">TRUST_SCORE</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground text-right">ADMIN_AUTH</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {flaggedReports.map((report) => (
-                            <TableRow key={report.id}>
-                              <TableCell className="font-medium">{report.title}</TableCell>
-                              <TableCell>
-                                {report.flagCount} user{report.flagCount > 1 ? "s" : ""}
+                            <TableRow key={report.id} className="border-border/50 hover:bg-card/50">
+                              <TableCell className="font-bold text-foreground max-w-[200px] truncate">{report.title}</TableCell>
+                              <TableCell className="text-destructive font-bold">
+                                [{report.flagCount}] FLAGS
                               </TableCell>
                               <TableCell>
-                                <Badge variant="outline">{report.trustScore}%</Badge>
+                                <Badge variant="outline" className="rounded-none border-border bg-background text-[10px] tracking-widest">{report.trustScore}%</Badge>
                               </TableCell>
-                              <TableCell>
-                                <div className="flex space-x-2">
-                                  <Button size="sm" variant="outline" onClick={() => handleResolveFlagged(report.id)}>
-                                    Resolve
+                              <TableCell className="text-right">
+                                <div className="flex justify-end space-x-2">
+                                  <Button size="sm" variant="outline" onClick={() => handleResolveFlagged(report.id)} className="h-8 rounded-none border-primary/50 text-primary hover:bg-primary hover:text-black uppercase tracking-widest text-[10px] font-bold">
+                                    RESOLVE_ALERT
                                   </Button>
-                                  <Button size="sm" variant="destructive" onClick={() => handleDelete(report.id)}>
+                                  <Button size="icon" variant="destructive" onClick={() => handleDelete(report.id)} className="h-8 w-8 rounded-none bg-destructive/10 text-destructive border border-destructive/50 hover:bg-destructive hover:text-white">
                                     <Trash2 className="h-4 w-4" />
-                                    <span className="sr-only">Delete</span>
                                   </Button>
                                 </div>
                               </TableCell>
@@ -361,53 +349,53 @@ export default function AdminDashboardClient() {
                       </Table>
                     </div>
                   ) : (
-                    <div className="text-center py-12">
-                      <Shield className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No flagged reports</h3>
-                      <p className="text-gray-600 dark:text-gray-400">All reports are in good standing.</p>
+                    <div className="text-center py-16 bg-card/30">
+                      <Shield className="h-10 w-10 text-primary mx-auto mb-4 drop-shadow-[0_0_8px_currentColor]" />
+                      <h3 className="text-sm font-bold font-mono tracking-widest text-foreground mb-1 uppercase">RADAR_CLEAR</h3>
+                      <p className="text-[10px] font-mono tracking-widest text-muted-foreground uppercase">ALL SYSTEM LOGS IN GOOD STANDING.</p>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </TabsContent>
 
-            {/* New Tab for Approved Reports */}
-            <TabsContent value="approved-reports">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Approved Reports</CardTitle>
-                </CardHeader>
-                <CardContent>
+            <TabsContent value="approved-reports" className="mt-6">
+              <div className="glass-strong border border-border rounded-none overflow-hidden">
+                <div className="bg-card/80 border-b border-border p-4">
+                  <h3 className="text-xs font-bold font-mono uppercase tracking-widest text-success flex items-center gap-2">
+                    <Terminal className="h-4 w-4" /> MAIN_DATABANK_LOGS
+                  </h3>
+                </div>
+                <div className="p-0">
                   {approvedReports.length > 0 ? (
                     <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Report Title</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Risk Level</TableHead>
-                            <TableHead>Created At</TableHead>
-                            <TableHead>Actions</TableHead>
+                      <Table className="font-mono text-xs">
+                        <TableHeader className="bg-background/80 hover:bg-background/80">
+                          <TableRow className="border-border">
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">THREAT_IDENTIFIER</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">VECTOR</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">SEVERITY</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">TIMESTAMP</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground text-right">ADMIN_AUTH</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {approvedReports.map((report) => (
-                            <TableRow key={report.id}>
-                              <TableCell className="font-medium">{report.title}</TableCell>
+                            <TableRow key={report.id} className="border-border/50 hover:bg-card/50">
+                              <TableCell className="font-bold text-foreground max-w-[200px] truncate">{report.title}</TableCell>
                               <TableCell>
-                                <Badge variant="outline">{report.scamType}</Badge>
+                                <Badge variant="outline" className="rounded-none border-border bg-background text-[10px] tracking-widest">{report.scamType}</Badge>
                               </TableCell>
                               <TableCell>
-                                <Badge variant={getRiskColor(report.riskLevel)}>{report.riskLevel}</Badge>
+                                <Badge className={cn("rounded-none border text-[10px] tracking-widest px-2 py-0", getRiskColor(report.riskLevel))}>{report.riskLevel}</Badge>
                               </TableCell>
-                              <TableCell className="text-sm text-gray-600 dark:text-gray-400">
+                              <TableCell className="text-muted-foreground">
                                 {new Date(report.createdAt).toLocaleString()}
                               </TableCell>
-                              <TableCell>
-                                <div className="flex space-x-2">
-                                  <Button size="sm" variant="destructive" onClick={() => handleDelete(report.id)}>
+                              <TableCell className="text-right">
+                                <div className="flex justify-end">
+                                  <Button size="icon" variant="destructive" onClick={() => handleDelete(report.id)} className="h-8 w-8 rounded-none bg-destructive/10 text-destructive border border-destructive/50 hover:bg-destructive hover:text-white">
                                     <Trash2 className="h-4 w-4" />
-                                    <span className="sr-only">Delete</span>
                                   </Button>
                                 </div>
                               </TableCell>
@@ -417,87 +405,67 @@ export default function AdminDashboardClient() {
                       </Table>
                     </div>
                   ) : (
-                    <div className="text-center py-12">
-                      <Check className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No approved reports</h3>
-                      <p className="text-gray-600 dark:text-gray-400">Approved reports will appear here.</p>
+                    <div className="text-center py-16 bg-card/30">
+                      <Terminal className="h-10 w-10 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-sm font-bold font-mono tracking-widest text-foreground mb-1 uppercase">DATABANK_EMPTY</h3>
+                      <p className="text-[10px] font-mono tracking-widest text-muted-foreground uppercase">NO APPROVED REPORTS EXIST IN SYSTEM.</p>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </TabsContent>
 
-            <TabsContent value="pending-companies">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Safe Companies Awaiting Review</CardTitle>
-                </CardHeader>
-                <CardContent>
+            <TabsContent value="pending-companies" className="mt-6">
+              <div className="glass-strong border border-border rounded-none overflow-hidden">
+                <div className="bg-card/80 border-b border-border p-4">
+                  <h3 className="text-xs font-bold font-mono uppercase tracking-widest text-secondary flex items-center gap-2">
+                    <Building className="h-4 w-4" /> WHITELIST_CANDIDATES
+                  </h3>
+                </div>
+                <div className="p-0">
                   {isLoadingSafeCompanies ? (
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+                    <div className="flex items-center justify-center py-16 bg-card/30">
+                      <Loader2 className="h-8 w-8 animate-spin text-secondary drop-shadow-[0_0_8px_currentColor]" />
                     </div>
                   ) : pendingSafeCompanies.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Company Name</TableHead>
-                            <TableHead>Industry</TableHead>
-                            <TableHead>Website</TableHead>
-                            <TableHead>Created At</TableHead>
-                            <TableHead>Actions</TableHead>
+                     <div className="overflow-x-auto">
+                      <Table className="font-mono text-xs">
+                        <TableHeader className="bg-background/80 hover:bg-background/80">
+                          <TableRow className="border-border">
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">NODE_ID</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">SECTOR</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">URL</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">TIMESTAMP</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground text-right">ADMIN_AUTH</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {pendingSafeCompanies.map((company) => (
-                            <TableRow key={company.id}>
-                              <TableCell className="font-medium">{company.name}</TableCell>
-                              <TableCell>{company.industry}</TableCell>
+                            <TableRow key={company.id} className="border-border/50 hover:bg-card/50">
+                              <TableCell className="font-bold text-foreground">{company.name}</TableCell>
+                              <TableCell className="text-muted-foreground">{company.industry}</TableCell>
                               <TableCell>
                                 {company.website ? (
-                                  <a
-                                    href={company.website}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline"
-                                  >
-                                    Link
+                                  <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-bold tracking-widest text-[10px]">
+                                    EXT_LINK
                                   </a>
                                 ) : (
-                                  "N/A"
+                                  <span className="text-muted-foreground text-[10px]">NULL</span>
                                 )}
                               </TableCell>
-                              <TableCell className="text-sm text-gray-600 dark:text-gray-400">
+                              <TableCell className="text-muted-foreground text-[10px]">
                                 {new Date(company.created_at).toLocaleString()}
                               </TableCell>
-                              <TableCell>
-                                <div className="flex space-x-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleApproveSafeCompany(company.id)}
-                                    className="text-green-600 hover:text-green-700"
-                                  >
-                                    <Check className="h-4 w-4 mr-1" />
-                                    Approve
+                              <TableCell className="text-right">
+                                <div className="flex justify-end space-x-2">
+                                  <Button size="icon" variant="outline" onClick={() => handleApproveSafeCompany(company.id)} className="h-8 w-8 rounded-none border-success/50 text-success hover:bg-success hover:text-black">
+                                    <Check className="h-4 w-4" />
                                   </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleRejectSafeCompany(company.id)}
-                                    className="text-red-600 hover:text-red-700"
-                                  >
-                                    <X className="h-4 w-4 mr-1" />
-                                    Reject
+                                  <Button size="icon" variant="outline" onClick={() => handleRejectSafeCompany(company.id)} className="h-8 w-8 rounded-none border-warning/50 text-warning hover:bg-warning hover:text-black">
+                                    <X className="h-4 w-4" />
                                   </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() => handleDeleteSafeCompany(company.id)}
-                                  >
+                                  <Button size="icon" variant="destructive" onClick={() => handleDeleteSafeCompany(company.id)} className="h-8 w-8 rounded-none bg-destructive/10 text-destructive border border-destructive/50 hover:bg-destructive hover:text-white">
                                     <Trash2 className="h-4 w-4" />
-                                    <span className="sr-only">Delete</span>
                                   </Button>
                                 </div>
                               </TableCell>
@@ -507,108 +475,100 @@ export default function AdminDashboardClient() {
                       </Table>
                     </div>
                   ) : (
-                    <div className="text-center py-12">
-                      <Check className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">All caught up!</h3>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        No safe companies pending review at the moment.
-                      </p>
+                    <div className="text-center py-16 bg-card/30">
+                      <Check className="h-10 w-10 text-success mx-auto mb-4 drop-shadow-[0_0_8px_currentColor]" />
+                      <h3 className="text-sm font-bold font-mono tracking-widest text-foreground mb-1 uppercase">QUARANTINE_EMPTY</h3>
+                      <p className="text-[10px] font-mono tracking-widest text-muted-foreground uppercase">NO PENDING WHITELIST NODES DETECTED.</p>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </TabsContent>
 
-            <TabsContent value="analytics">
+            <TabsContent value="analytics" className="mt-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <TrendingUp className="mr-2 h-5 w-5" />
-                      Report Trends
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
+                <div className="glass-strong border border-border rounded-none overflow-hidden bg-card/30">
+                  <div className="bg-card/80 border-b border-border p-4">
+                    <h3 className="text-xs font-bold font-mono uppercase tracking-widest text-primary flex items-center gap-2">
+                       <TrendingUp className="h-4 w-4" /> VECTOR_TELEMETRY
+                    </h3>
+                  </div>
+                  <div className="p-6 font-mono text-xs tracking-widest space-y-6">
+                    <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Fake Job Offers</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-gray-200 rounded-full h-2">
-                            <div className="bg-red-600 h-2 rounded-full" style={{ width: "65%" }}></div>
-                          </div>
-                          <span className="text-sm text-gray-600">65%</span>
-                        </div>
+                        <span className="text-foreground font-bold">FAKE_JOB_OFFERS</span>
+                        <span className="text-destructive font-bold drop-shadow-[0_0_5px_currentColor]">65%</span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Unpaid Work</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-gray-200 rounded-full h-2">
-                            <div className="bg-orange-600 h-2 rounded-full" style={{ width: "45%" }}></div>
-                          </div>
-                          <span className="text-sm text-gray-600">45%</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Portfolio Theft</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-gray-200 rounded-full h-2">
-                            <div className="bg-yellow-600 h-2 rounded-full" style={{ width: "30%" }}></div>
-                          </div>
-                          <span className="text-sm text-gray-600">30%</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Ghost Clients</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-gray-200 rounded-full h-2">
-                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: "25%" }}></div>
-                          </div>
-                          <span className="text-sm text-gray-600">25%</span>
-                        </div>
+                      <div className="w-full bg-background border border-border/50 h-2">
+                        <div className="bg-destructive h-full shadow-[0_0_10px_hsla(var(--destructive),0.5)]" style={{ width: "65%" }}></div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-foreground font-bold">UNPAID_LABOR</span>
+                        <span className="text-warning font-bold drop-shadow-[0_0_5px_currentColor]">45%</span>
+                      </div>
+                      <div className="w-full bg-background border border-border/50 h-2">
+                        <div className="bg-warning h-full shadow-[0_0_10px_hsla(var(--warning),0.5)]" style={{ width: "45%" }}></div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-foreground font-bold">IP_THEFT</span>
+                        <span className="text-secondary font-bold drop-shadow-[0_0_5px_currentColor]">30%</span>
+                      </div>
+                      <div className="w-full bg-background border border-border/50 h-2">
+                        <div className="bg-secondary h-full shadow-[0_0_10px_hsla(var(--secondary),0.5)]" style={{ width: "30%" }}></div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-foreground font-bold">GHOST_CLIENTS</span>
+                        <span className="text-primary font-bold drop-shadow-[0_0_5px_currentColor]">25%</span>
+                      </div>
+                      <div className="w-full bg-background border border-border/50 h-2">
+                        <div className="bg-primary h-full shadow-[0_0_10px_hsla(var(--primary),0.5)]" style={{ width: "25%" }}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <AlertTriangle className="mr-2 h-5 w-5" />
-                      Risk Distribution
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
+                <div className="glass-strong border border-border rounded-none overflow-hidden bg-card/30">
+                  <div className="bg-card/80 border-b border-border p-4">
+                    <h3 className="text-xs font-bold font-mono uppercase tracking-widest text-primary flex items-center gap-2">
+                       <AlertTriangle className="h-4 w-4" /> RISK_DISTRIBUTION
+                    </h3>
+                  </div>
+                  <div className="p-6 font-mono text-xs tracking-widest space-y-6">
+                    <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-red-600">High Risk</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-gray-200 rounded-full h-2">
-                            <div className="bg-red-600 h-2 rounded-full" style={{ width: "40%" }}></div>
-                          </div>
-                          <span className="text-sm text-gray-600">40%</span>
-                        </div>
+                        <span className="text-foreground font-bold">CRITICAL_THREATS</span>
+                        <span className="text-destructive font-bold drop-shadow-[0_0_5px_currentColor]">40%</span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-yellow-600">Medium Risk</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-gray-200 rounded-full h-2">
-                            <div className="bg-orange-600 h-2 rounded-full" style={{ width: "45%" }}></div>
-                          </div>
-                          <span className="text-sm text-gray-600">45%</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-green-600">Low Risk</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-gray-200 rounded-full h-2">
-                            <div className="bg-green-600 h-2 rounded-full" style={{ width: "15%" }}></div>
-                          </div>
-                          <span className="text-sm text-gray-600">15%</span>
-                        </div>
+                      <div className="w-full bg-background border border-border/50 h-2">
+                        <div className="bg-destructive h-full shadow-[0_0_10px_hsla(var(--destructive),0.5)]" style={{ width: "40%" }}></div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-foreground font-bold">ELEVATED_RISK</span>
+                        <span className="text-warning font-bold drop-shadow-[0_0_5px_currentColor]">45%</span>
+                      </div>
+                      <div className="w-full bg-background border border-border/50 h-2">
+                        <div className="bg-warning h-full shadow-[0_0_10px_hsla(var(--warning),0.5)]" style={{ width: "45%" }}></div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-foreground font-bold">ANOMALIES</span>
+                        <span className="text-success font-bold drop-shadow-[0_0_5px_currentColor]">15%</span>
+                      </div>
+                      <div className="w-full bg-background border border-border/50 h-2">
+                        <div className="bg-success h-full shadow-[0_0_10px_hsla(var(--success),0.5)]" style={{ width: "15%" }}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </TabsContent>
           </Tabs>

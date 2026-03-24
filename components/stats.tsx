@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { TrendingUp, Shield, Users, MapPin } from "lucide-react"
+import { TrendingUp, Shield, Users, MapPin, Terminal } from "lucide-react"
 import { useReports } from "@/contexts/reports-context"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -52,85 +52,96 @@ export function Stats() {
 
   const stats = [
     {
-      name: "Reports Submitted",
+      name: "THREATS_LOGGED",
       value: reports.length,
       icon: Shield,
-      change: "+12%",
-      gradient: "from-red-500 to-pink-600",
-      glowColor: "group-hover:shadow-red-500/50",
+      change: "+12.4%",
+      color: "text-primary",
+      bgClass: "bg-primary/10",
+      borderClass: "border-primary/50",
+      shadowClass: "shadow-[0_0_15px_hsla(var(--primary),0.3)]"
     },
     {
-      name: "Total Views",
+      name: "DATABASE_QUERIES",
       value: totalViews,
-      icon: Users,
-      change: "+8%",
-      gradient: "from-blue-500 to-cyan-600",
-      glowColor: "group-hover:shadow-blue-500/50",
+      icon: Terminal,
+      change: "+8.1%",
+      color: "text-secondary",
+      bgClass: "bg-secondary/10",
+      borderClass: "border-secondary/50",
+      shadowClass: "shadow-[0_0_15px_hsla(var(--secondary),0.3)]"
     },
     {
-      name: "Cities Covered",
+      name: "SECTORS_TRACKED",
       value: uniqueCities,
       icon: MapPin,
-      change: "+23%",
-      gradient: "from-orange-500 to-yellow-600",
-      glowColor: "group-hover:shadow-orange-500/50",
+      change: "+23.7%",
+      color: "text-warning",
+      bgClass: "bg-warning/10",
+      borderClass: "border-warning/50",
+      shadowClass: "shadow-[0_0_15px_hsla(var(--warning),0.3)]"
     },
     {
-      name: "Community Votes",
+      name: "PEER_VALIDATIONS",
       value: totalHelpfulVotes,
-      icon: TrendingUp,
-      change: "+15%",
-      gradient: "from-green-500 to-emerald-600",
-      glowColor: "group-hover:shadow-green-500/50",
+      icon: Users,
+      change: "+15.2%",
+      color: "text-success",
+      bgClass: "bg-success/10",
+      borderClass: "border-success/50",
+      shadowClass: "shadow-[0_0_15px_hsla(var(--success),0.3)]"
     },
   ]
 
   return (
-    <section className="relative py-20 bg-gradient-to-b from-gray-900 to-gray-950 overflow-hidden">
-      {/* Background Glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.1),transparent_70%)]" />
+    <section className="relative py-24 bg-background overflow-hidden border-y border-border">
+      {/* Background Cyber Matriz */}
+      <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.2]" />
 
       <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           {/* Section Header */}
-          <div className="text-center mb-16 animate-slide-up">
-            <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-              Community <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Impact</span>
+          <div className="text-center mb-16 animate-in fade-in slide-in-from-bottom-8 duration-500">
+            <h2 className="text-4xl font-extrabold tracking-widest uppercase text-foreground sm:text-5xl drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+              SYSTEM <span className="text-primary drop-shadow-[0_0_10px_hsla(var(--primary),0.5)]">TELEMETRY</span>
             </h2>
-            <p className="mt-4 text-xl text-gray-400">
-              Together, we're building a safer freelancing ecosystem
+            <p className="mt-4 text-sm font-mono tracking-widest uppercase text-muted-foreground">
+              LIVE NETWORK VITAL STATISTICS. CONSTANT VIGILANCE.
             </p>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {stats.map((stat, index) => {
               const { count, ref } = useCountUp(stat.value)
               return (
                 <div
                   key={stat.name}
                   ref={ref}
-                  className={`relative overflow-hidden glass-card p-6 transition-all duration-300 hover:translate-y-[-4px] hover:shadow-lg ${stat.glowColor.replace('shadow-', 'hover:shadow-')}`}
+                  className={cn("relative overflow-hidden glass-card p-6 transition-all duration-300 hover:scale-105 border-t-2", stat.borderClass, stat.shadowClass)}
                 >
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-6">
                     {/* Icon */}
-                    <div className={`flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.gradient} bg-opacity-10 backdrop-blur-md shadow-inner`}>
-                      <stat.icon className="w-6 h-6 text-white" />
+                    <div className={cn("flex items-center justify-center w-12 h-12 border", stat.bgClass, stat.borderClass)}>
+                      <stat.icon className={cn("w-6 h-6", stat.color)} />
                     </div>
 
                     {/* Change Badge */}
-                    <div className="flex items-center space-x-1 text-sm font-medium text-green-400 bg-green-400/10 px-2 py-1 rounded-full border border-green-400/20">
+                    <div className="flex items-center space-x-2 text-xs font-mono font-bold tracking-widest uppercase text-success bg-success/10 px-2 py-1 border border-success/30 shadow-[0_0_5px_hsla(var(--success),0.2)]">
                       <TrendingUp className="w-3 h-3" />
                       <span>{stat.change}</span>
                     </div>
                   </div>
 
                   <div>
-                    <dt className="text-sm font-medium text-gray-400">{stat.name}</dt>
-                    <dd className="mt-2 text-3xl font-bold text-white tracking-tight">
+                    <dt className="text-xs font-mono font-bold uppercase tracking-widest text-muted-foreground mb-1">{stat.name}</dt>
+                    <dd className={cn("mt-2 text-4xl font-extrabold tracking-tight drop-shadow-[0_0_5px_currentColor]", stat.color)}>
                       {count.toLocaleString()}
                     </dd>
                   </div>
+                  
+                  {/* Decorative Scanline */}
+                  <div className="absolute top-0 left-0 w-full h-[1px] bg-white/20"></div>
                 </div>
               )
             })}

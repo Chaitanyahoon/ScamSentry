@@ -6,10 +6,9 @@ import { useState, useEffect } from "react"
 import {
   AlertTriangle, MapPin, Building, Tag, FileText, Send, Loader2,
   Briefcase, DollarSign, UserX, Lock, ShieldAlert, HelpCircle,
-  ChevronRight, ChevronLeft, Upload, X, ImageIcon
+  ChevronRight, ChevronLeft, Upload, X, ImageIcon, Terminal
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -23,12 +22,12 @@ import { useReports } from "@/contexts/reports-context"
 import { cn } from "@/lib/utils"
 
 const scamTypes = [
-  { id: "Fake Job Offer", label: "Fake Job Offer", icon: Briefcase, description: "Job offers that require payment or seem too good to be true." },
-  { id: "Unpaid Work", label: "Unpaid Work", icon: DollarSign, description: "Work completed but payment was never received." },
-  { id: "Portfolio Theft", label: "Portfolio Theft", icon: UserX, description: "Someone using your work and claiming it as their own." },
-  { id: "Upfront Payment Scam", label: "Upfront Payment", icon: Lock, description: "Asking for money before starting a job or project." },
-  { id: "Identity Theft", label: "Identity Theft", icon: ShieldAlert, description: "Attempts to steal personal information." },
-  { id: "Other", label: "Other Scam", icon: HelpCircle, description: "Any other type of fraudulent activity." },
+  { id: "Fake Job Offer", label: "FAKE_JOB_OFFER", icon: Briefcase, description: "Unverified job pipelines demanding immediate payment." },
+  { id: "Unpaid Work", label: "UNPAID_WORK", icon: DollarSign, description: "Completed modules remaining uncompensated by client nodes." },
+  { id: "Portfolio Theft", label: "PORTFOLIO_THEFT", icon: UserX, description: "Unauthorized cloning of intellectual property or assets." },
+  { id: "Upfront Payment Scam", label: "UPFRONT_PAYMENT", icon: Lock, description: "Advance fee extraction protocols masked as 'security' deposits." },
+  { id: "Identity Theft", label: "IDENTITY_THEFT", icon: ShieldAlert, description: "Malicious attempts to exfiltrate personal data structures." },
+  { id: "Other", label: "OTHER_ANOMALY", icon: HelpCircle, description: "Undefined fraudulent architectural behaviors." },
 ]
 
 const industries = [
@@ -63,12 +62,8 @@ export default function ReportPage() {
   })
 
   const [selectedTags, setSelectedTags] = useState<string[]>([])
-
-  // Evidence upload state
   const [evidenceFiles, setEvidenceFiles] = useState<File[]>([])
   const [isUploadingEvidence, setIsUploadingEvidence] = useState(false)
-
-  // CAPTCHA state
   const [captchaQuestion, setCaptchaQuestion] = useState("")
   const [captchaAnswer, setCaptchaAnswer] = useState<number | null>(null)
   const [userCaptchaInput, setUserCaptchaInput] = useState("")
@@ -89,15 +84,13 @@ export default function ReportPage() {
     const files = e.target.files
     if (files) {
       const newFiles = Array.from(files)
-      // Limit to 5 files total
       if (evidenceFiles.length + newFiles.length > 5) {
-        toast({ title: "Too Many Files", description: "You can upload a maximum of 5 files.", variant: "destructive" })
+        toast({ title: "SYS_ERR: OVERLOAD", description: "Maximum of 5 data blocks allowed.", variant: "destructive" })
         return
       }
-      // Check file size (max 5MB per file)
       const oversizedFiles = newFiles.filter(f => f.size > 5 * 1024 * 1024)
       if (oversizedFiles.length > 0) {
-        toast({ title: "File Too Large", description: "Each file must be under 5MB.", variant: "destructive" })
+        toast({ title: "SYS_ERR: FILE_TOO_LARGE", description: "Blocks must not exceed 5MB.", variant: "destructive" })
         return
       }
       setEvidenceFiles(prev => [...prev, ...newFiles])
@@ -109,16 +102,15 @@ export default function ReportPage() {
   }
 
   const handleNext = () => {
-    // Validation per step
     if (step === 1) {
       if (!formData.scamType) {
-        toast({ title: "Selection Required", description: "Please select a scam type.", variant: "destructive" })
+        toast({ title: "SYS_ERR: MISSING_PARAM", description: "Select anomaly type vector.", variant: "destructive" })
         return
       }
     }
     if (step === 2) {
       if (!formData.title || !formData.description) {
-        toast({ title: "Missing Information", description: "Please provide a title and description.", variant: "destructive" })
+        toast({ title: "SYS_ERR: INCOMPLETE_DATA", description: "Title and description required.", variant: "destructive" })
         return
       }
     }
@@ -133,24 +125,22 @@ export default function ReportPage() {
 
   const handleSubmit = async () => {
     if (Number.parseInt(userCaptchaInput) !== captchaAnswer) {
-      toast({ title: "CAPTCHA Error", description: "Incorrect answer.", variant: "destructive" })
+      toast({ title: "SYS_ERR: AUTH_FAILURE", description: "Incorrect CAPTCHA parameters.", variant: "destructive" })
       generateCaptcha()
       return
     }
 
     setIsSubmitting(true)
     try {
-      // Upload evidence files first
       let evidenceUrls: string[] = []
       if (evidenceFiles.length > 0) {
         setIsUploadingEvidence(true)
         try {
           const uploadPromises = evidenceFiles.map(file => uploadEvidence(file))
           evidenceUrls = await Promise.all(uploadPromises)
-          toast({ title: "Files Uploaded", description: `${evidenceFiles.length} file(s) uploaded successfully.` })
+          toast({ title: "DATA_UPLOADED", description: "Evidence chunks processed." })
         } catch (uploadError) {
-          console.error("Error uploading evidence:", uploadError)
-          toast({ title: "Upload Failed", description: "Some files failed to upload. Continuing without them.", variant: "destructive" })
+          toast({ title: "UPLOAD_FAILURE", description: "Some blocks failed transfer. Committing available data.", variant: "destructive" })
         } finally {
           setIsUploadingEvidence(false)
         }
@@ -177,10 +167,10 @@ export default function ReportPage() {
 
       const newReport = await addReport({
         title: formData.title,
-        company: formData.company || "Unknown Company",
+        company: formData.company || "Unknown Node",
         scamType: formData.scamType,
         industry: formData.industry || "Other",
-        location: formData.location || "Location not specified",
+        location: formData.location || "GLOBAL_NETWORK",
         city: locationData.city,
         state: locationData.state,
         country: locationData.country,
@@ -195,26 +185,17 @@ export default function ReportPage() {
       })
 
       if (newReport) {
-        toast({ title: "Report Submitted", description: "Thank you for helping the community!" })
+        toast({ title: "COMMIT_SUCCESS", description: "Malicious node recorded into database." })
         router.push(`/report/success/${newReport.id}`)
       } else {
-        throw new Error("Failed to create report")
+        throw new Error("Commit aborted")
       }
     } catch (error: any) {
-      console.error("Submission error:", error)
-      if (error.code === "permission-denied" || error.message?.includes("Missing or insufficient permissions")) {
-        toast({
-          title: "Submission Failed",
-          description: "Database permissions denied. Please contact the administrator.",
-          variant: "destructive"
-        })
-      } else {
-        toast({
-          title: "Error",
-          description: "Something went wrong. Please try again.",
-          variant: "destructive"
-        })
-      }
+      toast({
+        title: "SYS_ERR: KERNEL_PANIC",
+        description: "Transmission failed. Contact system administrator.",
+        variant: "destructive"
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -225,28 +206,45 @@ export default function ReportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 sm:py-12">
-      <div className="container px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto">
+    <div className="min-h-screen bg-background py-16 relative overflow-hidden">
+      {/* Dynamic Cyber Grid */}
+      <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.2]"></div>
+
+      <div className="container relative z-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
 
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Report a Scam</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Step {step} of {totalSteps}</p>
-          <Progress value={(step / totalSteps) * 100} className="h-2 mt-4 w-full max-w-xs mx-auto" />
+        <div className="text-center mb-12">
+          <div className="mb-6 inline-flex p-4 border border-destructive/50 bg-destructive/10 text-destructive shadow-[0_0_15px_hsla(var(--destructive),0.3)]">
+            <AlertTriangle className="h-8 w-8 drop-shadow-[0_0_8px_hsla(var(--destructive),1)] animate-pulse" />
+          </div>
+          <h1 className="text-4xl font-extrabold tracking-widest text-foreground uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+            DUMP NEW <span className="text-destructive drop-shadow-[0_0_8px_hsla(var(--destructive),0.5)]">THREAT</span>
+          </h1>
+          <p className="mt-4 text-sm text-muted-foreground font-mono uppercase tracking-widest">
+            INITIALIZE REPORT SEQUENCE :: STAGE {step}/{totalSteps}
+          </p>
+          <div className="h-1 mt-6 w-full max-w-lg mx-auto bg-card border border-border">
+            <div className="h-full bg-destructive transition-all duration-300 shadow-[0_0_5px_hsla(var(--destructive),0.8)]" style={{ width: `${(step / totalSteps) * 100}%` }}></div>
+          </div>
         </div>
 
-        <Card className="border-none shadow-xl bg-white dark:bg-gray-800">
-          <CardContent className="p-6 sm:p-8">
+        <div className="glass-strong">
+          <div className="bg-card/80 border-b border-border p-4 flex gap-5">
+            <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground tracking-widest uppercase">
+              <Terminal className="h-4 w-4 text-destructive" /> DATA_ENTRY_FORM
+            </div>
+          </div>
+          <div className="p-6 sm:p-10 bg-background/50">
 
             {/* STEP 1: SCAM TYPE */}
             {step === 1 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="text-center mb-6">
-                  <h2 className="text-xl font-semibold">What type of scam is it?</h2>
-                  <p className="text-sm text-gray-500">Select the category that best fits your experience.</p>
+              <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold uppercase tracking-widest font-mono text-foreground">IDENTIFY ANOMALY VECTOR</h2>
+                  <p className="text-sm font-mono text-muted-foreground tracking-widest mt-2 uppercase">SELECT THE PROTOCOL_BREACH THAT MATCHES THE EVENT.</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto sm:max-w-none">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {scamTypes.map((type) => {
                     const Icon = type.icon
                     const isSelected = formData.scamType === type.id
@@ -255,17 +253,17 @@ export default function ReportPage() {
                         key={type.id}
                         onClick={() => setFormData(prev => ({ ...prev, scamType: type.id }))}
                         className={cn(
-                          "cursor-pointer rounded-xl border-2 p-4 transition-all hover:border-primary hover:bg-primary/5",
-                          isSelected ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-gray-200 dark:border-gray-700"
+                          "cursor-pointer border-2 p-5 transition-all bg-card/50",
+                          isSelected ? "border-primary bg-primary/10 shadow-[0_0_15px_hsla(var(--primary),0.2)]" : "border-border hover:border-primary/50"
                         )}
                       >
                         <div className="flex items-start space-x-4">
-                          <div className={cn("p-2 rounded-lg", isSelected ? "bg-primary text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-500")}>
+                          <div className={cn("p-2 border", isSelected ? "bg-primary text-white border-primary drop-shadow-[0_0_5px_currentColor]" : "bg-background text-muted-foreground border-border")}>
                             <Icon className="h-6 w-6" />
                           </div>
                           <div>
-                            <h3 className="font-semibold text-gray-900 dark:text-white">{type.label}</h3>
-                            <p className="text-xs text-gray-500 mt-1">{type.description}</p>
+                            <h3 className="font-bold text-foreground font-mono uppercase tracking-widest">{type.label}</h3>
+                            <p className="text-xs text-muted-foreground mt-2 font-mono tracking-wide leading-relaxed">{type.description}</p>
                           </div>
                         </div>
                       </div>
@@ -277,50 +275,50 @@ export default function ReportPage() {
 
             {/* STEP 2: DETAILS */}
             {step === 2 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="text-center mb-6">
-                  <h2 className="text-xl font-semibold">Tell us what happened</h2>
-                  <p className="text-sm text-gray-500">The more details you provide, the better we can help others.</p>
+              <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 font-mono">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold uppercase tracking-widest font-mono text-foreground">PROVIDE PAYLOAD LOGS</h2>
+                  <p className="text-sm font-mono text-muted-foreground tracking-widest mt-2 uppercase">INPUT EXPLICIT DATA SO WE CAN FLAG THE OFFENDING NODES.</p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div>
-                    <Label htmlFor="title">Report Title *</Label>
+                    <Label htmlFor="title" className="text-primary font-bold tracking-widest mb-2 block uppercase text-xs">REPORT_TITLE *</Label>
                     <Input
                       id="title"
-                      placeholder="e.g. Fake Job Offer from TechCorp"
+                      placeholder="E.G: FAKE SYSTEM_ADMIN RECRUITMENT"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="mt-1"
+                      className="h-12 bg-card/50 border-border text-foreground tracking-widest rounded-none focus-visible:border-primary"
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
-                      <Label htmlFor="company">Company Name</Label>
+                      <Label htmlFor="company" className="text-muted-foreground font-bold tracking-widest mb-2 block uppercase text-xs">RESPONSIBLE_NODE (COMPANY)</Label>
                       <div className="relative mt-1">
-                        <Building className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                        <Building className="absolute left-3 top-3.5 h-4 w-4 text-primary" />
                         <Input
                           id="company"
-                          className="pl-9"
-                          placeholder="Name of company or scammer"
+                          className="pl-10 h-12 bg-card/50 border-border text-foreground tracking-widest rounded-none focus-visible:border-primary uppercase"
+                          placeholder="COMPANY OR USERNAME"
                           value={formData.company}
                           onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                         />
                       </div>
                     </div>
                     <div>
-                      <Label htmlFor="industry">Industry</Label>
+                      <Label htmlFor="industry" className="text-muted-foreground font-bold tracking-widest mb-2 block uppercase text-xs">AFFECTED_INDUSTRY</Label>
                       <Select
                         value={formData.industry}
                         onValueChange={(val: string) => setFormData({ ...formData, industry: val })}
                       >
-                        <SelectTrigger className="mt-1">
-                          <SelectValue placeholder="Select industry" />
+                        <SelectTrigger className="h-12 bg-card/50 border-border text-foreground tracking-widest rounded-none uppercase focus:ring-primary focus:ring-offset-0">
+                          <SelectValue placeholder="SELECT_SECTOR" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-card border-border rounded-none text-foreground font-mono uppercase tracking-widest">
                           {industries.map((ind) => (
-                            <SelectItem key={ind} value={ind}>{ind}</SelectItem>
+                            <SelectItem key={ind} value={ind}>{ind.toUpperCase().replace(/\s+/g, '_')}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -328,13 +326,13 @@ export default function ReportPage() {
                   </div>
 
                   <div>
-                    <Label htmlFor="location">Location (Optional)</Label>
+                    <Label htmlFor="location" className="text-muted-foreground font-bold tracking-widest mb-2 block uppercase text-xs">IP_GEO_LOCATION (OPTIONAL)</Label>
                     <div className="relative mt-1">
-                      <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                      <MapPin className="absolute left-3 top-3.5 h-4 w-4 text-primary" />
                       <Input
                         id="location"
-                        className="pl-9"
-                        placeholder="City, Country"
+                        className="pl-10 h-12 bg-card/50 border-border text-foreground tracking-widest rounded-none focus-visible:border-primary uppercase"
+                        placeholder="CITY OR REGION"
                         value={formData.location}
                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                       />
@@ -342,12 +340,12 @@ export default function ReportPage() {
                   </div>
 
                   <div>
-                    <Label htmlFor="description">Detailed Description *</Label>
+                    <Label htmlFor="description" className="text-primary font-bold tracking-widest mb-2 block uppercase text-xs">EVENT_LOG_DESCRIPTION *</Label>
                     <Textarea
                       id="description"
-                      rows={6}
-                      className="mt-1"
-                      placeholder="Describe the incident in detail. What did they ask for? How did they contact you?"
+                      rows={8}
+                      className="mt-1 bg-card/50 border-border text-foreground tracking-widest rounded-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary resize-none uppercase"
+                      placeholder="DUMP RAW TEXT DETAILING THE OPERATION PROTOCOLS OF THE SCAMMER..."
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     />
@@ -358,23 +356,25 @@ export default function ReportPage() {
 
             {/* STEP 3: REVIEW & SUBMIT */}
             {step === 3 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="text-center mb-6">
-                  <h2 className="text-xl font-semibold">Final Details</h2>
-                  <p className="text-sm text-gray-500">Add tags and verify your submission.</p>
+              <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 font-mono">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold uppercase tracking-widest font-mono text-foreground">APPEND METADATA & COMPILE</h2>
+                  <p className="text-sm font-mono text-muted-foreground tracking-widest mt-2 uppercase">ATTACH PROOF_OF_WORK AND DEFINE PRIVACY SETTINGS.</p>
                 </div>
 
                 <div>
-                  <Label className="mb-2 block">Tags (Select all that apply)</Label>
-                  <div className="flex flex-wrap gap-2">
+                  <Label className="mb-4 block text-xs font-bold uppercase tracking-widest text-primary">SELECT_TAGS (MULTIPLE)</Label>
+                  <div className="flex flex-wrap gap-3">
                     {commonTags.map((tag) => (
                       <Badge
                         key={tag}
-                        variant={selectedTags.includes(tag) ? "default" : "outline"}
-                        className="cursor-pointer py-1.5 px-3"
+                        variant="outline"
+                        className={cn("cursor-pointer py-2 px-3 rounded-none tracking-widest uppercase transition-all", 
+                          selectedTags.includes(tag) ? "border-primary bg-primary/20 text-primary shadow-[0_0_5px_hsla(var(--primary),0.5)]" : "border-border bg-card/50 text-muted-foreground hover:border-primary/50"
+                        )}
                         onClick={() => toggleTag(tag)}
                       >
-                        {tag}
+                        #{tag.replace(/-/g, '_')}
                       </Badge>
                     ))}
                   </div>
@@ -382,9 +382,9 @@ export default function ReportPage() {
 
                 {/* Evidence Upload */}
                 <div>
-                  <Label className="mb-2 block">Upload Evidence (Optional)</Label>
-                  <div className="space-y-3">
-                    <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                  <Label className="mb-4 block text-xs font-bold uppercase tracking-widest text-primary">ATTACH_EVIDENCE_FILES (OPTIONAL)</Label>
+                  <div className="space-y-4">
+                    <div className="border border-dashed border-primary/50 bg-primary/5 p-8 text-center hover:bg-primary/10 transition-colors">
                       <input
                         type="file"
                         id="evidence-upload"
@@ -394,40 +394,42 @@ export default function ReportPage() {
                         className="hidden"
                       />
                       <label htmlFor="evidence-upload" className="cursor-pointer block">
-                        <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          Click to upload screenshots or documents
+                        <Upload className="h-10 w-10 mx-auto text-primary drop-shadow-[0_0_5px_currentColor] mb-4" />
+                        <p className="text-sm font-bold uppercase tracking-widest text-foreground">
+                          CLICK_TO_UPLOAD_ASSETS
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          PNG, JPG, PDF up to 5MB each (max 5 files)
+                        <p className="text-xs text-secondary mt-2 uppercase tracking-wide">
+                          PNG, JPG, PDF &lt; 5MB EACH (MAX 5 BLOCKS)
                         </p>
                       </label>
                     </div>
 
                     {/* File Preview */}
                     {evidenceFiles.length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                         {evidenceFiles.map((file, index) => (
                           <div
                             key={index}
-                            className="relative group bg-gray-100 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700"
+                            className="relative group bg-card border border-border p-3 flex"
                           >
                             <button
                               type="button"
                               onClick={() => removeFile(index)}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="absolute -top-3 -right-3 bg-destructive text-white border border-destructive drop-shadow-[0_0_5px_hsla(var(--destructive),0.5)] p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
                             >
-                              <X className="h-3 w-3" />
+                              <X className="h-4 w-4" />
                             </button>
-                            <div className="flex items-center space-x-2">
-                              <ImageIcon className="h-5 w-5 text-gray-500 flex-shrink-0" />
-                              <p className="text-xs text-gray-700 dark:text-gray-300 truncate">
-                                {file.name}
+                            <div className="flex flex-col flex-1 truncate">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <FileText className="h-4 w-4 text-primary shrink-0" />
+                                <p className="text-xs font-bold text-foreground truncate uppercase">
+                                  {file.name}
+                                </p>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground mt-1 uppercase">
+                                {(file.size / 1024).toFixed(1)} KB_DATA
                               </p>
                             </div>
-                            <p className="text-xs text-gray-400 mt-1">
-                              {(file.size / 1024).toFixed(1)} KB
-                            </p>
                           </div>
                         ))}
                       </div>
@@ -435,68 +437,84 @@ export default function ReportPage() {
                   </div>
                 </div>
 
-                <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg space-y-4">
-                  <div className="flex items-center space-x-2">
+                <div className="bg-card/50 border border-border p-6 space-y-6">
+                  <div className="flex items-center space-x-4">
                     <Checkbox
                       id="anonymous"
                       checked={formData.anonymous}
-                      onCheckedChange={(c: boolean) => setFormData({ ...formData, anonymous: c })}
+                      onCheckedChange={(c: boolean) => setFormData({ ...formData, anonymous: !!c })}
+                      className="border-primary data-[state=checked]:bg-primary data-[state=checked]:text-black rounded-none h-6 w-6"
                     />
-                    <Label htmlFor="anonymous" className="cursor-pointer">Submit anonymously</Label>
+                    <Label htmlFor="anonymous" className="cursor-pointer text-sm font-bold uppercase tracking-widest text-foreground">ENCRYPT_USER_IDENTITY (ANONYMOUS_POSTING)</Label>
                   </div>
 
                   {!formData.anonymous && (
-                    <div>
-                      <Label htmlFor="email">Email (Optional)</Label>
+                    <div className="pt-4 border-t border-border">
+                      <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-primary mb-2 block">CONTACT_ADDRESS (OPTIONAL)</Label>
                       <Input
                         id="email"
                         type="email"
-                        placeholder="For status updates"
+                        placeholder="RECEIVE STATUS UPDATES"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="mt-1"
+                        className="h-12 bg-background border-border text-foreground tracking-widest rounded-none focus-visible:border-primary uppercase"
                       />
                     </div>
                   )}
                 </div>
 
-                <div>
-                  <Label>CAPTCHA: {captchaQuestion}</Label>
-                  <Input
-                    type="number"
-                    placeholder="Answer"
-                    value={userCaptchaInput}
-                    onChange={(e) => setUserCaptchaInput(e.target.value)}
-                    className="mt-1"
-                  />
+                <div className="bg-card/50 border border-warning/50 p-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                  <div className="flex-1">
+                    <Label className="text-xs font-bold uppercase tracking-widest text-warning mb-2 block">HUMAN_VERIFICATION_REQUIRED: {captchaQuestion}</Label>
+                    <Input
+                      type="number"
+                      placeholder="ENTER SUM"
+                      value={userCaptchaInput}
+                      onChange={(e) => setUserCaptchaInput(e.target.value)}
+                      className="h-12 bg-background border-warning text-foreground tracking-widest rounded-none focus-visible:border-warning font-black"
+                    />
+                  </div>
                 </div>
               </div>
             )}
 
-          </CardContent>
-
-          <CardFooter className="flex justify-between p-6 sm:p-8 border-t bg-gray-50/50 dark:bg-gray-900/50">
-            <Button
-              variant="ghost"
-              onClick={handleBack}
-              disabled={step === 1 || isSubmitting}
-              className={step === 1 ? "invisible" : ""}
-            >
-              <ChevronLeft className="mr-2 h-4 w-4" /> Back
-            </Button>
-
-            {step < totalSteps ? (
-              <Button onClick={handleNext}>
-                Next <ChevronRight className="ml-2 h-4 w-4" />
+            <div className="mt-8 flex justify-between pt-8 border-t border-border">
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={step === 1 || isSubmitting}
+                className={cn(
+                  "h-12 border-border text-muted-foreground hover:bg-card hover:text-foreground rounded-none tracking-widest uppercase font-bold",
+                  step === 1 ? "invisible" : ""
+                )}
+              >
+                <ChevronLeft className="mr-2 h-4 w-4" /> REVERT
               </Button>
-            ) : (
-              <Button onClick={handleSubmit} disabled={isSubmitting} className="bg-red-600 hover:bg-red-700 text-white">
-                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                Submit Report
-              </Button>
-            )}
-          </CardFooter>
-        </Card>
+
+              {step < totalSteps ? (
+                <Button 
+                  onClick={handleNext} 
+                  className="cyber-button h-12 px-8 rounded-none tracking-widest uppercase font-bold"
+                >
+                  NEXT_PHASE <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleSubmit} 
+                  disabled={isSubmitting} 
+                  className="h-12 px-8 rounded-none tracking-widest uppercase font-bold border-destructive bg-destructive/20 text-destructive hover:bg-destructive hover:text-black border shadow-[0_0_10px_hsla(var(--destructive),0.5)] transition-all flex items-center"
+                >
+                  {isSubmitting ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> COMPILING...</>
+                  ) : (
+                    <><Send className="mr-2 h-4 w-4" /> EXECUTE_COMMIT</>
+                  )}
+                </Button>
+              )}
+            </div>
+
+          </div>
+        </div>
       </div>
     </div>
   )

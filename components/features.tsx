@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Shield, Users, MapPin, Search, AlertTriangle, Eye, Star, Settings } from "lucide-react"
+import { Shield, Users, MapPin, Search, AlertTriangle, Eye, Star, Settings, Terminal } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
@@ -14,131 +14,139 @@ export function Features() {
 
   const features = [
     {
-      name: "Anonymous Reporting",
+      name: "GHOST_PROTOCOL",
       description:
-        "Submit scam reports without revealing your identity. Optional fields for location, industry, and company details.",
+        "SUBMIT THREAT INTELLIGENCE WITHOUT COMPROMISING YOUR IDENTITY. SECURE DATA SANITIZATION ACTIVE.",
       icon: Shield,
-      gradient: "from-red-500 to-pink-600",
-      glowColor: "group-hover:shadow-red-500/50",
+      color: "text-primary",
+      bgClass: "bg-primary/10",
+      borderClass: "border-primary/50 group-hover:border-primary",
+      shadowClass: "group-hover:shadow-[0_0_20px_hsla(var(--primary),0.3)]",
     },
     {
-      name: "Interactive Heatmap",
-      description: "Visualize scam hotspots on an interactive map with filters by city, company, or scam type.",
+      name: "RADAR_SWEEP",
+      description: "LIVE THREAT HEATMAPS WITH TARGETED GEO-FILTERS AND VECTOR CLASSIFICATION.",
       icon: MapPin,
-      gradient: "from-orange-500 to-yellow-600",
-      glowColor: "group-hover:shadow-orange-500/50",
+      color: "text-secondary",
+      bgClass: "bg-secondary/10",
+      borderClass: "border-secondary/50 group-hover:border-secondary",
+      shadowClass: "group-hover:shadow-[0_0_20px_hsla(var(--secondary),0.3)]",
     },
     {
-      name: "Community Ratings",
-      description: "Vote on report helpfulness and build trust scores. Community-driven verification system.",
+      name: "CONSENSUS_ENGINE",
+      description: "DECENTRALIZED WORKER VALIDATION. CROWD-SOURCED TRUST MATRICES FOR EACH LOGGED THREAT.",
       icon: Users,
-      gradient: "from-yellow-500 to-amber-600",
-      glowColor: "group-hover:shadow-yellow-500/50",
+      color: "text-warning",
+      bgClass: "bg-warning/10",
+      borderClass: "border-warning/50 group-hover:border-warning",
+      shadowClass: "group-hover:shadow-[0_0_20px_hsla(var(--warning),0.3)]",
     },
     {
-      name: "Advanced Search",
+      name: "DEEP_QUERY",
       description:
-        "Full-text search across company names, cities, and keywords. Sort by recency, trust score, or flags.",
+        "FULL-TEXT INDEXING ACROSS SCAM LEDGERS. SORT BY SECTOR, ACTIVE STATUS, AND DESTRUCTIVE POTENTIAL.",
       icon: Search,
-      gradient: "from-green-500 to-emerald-600",
-      glowColor: "group-hover:shadow-green-500/50",
+      color: "text-success",
+      bgClass: "bg-success/10",
+      borderClass: "border-success/50 group-hover:border-success",
+      shadowClass: "group-hover:shadow-[0_0_20px_hsla(var(--success),0.3)]",
     },
     {
-      name: "Scam Categories",
-      description: "Structured tagging system for fake job offers, ghost clients, unpaid work, and portfolio theft.",
+      name: "THREAT_VECTORS",
+      description: "STANDARDIZED CLASSIFYING OF FAKE CONTRACTS, MALICIOUS NODES, AND PHISHING OPERATIONS.",
       icon: AlertTriangle,
-      gradient: "from-blue-500 to-cyan-600",
-      glowColor: "group-hover:shadow-blue-500/50",
+      color: "text-destructive",
+      bgClass: "bg-destructive/10",
+      borderClass: "border-destructive/50 group-hover:border-destructive",
+      shadowClass: "group-hover:shadow-[0_0_20px_hsla(var(--destructive),0.3)]",
     },
     {
-      name: "Real-time Tracking",
+      name: "LINK_MONITOR",
       description:
-        "Track your report status from submission to publication. Get notified when your report is reviewed.",
+        "PING REAL-TIME UPDATES. TRACE YOUR FILED EXPLOITS THROUGH MODERATOR REVIEW PROTOCOLS.",
       icon: Eye,
-      gradient: "from-purple-500 to-indigo-600",
-      glowColor: "group-hover:shadow-purple-500/50",
+      color: "text-primary",
+      bgClass: "bg-primary/10",
+      borderClass: "border-primary/50 group-hover:border-primary",
+      shadowClass: "group-hover:shadow-[0_0_20px_hsla(var(--primary),0.3)]",
     },
     {
-      name: "Trust Scoring",
+      name: "TRUST_METRICS",
       description:
-        "Each report gets a community trust score based on votes and verification. Badges for high-quality reports.",
+        "ACCUMULATING HEURISTIC WEIGHT FOR VERIFIED IDENTITIES. FILTER OUT FALSE POSITIVES RAPIDLY.",
       icon: Star,
-      gradient: "from-pink-500 to-rose-600",
-      glowColor: "group-hover:shadow-pink-500/50",
+      color: "text-secondary",
+      bgClass: "bg-secondary/10",
+      borderClass: "border-secondary/50 group-hover:border-secondary",
+      shadowClass: "group-hover:shadow-[0_0_20px_hsla(var(--secondary),0.3)]",
     },
     {
-      name: "Moderation Tools",
-      description: "Admin dashboard for approving reports, detecting duplicates, and flagging high-risk posts.",
+      name: "ROOT_ACCESS",
+      description: "OVERWATCH CONSOLE FOR SYSTEM ADMINISTRATORS TO QUARANTINE SPAM AND PATCH VULNERABILITIES.",
       icon: Settings,
-      gradient: "from-indigo-500 to-purple-600",
-      glowColor: "group-hover:shadow-indigo-500/50",
+      color: "text-warning",
+      bgClass: "bg-warning/10",
+      borderClass: "border-warning/50 group-hover:border-warning",
+      shadowClass: "group-hover:shadow-[0_0_20px_hsla(var(--warning),0.3)]",
     },
   ]
 
   return (
-    <section className="relative py-24 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(99,102,241,0.1),transparent_50%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(139,92,246,0.1),transparent_50%)]" />
-
+    <section className="relative py-24 bg-background overflow-hidden">
+      {/* Background Cyber Grid */}
+      <div className="absolute inset-0 bg-grid-cyber opacity-[0.2]" />
+      
       <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           {/* Section Header */}
           <div className={cn(
             "text-center mb-16",
-            mounted ? "animate-slide-up" : "opacity-0"
+            mounted ? "animate-in fade-in slide-in-from-bottom-8 duration-500" : "opacity-0"
           )}>
-            <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                Comprehensive Protection
-              </span>
-              {" "}Features
+            <div className="inline-flex items-center gap-2 px-3 py-1 border border-primary/50 bg-primary/10 text-primary mb-6 shadow-[0_0_10px_hsla(var(--primary),0.3)]">
+              <Terminal className="h-4 w-4" />
+              <span className="text-xs font-bold uppercase tracking-widest font-mono">CORE_MODULES_ONLINE</span>
+            </div>
+            <h2 className="text-4xl font-extrabold tracking-widest uppercase text-foreground sm:text-5xl drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+              <span className="text-primary drop-shadow-[0_0_10px_hsla(var(--primary),0.5)]">DEFENSIVE</span>{" "}
+              UTILITIES
             </h2>
-            <p className="mt-4 text-xl text-gray-400">
-              Everything you need to stay safe in the freelancing world
+            <p className="mt-4 text-sm font-mono tracking-widest uppercase text-muted-foreground">
+              ALL ASSETS REQUIRED TO IDENTIFY AND NEUTRALIZE ROGUE ENTITIES.
             </p>
           </div>
 
           {/* Features Grid */}
-          <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((feature, index) => (
-              <Card
+              <div
                 key={feature.name}
                 className={cn(
-                  "group relative overflow-hidden bg-gray-800/50 border-gray-700/50 backdrop-blur-sm hover-lift transition-all duration-500",
-                  feature.glowColor,
-                  mounted ? `animate-slide-up stagger-${Math.min(index + 1, 6)}` : "opacity-0"
+                  "group relative overflow-hidden glass-card transition-all duration-300 border-t-2",
+                  feature.borderClass,
+                  feature.shadowClass,
+                  mounted ? `animate-in fade-in slide-in-from-bottom-12 duration-700 delay-${(index % 4) * 100}` : "opacity-0"
                 )}
               >
-                {/* Gradient Border Effect */}
-                <div className={cn(
-                  "absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br p-[1px]",
-                  feature.gradient
-                )}>
-                  <div className="h-full w-full rounded-lg bg-gray-800" />
-                </div>
-
-                <CardHeader className="relative pb-4">
-                  {/* Icon with Gradient Background */}
+                <div className="p-6">
+                  {/* Icon with Glowing Border */}
                   <div className={cn(
-                    "inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-6",
-                    feature.gradient
+                    "inline-flex h-12 w-12 items-center justify-center border transition-all duration-300 group-hover:scale-110",
+                    feature.bgClass,
+                    feature.borderClass
                   )}>
-                    <feature.icon className="h-7 w-7 text-white" />
+                    <feature.icon className={cn("h-6 w-6 drop-shadow-[0_0_8px_currentColor]", feature.color)} />
                   </div>
-                  <CardTitle className="text-lg text-white mt-4 group-hover:text-purple-300 transition-colors">
+                  
+                  <h3 className={cn("text-sm font-bold tracking-widest uppercase mt-6 mb-3 transition-colors drop-shadow-[0_0_5px_currentColor]", feature.color)}>
                     {feature.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="relative">
-                  <p className="text-sm text-gray-400 leading-relaxed">
+                  </h3>
+                  
+                  <p className="text-xs text-muted-foreground font-mono leading-relaxed tracking-wide border-l border-border pl-3">
                     {feature.description}
                   </p>
-                </CardContent>
-
-                {/* Shimmer Effect on Hover */}
-                <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-100 pointer-events-none" />
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         </div>

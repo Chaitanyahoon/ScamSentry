@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Inter } from "next/font/google"
+import { Inter, JetBrains_Mono } from "next/font/google"
 import "./globals.css"
 // Removed ThemeProvider import
 import { Header } from "@/components/header"
@@ -10,7 +10,8 @@ import { ReportsProvider } from "@/contexts/reports-context"
 
 import { AuthProvider } from "@/contexts/auth-context"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
+const jbMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" })
 
 export const metadata: Metadata = {
   title: "ScamSentry - Protecting Freelancers, One Report at a Time",
@@ -50,7 +51,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${inter.className} flex flex-col min-h-screen`} suppressHydrationWarning>
+      <body className={`${inter.variable} ${jbMono.variable} font-sans flex flex-col min-h-screen`} suppressHydrationWarning>
         {/* ThemeProvider removed */}
         <ReportsProvider>
           <AuthProvider>

@@ -2,9 +2,8 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Shield, Menu, Search, AlertTriangle, MapPin, Users, CheckCircle } from "lucide-react"
+import { Shield, Menu, Search, AlertTriangle, MapPin, Database, Terminal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
@@ -14,109 +13,103 @@ export function Header() {
   const pathname = usePathname()
 
   const navigation = [
-    { name: "Browse Reports", href: "/reports", icon: Search },
-    { name: "Scam Map", href: "/map", icon: MapPin },
-    { name: "Safe Companies", href: "/safe-companies", icon: CheckCircle },
-    { name: "Community", href: "/community", icon: Users },
+    { name: "Validator", href: "/validator", icon: Shield },
+    { name: "Threat DB", href: "/reports", icon: Database },
+    { name: "Global Map", href: "/map", icon: MapPin },
+    { name: "API Docs", href: "/api-docs", icon: Terminal },
   ]
 
   const isActive = (href: string) => pathname === href || pathname?.startsWith(href + "/")
 
   return (
-    <header className="sticky top-0 z-50 w-full glass border-b border-white/10 backdrop-blur-xl">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+      <div className="container flex h-16 items-center justify-between px-4 sm:px-8">
         {/* Logo */}
-        <Link href="/" className="group flex items-center space-x-3 transition-transform hover:scale-105">
-          <div className="relative h-10 w-10 overflow-hidden rounded-xl">
-            <Image
-              src="/logo.png"
-              alt="ScamSentry Logo"
-              fill
-              className="object-cover"
-            />
+        <Link href="/" className="group flex items-center space-x-3 transition-transform hover:-translate-y-0.5">
+          <div className="relative flex items-center justify-center text-primary group-hover:text-secondary transition-colors duration-300 drop-shadow-[0_0_8px_hsla(var(--primary),0.8)]">
+            <Terminal className="h-6 w-6" />
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            ScamSentry
+          <span className="text-xl font-bold text-foreground tracking-widest uppercase truncate">
+            Scam<span className="text-primary group-hover:text-secondary transition-colors">Sentry</span>
           </span>
         </Link>
 
-        <div className="flex items-center space-x-4">
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center space-x-2">
+          <nav className="flex items-center space-x-1 text-sm font-bold uppercase tracking-wider">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "group relative flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300",
+                  "group relative flex items-center space-x-2 px-4 py-2 transition-all duration-300 border-b-2",
                   isActive(item.href)
-                    ? "text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/30"
-                    : "text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:border-secondary hover:text-foreground"
                 )}
               >
-                <item.icon className={cn(
-                  "h-4 w-4 transition-transform group-hover:scale-110",
-                  isActive(item.href) && "text-purple-600 dark:text-purple-400"
-                )} />
+                <item.icon className={cn("h-4 w-4", isActive(item.href) ? "drop-shadow-[0_0_5px_hsla(var(--primary),0.8)]" : "")} />
                 <span>{item.name}</span>
-                {isActive(item.href) && (
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full" />
-                )}
               </Link>
             ))}
           </nav>
 
           {/* CTA Button */}
-          <Button
-            asChild
-            className="hidden md:inline-flex gradient-danger text-white hover:shadow-lg hover:shadow-red-500/50 transition-all duration-300 hover:scale-105"
-          >
-            <Link href="/report">
+          <Link href="/report" className="ml-6">
+            <div className="flex items-center px-5 py-2 border-2 border-destructive text-destructive font-bold uppercase tracking-widest hover:bg-destructive hover:text-white transition-all duration-300 shadow-[0_0_15px_hsla(var(--destructive),0.4)]">
               <AlertTriangle className="mr-2 h-4 w-4" />
-              Report Scam
-            </Link>
-          </Button>
+              Report
+            </div>
+          </Link>
+        </div>
 
-          {/* Mobile Navigation */}
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="hover:bg-gray-100 dark:hover:bg-gray-800">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px] glass border-l border-white/10">
-              <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
-              <div className="flex flex-col space-y-4 mt-8">
+        {/* Mobile Navigation */}
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger asChild className="md:hidden">
+            <Button variant="outline" size="icon" className="border-border text-foreground bg-transparent hover:text-primary hover:border-primary rounded-none">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-background border-l border-primary p-0">
+            <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
+            <div className="flex flex-col h-full p-6 text-foreground font-mono">
+              <div className="flex items-center space-x-3 mb-8 border-b border-border pb-6">
+                <Terminal className="h-6 w-6 text-primary drop-shadow-[0_0_8px_hsla(var(--primary),1)]" />
+                <span className="text-xl font-bold tracking-widest uppercase">
+                  Sys Menu
+                </span>
+              </div>
+              <div className="flex flex-col space-y-4 font-bold uppercase tracking-wider">
                 {navigation.map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      "group flex items-center space-x-3 text-lg font-medium p-3 rounded-lg transition-all duration-300",
+                      "flex items-center space-x-3 p-3 border-l-2 transition-all duration-300",
                       isActive(item.href)
-                        ? "text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/30"
-                        : "text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                        ? "border-primary text-primary bg-primary/10"
+                        : "border-transparent text-muted-foreground hover:border-secondary hover:text-foreground hover:bg-secondary/5"
                     )}
                     onClick={() => setIsOpen(false)}
                   >
-                    <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                    <item.icon className="h-5 w-5" />
                     <span>{item.name}</span>
                   </Link>
                 ))}
-                <Button
-                  asChild
-                  className="mt-4 gradient-danger text-white hover:shadow-lg hover:shadow-red-500/50 transition-all"
+                
+                <Link 
+                  href="/report" 
+                  onClick={() => setIsOpen(false)}
+                  className="mt-8 flex items-center justify-center p-4 border-2 border-destructive bg-transparent text-destructive hover:bg-destructive hover:text-white transition-all duration-300 tracking-widest font-bold shadow-[0_0_15px_hsla(var(--destructive),0.4)]"
                 >
-                  <Link href="/report" onClick={() => setIsOpen(false)}>
-                    <AlertTriangle className="mr-2 h-4 w-4" />
-                    Report Scam
-                  </Link>
-                </Button>
+                  <AlertTriangle className="mr-2 h-5 w-5" />
+                  INIT_REPORT
+                </Link>
               </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </header>
   )
