@@ -21,6 +21,15 @@ export async function GET(req: Request) {
     });
 
     if (!response.ok) {
+      // If external OSINT provider is blocked / unavailable, skip this run.
+      if (response.status === 401 || response.status === 403) {
+        return NextResponse.json({
+          success: true,
+          processed: 0,
+          inserted: 0,
+          message: `OSINT feed auth returned ${response.status}, skip run`
+        });
+      }
       throw new Error(`OSINT feed returned status: ${response.status}`);
     }
 
