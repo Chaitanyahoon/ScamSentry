@@ -28,8 +28,7 @@ export const InteractiveMap = memo(function InteractiveMap({
     if (map.current || !mapContainer.current) return
 
     try {
-      // For a "Cyber Dark" aesthetic, we could use a darker map style if available,
-      // but 'demotiles' is standard. We will heavily style the popups/markers.
+      // Standard dark mode tiles, with Forensic Amber styling for markers
       map.current = new maplibregl.Map({
         container: mapContainer.current,
         style: "https://demotiles.maplibre.org/style.json",
@@ -70,13 +69,13 @@ export const InteractiveMap = memo(function InteractiveMap({
     document.querySelectorAll(".maplibregl-marker").forEach((m) => m.remove())
 
     if (currentLocation) {
-      new maplibregl.Marker({ color: "#00FFFF" }) // Cyan primary
+      new maplibregl.Marker({ color: "#F59E0B" }) // Amber primary
         .setLngLat([currentLocation.lng, currentLocation.lat])
         .setPopup(
           new maplibregl.Popup({ offset: 25, className: "custom-popup" }).setHTML(`
-            <div class="bg-[#050510] border border-[#00FFFF]/50 p-4 shadow-[0_0_15px_rgba(0,255,255,0.2)] font-mono uppercase tracking-widest">
-              <h3 class="font-bold text-[#00FFFF] mb-1 text-xs">SYS: CURRENT_LOCATION</h3>
-              <p class="text-[10px] text-gray-500">RADAR ORG_POINT</p>
+            <div class="bg-[#0C0A07] border border-[#F59E0B]/50 p-4 shadow-sm font-sans tracking-tight">
+              <h3 class="font-semibold text-[#F59E0B] mb-1 text-sm">Target Location</h3>
+              <p class="text-xs text-gray-400">Search Center</p>
             </div>
           `),
         )
@@ -87,9 +86,9 @@ export const InteractiveMap = memo(function InteractiveMap({
       if (r.lat == null || r.lng == null) return
 
       const riskColor =
-        r.riskLevel === "high" ? "#EF4444" : // Destructive
-          r.riskLevel === "medium" ? "#F5CE0B" : // Warning 
-            "#00FFFF" // Primary
+        r.riskLevel === "high" ? "#C0292A" : // Crimson
+          r.riskLevel === "medium" ? "#F5CE0B" : // Yellow-ish Warning 
+            "#737373" // Neutral gray for low
 
       const el = document.createElement("div")
       el.className = "custom-marker"
@@ -97,27 +96,27 @@ export const InteractiveMap = memo(function InteractiveMap({
         width: 16px;
         height: 16px;
         border: 2px solid ${riskColor};
-        background: rgba(0,0,0,0.8);
+        background: rgba(12, 10, 7, 0.9);
         cursor: pointer;
-        box-shadow: 0 0 10px ${riskColor};
-        transition: all 0.3s ease;
-        animation: ${r.riskLevel === "high" ? "pulse-marker 2s infinite" : "none"};
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        transition: all 0.2s ease;
+        border-radius: 50%;
       `
 
       el.addEventListener("mouseenter", () => {
-        el.style.transform = "scale(1.5)"
+        el.style.transform = "scale(1.2)"
         el.style.background = riskColor
       })
 
       el.addEventListener("mouseleave", () => {
         el.style.transform = "scale(1)"
-        el.style.background = "rgba(0,0,0,0.8)"
+        el.style.background = "rgba(12, 10, 7, 0.9)"
       })
 
       const riskBadgeColor =
-        r.riskLevel === "high" ? "text-[#EF4444] border-[#EF4444]" :
-          r.riskLevel === "medium" ? "text-[#F5CE0B] border-[#F5CE0B]" :
-            "text-[#00FFFF] border-[#00FFFF]"
+        r.riskLevel === "high" ? "text-[#C0292A] bg-[#C0292A]/10 border-[#C0292A]/20" :
+          r.riskLevel === "medium" ? "text-[#F5CE0B] bg-[#F5CE0B]/10 border-[#F5CE0B]/20" :
+            "text-[#737373] bg-[#737373]/10 border-[#737373]/20"
 
       new maplibregl.Marker(el)
         .setLngLat([r.lng, r.lat])
@@ -127,16 +126,16 @@ export const InteractiveMap = memo(function InteractiveMap({
             closeButton: false,
             className: "custom-popup"
           }).setHTML(`
-            <div class="bg-[#050510]/95 backdrop-blur-md border border-gray-800 p-5 shadow-[0_0_20px_rgba(0,0,0,0.8)] min-w-[280px] max-w-[320px] font-mono uppercase">
-              <div class="flex items-start justify-between mb-4 border-b border-gray-800 pb-3">
-                <h3 class="text-xs font-bold text-white flex-1 pr-2 tracking-widest line-clamp-1">${r.title}</h3>
-                <span class="px-2 py-0.5 border text-[10px] font-bold ${riskBadgeColor} bg-black shrink-0 tracking-widest">
-                  ${r.riskLevel}_RISK
+            <div class="bg-[#0C0A07]/95 backdrop-blur-sm border border-gray-800 p-5 shadow-xl min-w-[280px] max-w-[320px] font-sans">
+              <div class="flex items-start justify-between mb-4 pb-3 border-b border-gray-800/50">
+                <h3 class="text-sm font-semibold text-white flex-1 pr-2 tracking-tight line-clamp-1">${r.title}</h3>
+                <span class="px-2 py-0.5 border text-xs font-medium rounded-sm ${riskBadgeColor} shrink-0 capitalize">
+                  ${r.riskLevel} Risk
                 </span>
               </div>
               
-              <div class="flex items-center gap-2 text-[10px] text-gray-500 tracking-widest font-bold mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00FFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <div class="flex items-center gap-2 text-xs text-gray-400 font-medium mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
                   <circle cx="12" cy="10" r="3"/>
                 </svg>
@@ -144,23 +143,23 @@ export const InteractiveMap = memo(function InteractiveMap({
               </div>
 
               <div class="space-y-2 mb-4">
-                <div class="flex items-center justify-between text-[10px] tracking-widest">
-                  <span class="text-gray-600">NODE_ID:</span>
-                  <span class="font-bold text-gray-300 truncate max-w-[150px]">${r.company}</span>
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-gray-500">Company:</span>
+                  <span class="font-medium text-gray-200 truncate max-w-[150px]">${r.company}</span>
                 </div>
-                <div class="flex items-center justify-between text-[10px] tracking-widest">
-                  <span class="text-gray-600">TRUST_SCORE:</span>
-                  <span class="font-bold text-[#22c55e]">${r.trustScore}%</span>
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-gray-500">Trust Score:</span>
+                  <span class="font-semibold text-green-500">${r.trustScore}%</span>
                 </div>
               </div>
 
-              <p class="text-[10px] text-gray-400 mb-5 line-clamp-2 tracking-wide border-l border-gray-700 pl-2">${r.description}</p>
+              <p class="text-xs text-gray-400 mb-5 line-clamp-2 leading-relaxed border-l-2 border-gray-800 pl-3">${r.description}</p>
               
               <a 
                 href="/reports/${r.id}" 
-                class="block w-full text-center px-4 py-2 border border-[#00FFFF]/50 text-[#00FFFF] hover:bg-[#00FFFF] hover:text-black transition-all text-xs font-bold tracking-widest"
+                class="block w-full text-center px-4 py-2 bg-transparent border border-gray-700 hover:border-[#F59E0B] hover:text-[#F59E0B] text-gray-300 transition-colors text-sm font-medium rounded-sm"
               >
-                DUMP_LOGS ->
+                View Full Details →
               </a>
             </div>
           `),
@@ -173,18 +172,6 @@ export const InteractiveMap = memo(function InteractiveMap({
   return (
     <>
       <style jsx global>{`
-        @keyframes pulse-marker {
-          0% {
-            box-shadow: 0 0 5px rgba(239, 68, 68, 0.8), 0 0 0 0 rgba(239, 68, 68, 0.4);
-          }
-          70% {
-            box-shadow: 0 0 5px rgba(239, 68, 68, 0.8), 0 0 0 10px rgba(239, 68, 68, 0);
-          }
-          100% {
-            box-shadow: 0 0 5px rgba(239, 68, 68, 0.8), 0 0 0 0 rgba(239, 68, 68, 0);
-          }
-        }
-
         .maplibregl-popup-content {
           padding: 0 !important;
           background: transparent !important;
@@ -203,13 +190,12 @@ export const InteractiveMap = memo(function InteractiveMap({
 
       <div
         ref={mapContainer}
-        className="relative border-2 border-border/50 bg-[#050510] shadow-[0_0_30px_rgba(0,255,255,0.05)]"
-        style={{ width: "100%", height: 600 }}
+        className="relative bg-[#0C0A07] shadow-sm h-full w-full"
       >
         {!mapLoaded && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#050510] z-10 border border-[#00FFFF]/20">
-            <Loader2 className="h-10 w-10 animate-spin text-[#00FFFF] mb-4 drop-shadow-[0_0_10px_currentColor]" />
-            <p class="text-[#00FFFF] font-mono uppercase tracking-widest text-xs animate-pulse">ESTABLISHING_RADAR_LINK...</p>
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0C0A07] z-10 border border-gray-800/50">
+            <Loader2 className="h-8 w-8 animate-spin text-[#F59E0B] mb-4" />
+            <p className="text-gray-400 font-medium text-sm">Loading Map Data...</p>
           </div>
         )}
       </div>

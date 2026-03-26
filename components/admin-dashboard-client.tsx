@@ -2,9 +2,10 @@
 
 import { useEffect } from "react"
 import { useState } from "react"
-import { Shield, Eye, Check, X, Flag, TrendingUp, AlertTriangle, Trash2, Building, Loader2, Terminal } from "lucide-react"
+import { Shield, Eye, Check, X, Flag, TrendingUp, AlertTriangle, Trash2, Building, Loader2, Terminal, CheckSquare2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useToast } from "@/hooks/use-toast"
@@ -32,6 +33,8 @@ export default function AdminDashboardClient() {
 
   const [safeCompanies, setSafeCompanies] = useState<SafeCompany[]>([])
   const [isLoadingSafeCompanies, setIsLoadingSafeCompanies] = useState(true)
+  const [selectedReports, setSelectedReports] = useState<string[]>([])
+  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([])
 
   useEffect(() => {
     const fetchSafeCompanies = async () => {
@@ -108,39 +111,100 @@ export default function AdminDashboardClient() {
     })
   }
 
-  const handleApproveSafeCompany = async (id: string) => {
+  const handleApproveSafeCompany = async (id: string, suppressToast = false) => {
     try {
       const companyRef = doc(db, "safe_companies", id)
       await updateDoc(companyRef, { status: "approved" })
       setSafeCompanies((prev) => prev.map((c) => (c.id === id ? { ...c, status: "approved" } : c)))
-      toast({ title: "WHITELIST_UPDATED", description: "NODE ADDED TO VERIFIED DB." })
+      if (!suppressToast) {
+        toast({ title: "WHITELIST_UPDATED", description: "NODE ADDED TO VERIFIED DB." })
+      }
     } catch (error) {
-      toast({ title: "SYS_ERR", description: "FAILED TO COMMIT OVERRIDE.", variant: "destructive" })
+      if (!suppressToast) {
+        toast({ title: "SYS_ERR", description: "FAILED TO COMMIT OVERRIDE.", variant: "destructive" })
+      }
+      throw error
     }
   }
 
-  const handleRejectSafeCompany = async (id: string) => {
+  const handleRejectSafeCompany = async (id: string, suppressToast = false) => {
     try {
       const companyRef = doc(db, "safe_companies", id)
       await updateDoc(companyRef, { status: "rejected" })
       setSafeCompanies((prev) => prev.map((c) => (c.id === id ? { ...c, status: "rejected" } : c)))
-      toast({ title: "WHITELIST_DENIED", description: "NODE REJECTED FROM SYSTEM." })
+      if (!suppressToast) {
+        toast({ title: "WHITELIST_DENIED", description: "NODE REJECTED FROM SYSTEM." })
+      }
     } catch (error) {
-      toast({ title: "SYS_ERR", description: "FAILED TO REJECT.", variant: "destructive" })
+      if (!suppressToast) {
+        toast({ title: "SYS_ERR", description: "FAILED TO REJECT.", variant: "destructive" })
+      }
+      throw error
     }
   }
 
-  const handleDeleteSafeCompany = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, "safe_companies", id))
-      setSafeCompanies((prev) => prev.filter((c) => c.id !== id))
-      toast({ title: "DATA_WIPED", description: "NODE DELETED FROM ALL DATABASES." })
-    } catch (error) {
-      toast({ title: "SYS_ERR", description: "DELETE OPERATION FAILED.", variant: "destructive" })
-    }
-  }
+   const handleDeleteSafeCompany = async (id: string) => {
+     try {
+       await deleteDoc(doc(db, "safe_companies", id))
+       setSafeCompanies((prev) => prev.filter((c) => c.id !== id))
+       toast({ title: "DATA_WIPED", description: "NODE DELETED FROM ALL DATABASES." })
+     } catch (error) {
+       toast({ title: "SYS_ERR", description: "DELETE OPERATION FAILED.", variant: "destructive" })
+     }
+   }
 
-  const stats = [
+   // Bulk action functions for reports
+   const handleBulkApproveReports = async () => {
+     try {
+       await Promise.all(selectedReports.map(id => approveReport(id)))
+       setSelectedReports([])
+       toast({
+         title: "BULK_APPROVED",
+         description: `${selectedReports.length} LOGS HAVE BEEN COMMITTED TO MAIN LEDGER.`,
+       })
+     } catch (error) {
+       toast({ title: "SYS_ERR", description: "BULK APPROVE FAILED.", variant: "destructive" })
+     }
+   }
+
+   const handleBulkRejectReports = async () => {
+     try {
+       await Promise.all(selectedReports.map(id => rejectReport(id)))
+       setSelectedReports([])
+       toast({
+         title: "BULK_REJECTED",
+         description: `${selectedReports.length} LOGS HAVE BEEN PURGED. NOT PUBLISHED.`,
+         variant: "destructive",
+       })
+     } catch (error) {
+       toast({ title: "SYS_ERR", description: "BULK REJECT FAILED.", variant: "destructive" })
+     }
+   }
+
+   // Bulk action functions for companies
+   const handleBulkApproveCompanies = async () => {
+     try {
+       const count = selectedCompanies.length
+       await Promise.all(selectedCompanies.map(id => handleApproveSafeCompany(id, true)))
+       setSelectedCompanies([])
+       toast({ title: "BULK_WHITELISTED", description: `${count} NODES ADDED TO VERIFIED DB.` })
+     } catch (error) {
+       toast({ title: "SYS_ERR", description: "BULK APPROVE FAILED.", variant: "destructive" })
+     }
+   }
+
+   const handleBulkRejectCompanies = async () => {
+     try {
+       const count = selectedCompanies.length
+       await Promise.all(selectedCompanies.map(id => handleRejectSafeCompany(id, true)))
+       setSelectedCompanies([])
+       toast({ title: "BULK_REJECTED", description: `${count} NODES REJECTED FROM SYSTEM.`, variant: "destructive" })
+     } catch (error) {
+       toast({ title: "SYS_ERR", description: "BULK REJECT FAILED.", variant: "destructive" })
+     }
+   }
+
+   const stats = [
     {
       name: "QUARANTINED_LOGS",
       value: pendingReports.length,
@@ -249,9 +313,29 @@ export default function AdminDashboardClient() {
                     <Terminal className="h-4 w-4" /> THREAT_LOGS_AWAITING_REVIEW
                   </h3>
                 </div>
-                <div className="p-0">
-                  {pendingReports.length > 0 ? (
-                    <div className="overflow-x-auto">
+                 <div className="p-4">
+                   {selectedReports.length > 0 ? (
+                     <div className="flex justify-end space-x-3 mb-4">
+                       <Button 
+                         variant="outline" 
+                         onClick={handleBulkApproveReports}
+                         className="h-9 px-4 border-success/50 text-success hover:bg-success hover:text-black"
+                       >
+                         APPROVE SELECTED ({selectedReports.length})
+                       </Button>
+                       <Button 
+                         variant="destructive" 
+                         onClick={handleBulkRejectReports}
+                         className="h-9 px-4 border-destructive/50 text-destructive hover:bg-destructive hover:text-white"
+                       >
+                         REJECT SELECTED ({selectedReports.length})
+                       </Button>
+                     </div>
+                   ) : null}
+                 </div>
+                 <div className="p-0">
+                   {pendingReports.length > 0 ? (
+                     <div className="overflow-x-auto">
                       <Table className="font-mono text-xs">
                         <TableHeader className="bg-background/80 hover:bg-background/80">
                           <TableRow className="border-border">
@@ -262,35 +346,48 @@ export default function AdminDashboardClient() {
                             <TableHead className="uppercase tracking-widest text-muted-foreground text-right">ADMIN_AUTH</TableHead>
                           </TableRow>
                         </TableHeader>
-                        <TableBody>
-                          {pendingReports.map((report) => (
-                            <TableRow key={report.id} className="border-border/50 hover:bg-card/50">
-                              <TableCell className="font-bold text-foreground max-w-[200px] truncate">{report.title}</TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className="rounded-none border-border bg-background text-[10px] tracking-widest">{report.scamType}</Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge className={cn("rounded-none border text-[10px] tracking-widest px-2 py-0", getRiskColor(report.riskLevel))}>{report.riskLevel}</Badge>
-                              </TableCell>
-                              <TableCell className="text-muted-foreground">
-                                {new Date(report.createdAt).toLocaleString()}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex justify-end space-x-2">
-                                  <Button size="icon" variant="outline" onClick={() => handleApprove(report.id)} className="h-8 w-8 rounded-none border-success/50 text-success hover:bg-success hover:text-black">
-                                    <Check className="h-4 w-4" />
-                                  </Button>
-                                  <Button size="icon" variant="outline" onClick={() => handleReject(report.id)} className="h-8 w-8 rounded-none border-warning/50 text-warning hover:bg-warning hover:text-black">
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                  <Button size="icon" variant="destructive" onClick={() => handleDelete(report.id)} className="h-8 w-8 rounded-none bg-destructive/10 text-destructive border border-destructive/50 hover:bg-destructive hover:text-white">
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
+                         <TableBody>
+                           {pendingReports.map((report) => (
+                             <TableRow key={report.id} className="border-border/50 hover:bg-card/50">
+                               <TableCell className="flex items-center">
+                                 <Checkbox
+                                   checked={selectedReports.includes(report.id)}
+                                   onCheckedChange={(checked) => {
+                                     if (checked) {
+                                       setSelectedReports(prev => [...prev, report.id]);
+                                     } else {
+                                       setSelectedReports(prev => prev.filter(id => id !== report.id));
+                                     }
+                                   }}
+                                   className="h-4 w-4"
+                                 />
+                               </TableCell>
+                               <TableCell className="font-bold text-foreground max-w-[200px] truncate">{report.title}</TableCell>
+                               <TableCell>
+                                 <Badge variant="outline" className="rounded-none border-border bg-background text-[10px] tracking-widest">{report.scamType}</Badge>
+                               </TableCell>
+                               <TableCell>
+                                 <Badge className={cn("rounded-none border text-[10px] tracking-widest px-2 py-0", getRiskColor(report.riskLevel))}>{report.riskLevel}</Badge>
+                               </TableCell>
+                               <TableCell className="text-muted-foreground">
+                                 {new Date(report.createdAt).toLocaleString()}
+                               </TableCell>
+                               <TableCell className="text-right">
+                                 <div className="flex justify-end space-x-2">
+                                   <Button size="icon" variant="outline" onClick={() => handleApprove(report.id)} className="h-8 w-8 rounded-none border-success/50 text-success hover:bg-success hover:text-black">
+                                     <Check className="h-4 w-4" />
+                                   </Button>
+                                   <Button size="icon" variant="outline" onClick={() => handleReject(report.id)} className="h-8 w-8 rounded-none border-warning/50 text-warning hover:bg-warning hover:text-black">
+                                     <X className="h-4 w-4" />
+                                   </Button>
+                                   <Button size="icon" variant="destructive" onClick={() => handleDelete(report.id)} className="h-8 w-8 rounded-none bg-destructive/10 text-destructive border border-destructive/50 hover:bg-destructive hover:text-white">
+                                     <Trash2 className="h-4 w-4" />
+                                   </Button>
+                                 </div>
+                               </TableCell>
+                             </TableRow>
+                           ))}
+                         </TableBody>
                       </Table>
                     </div>
                   ) : (
@@ -422,18 +519,40 @@ export default function AdminDashboardClient() {
                     <Building className="h-4 w-4" /> WHITELIST_CANDIDATES
                   </h3>
                 </div>
+                <div className="p-4">
+                  {selectedCompanies.length > 0 ? (
+                    <div className="flex justify-end space-x-3 mb-4">
+                      <Button 
+                        variant="outline" 
+                        onClick={handleBulkApproveCompanies}
+                        className="h-9 px-4 border-success/50 text-success hover:bg-success hover:text-black"
+                      >
+                        APPROVE SELECTED ({selectedCompanies.length})
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        onClick={handleBulkRejectCompanies}
+                        className="h-9 px-4 border-destructive/50 text-destructive hover:bg-destructive hover:text-white"
+                      >
+                        REJECT SELECTED ({selectedCompanies.length})
+                      </Button>
+                    </div>
+                  ) : null}
+                </div>
                 <div className="p-0">
                   {isLoadingSafeCompanies ? (
                     <div className="flex items-center justify-center py-16 bg-card/30">
                       <Loader2 className="h-8 w-8 animate-spin text-secondary drop-shadow-[0_0_8px_currentColor]" />
                     </div>
                   ) : pendingSafeCompanies.length > 0 ? (
-                     <div className="overflow-x-auto">
+                    <div className="overflow-x-auto">
                       <Table className="font-mono text-xs">
                         <TableHeader className="bg-background/80 hover:bg-background/80">
                           <TableRow className="border-border">
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">SELECT</TableHead>
                             <TableHead className="uppercase tracking-widest text-muted-foreground">NODE_ID</TableHead>
                             <TableHead className="uppercase tracking-widest text-muted-foreground">SECTOR</TableHead>
+                            <TableHead className="uppercase tracking-widest text-muted-foreground">VERIFY_SCORE</TableHead>
                             <TableHead className="uppercase tracking-widest text-muted-foreground">URL</TableHead>
                             <TableHead className="uppercase tracking-widest text-muted-foreground">TIMESTAMP</TableHead>
                             <TableHead className="uppercase tracking-widest text-muted-foreground text-right">ADMIN_AUTH</TableHead>
@@ -442,8 +561,24 @@ export default function AdminDashboardClient() {
                         <TableBody>
                           {pendingSafeCompanies.map((company) => (
                             <TableRow key={company.id} className="border-border/50 hover:bg-card/50">
+                              <TableCell className="flex items-center">
+                                <Checkbox
+                                  checked={selectedCompanies.includes(company.id)}
+                                  onCheckedChange={(checked) => {
+                                    if (checked) {
+                                      setSelectedCompanies(prev => [...prev, company.id]);
+                                    } else {
+                                      setSelectedCompanies(prev => prev.filter(id => id !== company.id));
+                                    }
+                                  }}
+                                  className="h-4 w-4"
+                                />
+                              </TableCell>
                               <TableCell className="font-bold text-foreground">{company.name}</TableCell>
                               <TableCell className="text-muted-foreground">{company.industry}</TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="rounded-none border-border bg-background text-[10px] tracking-widest">{company.verified_score}</Badge>
+                              </TableCell>
                               <TableCell>
                                 {company.website ? (
                                   <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-bold tracking-widest text-[10px]">
@@ -453,7 +588,7 @@ export default function AdminDashboardClient() {
                                   <span className="text-muted-foreground text-[10px]">NULL</span>
                                 )}
                               </TableCell>
-                              <TableCell className="text-muted-foreground text-[10px]">
+                              <TableCell className="text-muted-foreground">
                                 {new Date(company.created_at).toLocaleString()}
                               </TableCell>
                               <TableCell className="text-right">

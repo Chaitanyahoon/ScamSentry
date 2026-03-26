@@ -5,52 +5,52 @@ export function ForensicReport({ report, finalScore, riskLevel }: any) {
   const isSuspicious = finalScore > 20 && finalScore <= 60;
 
   return (
-    <div className="space-y-6 mt-8 animate-fade-in">
-      <div className={`glass-card overflow-hidden border-t-2 ${isHighRisk ? 'border-t-destructive' : isSuspicious ? 'border-t-warning' : 'border-t-success'}`}>
+    <div className="space-y-6 mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className={`bg-card border-t-4 ${isHighRisk ? 'border-t-destructive' : isSuspicious ? 'border-t-warning' : 'border-t-success'} border-l border-r border-b border-border shadow-sm`}>
         
         {/* Header Block */}
-        <div className="p-5 sm:p-6 border-b border-border/50 bg-card/40 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h2 className="text-xl font-bold uppercase text-foreground flex items-center gap-3 tracking-widest drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
-            <Fingerprint className={`h-6 w-6 ${isHighRisk ? 'text-destructive drop-shadow-[0_0_8px_hsla(var(--destructive),0.8)]' : isSuspicious ? 'text-warning drop-shadow-[0_0_8px_hsla(var(--warning),0.8)]' : 'text-primary drop-shadow-[0_0_8px_hsla(var(--primary),0.8)]'}`} />
-            DIAGNOSTIC_REPORT
+        <div className="p-5 sm:p-6 border-b border-border bg-card flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h2 className="text-xl font-bold text-foreground flex items-center gap-3">
+            <Fingerprint className={`h-6 w-6 ${isHighRisk ? 'text-destructive' : isSuspicious ? 'text-warning' : 'text-primary'}`} />
+            Diagnostic Report
           </h2>
-          <div className={`px-5 py-2 font-bold tracking-widest uppercase border bg-background/50 flex items-center gap-2 
-            ${isHighRisk ? 'text-destructive border-destructive/50 shadow-[0_0_15px_hsla(var(--destructive),0.2)]' : 
-              isSuspicious ? 'text-warning border-warning/50 shadow-[0_0_15px_hsla(var(--warning),0.2)]' : 
-              'text-primary border-primary/50 shadow-[0_0_15px_hsla(var(--primary),0.2)]'}`}>
+          <div className={`px-4 py-1.5 font-semibold text-sm border flex items-center gap-2 
+            ${isHighRisk ? 'text-destructive border-destructive/30 bg-destructive/10' : 
+              isSuspicious ? 'text-warning border-warning/30 bg-warning/10' : 
+              'text-primary border-primary/30 bg-primary/10'}`}>
             {isHighRisk ? <AlertTriangle className="h-4 w-4" /> : <ShieldCheck className="h-4 w-4" />}
-            TRUST_SCORE: {finalScore}/100 
-            <span className="ml-2 opacity-80 font-normal">[{riskLevel}]</span>
+            Trust Score: {finalScore}/100 
+            <span className="ml-2 opacity-80 font-normal capitalize">({riskLevel})</span>
           </div>
         </div>
         
-        <div className="p-5 sm:p-6 space-y-8">
+        <div className="p-5 sm:p-6 space-y-6 bg-background/30">
           <LayerSection 
-            title="L1 :: URL_HEURISTICS" 
+            title="URL Heuristics" 
             icon={<Cpu className="h-5 w-5" />}
             data={report.layer1_Heuristics} 
           />
           
           <LayerSection 
-            title="L2 :: DOMAIN_DNS_FORENSICS" 
+            title="Domain & DNS Records" 
             icon={<Globe className="h-5 w-5" />}
             data={report.layer2_Forensics} 
           />
 
           <LayerSection 
-            title="L3 :: GLOBAL_THREAT_INTEL" 
+            title="Global Threat Intel" 
             icon={<ShieldOff className="h-5 w-5" />}
             data={report.layer3_ThreatIntel} 
           />
 
           <LayerSection 
-            title="L4 :: INTERNAL_CROSSCHECK" 
+            title="Community Database" 
             icon={<Database className="h-5 w-5" />}
             data={report.layer4_InternalGraph} 
           />
 
           <LayerSection 
-            title="L5 :: AI_STRUCTURAL_SEMANTICS" 
+            title="Semantic AI Analysis" 
             icon={<Fingerprint className="h-5 w-5" />}
             data={report.layer5_AI_Semantics} 
             isAi
@@ -65,43 +65,42 @@ function LayerSection({ title, icon, data, isAi = false }: any) {
   const isSafe = data.score < 40;
   
   return (
-    <div className="space-y-4 border-l-2 border-border/50 pl-5 py-1">
-      <div className="flex items-center gap-4">
-        <div className={`p-2 border bg-card shadow-[0_0_10px_rgba(0,0,0,0.5)] 
-          ${isSafe ? 'text-primary border-primary/30' : 'text-destructive border-destructive/30 drop-shadow-[0_0_5px_hsla(var(--destructive),0.5)]'}`}>
+    <div className="space-y-3 pl-4 border-l-2 border-border py-1">
+      <div className="flex items-center gap-3">
+        <div className={`p-1.5 rounded-sm 
+          ${isSafe ? 'text-primary bg-primary/10' : 'text-destructive bg-destructive/10'}`}>
           {icon}
         </div>
-        <h3 className="text-base font-bold text-foreground tracking-widest uppercase flex-1">{title}</h3>
+        <h3 className="text-sm font-semibold text-foreground flex-1">{title}</h3>
         {isAi && !data.aiActive && (
-          <span className="text-xs bg-muted/50 text-muted-foreground px-2 py-1 font-bold border border-border uppercase tracking-widest">
-            OFFLINE_BYPASS
+          <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+            Offline
           </span>
         )}
       </div>
       
-      <div className="space-y-3 mt-2">
+      <div className="space-y-2 mt-2">
         {data.flags.length > 0 ? (
           data.flags.map((flag: string, i: number) => {
+             // Remove fake emoji indicators like ⚠️
+            const cleanFlag = flag.replace('⚠️ ', '').replace('CRITICAL: ', '')
             const isCritical = flag.includes('CRITICAL') || flag.includes('⚠️');
             return (
-              <div key={i} className={`flex gap-3 text-sm tracking-wide p-3 border bg-background/50 
-                ${isCritical ? 'border-destructive/30 text-destructive' : 'border-warning/30 text-warning'}`}>
+              <div key={i} className={`flex gap-3 text-sm p-3 border 
+                ${isCritical ? 'border-destructive/20 bg-destructive/5 text-destructive font-medium' : 'border-warning/20 bg-warning/5 text-muted-foreground'}`}>
                 <span className="mt-0.5 shrink-0">
-                  {isCritical ? 
-                    <AlertTriangle className="h-4 w-4 drop-shadow-[0_0_3px_currentColor]" /> :
-                    <AlertTriangle className="h-4 w-4 drop-shadow-[0_0_3px_currentColor]" />
-                  }
+                  <AlertTriangle className="h-4 w-4" />
                 </span>
                 <span className="leading-relaxed">
-                  {flag}
+                  {cleanFlag}
                 </span>
               </div>
             )
           })
         ) : (
-          <div className="flex gap-3 text-sm text-success bg-success/5 p-3 border border-success/20 font-medium tracking-wide">
-            <CheckSquare className="h-4 w-4 mt-0.5 shrink-0 drop-shadow-[0_0_3px_currentColor]" />
-            <span>&gt; SYNC_SUCCESS: ZERO_TRUST_MODULE_PASSED</span>
+          <div className="flex gap-3 text-sm text-muted-foreground p-3 border border-border bg-card">
+            <CheckSquare className="h-4 w-4 mt-0.5 shrink-0 text-success" />
+            <span>No anomalies detected.</span>
           </div>
         )}
       </div>

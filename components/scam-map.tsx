@@ -1,16 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { MapPin, Search, Loader2, Filter, Layers, TrendingUp, Terminal } from "lucide-react"
+import { MapPin, Search, Loader2, Filter, Layers, TrendingUp, TerminalSquare, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { useReports } from "@/contexts/reports-context"
 import { geocodeCity, type GeocodingResult } from "@/utils/geocoding"
 import { InteractiveMap } from "@/components/interactive-map"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 export function ScamMap() {
   const { toast } = useToast()
@@ -28,8 +28,35 @@ export function ScamMap() {
       setDisplayedReports(cityReports)
       setMapCenter({ lat: searchResults.lat, lng: searchResults.lng })
     } else {
-      setDisplayedReports(reports.filter((r) => r.status === "approved"))
-      setMapCenter({ lat: 39.8283, lng: -98.5795 })
+      const allApproved = reports.filter((r) => r.status === "approved")
+      setDisplayedReports(allApproved)
+      
+      // Calculate center based on the location with the most complaints
+      if (allApproved.length > 0) {
+        // Find most frequent location
+        const locationCounts = allApproved.reduce((acc: Record<string, {count: number, lat: number, lng: number}>, report) => {
+          if (report.lat && report.lng) {
+            const key = `${report.lat},${report.lng}`
+            if (!acc[key]) acc[key] = { count: 0, lat: report.lat, lng: report.lng }
+            acc[key].count++
+          }
+          return acc
+        }, {})
+        
+        let maxCount = 0
+        let bestCenter = { lat: 39.8283, lng: -98.5795 }
+        
+        Object.values(locationCounts).forEach(loc => {
+          if (loc.count > maxCount) {
+            maxCount = loc.count
+            bestCenter = { lat: loc.lat, lng: loc.lng }
+          }
+        })
+        
+        setMapCenter(bestCenter)
+      } else {
+        setMapCenter({ lat: 39.8283, lng: -98.5795 })
+      }
     }
   }, [searchResults, reports, searchReportsByCity])
 
@@ -42,20 +69,20 @@ export function ScamMap() {
       if (result) {
         setSearchResults(result)
         toast({
-          title: "LOCATION_FOUND",
-          description: `INITIATING PING SWEEP IN: ${result.displayName}`,
+          title: "Location Found",
+          description: `Focusing map on: ${result.displayName}`,
         })
       } else {
         toast({
-          title: "SYS_ERR: LOCATION_NULL",
-          description: "ATTEMPT FAILED. CHECK CO-ORDINATE SPELLING.",
+          title: "Location Not Found",
+          description: "Could not find coordinates for that location.",
           variant: "destructive",
         })
       }
     } catch (error) {
       toast({
-        title: "SYS_ERR: KERNEL_PANIC",
-        description: "GEO-API CONNECTION ABORTED.",
+        title: "Search Error",
+        description: "Failed to connect to geocoding service.",
         variant: "destructive",
       })
     } finally {
@@ -75,67 +102,65 @@ export function ScamMap() {
   })
 
   const riskLevels = [
-    { value: "high", label: "CRITICAL_THREATS", classes: "bg-destructive/20 text-destructive border border-destructive shadow-[0_0_5px_hsla(var(--destructive),0.5)]", count: displayedReports.filter(r => r.riskLevel === "high").length },
-    { value: "medium", label: "ELEVATED_RISK", classes: "bg-warning/20 text-warning border border-warning shadow-[0_0_5px_hsla(var(--warning),0.5)]", count: displayedReports.filter(r => r.riskLevel === "medium").length },
-    { value: "low", label: "ANOMALIES", classes: "bg-secondary/20 text-secondary border border-secondary shadow-[0_0_5px_hsla(var(--secondary),0.5)]", count: displayedReports.filter(r => r.riskLevel === "low").length },
+    { value: "high", label: "High Risk", classes: "bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20", count: displayedReports.filter(r => r.riskLevel === "high").length },
+    { value: "medium", label: "Medium Risk", classes: "bg-warning/10 text-warning border-warning/20 hover:bg-warning/20", count: displayedReports.filter(r => r.riskLevel === "medium").length },
+    { value: "low", label: "Low Risk", classes: "bg-secondary/10 text-secondary border-secondary/20 hover:bg-secondary/20", count: displayedReports.filter(r => r.riskLevel === "low").length },
   ]
 
   return (
-    <section className="relative min-h-screen bg-background py-16 overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.2]" />
+    <section className="relative min-h-screen bg-background py-16">
 
       <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           {/* Header */}
-          <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-8 duration-500">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/50 text-primary mb-6 shadow-[0_0_10px_hsla(var(--primary),0.2)]">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary mb-6 rounded-sm font-semibold text-sm">
               <Layers className="h-4 w-4" />
-              <span className="text-xs font-bold uppercase tracking-widest font-mono">GLOBAL_THREAT_VISUALIZATION</span>
+              <span>Global Threat Map</span>
             </div>
-            <h2 className="text-4xl font-extrabold tracking-widest uppercase sm:text-6xl text-foreground drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-              INTERACTIVE <span className="text-primary drop-shadow-[0_0_10px_hsla(var(--primary),0.5)]">HEATMAP</span>
+            <h2 className="text-3xl sm:text-5xl font-bold text-foreground mb-4">
+              Interactive Heatmap
             </h2>
-            <p className="mt-4 text-sm font-mono tracking-widest uppercase text-muted-foreground">
-              TRACK ACTIVE MALICIOUS NODES ACROSS GEOGRAPHIC COORDINATES IN REAL TIME.
+            <p className="text-base text-muted-foreground max-w-2xl mx-auto">
+              Track reported scams and malicious organizations across geographic regions in real-time.
             </p>
           </div>
 
           {/* Search & Filters */}
-          <div className="mb-10 space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100 font-mono">
+          <div className="mb-10 space-y-4">
             {/* Search Bar */}
-            <div className="glass-strong">
-              <div className="bg-card/80 border-b border-border p-4 flex gap-5">
-                <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground tracking-widest uppercase">
-                  <Terminal className="h-4 w-4 text-primary" /> RADAR_TARGETING_MODULE
+            <div className="bg-card border border-border shadow-sm">
+              <div className="bg-card border-b border-border p-4 sm:p-5 flex gap-5">
+                <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground tracking-wider uppercase">
+                  <TerminalSquare className="h-4 w-4 text-primary" /> Location Search
                 </div>
               </div>
-              <div className="p-6 bg-background/50">
+              <div className="p-5 sm:p-6 bg-background/50">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary drop-shadow-[0_0_5px_currentColor]" />
+                    <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                      placeholder="ENTER NODE CITY/REGION FOR SECTOR SCAN..."
+                      placeholder="Enter city or region name..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onKeyPress={(e) => e.key === "Enter" && handleCitySearch()}
-                      className="pl-12 h-14 bg-card/50 border-border text-foreground tracking-widest rounded-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary placeholder:text-muted-foreground/50 border-2 uppercase"
+                      className="pl-12 h-12 bg-card border-border text-foreground text-base"
                     />
                   </div>
                   <Button
                     onClick={handleCitySearch}
                     disabled={isSearching}
-                    className="h-14 px-10 cyber-button uppercase tracking-widest font-bold"
+                    className="h-12 px-8 font-semibold"
                   >
-                    {isSearching ? <><Loader2 className="h-5 w-5 animate-spin mr-2" /> SCANNING...</> : "INITIATE_SWEEP"}
+                    {isSearching ? <><Loader2 className="h-5 w-5 animate-spin mr-2" /> Searching...</> : "Search Location"}
                   </Button>
                 </div>
 
                 {searchResults && (
                   <div className="mt-4 flex items-center gap-3">
-                    <Badge className="bg-primary/20 hover:bg-primary/20 text-primary border border-primary px-3 py-1.5 rounded-none font-bold uppercase tracking-widest shadow-[0_0_5px_hsla(var(--primary),0.5)] flex items-center">
-                      <MapPin className="mr-2 h-4 w-4" />
-                      LOCKED: {searchResults.city}, {searchResults.state}
+                    <Badge className="bg-primary/10 text-primary border-primary/20 px-3 py-1 text-sm font-medium">
+                      <MapPin className="mr-2 h-3.5 w-3.5 inline-block" />
+                      Showing: {searchResults.city}, {searchResults.state}
                     </Badge>
                     <Button
                       variant="ghost"
@@ -144,9 +169,9 @@ export function ScamMap() {
                         setSearchResults(null)
                         setSearchTerm("")
                       }}
-                      className="h-8 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-none border border-transparent hover:border-destructive/30"
+                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8"
                     >
-                      ABORT_TARGET
+                      Clear Filter
                     </Button>
                   </div>
                 )}
@@ -154,30 +179,30 @@ export function ScamMap() {
             </div>
 
             {/* Risk Level Filters */}
-            <div className="flex flex-wrap gap-3 glass-card p-4">
+            <div className="flex flex-wrap gap-2 sm:gap-4 bg-card border border-border p-4">
               <Button
                 variant={selectedRiskFilter === null ? "default" : "outline"}
                 onClick={() => setSelectedRiskFilter(null)}
                 className={cn(
-                  "h-10 rounded-none border text-xs font-bold uppercase tracking-widest transition-all",
+                  "h-9 text-sm font-semibold transition-colors",
                   selectedRiskFilter === null 
-                    ? "border-primary bg-primary text-black drop-shadow-[0_0_5px_hsla(var(--primary),0.5)]" 
-                    : "border-border bg-card/50 text-muted-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
+                    ? "bg-foreground text-background" 
+                    : "bg-transparent text-muted-foreground border-border hover:bg-muted"
                 )}
               >
                 <Filter className="mr-2 h-4 w-4" />
-                SHOW_ALL_PINGS ({displayedReports.length})
+                All Reports ({displayedReports.length})
               </Button>
               {riskLevels.map((level) => (
                 <Button
                   key={level.value}
-                  variant={selectedRiskFilter === level.value ? "default" : "outline"}
+                  variant={selectedRiskFilter === level.value ? "secondary" : "outline"}
                   onClick={() => setSelectedRiskFilter(selectedRiskFilter === level.value ? null : level.value)}
                   className={cn(
-                    "h-10 rounded-none border text-xs font-bold uppercase tracking-widest transition-all",
+                    "h-9 text-sm font-semibold transition-colors border",
                     selectedRiskFilter === level.value 
                       ? level.classes 
-                      : "border-border bg-card/50 text-muted-foreground hover:border-border hover:bg-background"
+                      : "bg-transparent text-muted-foreground border-border hover:bg-muted"
                   )}
                 >
                   {level.label} ({level.count})
@@ -187,54 +212,48 @@ export function ScamMap() {
           </div>
 
           {/* Stats Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200">
-            <div className="glass-card p-6 border-t-2 border-t-primary/50">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest font-mono text-muted-foreground">TOTAL_THREATS_DETECTED</p>
-                  <p className="text-4xl font-extrabold text-foreground mt-2 drop-shadow-[0_0_5px_rgba(255,255,255,0.2)]">
-                    {filteredReports.length}
-                  </p>
-                </div>
-                <div className="h-12 w-12 border border-primary/50 bg-primary/10 flex items-center justify-center shadow-[0_0_10px_hsla(var(--primary),0.3)]">
-                  <MapPin className="h-6 w-6 text-primary" />
-                </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-10">
+            <div className="bg-card border border-border p-6 shadow-sm flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Total Threats</p>
+                <p className="text-3xl font-bold text-foreground">
+                  {filteredReports.length}
+                </p>
+              </div>
+              <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center">
+                <MapPin className="h-6 w-6 text-primary" />
               </div>
             </div>
 
-            <div className="glass-card p-6 border-t-2 border-t-destructive/50">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest font-mono text-muted-foreground">CRITICAL_LEVEL_PINGS</p>
-                  <p className="text-4xl font-extrabold text-destructive mt-2 drop-shadow-[0_0_8px_hsla(var(--destructive),0.5)]">
-                    {filteredReports.filter(r => r.riskLevel === "high").length}
-                  </p>
-                </div>
-                <div className="h-12 w-12 border border-destructive/50 bg-destructive/10 flex items-center justify-center shadow-[0_0_10px_hsla(var(--destructive),0.3)]">
-                  <TrendingUp className="h-6 w-6 text-destructive" />
-                </div>
+            <div className="bg-card border border-border p-6 shadow-sm flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">High Risk Entities</p>
+                <p className="text-3xl font-bold text-destructive">
+                  {filteredReports.filter(r => r.riskLevel === "high").length}
+                </p>
+              </div>
+              <div className="h-12 w-12 bg-destructive/10 rounded-full flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-destructive" />
               </div>
             </div>
 
-            <div className="glass-card p-6 border-t-2 border-t-success/50">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest font-mono text-muted-foreground">AVERAGE_VERIFICATION</p>
-                  <p className="text-4xl font-extrabold text-success mt-2 drop-shadow-[0_0_8px_hsla(var(--success),0.5)]">
-                    {filteredReports.length > 0
-                      ? Math.round(filteredReports.reduce((sum, r) => sum + r.trustScore, 0) / filteredReports.length)
-                      : 0}%
-                  </p>
-                </div>
-                <div className="h-12 w-12 border border-success/50 bg-success/10 flex items-center justify-center shadow-[0_0_10px_hsla(var(--success),0.3)]">
-                  <Terminal className="h-6 w-6 text-success" />
-                </div>
+            <div className="bg-card border border-border p-6 shadow-sm flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Avg Trust Score</p>
+                <p className="text-3xl font-bold text-success">
+                  {filteredReports.length > 0
+                    ? Math.round(filteredReports.reduce((sum, r) => sum + r.trustScore, 0) / filteredReports.length)
+                    : 0}%
+                </p>
+              </div>
+              <div className="h-12 w-12 bg-success/10 rounded-full flex items-center justify-center">
+                <TerminalSquare className="h-6 w-6 text-success" />
               </div>
             </div>
           </div>
 
           {/* Map */}
-          <div className="mb-10 animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
+          <div className="mb-10 bg-card border border-border shadow-sm overflow-hidden h-[500px] sm:h-[600px]">
             <InteractiveMap
               centerLat={mapCenter.lat}
               centerLng={mapCenter.lng}
@@ -245,57 +264,59 @@ export function ScamMap() {
 
           {/* Reports Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredReports.map((report, index) => (
+            {filteredReports.map((report) => (
               <div
                 key={report.id}
-                className={cn(
-                  "glass-card flex flex-col justify-between group overflow-hidden border-t-2 border-t-border hover:border-t-primary transition-all duration-300",
-                )}
+                className="bg-card flex flex-col justify-between border border-border shadow-sm hover:border-primary/50 transition-colors"
               >
-                <div className="p-6 border-b border-border/50 bg-card/40">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold uppercase tracking-widest text-foreground flex items-center gap-2 drop-shadow-[0_0_5px_rgba(255,255,255,0.1)]">
-                      <MapPin className="h-4 w-4 text-primary" />
-                      {report.city}, {report.state}
+                <div className="p-6 border-b border-border bg-card">
+                  <div className="flex items-start justify-between mb-4 gap-4">
+                    <h3 className="font-semibold text-foreground text-base clamp-1">
+                      {report.title}
                     </h3>
                     <Badge
                       className={cn(
-                        "rounded-none text-xs font-bold px-2 py-0 border",
-                        report.riskLevel === "high" && "bg-destructive/20 text-destructive border-destructive drop-shadow-[0_0_5px_hsla(var(--destructive),0.5)]",
-                        report.riskLevel === "medium" && "bg-warning/20 text-warning border-warning drop-shadow-[0_0_5px_hsla(var(--warning),0.5)]",
-                        report.riskLevel === "low" && "bg-secondary/20 text-secondary border-secondary drop-shadow-[0_0_5px_hsla(var(--secondary),0.5)]"
+                        "rounded-sm text-xs font-semibold shrink-0 cursor-default",
+                        report.riskLevel === "high" && "bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/10",
+                        report.riskLevel === "medium" && "bg-warning/10 text-warning border-warning/20 hover:bg-warning/10",
+                        report.riskLevel === "low" && "bg-secondary/10 text-secondary border-secondary/20 hover:bg-secondary/10"
                       )}
                     >
-                      {report.riskLevel}_RISK
+                      {report.riskLevel}
                     </Badge>
                   </div>
                   
-                  <div className="space-y-3 font-mono">
-                    <div className="flex items-center justify-between border-b border-border/50 pb-2">
-                      <span className="text-xs uppercase tracking-widest text-muted-foreground">NODE_ID:</span>
-                      <span className="text-xs font-bold truncate ml-2 text-foreground">{report.company}</span>
-                    </div>
-                    <div className="flex items-center justify-between border-b border-border/50 pb-2">
-                      <span className="text-xs uppercase tracking-widest text-muted-foreground">VECTOR:</span>
-                      <span className="text-xs font-bold uppercase tracking-widest text-secondary">{report.scamType}</span>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Company:</span>
+                      <span className="font-medium text-foreground truncate ml-4">{report.company}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs uppercase tracking-widest text-muted-foreground">TRUST_SCORE:</span>
-                      <span className="text-xs font-bold text-success">{report.trustScore}%</span>
+                      <span className="text-muted-foreground">Location:</span>
+                      <span className="font-medium text-foreground truncate ml-4 flex items-center">
+                         <MapPin className="h-3 w-3 mr-1" />
+                         {report.city}, {report.state}
+                      </span>
+                    </div>
+                     <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Method:</span>
+                      <span className="font-medium">{report.scamType}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-6 bg-background/50">
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-3 font-mono tracking-wide leading-relaxed border-l-2 border-border pl-3">
+                <div className="p-6 bg-background/50 flex flex-col flex-1">
+                  <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed mb-6 flex-1">
                     {report.description}
                   </p>
                   <Button
+                    asChild
                     variant="outline"
-                    size="sm"
-                    className="w-full mt-6 h-10 rounded-none bg-transparent border-primary/50 text-primary hover:bg-primary hover:text-black font-bold uppercase tracking-widest transition-all"
+                    className="w-full font-semibold"
                   >
-                    DUMP_FULL_LOGS →
+                    <Link href={`/reports/${report.id}`}>
+                      View Full Details <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
                   </Button>
                 </div>
               </div>
@@ -303,15 +324,15 @@ export function ScamMap() {
           </div>
 
           {filteredReports.length === 0 && (
-            <div className="border border-border p-16 text-center bg-card/50 glass-card">
-              <div className="inline-flex h-20 w-20 items-center justify-center border border-primary/50 bg-primary/10 mb-6 shadow-[0_0_15px_hsla(var(--primary),0.3)]">
-                <MapPin className="h-10 w-10 text-primary" />
+            <div className="border border-border p-12 text-center bg-card shadow-sm mt-8">
+              <div className="inline-flex h-16 w-16 items-center justify-center bg-muted rounded-full mb-6">
+                <MapPin className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="text-xl font-bold font-mono tracking-widest uppercase text-foreground mb-3">SECTOR_CLEAR</h3>
-              <p className="text-muted-foreground font-mono uppercase tracking-widest text-sm">
+              <h3 className="text-lg font-bold text-foreground mb-2">No Reports Found</h3>
+              <p className="text-muted-foreground text-sm max-w-md mx-auto">
                 {searchResults
-                  ? "NO MALICIOUS ACTIVITY DETECTED IN THIS GRID SECTOR."
-                  : "INITIALIZE PROTOCOL BY SEARCHING A GEOGRAPHIC TARGET."}
+                  ? `There are no active threat reports logged for ${searchResults.city}.`
+                  : "Search for a city or region to view active threat reports in that area."}
               </p>
             </div>
           )}

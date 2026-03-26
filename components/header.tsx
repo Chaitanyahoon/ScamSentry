@@ -3,110 +3,107 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Shield, Menu, Search, AlertTriangle, MapPin, Database, Terminal } from "lucide-react"
+import { Menu, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
+import { Logo } from "@/components/logo"
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
 
   const navigation = [
-    { name: "Validator", href: "/validator", icon: Shield },
-    { name: "Threat DB", href: "/reports", icon: Database },
-    { name: "Global Map", href: "/map", icon: MapPin },
-    { name: "API Docs", href: "/api-docs", icon: Terminal },
+    { name: "Scanner", href: "/validator" },
+    { name: "Reports", href: "/reports" },
+    { name: "Map", href: "/map" },
+    { name: "API", href: "/api-docs" },
   ]
 
   const isActive = (href: string) => pathname === href || pathname?.startsWith(href + "/")
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
-      <div className="container flex h-16 items-center justify-between px-4 sm:px-8">
+    <header className="sticky top-0 z-50 w-full bg-background/90 backdrop-blur-sm border-b border-border">
+      <div className="container flex h-14 items-center justify-between px-4 sm:px-6">
         {/* Logo */}
-        <Link href="/" className="group flex items-center space-x-3 transition-transform hover:-translate-y-0.5">
-          <div className="relative flex items-center justify-center text-primary group-hover:text-secondary transition-colors duration-300 drop-shadow-[0_0_8px_hsla(var(--primary),0.8)]">
-            <Terminal className="h-6 w-6" />
-          </div>
-          <span className="text-xl font-bold text-foreground tracking-widest uppercase truncate">
-            Scam<span className="text-primary group-hover:text-secondary transition-colors">Sentry</span>
+        <Link href="/" className="flex items-center gap-2.5">
+          <Logo className="h-6 w-6" />
+          <span className="text-sm font-bold text-foreground tracking-wide">
+            Scam<span className="text-primary">Sentry</span>
           </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-2">
-          <nav className="flex items-center space-x-1 text-sm font-bold uppercase tracking-wider">
+        <div className="hidden md:flex items-center gap-1">
+          <nav className="flex items-center gap-1 text-sm">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "group relative flex items-center space-x-2 px-4 py-2 transition-all duration-300 border-b-2",
+                  "px-3 py-1.5 transition-colors",
                   isActive(item.href)
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:border-secondary hover:text-foreground"
+                    ? "text-primary font-medium"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <item.icon className={cn("h-4 w-4", isActive(item.href) ? "drop-shadow-[0_0_5px_hsla(var(--primary),0.8)]" : "")} />
-                <span>{item.name}</span>
+                {item.name}
               </Link>
             ))}
           </nav>
 
-          {/* CTA Button */}
-          <Link href="/report" className="ml-6">
-            <div className="flex items-center px-5 py-2 border-2 border-destructive text-destructive font-bold uppercase tracking-widest hover:bg-destructive hover:text-white transition-all duration-300 shadow-[0_0_15px_hsla(var(--destructive),0.4)]">
-              <AlertTriangle className="mr-2 h-4 w-4" />
+          <div className="ml-4 h-4 w-px bg-border" />
+
+          <Link href="/report" className="ml-4">
+            <div className="flex items-center gap-2 px-4 py-1.5 text-xs font-semibold border border-destructive/50 text-destructive hover:bg-destructive/10 transition-colors">
+              <AlertTriangle className="h-3.5 w-3.5" />
               Report
             </div>
           </Link>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="outline" size="icon" className="border-border text-foreground bg-transparent hover:text-primary hover:border-primary rounded-none">
+            <Button variant="ghost" size="icon" className="text-foreground h-9 w-9">
               <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle menu</span>
+              <span className="sr-only">Menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-background border-l border-primary p-0">
-            <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
-            <div className="flex flex-col h-full p-6 text-foreground font-mono">
-              <div className="flex items-center space-x-3 mb-8 border-b border-border pb-6">
-                <Terminal className="h-6 w-6 text-primary drop-shadow-[0_0_8px_hsla(var(--primary),1)]" />
-                <span className="text-xl font-bold tracking-widest uppercase">
-                  Sys Menu
-                </span>
+          <SheetContent side="right" className="w-[280px] bg-background border-l border-border p-0">
+            <SheetTitle className="sr-only">Navigation</SheetTitle>
+            <div className="flex flex-col p-6">
+              <div className="flex items-center gap-2 mb-8 pb-4 border-b border-border">
+                <Logo className="h-5 w-5" />
+                <span className="text-sm font-bold">Scam<span className="text-primary">Sentry</span></span>
               </div>
-              <div className="flex flex-col space-y-4 font-bold uppercase tracking-wider">
+
+              <nav className="flex flex-col gap-1">
                 {navigation.map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      "flex items-center space-x-3 p-3 border-l-2 transition-all duration-300",
+                      "px-3 py-2.5 text-sm transition-colors",
                       isActive(item.href)
-                        ? "border-primary text-primary bg-primary/10"
-                        : "border-transparent text-muted-foreground hover:border-secondary hover:text-foreground hover:bg-secondary/5"
+                        ? "text-primary font-medium bg-primary/5"
+                        : "text-muted-foreground hover:text-foreground"
                     )}
                     onClick={() => setIsOpen(false)}
                   >
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.name}</span>
+                    {item.name}
                   </Link>
                 ))}
-                
-                <Link 
-                  href="/report" 
-                  onClick={() => setIsOpen(false)}
-                  className="mt-8 flex items-center justify-center p-4 border-2 border-destructive bg-transparent text-destructive hover:bg-destructive hover:text-white transition-all duration-300 tracking-widest font-bold shadow-[0_0_15px_hsla(var(--destructive),0.4)]"
-                >
-                  <AlertTriangle className="mr-2 h-5 w-5" />
-                  INIT_REPORT
-                </Link>
-              </div>
+              </nav>
+
+              <Link
+                href="/report"
+                onClick={() => setIsOpen(false)}
+                className="mt-6 flex items-center justify-center gap-2 py-3 text-sm font-semibold border border-destructive/50 text-destructive hover:bg-destructive/10 transition-colors"
+              >
+                <AlertTriangle className="h-4 w-4" />
+                Report a scam
+              </Link>
             </div>
           </SheetContent>
         </Sheet>
