@@ -8,7 +8,8 @@
   }
 
   body {
-    @apply bg-background text-foreground min-h-screen w-full font-mono selection:bg-primary/20 selection:text-primary;
+    @apply bg-background text-foreground min-h-screen w-full selection:bg-primary/20 selection:text-primary;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
   }
 
   *,
@@ -20,54 +21,64 @@
   }
 
   :root {
-    /* VIBRANT & BLOCK-BASED "DEEP CYBER" THEME */
-    --background: 240 53% 4%; /* #050510 */
-    --foreground: 240 100% 94%; /* #E0E0FF */
-    
-    --card: 240 53% 6%; /* Slightly lighter than background */
-    --card-foreground: 240 100% 94%;
-    
-    --popover: 240 53% 6%;
-    --popover-foreground: 240 100% 94%;
+    /* ── FORENSIC AMBER ─────────────────────────────────────
+       Inspired by real OSINT/threat-intel tooling (Maltego,
+       Shodan, old FBI workstation terminals). Warm blacks,
+       burnt-amber accents, deep-crimson for threat states.
+       ──────────────────────────────────────────────────── */
 
-    --primary: 180 100% 50%; /* Neon Cyan #00FFFF */
-    --primary-foreground: 240 53% 4%; /* Black/Deep Navy text on Cyan */
+    /* Backgrounds */
+    --background:      30 12%  5%;    /* #0C0A07 — warm near-black     */
+    --card:            30  8%  9%;    /* #171410 — dark charcoal-brown  */
+    --card-foreground: 40 60% 88%;
+    --popover:         30  8%  9%;
+    --popover-foreground: 40 60% 88%;
 
-    --secondary: 250 100% 69%; /* Vivid Purple #7B61FF */
-    --secondary-foreground: 240 100% 94%;
-    
-    --muted: 240 53% 10%;
-    --muted-foreground: 240 20% 70%;
-    
-    --accent: 300 100% 50%; /* Magenta CTA #FF00FF */
-    --accent-foreground: 240 100% 94%;
+    /* Text */
+    --foreground:         40 30% 88%;  /* #E8DBC8 — warm cream           */
+    --muted:              30  8% 13%;  /* slightly lifted surface        */
+    --muted-foreground:   35 15% 52%;  /* dim amber-grey for secondary   */
 
-    --destructive: 0 100% 60%; /* Bright Red */
-    --destructive-foreground: 240 100% 94%;
-    
-    --success: 150 100% 50%; /* Neon Green */
-    --success-foreground: 240 53% 4%;
-    
-    --warning: 45 100% 50%; /* Neon Yellow/Orange */
-    --warning-foreground: 240 53% 4%;
+    /* Primary — Burnt Amber */
+    --primary:            38 92% 50%;  /* #F59E0B — energetic, distinct  */
+    --primary-foreground: 30 12%  5%;  /* near-black text on amber       */
 
-    --border: 250 30% 20%; /* Deep Purple-ish Border */
-    --input: 250 30% 20%;
-    --ring: 180 100% 50%; /* Cyan Ring */
-    
-    /* Block-based styling implies sharp edges */
-    --radius: 0rem; 
+    /* Secondary — Aged Bronze */
+    --secondary:            32 70% 38%;  /* #8C5A1A                       */
+    --secondary-foreground: 40 60% 88%;
 
-    /* Custom Gradients/FX */
-    --primary-start: 180 100% 50%;
-    --primary-end: 250 100% 69%;
+    /* Accent — warm lifted surface */
+    --accent:            40 50% 20%;
+    --accent-foreground: 40 60% 92%;
+
+    /* Threat / Destructive — Deep Crimson */
+    --destructive:            0 72% 45%;  /* #C0292A — serious, not garish */
+    --destructive-foreground: 40 60% 92%;
+
+    /* Success — Muted Olive-green */
+    --success:            90 40% 38%;  /* #4D7A2A */
+    --success-foreground: 40 60% 92%;
+
+    /* Warning — Ochre */
+    --warning:            45 80% 48%;  /* #D4950A */
+    --warning-foreground: 30 12%  5%;
+
+    /* Borders & Inputs */
+    --border: 35 18% 18%;
+    --input:  35 18% 18%;
+    --ring:   38 92% 50%;
+
+    --radius: 0.125rem;
+
+    /* Gradient stops */
+    --primary-start: 38 92% 50%;
+    --primary-end:   32 70% 38%;
   }
 
-  /* Force dark mode behavior across the board */
   .dark {
-    --background: 240 53% 4%;
-    --foreground: 240 100% 94%;
-    --primary: 180 100% 50%;
+    --background: 30 12%  5%;
+    --foreground: 40 30% 88%;
+    --primary:    38 92% 50%;
   }
 }
 
@@ -77,113 +88,117 @@
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
-
   .line-clamp-3 {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
   }
 
-  /* Vibrant Cyber Cards */
+  /* ── Forensic Cards — solid, no blur/glass ───────────── */
   .glass-card {
-    background: linear-gradient(180deg, rgba(30, 30, 45, 0.4) 0%, rgba(15, 15, 25, 0.8) 100%);
-    backdrop-filter: blur(16px);
+    background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
   }
-  
   .glass-card:hover {
     border-color: hsla(var(--primary), 0.5);
-    box-shadow: 0 0 20px hsla(var(--primary), 0.15);
+    box-shadow: 0 4px 28px rgba(0, 0, 0, 0.5), 0 0 0 1px hsla(var(--primary), 0.15);
   }
 
   .glass-strong {
     background: hsl(var(--card));
-    border: 2px solid hsl(var(--border));
+    border: 1px solid hsl(var(--border));
     position: relative;
     overflow: hidden;
   }
-  
   .glass-strong::after {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, hsl(var(--primary)), transparent);
+    top: 0; left: 0; right: 0; height: 2px;
+    background: hsl(var(--primary));
+    opacity: 0.7;
   }
 
-  /* Gradient Text */
+  /* ── Gradient Text ───────────────────────────────────── */
   .gradient-text {
-    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--secondary)));
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(38, 70%, 68%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .animated-gradient {
-    background: linear-gradient(-45deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--accent)));
+    background: linear-gradient(-45deg,
+      hsl(var(--primary)),
+      hsl(var(--secondary)),
+      hsl(38, 70%, 68%),
+      hsl(var(--primary))
+    );
     background-size: 400% 400%;
-    animation: gradient-flow 15s ease infinite;
+    animation: gradient-flow 12s ease infinite;
   }
 
-  /* Block UI Elements */
+  /* ── Forensic Button ─────────────────────────────────── */
   .cyber-button {
     position: relative;
     background: transparent;
-    border: 2px solid hsl(var(--primary));
+    border: 1px solid hsl(var(--primary));
     color: hsl(var(--primary));
     text-transform: uppercase;
-    font-weight: bold;
+    font-weight: 700;
     letter-spacing: 0.1em;
-    transition: all 0.3s ease;
+    font-family: 'IBM Plex Mono', monospace;
+    transition: all 0.25s ease;
     overflow: hidden;
   }
-  
   .cyber-button::before {
     content: '';
     position: absolute;
-    top: 0; left: 0; bottom: 0; right: 0;
+    inset: 0;
     background: hsl(var(--primary));
     z-index: -1;
     transform: scaleX(0);
     transform-origin: left;
-    transition: transform 0.3s ease;
+    transition: transform 0.25s ease;
   }
-  
   .cyber-button:hover {
     color: hsl(var(--primary-foreground));
   }
-  
   .cyber-button:hover::before {
     transform: scaleX(1);
   }
 
-  /* Interference Patterns */
+  /* ── Grid Background — warm amber ───────────────────── */
   .bg-grid-cyber {
-    background-image: linear-gradient(to right, hsla(var(--primary), 0.1) 1px, transparent 1px),
-                      linear-gradient(to bottom, hsla(var(--primary), 0.1) 1px, transparent 1px);
-    background-size: 40px 40px;
+    background-image:
+      linear-gradient(to right,  hsla(38, 60%, 40%, 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, hsla(38, 60%, 40%, 0.07) 1px, transparent 1px);
+    background-size: 48px 48px;
   }
 }
 
+/* ── Keyframes ───────────────────────────────────────────── */
 @keyframes gradient-flow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fade-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.stagger-1 { animation-delay: 0.1s; }
-.stagger-2 { animation-delay: 0.2s; }
-.stagger-3 { animation-delay: 0.3s; }
-.stagger-4 { animation-delay: 0.4s; }
+.stagger-1 { animation-delay: 0.08s; }
+.stagger-2 { animation-delay: 0.16s; }
+.stagger-3 { animation-delay: 0.26s; }
+.stagger-4 { animation-delay: 0.38s; }

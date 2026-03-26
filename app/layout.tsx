@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Inter, JetBrains_Mono } from "next/font/google"
+import { IBM_Plex_Mono } from "next/font/google"
 import "./globals.css"
 // Removed ThemeProvider import
 import { Header } from "@/components/header"
@@ -10,14 +10,17 @@ import { ReportsProvider } from "@/contexts/reports-context"
 
 import { AuthProvider } from "@/contexts/auth-context"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
-const jbMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" })
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-mono",
+})
 
 export const metadata: Metadata = {
-  title: "ScamSentry - Protecting Freelancers, One Report at a Time",
+  title: "ScamSentry — Zero-Trust Threat Intelligence",
   description:
-    "Report, view, and discuss scam job offers. Help protect the freelancer community from fraudulent clients and companies.",
-  keywords: ["scam reports", "freelancer protection", "job scams", "fraud prevention", "community safety"],
+    "Investigate suspicious URLs with our 5-Layer AI Forensics Engine. Community-powered scam intelligence for freelancers and developers.",
+  keywords: ["scam reports", "phishing detection", "url scanner", "threat intelligence", "cybersecurity", "fraud prevention"],
   authors: [{ name: "ScamSentry Team" }],
   icons: {
     icon: [
@@ -34,8 +37,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#6366f1" },
-    { media: "(prefers-color-scheme: dark)", color: "#1f2937" },
+    { media: "(prefers-color-scheme: light)", color: "#F59E0B" },
+    { media: "(prefers-color-scheme: dark)",  color: "#0C0A07" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -51,7 +54,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${inter.variable} ${jbMono.variable} font-sans flex flex-col min-h-screen`} suppressHydrationWarning>
+      <body className={`${ibmPlexMono.variable} font-mono flex flex-col min-h-screen`} suppressHydrationWarning>
         {/* ThemeProvider removed */}
         <ReportsProvider>
           <AuthProvider>
