@@ -1,8 +1,1 @@
-{
-  "crons": [
-    {
-      "path": "/api/cron/osint-sync",
-      "schedule": "0 */12 * * *"
-    }
-  ]
-}
+{}

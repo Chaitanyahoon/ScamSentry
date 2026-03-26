@@ -1,0 +1,25 @@
+name: "OSINT Cron Sync"
+
+on:
+  schedule:
+    - cron: "0 */12 * * *" # every 12 hours
+  workflow_dispatch: {}
+
+jobs:
+  osint-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call /api/cron/osint-sync
+        run: |
+          URL="https://${{ env.SITE_DOMAIN }}/api/cron/osint-sync"
+          echo "Calling $URL"
+          STATUS=$(curl -sS -o /tmp/resp.json -w "%{http_code}" -H "Authorization: Bearer $CRON_SECRET" "$URL")
+          cat /tmp/resp.json
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "Cron call failed"
+            exit 1
+          fi
+        env:
+          SITE_DOMAIN: scam-sentry.vercel.app
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
