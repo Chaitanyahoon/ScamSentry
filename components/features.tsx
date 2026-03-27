@@ -1,57 +1,59 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { cn } from "@/lib/utils"
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 export function Features() {
-  const [mounted, setMounted] = useState(false)
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   const capabilities = [
     {
       step: "01",
       title: "Static heuristics",
-      detail: "Pattern-matches against known phishing signatures — punycode homographs, dash-stuffing, IP masking, burner-hosting abuse, and 60+ sketchy TLDs. Catches 90% of threats instantly, zero API calls.",
+      detail:
+        "Pattern-matches against known phishing signatures — punycode homographs, dash-stuffing, IP masking, burner-hosting abuse, and 60+ sketchy TLDs. Catches 90% of threats instantly, zero API calls.",
     },
     {
       step: "02",
       title: "DNS forensics",
-      detail: "Resolves the target domain and inspects its MX, A, and NS records for anomalies like recently registered nameservers or missing reverse-DNS.",
+      detail:
+        "Resolves the target domain and inspects its MX, A, and NS records for anomalies like recently registered nameservers or missing reverse-DNS.",
     },
     {
       step: "03",
       title: "Threat-intel crosscheck",
-      detail: "Queries Google Safe Browsing in real-time for known malware, social engineering, and unwanted software flags.",
+      detail:
+        "Queries Google Safe Browsing in real-time for known malware, social engineering, and unwanted software flags.",
     },
     {
       step: "04",
       title: "Community ledger",
-      detail: "Cross-references against our Firestore database of 2,400+ freelancer-verified scam reports submitted by the community.",
+      detail:
+        "Cross-references against our Firestore database of 2,400+ freelancer-verified scam reports submitted by the community.",
     },
-    {
-      step: "05",
-      title: "AI semantic review",
-      detail: "If the first four layers can't reach a verdict, Gemini analyzes the URL structure for sophisticated social-engineering patterns humans would miss.",
-      note: "Only triggered when needed — saves API quota.",
-    },
-  ]
+  ];
 
   return (
     <section className="relative py-20 sm:py-28 bg-background border-b border-border">
       <div className="container px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
           {/* Section header — editorial style, not a badge */}
-          <div className={cn(
-            "mb-14",
-            mounted ? "animate-fade-in" : "opacity-0"
-          )}>
-            <p className="text-xs font-mono text-primary tracking-wider mb-3">How it works</p>
+          <div
+            className={cn("mb-14", mounted ? "animate-fade-in" : "opacity-0")}
+          >
+            <p className="text-xs font-mono text-primary tracking-wider mb-3">
+              How it works
+            </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight leading-tight">
-              Five layers of analysis.<br />
-              <span className="text-muted-foreground font-normal">One trust score.</span>
+              Four layers of analysis.
+              <br />
+              <span className="text-muted-foreground font-normal">
+                One trust score.
+              </span>
             </h2>
           </div>
 
@@ -62,7 +64,7 @@ export function Features() {
                 key={item.step}
                 className={cn(
                   "group flex gap-6 py-6 border-b border-border last:border-b-0 transition-colors hover:bg-card/50",
-                  mounted ? `animate-fade-in` : "opacity-0"
+                  mounted ? `animate-fade-in` : "opacity-0",
                 )}
                 style={{ animationDelay: `${index * 80}ms` }}
               >
@@ -91,5 +93,5 @@ export function Features() {
         </div>
       </div>
     </section>
-  )
+  );
 }
