@@ -1,8 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Trash2, RefreshCw, Check, X, ChevronDown, ChevronUp } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Trash2, RefreshCw, Check, X, ChevronDown, ChevronUp, RotateCcw, ShieldCheck, Zap, Target } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
@@ -162,38 +161,58 @@ export default function RulesManagementPage() {
   const totalWeight = rules.reduce((sum, r) => (r.enabled ? sum + (r.weight || 0) : sum), 0)
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Rule Management</h1>
-          <p className="text-gray-500 mt-1">Configure detection rules and adjust sensitivity</p>
+    <div className="min-h-screen bg-[#0C0A09] p-8 relative overflow-hidden">
+      {/* Decorative Scanlines */}
+      <div className="absolute inset-x-0 top-0 h-px bg-primary/20 shadow-[0_0_20px_rgba(255,191,0,0.5)] z-0" />
+      <div className="fixed inset-0 pointer-events-none z-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:32px_32px] opacity-10" />
+
+      <div className="max-w-7xl mx-auto space-y-8 relative z-10">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1F1914] pb-8">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2">
+              <Zap className="h-4 w-4 text-primary" />
+              <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2rem]">
+                LOGIC_CONTROL_SURFACE
+              </span>
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground uppercase tracking-widest drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+              Detection <span className="text-primary drop-shadow-[0_0_10px_rgba(255,191,0,0.3)]">Protocols</span>
+            </h1>
+            <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest border-l-2 border-primary/50 pl-4 max-w-2xl">
+              Configure heuristic weights and signal thresholds for the neural detection stack.
+            </p>
+          </div>
+          
+          <div className="flex gap-3">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing || loading}
+              className="px-4 py-2 font-mono text-[10px] uppercase tracking-widest transition-all border bg-[#15110E] text-muted-foreground border-[#1F1914] hover:border-primary/50 flex items-center gap-2"
+            >
+              <RefreshCw className={`w-3 h-3 ${refreshing ? 'animate-spin' : ''}`} />
+              RECALIBRATE
+            </button>
+            <button
+              onClick={handleResetRules}
+              disabled={saving || loading}
+              className="px-4 py-2 font-mono text-[10px] uppercase tracking-widest transition-all border bg-[#15110E] text-red-500/70 border-red-500/20 hover:border-red-500 flex items-center gap-2"
+            >
+              <RotateCcw className="w-3 h-3" />
+              WIPE_DEFAULTS
+            </button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleRefresh}
-            disabled={refreshing || loading}
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleResetRules}
-            disabled={saving || loading}
-          >
-            <RotateCw className="w-4 h-4 mr-2" />
-            Reset to Defaults
-          </Button>
-        </div>
-      </div>
 
       {/* Category Tabs */}
-      <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-        <TabsList>
+      <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full">
+        <TabsList className="bg-[#15110E] border border-[#1F1914] rounded-none p-1 h-auto flex-wrap sm:flex-nowrap">
           {CATEGORIES.map((cat) => (
-            <TabsTrigger key={cat.id} value={cat.id}>
+            <TabsTrigger 
+              key={cat.id} 
+              value={cat.id}
+              className="rounded-none px-6 py-2 font-mono text-[10px] uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-black transition-all"
+            >
               {cat.label}
             </TabsTrigger>
           ))}
@@ -202,155 +221,140 @@ export default function RulesManagementPage() {
         {CATEGORIES.map((category) => (
           <TabsContent key={category.id} value={category.id}>
             {/* Category Stats */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-500">Total Rules</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{rules.length}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-500">Enabled</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{enabledRulesCount}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-500">Total Weight</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{totalWeight}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-500">Avg Accuracy</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {(
-                      rules.reduce((sum, r) => sum + (r.stats?.accuracy || 0), 0) / Math.max(rules.length, 1)
-                    ).toFixed(1)}
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {[
+                { label: "REGISTERED_RULES", value: rules.length, detail: "TOTAL_COUNT" },
+                { label: "ACTIVE_SIGNALS", value: enabledRulesCount, detail: "LIVE_STREAMS", color: "text-green-500" },
+                { label: "CUMULATIVE_WEIGHT", value: totalWeight, detail: "IMPACT_SUM" },
+                { label: "AGGREGATE_ACCURACY", value: `${(rules.reduce((sum, r) => sum + (r.stats?.accuracy || 0), 0) / Math.max(rules.length, 1) * 100).toFixed(1)}%`, detail: "VALIDATION_CONF" }
+              ].map((stat, idx) => (
+                <div key={idx} className="bg-[#15110E] border border-[#1F1914] p-6 relative group overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-primary/20 group-hover:border-primary transition-colors" />
+                  <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest block mb-2">{stat.label}</span>
+                  <div className={`text-2xl font-mono font-bold ${stat.color || 'text-foreground'} mb-1`}>{stat.value}</div>
+                  <div className="text-[9px] font-mono text-muted-foreground/40 uppercase tracking-widest">{stat.detail}</div>
+                </div>
+              ))}
             </div>
 
             {/* Rules List */}
             {loading ? (
-              <div className="text-center py-8 text-gray-500">Loading rules...</div>
+              <div className="text-center py-20 font-mono text-[10px] uppercase tracking-widest animate-pulse">SYNCHRONIZING_RULESET...</div>
             ) : rules.length === 0 ? (
-              <Card>
-                <CardContent className="py-8 text-center text-gray-500">
-                  No rules configured for this layer yet
-                </CardContent>
-              </Card>
+              <div className="bg-[#15110E] border border-[#1F1914] py-12 text-center font-mono text-xs text-muted-foreground uppercase tracking-widest">
+                NO_PROTOCOLS_FOUND_IN_THIS_LAYER
+              </div>
             ) : (
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 {rules.map((rule) => (
-                  <Card key={rule.id}>
-                    <CardContent className="p-4">
+                  <div 
+                    key={rule.id} 
+                    className={`bg-[#15110E] border transition-all duration-300 relative group ${
+                      expandedRules.has(rule.id!) ? 'border-primary/40 ring-1 ring-primary/10' : 'border-[#1F1914] hover:border-primary/20'
+                    }`}
+                  >
+                    <div className="p-6">
                       {/* Rule Header */}
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3">
+                      <div className="flex items-start justify-between mb-6">
+                        <div className="flex-1 space-y-4">
+                          <div className="flex items-center gap-4">
                             <Switch
                               checked={rule.enabled}
                               onCheckedChange={() => handleToggleRule(rule.id!, rule.enabled)}
                               disabled={saving}
+                              className="data-[state=checked]:bg-primary"
                             />
-                            <h3 className="font-semibold">{rule.name}</h3>
-                            <Badge variant={rule.enabled ? 'default' : 'outline'}>
-                              {rule.enabled ? 'Enabled' : 'Disabled'}
-                            </Badge>
-                            {rule.confidence && (
-                              <Badge variant="secondary">
-                                {(rule.confidence * 100).toFixed(0)}% confidence
-                              </Badge>
-                            )}
+                            <div className="space-y-1">
+                              <h3 className="font-mono text-sm font-bold text-foreground uppercase tracking-widest">{rule.name}</h3>
+                              <div className="flex gap-2">
+                                <Badge className="rounded-none bg-[#0C0A09] border-[#1F1914] text-[9px] font-mono text-primary py-0">
+                                  {rule.enabled ? 'ACTIVE' : 'OFFLINE'}
+                                </Badge>
+                                {rule.confidence && (
+                                  <Badge className="rounded-none bg-[#0C0A09] border-[#1F1914] text-[9px] font-mono text-muted-foreground py-0 uppercase">
+                                    CFD: {(rule.confidence * 100).toFixed(0)}%
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-sm text-gray-600 mt-1">{rule.description}</p>
+                          <p className="text-[11px] font-mono text-muted-foreground leading-relaxed uppercase pr-8">{rule.description}</p>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        <button
                           onClick={() => toggleRuleExpanded(rule.id!)}
+                          className="p-1 hover:bg-white/5 transition-colors border border-[#1F1914]"
                         >
                           {expandedRules.has(rule.id!) ? (
-                            <ChevronUp className="w-4 h-4" />
+                            <ChevronUp className="w-4 h-4 text-primary" />
                           ) : (
-                            <ChevronDown className="w-4 h-4" />
+                            <ChevronDown className="w-4 h-4 text-muted-foreground" />
                           )}
-                        </Button>
+                        </button>
                       </div>
 
                       {/* Weight Control */}
-                      <div className="mt-4 space-y-2">
+                      <div className="space-y-4 pt-4 border-t border-[#1F1914]">
                         <div className="flex items-center justify-between">
-                          <label className="text-sm font-medium">Detection Weight</label>
-                          <span className="text-sm font-semibold">{rule.weight}/100</span>
+                          <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest">DETECTION_SENSITIVITY</label>
+                          <span className="text-xs font-mono font-bold text-primary tracking-tighter">{rule.weight}/100</span>
                         </div>
-                        <div className="flex items-center gap-4">
-                          <Slider
-                            value={[rule.weight]}
-                            onValueChange={(value) => handleWeightChange(rule.id!, value[0])}
-                            max={100}
-                            step={5}
-                            disabled={saving || !rule.enabled}
-                            className="flex-1"
-                          />
-                        </div>
+                        <Slider
+                          value={[rule.weight]}
+                          onValueChange={(value) => handleWeightChange(rule.id!, value[0])}
+                          max={100}
+                          step={5}
+                          disabled={saving || !rule.enabled}
+                          className="opacity-80 hover:opacity-100 transition-opacity"
+                        />
                       </div>
 
                       {/* Expanded Details */}
                       {expandedRules.has(rule.id!) && rule.stats && (
-                        <div className="mt-4 pt-4 border-t space-y-4">
-                          <div>
-                            <h4 className="font-medium text-sm mb-3">Performance Metrics</h4>
-                            <div className="grid grid-cols-2 gap-4">
+                        <div className="mt-6 pt-6 border-t border-[#1F1914] space-y-6">
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                              <Target className="h-3 w-3 text-primary" />
+                              <h4 className="text-[10px] font-mono font-bold text-foreground uppercase tracking-widest">PERFORMANCE_SIGNATURE</h4>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                               {/* Trigger Rate */}
-                              <div>
-                                <div className="flex justify-between mb-1">
-                                  <span className="text-xs text-gray-600">Trigger Rate</span>
-                                  <span className="text-xs font-semibold">
+                              <div className="space-y-2">
+                                <div className="flex justify-between">
+                                  <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">TRIGGER_RATE</span>
+                                  <span className="text-[9px] font-mono font-bold text-foreground uppercase tracking-widest">
                                     {(rule.stats.triggerRate * 100).toFixed(1)}%
                                   </span>
                                 </div>
                                 <Progress
                                   value={rule.stats.triggerRate * 100}
-                                  className="h-2"
+                                  className="h-1 bg-[#0C0A09] rounded-none [&>div]:bg-primary"
                                 />
                               </div>
 
                               {/* Accuracy */}
-                              <div>
-                                <div className="flex justify-between mb-1">
-                                  <span className="text-xs text-gray-600">Accuracy</span>
-                                  <span className={`text-xs font-semibold ${getAccuracyColor(rule.stats.accuracy)}`}>
+                              <div className="space-y-2">
+                                <div className="flex justify-between">
+                                  <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">PRECISION_INDEX</span>
+                                  <span className={`text-[9px] font-mono font-bold uppercase tracking-widest ${getAccuracyColor(rule.stats.accuracy)}`}>
                                     {(rule.stats.accuracy * 100).toFixed(1)}%
                                   </span>
                                 </div>
                                 <Progress
                                   value={rule.stats.accuracy * 100}
-                                  className="h-2"
+                                  className="h-1 bg-[#0C0A09] rounded-none [&>div]:bg-primary"
                                 />
                               </div>
 
                               {/* Detection Count */}
-                              <div className="text-xs">
-                                <span className="text-gray-600">Times Triggered</span>
-                                <p className="font-semibold mt-1">{rule.stats.triggered.toLocaleString()}</p>
+                              <div className="bg-[#0C0A09] border border-[#1F1914] p-3 text-center">
+                                <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest block mb-1">TOTAL_MATCHES</span>
+                                <p className="font-mono text-lg font-bold text-foreground tabular-nums">{rule.stats.triggered.toLocaleString()}</p>
                               </div>
 
                               {/* False Positive Rate */}
-                              <div className="text-xs">
-                                <span className="text-gray-600">False Positives</span>
-                                <p className={`font-semibold mt-1 ${getFalsePositiveColor(rule.falsePositiveRate || 0)}`}>
+                              <div className="bg-[#0C0A09] border border-[#1F1914] p-3 text-center">
+                                <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest block mb-1">NOISE_ESTIMATE</span>
+                                <p className={`font-mono text-lg font-bold tabular-nums ${getFalsePositiveColor(rule.falsePositiveRate || 0)}`}>
                                   {((rule.falsePositiveRate || 0) * 100).toFixed(1)}%
                                 </p>
                               </div>
@@ -359,14 +363,14 @@ export default function RulesManagementPage() {
 
                           {/* Last Updated */}
                           {rule.lastUpdated && (
-                            <div className="text-xs text-gray-500 pt-2 border-t">
-                              Last updated: {new Date(rule.lastUpdated).toLocaleString()}
+                            <div className="text-[9px] font-mono text-muted-foreground/30 uppercase tracking-[0.2rem] pt-2 border-t border-[#1F1914] text-right">
+                              LAST_MODIFIED: {new Date(rule.lastUpdated).toISOString().replace('T', '_').split('.')[0]}
                             </div>
                           )}
                         </div>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
@@ -375,64 +379,43 @@ export default function RulesManagementPage() {
       </Tabs>
 
       {/* Category Management Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Layer Management</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {CATEGORIES.map((cat) => (
-              <div key={cat.id} className="flex items-start justify-between p-3 border rounded">
-                <div>
-                  <p className="font-medium">{cat.label}</p>
-                  <p className="text-sm text-gray-600">{cat.description}</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => enableCategoryRules(cat.id, user?.uid || 'admin')}
-                    disabled={saving}
-                  >
-                    <Check className="w-4 h-4 mr-1" />
-                    Enable All
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => disableCategoryRules(cat.id, user?.uid || 'admin')}
-                    disabled={saving}
-                  >
-                    <X className="w-4 h-4 mr-1" />
-                    Disable All
-                  </Button>
-                </div>
+      <div className="bg-[#15110E] border border-[#1F1914] p-8 mt-12 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+        <div className="flex items-center gap-2 mb-8">
+          <ShieldCheck className="h-4 w-4 text-primary" />
+          <h2 className="text-xs font-mono font-bold text-foreground uppercase tracking-[0.2rem]">BULK_LAYER_OVERRIDE</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {CATEGORIES.map((cat) => (
+            <div key={cat.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-[#0C0A09] border border-[#1F1914] hover:border-primary/30 transition-all gap-4">
+              <div className="space-y-1">
+                <p className="font-mono text-xs font-bold text-foreground uppercase tracking-widest">{cat.label}</p>
+                <p className="text-[10px] font-mono text-muted-foreground uppercase">{cat.description}</p>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => enableCategoryRules(cat.id, user?.uid || 'admin')}
+                  disabled={saving}
+                  className="flex-1 sm:flex-none px-3 py-1 font-mono text-[9px] uppercase tracking-widest bg-green-500/10 text-green-500 border border-green-500/20 hover:bg-green-500/20 transition-all flex items-center justify-center gap-1"
+                >
+                  <Check className="w-3 h-3" />
+                  ENABLE
+                </button>
+                <button
+                  onClick={() => disableCategoryRules(cat.id, user?.uid || 'admin')}
+                  disabled={saving}
+                  className="flex-1 sm:flex-none px-3 py-1 font-mono text-[9px] uppercase tracking-widest bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-all flex items-center justify-center gap-1"
+                >
+                  <X className="w-3 h-3" />
+                  HALT
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
-  )
+  </div>
+)
 }
 
-// Import missing icon
-function RotateCw(props: any) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M23 4v6h-6"></path>
-      <path d="M20.49 15a9 9 0 1 1-2-8.83"></path>
-    </svg>
-  )
-}
+
