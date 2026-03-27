@@ -21,6 +21,7 @@ export interface ScanEvent {
     forensics: number;
     threatIntel: number;
     internalGraph: number;
+    semantic: number;
   };
   timestamp: Date;
   userAgent?: string;
@@ -38,6 +39,7 @@ export interface AnalyticsMetrics {
     forensics: number;
     threatIntel: number;
     internalGraph: number;
+    semantic: number;
   };
   topUrlPatterns: Array<{ pattern: string; count: number }>;
   scanTrend: Array<{ date: string; count: number }>;
