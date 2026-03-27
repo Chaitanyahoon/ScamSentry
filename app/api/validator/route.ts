@@ -3,6 +3,7 @@ import { analyzeHeuristics } from "@/lib/validator/heuristics";
 import { analyzeDomainForensics } from "@/lib/validator/forensics";
 import { analyzeThreatIntel } from "@/lib/validator/threat-intel";
 import { analyzeInternalGraph } from "@/lib/validator/internal-graph";
+import { logScanEvent } from "@/lib/analytics";
 
 export async function POST(req: Request) {
   try {
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
     const rawRiskScore = Math.min(combinedRisk, 100);
     const finalScore = 100 - rawRiskScore; // Inverted: 100 = Safe, 0 = Critical
 
-    let riskLevel = "Secure";
+    let riskLevel: "Secure" | "Suspicious" | "Critical Threat" = "Secure";
     // Slightly tweaked thresholds now that AI is gone and logic scales to 100 faster
     if (finalScore <= 30) riskLevel = "Critical Threat";
     else if (finalScore <= 70) riskLevel = "Suspicious";
@@ -44,6 +45,27 @@ export async function POST(req: Request) {
       layer3_ThreatIntel: L3,
       layer4_InternalGraph: L4,
     };
+
+    // Log scan event asynchronously (non-blocking)
+    logScanEvent({
+      url: input,
+      finalScore,
+      riskLevel,
+      triggeredLayers: [
+        L1.flags.length > 0 ? "heuristics" : "",
+        L2.flags.length > 0 ? "forensics" : "",
+        L3.flags.length > 0 ? "threatIntel" : "",
+        L4.flags.length > 0 ? "internalGraph" : "",
+      ].filter(Boolean),
+      layerScores: {
+        heuristics: L1.score,
+        forensics: L2.score,
+        threatIntel: L3.score,
+        internalGraph: L4.score,
+      },
+      timestamp: new Date(),
+      userAgent: req.headers.get("user-agent") || undefined,
+    }).catch((e) => console.error("Analytics logging error:", e));
 
     return NextResponse.json({
       success: true,

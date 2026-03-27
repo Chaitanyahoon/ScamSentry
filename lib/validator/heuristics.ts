@@ -1,19 +1,22 @@
 export const MALICIOUS_URL_DICTIONARIES = {
   sketchyTLDs:
-    /\.(xyz|top|buzz|cn|ru|cc|pw|su|info|loan|club|work|gq|win|bid|tk|ml|ga|cf|gq|zip|ltd)$/i,
+    /\.(xyz|top|buzz|cn|ru|cc|pw|su|info|loan|club|work|gq|win|bid|tk|ml|ga|cf|zip|ltd|review|hair|racing|science|online|site|space|store|download|stream|webcam|accountant|date|men|monster)$/i,
   urlShorteners:
-    /^(https?:\/\/)?(bit\.ly|tinyurl\.com|t\.co|goo\.gl|ow\.ly|is\.gd|buff\.ly|adf\.ly|shorte\.st|cutt\.ly|cli\.gs|v\.gd)\//i,
+    /^(https?:\/\/)?(bit\.ly|tinyurl\.com|t\.co|goo\.gl|ow\.ly|is\.gd|buff\.ly|adf\.ly|shorte\.st|cutt\.ly|cli\.gs|v\.gd|bitly|short\.link|shor\.by|tiny\.cc|link\.to|qr\.link)\//i,
   spoofedBrands:
-    /(paypal|apple|google|microsoft|amazon|netflix|meta|facebook|instagram|bankofamerica|chase|wellsfargo|binance|coinbase)-?(login|secure|verify|update|support|auth|billing|account)/i,
+    /(paypal|apple|google|microsoft|amazon|netflix|meta|facebook|instagram|bankofamerica|chase|wellsfargo|binance|coinbase|stripe|twitch|adobe|dropbox|uber|airbnb|spotify)-?(login|secure|verify|update|support|auth|billing|account|confirm|validate|check)/i,
   suspiciousKeywords:
-    /(free-iphone|hack|crack|cheats|generator|giveaway|claim-prize|free-money|verification-required|update-payment|urgent-action|account-suspended)/i,
+    /(free-iphone|hack|crack|cheats|generator|giveaway|claim-prize|free-money|verification-required|update-payment|urgent-action|account-suspended|confirm-identity|unusual-activity|click-here|act-now|limited-time|verify-account|unlock-account|suspicious-activity|click-link|validate-card|re-enter-password)/i,
   freeHosting:
-    /\.(000webhostapp|herokuapp|vercel|netlify|onrender|pythonanywhere|duckdns|bounceme|no-ip|ngrok)\./i,
+    /\.(000webhostapp|herokuapp|vercel|netlify|onrender|pythonanywhere|duckdns|bounceme|no-ip|ngrok|replit|github\.io|pages|surge\.sh|netlify\.app|vercel\.app)\./i,
   ipAddressMask: /^(https?:\/\/)?((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}/i,
   punycode: /xn--/i,
   suspiciousPaths:
-    /\/(login|secure|verify|update|account|reset|authenticate|oauth|checkout|billing|support)\b/i,
-  embeddedRedirect: /@|%40|\/(?:goto|redirect|info|download)\//i,
+    /\/(login|secure|verify|update|account|reset|authenticate|oauth|checkout|billing|support|admin|panel|confirm|validate|check|confirm-identity|unusual-activity|re-enter|re-verify|security|alert)\b/i,
+  embeddedRedirect: /@|%40|\/(?:goto|redirect|info|download|click|action|callback|confirm|validate)\//i,
+  credentialHarvesting: /password|passwd|pwd|secret|token|key|credential|auth|login|username|email/i,
+  numberReplace: /0=o|1=i|3=e|5=s|7=t|8=b|9=g/i,
+  homoglyphPatterns: /[il1][il1]{1,}|[o0]{1,}o[o0]{1,}|[rn]{2,}/i,
 };
 
 export const TARGET_BRANDS = [
@@ -41,6 +44,16 @@ export const TARGET_BRANDS = [
   "chasebank",
   "americanexpress",
   "capitalone",
+  "stripe",
+  "twitch",
+  "adobe",
+  "dropbox",
+  "uber",
+  "airbnb",
+  "spotify",
+  "slack",
+  "github",
+  "gitlab",
 ];
 
 function levenshteinDistance(a: string, b: string): number {
@@ -216,7 +229,49 @@ export function analyzeHeuristics(inputUrl: string) {
       );
     }
 
-    // New: DGA / Entropy Check
+    // Credential harvesting detection
+    if (
+      MALICIOUS_URL_DICTIONARIES.credentialHarvesting.test(
+        domainObj.pathname + domainObj.search,
+      )
+    ) {
+      score += 25;
+      flags.push(
+        "Suspicious: URL contains credential-related keywords (password, token, auth).",
+      );
+    }
+
+    // Homoglyph character confusion detection
+    if (MALICIOUS_URL_DICTIONARIES.homoglyphPatterns.test(domainObj.hostname)) {
+      score += 45;
+      flags.push(
+        "High Risk: Hostname uses character homoglyphs (visually similar characters) to spoof legitimate domains.",
+      );
+    }
+
+    // Query string parameter suspicion check
+    const queryParams = domainObj.searchParams;
+    let suspiciousParamCount = 0;
+    for (const [key, value] of queryParams.entries()) {
+      if (
+        /redirect|callback|return|url|link|goto|redir|next|back|continue/i.test(
+          key,
+        )
+      ) {
+        suspiciousParamCount++;
+      }
+      if (value && value.length > 100) {
+        suspiciousParamCount++;
+      }
+    }
+    if (suspiciousParamCount >= 2) {
+      score += 40;
+      flags.push(
+        `High Risk: URL contains ${suspiciousParamCount} suspicious redirect/callback parameters.`,
+      );
+    }
+
+    // DGA / Entropy Check
     // We check the entropy of the hostname (excluding TLD)
     const hostnameWithoutTld =
       parts.length > 1 ? parts.slice(0, -1).join("") : domainObj.hostname;
