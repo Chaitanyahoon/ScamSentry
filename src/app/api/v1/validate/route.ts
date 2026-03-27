@@ -3,6 +3,8 @@ import { analyzeHeuristics } from "@/lib/validator/heuristics";
 import { analyzeDomainForensics } from "@/lib/validator/forensics";
 import { analyzeThreatIntel } from "@/lib/validator/threat-intel";
 import { analyzeInternalGraph } from "@/lib/validator/internal-graph";
+import { analyzeSemanticIntent } from "@/lib/validator/semantic";
+import { generateThreatFingerprint } from "@/lib/fingerprints";
 import { freeTierLimiter, enterpriseLimiter } from "@/lib/rate-limit";
 import { logScanEvent } from "@/lib/analytics";
 
@@ -28,13 +30,13 @@ export async function POST(req: Request) {
       ? `enterprise:${apiKey}`
       : req.headers.get("x-forwarded-for") || "anonymous";
 
-    // -- Rate Limiting: Upstash (production) or in-memory (local dev) --
+    // -- Rate Limiting --
     if (isEnterprise && enterpriseLimiter) {
       const { success } = await enterpriseLimiter.limit(identifier);
       if (!success) {
         return NextResponse.json(
           { error: "Enterprise rate limit exceeded (300 req/min)." },
-          { status: 429, headers: CORS_HEADERS },
+          { status: 429, headers: CORS_HEADERS }
         );
       }
     } else if (!isEnterprise) {
@@ -46,11 +48,10 @@ export async function POST(req: Request) {
               error:
                 "Rate limit exceeded (5 req/min). Pass a valid 'x-api-key' for higher limits.",
             },
-            { status: 429, headers: CORS_HEADERS },
+            { status: 429, headers: CORS_HEADERS }
           );
         }
       } else {
-        // Local dev fallback
         const now = Date.now();
         const clientData = localRateLimitMap.get(identifier);
         if (!clientData || now > clientData.resetTime) {
@@ -62,7 +63,7 @@ export async function POST(req: Request) {
           if (clientData.count >= LOCAL_LIMIT) {
             return NextResponse.json(
               { error: "Rate limit exceeded. (Local dev: 5 req/min)" },
-              { status: 429, headers: CORS_HEADERS },
+              { status: 429, headers: CORS_HEADERS }
             );
           }
           clientData.count++;
@@ -75,15 +76,14 @@ export async function POST(req: Request) {
     if (!body || !body.payload || typeof body.payload !== "string") {
       return NextResponse.json(
         { error: 'Invalid request shape. Expected { "payload": "string" }' },
-        { status: 400, headers: CORS_HEADERS },
+        { status: 400, headers: CORS_HEADERS }
       );
     }
 
     const input = body.payload;
 
-    // 4. Engine Execution (Pre-AI)
+    // 4. Engine Execution (Deterministic L1-L4)
     const L1 = analyzeHeuristics(input);
-
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const urls = input.match(urlRegex) || [];
 
@@ -93,9 +93,17 @@ export async function POST(req: Request) {
       analyzeThreatIntel(urls),
     ]);
 
-    // 5. Scoring Algorithm (deterministic logic only)
-    const preliminaryRisk = L1.score + L2.score + L3.score + L4.score;
-    const combinedRisk = Math.min(preliminaryRisk, 100);
+    // 5. Intelligence Layer 5 (Semantic - Conditional)
+    let L5 = { score: 0, flags: [] as string[], explanation: "" };
+    const deterministicRisk = L1.score + L2.score + L3.score + L4.score;
+    
+    // Only trigger AI for edge cases (Suspicious zone)
+    if (deterministicRisk > 20 && deterministicRisk < 70 && process.env.GEMINI_API_KEY) {
+      L5 = await analyzeSemanticIntent(input);
+    }
+
+    // 6. Scoring Algorithm
+    const combinedRisk = Math.min(deterministicRisk + L5.score, 100);
     const finalScore = 100 - combinedRisk;
 
     let riskLevel: "Secure" | "Suspicious" | "Critical Threat" = "Secure";
@@ -104,7 +112,16 @@ export async function POST(req: Request) {
 
     const isBlacklisted = finalScore <= 20;
 
-    // Log scan event asynchronously (non-blocking)
+    // 7. Forensic Fingerprinting
+    const fingerprint = generateThreatFingerprint(input, [...L1.flags, ...L5.flags], {
+      heuristics: L1.score,
+      forensics: L2.score,
+      threatIntel: L3.score,
+      internalGraph: L4.score,
+      semantic: L5.score
+    } as Record<string, number>);
+
+    // Log scan event asynchronously
     logScanEvent({
       url: input,
       finalScore,
@@ -114,49 +131,53 @@ export async function POST(req: Request) {
         L2.flags.length > 0 ? "forensics" : "",
         L3.flags.length > 0 ? "threatIntel" : "",
         L4.flags.length > 0 ? "internalGraph" : "",
+        L5.score > 0 ? "semantic" : "",
       ].filter(Boolean),
       layerScores: {
         heuristics: L1.score,
         forensics: L2.score,
         threatIntel: L3.score,
         internalGraph: L4.score,
+        semantic: L5.score,
       },
       timestamp: new Date(),
       userAgent: req.headers.get("user-agent") || undefined,
     }).catch((e) => console.error("Analytics logging error:", e));
 
-    // 6. Return standard B2B developer response
+    // 8. Return Intelligence Response
     return NextResponse.json(
       {
         success: true,
         meta: {
           timestamp: new Date().toISOString(),
-          engineVersion: "v2.1.0-beta",
-          tier:
-            apiKey === process.env.SCAM_SENTRY_B2B_KEY ? "enterprise" : "free",
+          engineVersion: "v2.2.0-beta",
+          tier: isEnterprise ? "enterprise" : "free",
         },
         data: {
           target: input,
           isBlacklisted,
           trustScore: finalScore,
           severity: riskLevel,
+          fingerprint: fingerprint.hash,
           diagnostics: {
-            heuristics: {
-              triggerCount: L1.flags.length,
-              scorePenalty: L1.score,
-            },
+            heuristics: { triggerCount: L1.flags.length, scorePenalty: L1.score },
             dnsForensics: { scorePenalty: L2.score },
             threatIntel: { scorePenalty: L3.score },
             internalLedger: { verifiedScamsFound: L4.score > 0 },
+            semanticAI: L5.score > 0 ? {
+              scorePenalty: L5.score,
+              flags: L5.flags,
+              assessment: L5.explanation
+            } : undefined
           },
         },
       },
-      { status: 200, headers: CORS_HEADERS },
+      { status: 200, headers: CORS_HEADERS }
     );
   } catch (error: any) {
     return NextResponse.json(
       { error: "Internal Server Error", details: error.message },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
