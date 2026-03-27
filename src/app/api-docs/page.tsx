@@ -108,17 +108,19 @@ export default function ApiDocsPage() {
             <div className="bg-[#0C0A07] border border-border p-4 rounded-md font-mono text-xs overflow-x-auto text-muted-foreground">
               <pre>{`{
   "success": true,
+  "meta": {
+    "engineVersion": "v2.3.0-deterministic",
+    "tier": "free"
+  },
   "data": {
-    "target_url": "https://secure-login.paypal.com.scam.net",
-    "finalScore": 15,
-    "riskLevel": "Critical Threat",
-    "forensicReport": {
-      "layer1_Heuristics": {
-        "score": 85,
-        "flags": [
-          "CRITICAL: Subdomain explicitly spoofing major brand."
-        ]
-      }
+    "target": "https://secure-login.paypa1.com.scam.net",
+    "trustScore": 15,
+    "severity": "Critical Threat",
+    "fingerprint": "fc7a8...e921b",
+    "diagnostics": {
+      "heuristics": { "triggerCount": 3, "scorePenalty": 85 },
+      "dnsForensics": { "scorePenalty": 40 },
+      "mxPedigree": { "hasMailServer": false }
     }
   }
 }`}</pre>
@@ -166,6 +168,12 @@ export default function ApiDocsPage() {
                     </Button>
                   </div>
                   <p className="text-[10px] text-muted-foreground mt-2">Keep this key secret.</p>
+                </div>
+
+                <div className="pt-4 border-t border-border">
+                  <Button className="w-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 font-mono" asChild>
+                    <a href="/dashboard/api">Open Full Dashboard</a>
+                  </Button>
                 </div>
 
                 <div className="pt-4 border-t border-border">
