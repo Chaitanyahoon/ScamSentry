@@ -14,14 +14,29 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
-
 # env files
 .env*
 
 # vercel
-.vercel
+/.vercel/
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# debug & temp
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.swc/
+.DS_Store
+
+# testing & coverage
+/coverage/
+/__tests__/__snapshots__/
+
+# scan results
+results.json
+results.csv
+results.html
