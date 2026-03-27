@@ -1,0 +1,42 @@
+[
+  {
+    "url": "https://github.com",
+    "category": "legitimate"
+  },
+  {
+    "url": "https://paypa1.com/login",
+    "category": "phishing"
+  },
+  {
+    "url": "https://example.com",
+    "category": "unknown"
+  },
+  {
+    "url": "https://verify-microsoft-account.xyz",
+    "category": "phishing"
+  },
+  {
+    "url": "https://www.google.com",
+    "category": "legitimate"
+  },
+  {
+    "url": "http://secure-login.paypal.com.scam.net",
+    "category": "critical"
+  },
+  {
+    "url": "https://amazon-verify-account.top",
+    "category": "phishing"
+  },
+  {
+    "url": "https://stackoverflow.com",
+    "category": "legitimate"
+  },
+  {
+    "url": "http://rn-cloud.com/office365",
+    "category": "phishing"
+  },
+  {
+    "url": "https://stripe.com",
+    "category": "legitimate"
+  }
+]
