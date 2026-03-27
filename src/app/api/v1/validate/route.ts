@@ -6,7 +6,6 @@ import { analyzeInternalGraph } from "@/lib/validator/internal-graph";
 import { analyzeSemanticIntent } from "@/lib/validator/semantic";
 import { generateThreatFingerprint } from "@/lib/fingerprints";
 import { freeTierLimiter, enterpriseLimiter } from "@/lib/rate-limit";
-import { validateApiKey } from "@/lib/auth";
 import { logScanEvent, ScanEvent } from "@/lib/analytics";
 import { dispatchBrandAlert } from "@/lib/webhook-dispatcher";
 
@@ -115,7 +114,8 @@ export async function POST(req: Request) {
     const isBlacklisted = finalScore <= 20;
 
     // 7. Forensic Fingerprinting
-    const fingerprint = generateThreatFingerprint(input, [...L1.flags, ...L5.flags], {
+    const forensicDetails = [...L1.flags, ...L2.flags, ...L3.flags, ...L5.flags];
+    const fingerprint = generateThreatFingerprint(input, forensicDetails, {
       heuristics: L1.score,
       forensics: L2.score,
       threatIntel: L3.score,
@@ -123,50 +123,59 @@ export async function POST(req: Request) {
       semantic: L5.score
     } as Record<string, number>);
 
-    // Log scan event asynchronously
-    logScanEvent({
+    // 8. Log scan event for analytics
+    const scanEvent: ScanEvent = {
       url: input,
-      finalScore: result.score,
-      riskLevel: result.label as any,
-      triggeredLayers: result.layers.filter(l => l.score > 0).map(l => l.name),
+      finalScore: finalScore,
+      riskLevel: riskLevel,
+      triggeredLayers: [
+        L1.score > 0 ? "Heuristics" : "",
+        L2.score > 0 ? "Forensics" : "",
+        L3.score > 0 ? "Threat Intel" : "",
+        L4.score > 0 ? "Internal Trust Graph" : "",
+        L5.score > 0 ? "Semantic AI" : "",
+      ].filter(Boolean),
       layerScores: {
-        heuristics: result.layers.find(l => l.name === "Heuristics")?.score || 0,
-        forensics: result.layers.find(l => l.name === "Forensics")?.score || 0,
-        threatIntel: result.layers.find(l => l.name === "Threat Intel")?.score || 0,
-        internalGraph: result.layers.find(l => l.name === "Internal Trust Graph")?.score || 0,
-        semantic: result.layers.find(l => l.name === "Semantic AI")?.score || 0,
+        heuristics: L1.score,
+        forensics: L2.score,
+        threatIntel: L3.score,
+        internalGraph: L4.score,
+        semantic: L5.score,
       },
       timestamp: new Date(),
       userAgent: req.headers.get("user-agent") || undefined,
       ipHash: req.headers.get("x-forwarded-for") || "internal",
-      apiKeyId: apiKey || undefined, // Assuming keyData?.id maps to apiKey for now
+      apiKeyId: apiKey || undefined,
     };
 
     await logScanEvent(scanEvent);
 
-    // 4. B2B Brand Monitoring Trigger
-    if (result.score <= 20) { // Changed from >= 85 to <= 20 to match "Critical Threat"
-      // Extract brand from result flags if possible (heuristic matches brands)
-      const brandMatch = result.details.find(d => d.includes("mimics '") || d.includes("spoofing major brand '"))
+    // 9. B2B Brand Monitoring Trigger (Webhook Dispatch)
+    if (finalScore <= 25) { // Notify on suspicious/critical (matches brand spoof triggers)
+      const brandMatch = forensicDetails.find(d => d.includes("mimics '") || d.includes("spoofing major brand '"))
       if (brandMatch) {
          const brandName = brandMatch.match(/'([^']+)'/)?.[1]
          if (brandName) {
             await dispatchBrandAlert(brandName, {
               alertType: "BRAND_MIMICRY",
-              severity: "CRITICAL",
+              severity: finalScore <= 20 ? "CRITICAL" : "HIGH",
               targetBrand: brandName,
-              maliciousUrl: input, // Use 'input' as the URL
-              fingerprint: result.fingerprint,
+              maliciousUrl: input,
+              fingerprint: fingerprint.hash,
               detectedAt: new Date().toISOString(),
-              forensicSummary: result.details
+              forensicSummary: forensicDetails
             })
          }
       }
     }
 
-    // 8. Return Intelligence Response
+    // 10. Return Forensic Intelligence Response
+    return NextResponse.json(
+      {
+        success: true,
+        meta: {
           timestamp: new Date().toISOString(),
-          engineVersion: "v2.2.0-beta",
+          engineVersion: "v2.5.0-forensic",
           tier: isEnterprise ? "enterprise" : "free",
         },
         data: {
@@ -177,8 +186,8 @@ export async function POST(req: Request) {
           fingerprint: fingerprint.hash,
           diagnostics: {
             heuristics: { triggerCount: L1.flags.length, scorePenalty: L1.score },
-            dnsForensics: { scorePenalty: L2.score },
-            threatIntel: { scorePenalty: L3.score },
+            dnsForensics: { scorePenalty: L2.score, flags: L2.flags },
+            threatIntel: { scorePenalty: L3.score, flags: L3.flags },
             internalLedger: { verifiedScamsFound: L4.score > 0 },
             semanticAI: L5.score > 0 ? {
               scorePenalty: L5.score,
@@ -186,11 +195,13 @@ export async function POST(req: Request) {
               assessment: L5.explanation
             } : undefined
           },
+          details: forensicDetails
         },
       },
       { status: 200, headers: CORS_HEADERS }
     );
   } catch (error: any) {
+    console.error("Forensic Engine Crash:", error);
     return NextResponse.json(
       { error: "Internal Server Error", details: error.message },
       { status: 500 }
@@ -202,10 +213,6 @@ export async function POST(req: Request) {
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, x-api-key",
-    },
+    headers: CORS_HEADERS,
   });
 }
