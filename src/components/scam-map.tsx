@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useReports } from "@/contexts/reports-context"
 import { geocodeCity, type GeocodingResult } from "@/utils/geocoding"
 import { InteractiveMap } from "@/components/interactive-map"
+import { ForensicGlobe } from "@/components/forensic-globe"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 
@@ -252,14 +253,19 @@ export function ScamMap() {
             </div>
           </div>
 
-          {/* Map */}
-          <div className="mb-10 bg-card border border-border shadow-sm overflow-hidden h-[500px] sm:h-[600px]">
-            <InteractiveMap
-              centerLat={mapCenter.lat}
-              centerLng={mapCenter.lng}
-              reports={filteredReports}
-              currentLocation={null}
-            />
+          {/* Map Section */}
+          <div className="mb-10 bg-[#0C0A09] border border-[#1F1914] shadow-2xl overflow-hidden h-[600px] sm:h-[800px] relative rounded-xl group">
+             <div className="absolute inset-0 z-0">
+                <ForensicGlobe />
+             </div>
+             
+             {/* Map Overlay for Info */}
+             <div className="absolute bottom-6 left-6 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                <div className="bg-[#0C0A09]/80 backdrop-blur-sm border border-[#1F1914] p-4 rounded-lg">
+                  <p className="font-mono text-[10px] text-primary uppercase tracking-[0.2em]">Neural Engine v2.6</p>
+                  <p className="text-muted-foreground text-xs mt-1 italic">Mapping global attack vectors using deterministic telemetry...</p>
+                </div>
+             </div>
           </div>
 
           {/* Reports Grid */}

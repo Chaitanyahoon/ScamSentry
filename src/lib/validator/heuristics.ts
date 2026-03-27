@@ -56,6 +56,21 @@ export const TARGET_BRANDS = [
   "gitlab",
 ];
 
+const HOMOGLYPH_MAP: Record<string, string> = {
+  // Cyrillic
+  'а': 'a', 'е': 'e', 'і': 'i', 'о': 'o', 'р': 'p', 'с': 'c', 'у': 'y', 'х': 'x',
+  'А': 'A', 'Е': 'E', 'І': 'I', 'О': 'O', 'Р': 'P', 'С': 'C', 'У': 'Y', 'Х': 'X',
+  // Greek
+  'α': 'a', 'ε': 'e', 'ι': 'i', 'ο': 'o', 'ρ': 'p', 'ν': 'v', 'τ': 't', 'χ': 'x',
+  // Other Lookalikes
+  'ɩ': 'i', 'Ɩ': 'I', 'օ': 'o', 'ԁ': 'd', 'զ': 'q', 'ｗ': 'w', 'ｖ': 'v', 'ｕ': 'u',
+  '0': 'o', '1': 'l', // Common number-swaps included for normalization
+};
+
+function normalizeHomoglyphs(str: string): string {
+  return str.split('').map(char => HOMOGLYPH_MAP[char] || char).join('');
+}
+
 function levenshteinDistance(a: string, b: string): number {
   if (a.length === 0) return b.length;
   if (b.length === 0) return a.length;
@@ -255,12 +270,29 @@ export function analyzeHeuristics(inputUrl: string) {
         );
       }
 
-      // Homoglyph character confusion detection
-      if (MALICIOUS_URL_DICTIONARIES.homoglyphPatterns.test(domainObj.hostname)) {
-        score += 45;
-        flags.push(
-          "High Risk: Hostname uses character homoglyphs (visually similar characters) to spoof legitimate domains."
+      // Enhanced Homoglyph / Visual Spoofing Detection
+      const originalHostname = domainObj.hostname;
+      const normalizedHostname = normalizeHomoglyphs(originalHostname);
+      
+      if (originalHostname !== normalizedHostname) {
+        // If normalization changed the hostname, it's a visual spoof attempt
+        // Check if the normalized version mimics a brand
+        const isSpoofingBrand = TARGET_BRANDS.some(brand => 
+          normalizedHostname.includes(brand) || 
+          levenshteinDistance(normalizedHostname.split('.')[0], brand) <= 1
         );
+
+        if (isSpoofingBrand) {
+          score += 90;
+          flags.push(
+            `CRITICAL: Visual Spoofing detected. Hostname '${originalHostname}' uses lookalike characters to mimic '${normalizedHostname}'.`
+          );
+        } else {
+          score += 40;
+          flags.push(
+            "High Risk: Hostname contains non-standard Unicode lookalikes (Homoglyphs)."
+          );
+        }
       }
 
       // Query string parameter suspicion check
