@@ -62,11 +62,11 @@ describe('Admin Auth Verification', () => {
 
     it('should return null if token verification fails', async () => {
       const mockAuth = {
-        verifyIdToken: jest.fn().mockRejectedValue(new Error('Invalid token')),
+        verifyIdToken: jest.fn().mockImplementation(() => Promise.reject(new Error('Invalid token'))),
       }
 
-      const { getAdminAuth } = require('@/lib/firebase-admin')
-      getAdminAuth.mockReturnValue(mockAuth)
+      const { getAdminAuth } = require('@/lib/firebase-admin') as any
+      ;(getAdminAuth as jest.Mock).mockReturnValue(mockAuth)
 
       const result = await adminAuthVerify.authenticateAdminRequest(
         'Bearer invalid-token'

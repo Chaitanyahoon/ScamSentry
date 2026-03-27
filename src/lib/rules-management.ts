@@ -8,10 +8,11 @@
 import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, Timestamp } from 'firebase/firestore'
 import { db } from './firebase'
 
+
 export interface DetectionRule {
   id?: string
   name: string
-  category: 'heuristics' | 'forensics' | 'threatIntel' | 'internalGraph'
+  category: 'heuristics' | 'forensics' | 'threatIntel' | 'internalGraph' | 'semantic'
   pattern?: string
   description: string
   enabled: boolean

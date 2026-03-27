@@ -92,7 +92,7 @@ export async function checkAdminReadLimit(
     const result = await adminReadLimiter.limit(adminUid)
     return {
       success: result.success,
-      resetTime: result.resetTime ? new Date(result.resetTime).getTime() : undefined,
+      resetTime: result.reset,
     }
   }
 
@@ -131,7 +131,7 @@ export async function checkAdminWriteLimit(
     const result = await adminWriteLimiter.limit(adminUid)
     return {
       success: result.success,
-      resetTime: result.resetTime ? new Date(result.resetTime).getTime() : undefined,
+      resetTime: result.reset,
     }
   }
 
@@ -170,7 +170,7 @@ export async function checkAdminDeleteLimit(
     const result = await adminDeleteLimiter.limit(adminUid)
     return {
       success: result.success,
-      resetTime: result.resetTime ? new Date(result.resetTime).getTime() : undefined,
+      resetTime: result.reset,
     }
   }
 
@@ -209,7 +209,7 @@ export async function checkAdminBatchLimit(
     const result = await adminBatchLimiter.limit(adminUid)
     return {
       success: result.success,
-      resetTime: result.resetTime ? new Date(result.resetTime).getTime() : undefined,
+      resetTime: result.reset,
     }
   }
 

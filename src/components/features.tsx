@@ -35,6 +35,13 @@ export function Features() {
       detail:
         "Cross-references against our Firestore database of 2,400+ freelancer-verified scam reports submitted by the community.",
     },
+    {
+      step: "05",
+      title: "Semantic Intelligence",
+      detail:
+        "Uses Gemini-1.5 AI to analyze the semantic intent and visual structure of the page, detecting psychological triggers and social engineering tactics.",
+      note: "Layer 5: Intent Detection Active"
+    },
   ];
 
   return (
@@ -49,10 +56,10 @@ export function Features() {
               How it works
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight leading-tight">
-              Four layers of analysis.
+              Five layers of analysis.
               <br />
               <span className="text-muted-foreground font-normal">
-                One trust score.
+                One forensic truth.
               </span>
             </h2>
           </div>

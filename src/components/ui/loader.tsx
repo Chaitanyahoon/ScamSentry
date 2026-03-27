@@ -1,9 +1,9 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-export interface LoaderProps extends React.HTMLAttributes<HTMLDivElement> {}
+export interface LoaderProps extends React.SVGProps<SVGSVGElement> {}
 
-export const Loader2 = React.forwardRef<HTMLDivElement, LoaderProps>(({ className, ...props }, ref) => {
+export const Loader2 = React.forwardRef<SVGSVGElement, LoaderProps>(({ className, ...props }, ref) => {
   return (
     <svg
       ref={ref}

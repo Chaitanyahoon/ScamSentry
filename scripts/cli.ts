@@ -20,10 +20,10 @@ import fs from 'fs'
 import path from 'path'
 import { createReadStream } from 'fs'
 import { createInterface } from 'readline'
-import { analyzeHeuristics } from './lib/validator/heuristics.js'
-import { analyzeDomainForensics } from './lib/validator/forensics.js'
-import { analyzeThreatIntel } from './lib/validator/threat-intel.js'
-import { analyzeInternalGraph } from './lib/validator/internal-graph.js'
+import { analyzeHeuristics } from '../src/lib/validator/heuristics'
+import { analyzeDomainForensics } from '../src/lib/validator/forensics'
+import { analyzeThreatIntel } from '../src/lib/validator/threat-intel'
+import { analyzeInternalGraph } from '../src/lib/validator/internal-graph'
 
 interface ScanResult {
   url: string
@@ -174,7 +174,7 @@ async function scanUrl(url: string): Promise<ScanResult> {
     // Execute layers
     const layer1 = analyzeHeuristics(url)
     const layer2 = await analyzeDomainForensics(url)
-    const layer3 = await analyzeThreatIntel(url)
+    const layer3 = await analyzeThreatIntel([url])
     const layer4 = await analyzeInternalGraph(url)
 
     // Aggregate scores (additive, capped at 100)
