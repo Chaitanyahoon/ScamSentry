@@ -5,13 +5,13 @@ import { getStorage, FirebaseStorage } from "firebase/storage"
 import { getAnalytics, Analytics, isSupported } from "firebase/analytics"
 
 const firebaseConfig = {
-  apiKey: "REDACTED_FILTER_BRANCH",
-  authDomain: "REDACTED_FILTER_BRANCH",
-  projectId: "REDACTED_FILTER_BRANCH",
-  storageBucket: "REDACTED_FILTER_BRANCH",
-  messagingSenderId: "REDACTED_FILTER_BRANCH",
-  appId: "1:REDACTED_FILTER_BRANCH:web:51679c50f954ef0f602463",
-  measurementId: "REDACTED_FILTER_BRANCH"
+  apiKey: "AIzaSyD5QX4zZhA5foxWs_PTWGlXbAeXic5nBp4",
+  authDomain: "chaitanya-scamsentry.firebaseapp.com",
+  projectId: "chaitanya-scamsentry",
+  storageBucket: "chaitanya-scamsentry.firebasestorage.app",
+  messagingSenderId: "1009634174042",
+  appId: "1:1009634174042:web:51679c50f954ef0f602463",
+  measurementId: "G-9RJEH5QQLE"
 };
 
 // Initialize Firebase

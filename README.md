@@ -1,129 +1,79 @@
+# 🔐 ScamSentry | Forensic Threat Intelligence
 
 <div align="center">
-  <img src="public/logo.png" alt="ScamSentry Logo" width="120" height="120">
-  <h1 align="center">ScamSentry</h1>
-  <p align="center">
-    <strong>Guardians of the Gig Economy</strong>
-    <br />
-    Protecting freelancers, freshers, and job seekers from fraud, one report at a time.
-  </p>
-
-  <p align="center">
-    <a href="#-features">Features</a> •
-    <a href="#-tech-stack">Tech Stack</a> •
-    <a href="#-getting-started">Getting Started</a> •
-    <a href="#-contributing">Contributing</a>
+  <img src="public/logo.png" alt="ScamSentry Logo" width="160">
+  <br />
+  <h3>Deterministic URL Threat Detection & Forensic Analysis</h3>
+  <p>
+    <strong>High-Trust Open Source Intelligence (OSINT) for the Modern Web</strong>
   </p>
 </div>
 
 ---
 
-## 🛡️ Project Overview
+## 🏛️ Project Overview
 
-**ScamSentry** is an open-source, community-driven platform designed to combat the rising tide of employment fraud. With the gig economy booming, scammers have found new ways to exploit vulnerable job seekers. ScamSentry provides a safe, anonymous space to report fraudulent activities, visualize scam hotspots, and verify legitimate companies.
+**ScamSentry** is a high-performance forensic platform designed to combat industrial-scale employment fraud and malicious URL campaigns. Transitioning from generic AI-based detection to a **deterministic, 4-layer heuristic engine**, ScamSentry provides military-grade trust signals for job seekers, freshers, and enterprise partners.
 
-Our mission is simple: **Empower the community to protect itself.**
+The platform has been redesigned with the **"Forensic Amber"** design system—inspired by professional OSINT workstation aesthetics (Maltego, Shodan)—to emphasize accuracy, transparency, and data-driven trust.
 
-## ✨ Features
+## 🚀 Key Features
 
-- **🔒 Anonymous Reporting**  
-  Submit detailed scam reports without fear of retaliation. No sign-up required for reporting.
+### 🧠 4-Layer Deterministic Engine (Non-AI)
+Unlike broad AI models, ScamSentry uses a multi-layered verifiable analysis pipeline:
+1. **L1: Heuristics** — Real-time pattern matching for known scam indicators.
+2. **L2: DNS Forensics** — Deep analysis of domain age, registrar reputation, and SSL validity.
+3. **L3: Threat Intel** — Direct synchronization with global OSINT blocklists (Google Safe Browsing, etc.).
+4. **L4: Internal Ledger** — Cross-referencing against our community-verified scam database.
 
-- **🗺️ Interactive Heatmap**  
-  Visualize global scam trends and hotspots using our real-time Mapbox integration.
+### 📊 Professional Batch Scanner (CLI)
+A robust command-line tool for security researchers and B2B partners to scan thousands of URLs in seconds with automated reporting in JSON, CSV, or HTML.
 
-- **✅ Safe Companies Directory**  
-  A curated, verified list of legitimate organizations to help you distinguish friend from foe.
+### 🗺️ Global Threat Hotspots
+Real-time visualization of scam campaign origins and targets using **MapLibre GL**, focused on high-complaint regions.
 
-- **👮 Admin Dashboard**  
-  Robust moderation tools for admins to review, approve, or reject reports, ensuring data integrity.
-
-- **📊 Smart Stats**  
-  Real-time community impact metrics showing blocked scams and protected value.
-
-- **📱 Mobile-First Design**  
-  Fully responsive UI that looks beautiful on every device, from desktop monitors to mobile screens.
+### 🛡️ Enterprise-Grade Architecture
+- **Rate-Limiting**: Powered by **Upstash Redis** for distributed production scaling.
+- **Admin Workspace**: Secure moderation portal for database integrity.
+- **Micro-Verifications**: Deterministic "Safe Company" whitelist.
 
 ## 🛠️ Tech Stack
 
-We use the latest modern web technologies to ensure speed, security, and scalability.
+- **Core**: Next.js 16 (App Router), React 19, TypeScript
+- **Design**: "Forensic Amber" custom CSS tokens, Tailwind CSS, Shadcn UI
+- **Data**: Firebase (Firestore, Auth), Upstash (Redis / Rate Limiting)
+- **Maps**: MapLibre GL JS
+- **Testing**: Jest + React Testing Library (150+ deterministic tests)
 
-- **Frontend:** [Next.js 16](https://nextjs.org/) (App Router), [React 19](https://react.dev/)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/) with [Shadcn UI](https://ui.shadcn.com/)
-- **Maps:** [Mapbox GL JS](https://www.mapbox.com/)
-- **Backend & Auth:** [Firebase](https://firebase.google.com/) (Firestore, Authentication)
-- **Icons:** [Lucide React](https://lucide.dev/)
+## 📁 Installation & Setup
 
-## 🚀 Getting Started
-
-Follow these steps to set up ScamSentry locally.
-
-### Prerequisites
-
-- Node.js 18+ installed
-- A Firebase Project
-- A Mapbox Public Token
-
-### Installation
-
-1. **Clone the repository**
+1. **Clone & Install**
    ```bash
    git clone https://github.com/Chaitanyahoon/ScamSentry.git
-   cd ScamSentry
+   npm install
    ```
 
-2. **Install dependencies**
-   ```bash
-   npm install --legacy-peer-deps
-   ```
+2. **Environment Configuration**
+   Copy `.env.example` to `.env.local` and populate:
+   - `GEMINI_API_KEY` (Layer 5 Semantic Context)
+   - `GOOGLE_SAFE_BROWSING_API_KEY`
+   - `FIREBASE_*` (Database & Auth)
+   - `UPSTASH_REDIS_*` (Rate Limiting)
 
-3. **Configure Environment Variables**
-   Create a `.env.local` file in the root directory:
-
-   ```env
-   # Mapbox
-   NEXT_PUBLIC_MAPBOX_TOKEN=pk.eyJ1...
-
-   # Firebase Configuration
-   NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSy...
-   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project
-   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
-   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456...
-   NEXT_PUBLIC_FIREBASE_APP_ID=1:123456...
-   NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-XYZ...
-   ```
-
-4. **Run the development server**
+3. **Run Development**
    ```bash
    npm run dev
    ```
 
-5. **Open the App**
-   Visit `http://localhost:3000` (or `3004` if 3000 is taken).
+4. **Run CLI Scanner**
+   ```bash
+   npm run scan urls.txt --format html --output report.html
+   ```
 
-### Admin Setup
-To access the Admin Dashboard:
-1. Go to your Firebase Console -> Authentication.
-2. Manually add a new user (email/password).
-3. Use these credentials to log in at `/admin/login`.
-
-## 🤝 Contributing
-
-Contributions make the open-source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/NewFeature`)
-3. Commit your Changes (`git commit -m 'Add some NewFeature'`)
-4. Push to the Branch (`git push origin feature/NewFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
+## 📜 License
+MIT License. Created with ❤️ for the global job-seeking community.
 
 ---
-
 <div align="center">
-  Made with ❤️ for the Community
+  <strong>Built for Accuracy. Designed for Trust.</strong>
 </div>
