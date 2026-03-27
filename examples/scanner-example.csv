@@ -1,0 +1,11 @@
+url,category
+https://github.com,legitimate
+https://paypa1.com/login,phishing
+https://example.com,unknown
+https://verify-microsoft-account.xyz,phishing
+https://www.google.com,legitimate
+http://secure-login.paypal.com.scam.net,critical
+https://amazon-verify-account.top,phishing
+https://stackoverflow.com,legitimate
+http://rn-cloud.com/office365,phishing
+https://stripe.com,legitimate
