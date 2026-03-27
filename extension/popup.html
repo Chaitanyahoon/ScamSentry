@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    :root {
+      --primary: #FFBF00;
+      --bg: #0C0A09;
+      --card: #120F0D;
+      --text: #F5F5F4;
+      --muted: #A8A29E;
+      --border: #1F1914;
+      --red: #FF4D4D;
+      --success: #10B981;
+    }
+
+    body {
+      width: 320px;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      border: 1px solid var(--border);
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-box {
+      background-color: rgba(255, 191, 0, 0.1);
+      border: 1px solid rgba(255, 191, 0, 0.3);
+      padding: 6px;
+      border-radius: 4px;
+    }
+
+    .logo-icon {
+      width: 16px;
+      height: 16px;
+      background-color: var(--primary);
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    }
+
+    h1 {
+      font-size: 11px;
+      font-family: monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin: 0;
+      color: var(--primary);
+    }
+
+    .status-card {
+      background-color: var(--card);
+      border: 1px solid var(--border);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    .status-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .status-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .risk-badge {
+      font-size: 9px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .risk-badge.safe { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .risk-badge.malicious { background: rgba(255, 77, 77, 0.1); color: var(--red); border: 1px solid rgba(255, 77, 77, 0.3); }
+
+    .url-display {
+      font-size: 12px;
+      word-break: break-all;
+      color: var(--text);
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .score-bar-container {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+
+    .score-bar {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 1s ease-out;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    .stat-val {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--text);
+      display: block;
+    }
+
+    .stat-lbl {
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    footer {
+      margin-top: 20px;
+    }
+
+    .action-btn {
+      width: 100%;
+      background: var(--primary);
+      color: var(--bg);
+      border: none;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .action-btn:hover {
+      filter: brightness(1.1);
+    }
+    
+    #loading {
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo-box">
+        <div class="logo-icon"></div>
+      </div>
+      <h1>ScamSentry Shield v1.0</h1>
+    </header>
+
+    <div id="loading">Initializing Forensic Scan...</div>
+
+    <div id="main-ui" style="display: none;">
+      <div class="status-card">
+        <div class="status-header">
+          <span class="status-label">Current Page Analysis</span>
+          <span id="risk-badge" class="risk-badge safe">Safe</span>
+        </div>
+        <div id="current-url" class="url-display">https://google.com</div>
+        <div class="score-bar-container">
+          <div id="score-bar" class="score-bar"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 9px; color: var(--muted);">
+          <span>Trust Score</span>
+          <span id="score-val" style="color: var(--primary); font-weight: bold;">0%</span>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <span class="stat-val" id="links-scanned">1,240</span>
+          <span class="stat-lbl">Links Scanned</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-val" id="threats-blocked" style="color: var(--red);">42</span>
+          <span class="stat-lbl">Threats Deflected</span>
+        </div>
+      </div>
+
+      <footer>
+        <button class="action-btn" id="view-dashboard">
+          Open Forensic Dashboard
+        </button>
+      </footer>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

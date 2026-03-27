@@ -1,0 +1,84 @@
+/**
+ * ScamSentry Extension Content Styles
+ * 
+ * Provides visual trust indicators and threat alerts for links.
+ */
+
+/* Pending Scan Indicator */
+.ss-scan-pending {
+  position: relative;
+  opacity: 0.85;
+}
+
+/* Suspicious Link Style */
+.ss-scan-suspicious {
+  background-color: rgba(255, 191, 0, 0.08) !important;
+  border-bottom: 2px dashed #FFBF00 !important;
+  color: #FFBF00 !important;
+}
+
+/* Malicious Link Style */
+.ss-scan-malicious {
+  background-color: rgba(255, 77, 77, 0.1) !important;
+  border-bottom: 2px solid #FF4D4D !important;
+  color: #FF4D4D !important;
+  font-weight: bold !important;
+}
+
+/* Threat Shield Badge */
+.ss-threat-shield {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  position: relative;
+  vertical-align: middle;
+}
+
+.ss-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.ss-pulse {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  animation: ss-pulse-anim 2s infinite;
+  z-index: 1;
+}
+
+/* Amber Shield (Suspicious) */
+.ss-shield-suspicious .ss-dot {
+  background-color: #FFBF00;
+  box-shadow: 0 0 5px rgba(255, 191, 0, 0.5);
+}
+
+.ss-shield-suspicious .ss-pulse {
+  background-color: rgba(255, 191, 0, 0.3);
+}
+
+/* Red Shield (Malicious) */
+.ss-shield-malicious .ss-dot {
+  background-color: #FF4D4D;
+  box-shadow: 0 0 8px rgba(255, 77, 77, 0.6);
+}
+
+.ss-shield-malicious .ss-pulse {
+  background-color: rgba(255, 77, 77, 0.4);
+}
+
+@keyframes ss-pulse-anim {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Hide scanned indicators on actual ScamSentry dashboard */
+[data-scamsentry-dashboard="true"] .ss-threat-shield {
+  display: none !important;
+}
