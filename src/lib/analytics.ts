@@ -25,6 +25,7 @@ export interface ScanEvent {
   timestamp: Date;
   userAgent?: string;
   ipHash?: string;
+  apiKeyId?: string; // Links to api_keys collection
 }
 
 export interface AnalyticsMetrics {
@@ -53,17 +54,21 @@ export async function logScanEvent(event: ScanEvent): Promise<void> {
   }
 }
 
-export async function getRecentScans(days: number = 7): Promise<ScanEvent[]> {
+export async function getRecentScans(apiKeyId?: string, days: number = 7): Promise<ScanEvent[]> {
   try {
     const since = new Date();
     since.setDate(since.getDate() - days);
 
-    const q = query(
+    let q = query(
       collection(db, "scan_events"),
       where("timestamp", ">=", Timestamp.fromDate(since)),
       orderBy("timestamp", "desc"),
       limit(1000),
     );
+
+    if (apiKeyId) {
+      q = query(q, where("apiKeyId", "==", apiKeyId));
+    }
 
     const snapshot = await getDocs(q);
     return snapshot.docs.map((doc) => ({
@@ -77,9 +82,9 @@ export async function getRecentScans(days: number = 7): Promise<ScanEvent[]> {
   }
 }
 
-export async function getAnalyticsMetrics(days: number = 30): Promise<AnalyticsMetrics> {
+export async function getAnalyticsMetrics(apiKeyId?: string, days: number = 30): Promise<AnalyticsMetrics> {
   try {
-    const scans = await getRecentScans(days);
+    const scans = await getRecentScans(apiKeyId, days);
 
     const totalScans = scans.length;
     const threatsDetected = scans.filter(

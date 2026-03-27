@@ -142,6 +142,7 @@ export async function POST(req: Request) {
       },
       timestamp: new Date(),
       userAgent: req.headers.get("user-agent") || undefined,
+      apiKeyId: apiKey || undefined, // Track which key triggered the scan
     }).catch((e) => console.error("Analytics logging error:", e));
 
     // 8. Return Intelligence Response
