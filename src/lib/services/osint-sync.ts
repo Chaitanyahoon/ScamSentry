@@ -126,3 +126,25 @@ async function processDomain(domain: string, source: string, col: FirebaseFirest
     return 'error';
   }
 }
+
+/**
+ * Fetch the latest 50 threats from the OSINT database
+ */
+export async function getRecentThreats(limit: number = 50): Promise<OSINTThreat[]> {
+  try {
+    const db = getAdminDb();
+    const snapshot = await db.collection('threat_intel_feeds')
+      .orderBy('firstSeen', 'desc')
+      .limit(limit)
+      .get();
+
+    return snapshot.docs.map(doc => ({
+      ...doc.data(),
+      firstSeen: doc.data().firstSeen.toDate(),
+      lastSync: doc.data().lastSync.toDate()
+    })) as OSINTThreat[];
+  } catch (error) {
+    console.error('[OSINT] Failed to fetch threats:', error);
+    return [];
+  }
+}
