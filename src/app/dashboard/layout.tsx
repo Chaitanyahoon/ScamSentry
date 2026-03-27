@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button"
 const sidebarItems = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { name: "API Management", href: "/dashboard/api", icon: Key },
-  { name: "Forensic Logs", href: "/dashboard/logs", icon: Database },
-  { name: "Global Map", href: "/map", icon: Activity },
+  { name: "OSINT Intelligence", href: "/dashboard/admin/osint", icon: Database },
+  { name: "Forensic Logs", href: "/dashboard/logs", icon: Activity },
+  { name: "Global Map", href: "/map", icon: Shield },
 ]
 
 export default function DashboardLayout({
