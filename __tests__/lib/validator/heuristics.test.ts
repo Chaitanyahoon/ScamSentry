@@ -1,4 +1,4 @@
-import { analyzeHeuristics } from '@/lib/validator/heuristics'
+import { analyzeHeuristics } from '../../../src/lib/validator/heuristics'
 import {
   MALICIOUS_URLS,
   SAFE_URLS,
@@ -139,7 +139,7 @@ describe('Heuristics Layer (L1) - URL Pattern Detection', () => {
       ]
       spoofedBrands.forEach((url) => {
         const result = analyzeHeuristics(url)
-        expect(result.score).toBeGreaterThan(10, `Failed to detect spoofed brand in ${url}`)
+        expect(result.score).toBeGreaterThan(10)
       })
     })
   })

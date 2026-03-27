@@ -114,7 +114,7 @@ function calculateEntropy(str: string): number {
   }, 0);
 }
 
-export function analyzeHeuristics(inputUrl: string) {
+export function analyzeHeuristics(inputUrl: string): { score: number; flags: string[] } {
   let score = 0;
   const flags: string[] = [];
   const url = inputUrl.trim().toLowerCase();

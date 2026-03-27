@@ -8,11 +8,7 @@ export const ADMIN_CONFIG = {
    * Email domains allowed to create admin accounts
    * Empty array = allow any email
    */
-  ALLOWED_ADMIN_DOMAINS: [
-    // Add authorized domains here
-    // 'company.com',
-    // 'admin.company.com',
-  ],
+  ALLOWED_ADMIN_DOMAINS: [] as string[],
 
   /**
    * Session timeout in milliseconds
@@ -71,7 +67,6 @@ export const ADMIN_CONFIG = {
   isEmailDomainAllowed(email: string): boolean {
     if (!this.ENABLE_EMAIL_DOMAIN_CHECK) return true
     if (this.ALLOWED_ADMIN_DOMAINS.length === 0) return true
-    
     const domain = email.split('@')[1]?.toLowerCase()
     return this.ALLOWED_ADMIN_DOMAINS.includes(domain || '')
   },

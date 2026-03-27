@@ -172,9 +172,10 @@ describe('Rule Management System', () => {
         weight: 50,
         confidence: 0.8,
         falsePositiveRate: 0.05,
+        createdBy: 'user-123',
       }
 
-      const ruleId = await createRule(newRule, 'user-123')
+      const ruleId = await createRule(newRule as any, 'user-123')
       expect(ruleId).toBe('new-rule-123')
     })
 
@@ -190,9 +191,10 @@ describe('Rule Management System', () => {
         weight: 50,
         confidence: 0.8,
         falsePositiveRate: 0.05,
+        createdBy: 'user-123',
       }
 
-      await createRule(newRule, 'user-123')
+      await createRule(newRule as any, 'user-123')
 
       expect(addDoc).toHaveBeenCalledWith(
         expect.anything(),

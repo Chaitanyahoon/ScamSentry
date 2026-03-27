@@ -16,8 +16,8 @@ export default function AnalyticsDashboard() {
     const fetchData = async () => {
       setLoading(true);
       const [metricsData, scansData] = await Promise.all([
-        getAnalyticsMetrics(days),
-        getRecentScans(days),
+        getAnalyticsMetrics(undefined, days),
+        getRecentScans(undefined, days),
       ]);
       setMetrics(metricsData);
       setRecentScans(scansData);

@@ -7,6 +7,9 @@ import { getRecentScans, ScanEvent } from "@/lib/analytics"
 import { Loader2, Zap, Globe as GlobeIcon, Maximize2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
+import { MapPin } from "lucide-react"
+import Link from "next/link"
+
 // Dynamic import for react-globe.gl to avoid SSR issues with Three.js
 const Globe = dynamic(() => import("react-globe.gl"), { 
   ssr: false,
@@ -22,6 +25,7 @@ export function ForensicGlobe() {
   const { reports } = useReports()
   const [scans, setScans] = useState<ScanEvent[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedIntel, setSelectedIntel] = useState<any>(null)
   const globeRef = useRef<any>(null)
 
   useEffect(() => {
@@ -67,6 +71,7 @@ export function ForensicGlobe() {
   // Points for "Forensic Intel"
   const points = useMemo(() => {
     return reports.filter(r => r.lat && r.lng).map(r => ({
+      ...r, // Include all report data for the click handler
       lat: r.lat,
       lng: r.lng,
       size: r.riskLevel === "high" ? 0.8 : 0.4,
@@ -117,6 +122,55 @@ export function ForensicGlobe() {
         </div>
       </div>
 
+      {/* Detail Overlay Card */}
+      {selectedIntel && (
+        <div className="absolute right-6 top-6 z-20 w-72 bg-[#120F0D]/95 backdrop-blur-xl border border-primary/30 p-5 rounded-lg shadow-[0_0_50px_rgba(255,191,0,0.15)] animate-in fade-in slide-in-from-right-4 duration-300">
+           <div className="flex justify-between items-start mb-4">
+              <div className="bg-primary/10 px-2 py-0.5 border border-primary/20 rounded text-[9px] font-mono text-primary uppercase tracking-tighter">
+                {selectedIntel.riskLevel} Risk Entity
+              </div>
+              <button 
+                onClick={() => setSelectedIntel(null)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Close details"
+              >
+                <Maximize2 className="h-3 w-3 rotate-45" />
+              </button>
+           </div>
+           
+           <h4 className="font-bold text-sm text-foreground mb-1">{selectedIntel.title}</h4>
+           <div className="flex items-center text-[10px] text-muted-foreground mb-4">
+              <MapPin className="h-2.5 w-2.5 mr-1 text-primary/60" />
+              {selectedIntel.city}, {selectedIntel.state}
+           </div>
+           
+           <div className="space-y-3 mb-5 text-[11px]">
+              <div className="flex justify-between border-b border-[#1F1914] pb-1.5">
+                <span className="text-muted-foreground">Company:</span>
+                <span className="text-foreground font-medium">{selectedIntel.company}</span>
+              </div>
+              <div className="flex justify-between border-b border-[#1F1914] pb-1.5">
+                <span className="text-muted-foreground">Vector:</span>
+                <span className="text-foreground font-medium">{selectedIntel.scamType}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Trust Score:</span>
+                <span className="text-primary font-bold">{selectedIntel.trustScore}%</span>
+              </div>
+           </div>
+           
+           <p className="text-[10px] text-muted-foreground line-clamp-3 italic mb-4 border-l-2 border-primary/30 pl-3">
+              "{selectedIntel.description}"
+           </p>
+
+           <Button size="sm" variant="outline" className="w-full text-[10px] h-8 font-mono tracking-widest uppercase bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary" asChild>
+              <Link href={`/reports/${selectedIntel.id}`}>
+                Access Full Dossier <Zap className="ml-1.5 h-3 w-3 fill-primary" />
+              </Link>
+           </Button>
+        </div>
+      )}
+
       <Globe
         ref={globeRef}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
@@ -133,8 +187,9 @@ export function ForensicGlobe() {
         pointsData={points}
         pointColor={"color" as any}
         pointRadius={"size" as any}
-        pointsMerge={true}
+        pointsMerge={false}
         pointAltitude={0.01}
+        onPointClick={(point: any) => setSelectedIntel(point)}
         
         ringsData={points.filter(p => p.size > 0.5)}
         ringColor={() => "#FF4D4D"}

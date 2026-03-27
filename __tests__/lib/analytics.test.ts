@@ -14,6 +14,7 @@ describe('Analytics Service', () => {
           forensics: 10,
           threatIntel: 0,
           internalGraph: 0,
+          semantic: 0,
         },
         timestamp: new Date(),
         userAgent: 'Mozilla/5.0...',
@@ -46,6 +47,7 @@ describe('Analytics Service', () => {
           forensics: 0,
           threatIntel: 0,
           internalGraph: 0,
+          semantic: 0,
         },
         timestamp: new Date(),
         userAgent: 'Test',
@@ -96,7 +98,7 @@ describe('Analytics Service', () => {
 
   describe('Analytics Metrics Computation', () => {
     it('should return AnalyticsMetrics interface', async () => {
-      const metrics = await getAnalyticsMetrics(7)
+      const metrics = await getAnalyticsMetrics(undefined, 7)
       expect(metrics).toHaveProperty('totalScans')
       expect(metrics).toHaveProperty('threatsDetected')
       expect(metrics).toHaveProperty('averageScore')
@@ -106,7 +108,7 @@ describe('Analytics Service', () => {
     })
 
     it('layerAccuracy should contain layer metrics', async () => {
-      const metrics = await getAnalyticsMetrics(7)
+      const metrics = await getAnalyticsMetrics(undefined, 7)
       expect(metrics.layerAccuracy).toHaveProperty('heuristics')
       expect(metrics.layerAccuracy).toHaveProperty('forensics')
       expect(metrics.layerAccuracy).toHaveProperty('threatIntel')
@@ -116,24 +118,24 @@ describe('Analytics Service', () => {
     it('should support various date ranges', async () => {
       const ranges = [7, 30, 90]
       for (const range of ranges) {
-        expect(() => getAnalyticsMetrics(range)).not.toThrow()
+        expect(() => getAnalyticsMetrics(undefined, range)).not.toThrow()
       }
     })
   })
 
   describe('Recent Scans Retrieval', () => {
     it('should retrieve recent scans', async () => {
-      const scans = await getRecentScans(7)
+      const scans = await getRecentScans(undefined, 7)
       expect(Array.isArray(scans)).toBe(true)
     })
 
     it('should limit results appropriately', async () => {
-      const scans = await getRecentScans(7)
+      const scans = await getRecentScans(undefined, 7)
       expect(scans.length).toBeLessThanOrEqual(1000)
     })
 
     it('should return ScanEvent objects', async () => {
-      const scans = await getRecentScans(7)
+      const scans = await getRecentScans(undefined, 7)
       scans.forEach((scan) => {
         if (scan) {
           expect(scan).toHaveProperty('url')
@@ -147,7 +149,7 @@ describe('Analytics Service', () => {
       const ranges = [1, 7, 30, 90]
       for (const range of ranges) {
         expect(async () => {
-          await getRecentScans(range)
+          await getRecentScans(undefined, range)
         }).not.toThrow()
       }
     })
@@ -167,6 +169,7 @@ describe('Analytics Service', () => {
             forensics: 0,
             threatIntel: 0,
             internalGraph: 0,
+            semantic: 0,
           },
           timestamp: new Date(),
           userAgent: 'Test',
@@ -185,6 +188,7 @@ describe('Analytics Service', () => {
           forensics: 0,
           threatIntel: 0,
           internalGraph: 0,
+          semantic: 0,
         },
         timestamp: new Date(),
         userAgent: 'Test',
@@ -206,6 +210,7 @@ describe('Analytics Service', () => {
           forensics: 20,
           threatIntel: 0,
           internalGraph: 0,
+          semantic: 0,
         },
         timestamp: new Date(),
         userAgent: 'IntegrationTest',
@@ -213,12 +218,12 @@ describe('Analytics Service', () => {
 
       await logScanEvent(event)
 
-      const recentScans = await getRecentScans(1)
+      const recentScans = await getRecentScans(undefined, 1)
       expect(Array.isArray(recentScans)).toBe(true)
     })
 
     it('should compute metrics from logged events', async () => {
-      const metrics = await getAnalyticsMetrics(7)
+      const metrics = await getAnalyticsMetrics(undefined, 7)
       expect(metrics.totalScans).toBeGreaterThanOrEqual(0)
       expect(metrics.threatsDetected).toBeGreaterThanOrEqual(0)
       expect(metrics.averageScore).toBeGreaterThanOrEqual(0)

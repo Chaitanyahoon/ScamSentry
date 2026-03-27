@@ -16,7 +16,8 @@ import {
   Zap, 
   Clock,
   ArrowUpRight,
-  Fingerprint
+  Fingerprint,
+  Database
 } from "lucide-react"
 import { getAnalyticsMetrics, ScanEvent, getRecentScans } from "@/lib/analytics"
 import { cn } from "@/lib/utils"
@@ -39,12 +40,14 @@ export default function ApiDashboardPage() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true)
+      if (!user) return
       // 1. Fetch API Key
       const q = query(collection(db, "api_keys"), where("userId", "==", user.uid), where("status", "==", "active"))
       const snapshot = await getDocs(q)
       
       if (!snapshot.empty) {
-        const keyData = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() }
+        const data = snapshot.docs[0].data()
+        const keyData = { id: snapshot.docs[0].id, ...data } as any
         setApiKey(keyData)
         
         // 2. Fetch Metrics & Scans for this key
