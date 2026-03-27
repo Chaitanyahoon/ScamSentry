@@ -93,6 +93,7 @@ export async function analyzeDomainForensics(inputUrl: string) {
   }
 
   // 5. RDAP & Registrar Pedigree
+  let infrastructure: { nameservers?: string[], registrar?: string } | undefined;
   try {
     // We will extract the root domain since RDAP query for full subdomains usually fails
     // e.g., for secure.login.paypal.com.scam.net we want scam.net
@@ -112,6 +113,10 @@ export async function analyzeDomainForensics(inputUrl: string) {
       
       // NEW: Nameserver Reputation Audit
       const nameServers = (rdapData.nameservers || []).map((ns: any) => ns.ldhName || "");
+      const registrar = rdapData.entities?.find((e: any) => e.roles?.includes("registrar"))?.vcardArray?.[1]?.find((v: any) => v[0] === "fn")?.[3] || "";
+      
+      infrastructure = { nameservers: nameServers, registrar };
+
       const suspiciousNS = ["freenom", "freehost", "burner", "disposable"];
       if (nameServers.some((ns: string) => suspiciousNS.some(s => ns.toLowerCase().includes(s)))) {
         score += 40;
@@ -143,9 +148,15 @@ export async function analyzeDomainForensics(inputUrl: string) {
     // We do not push a flag here because many obscure foreign TLDs don't support RDAP well
   }
 
+  // 6. Threat Fingerprinting (NEW: Neural Cluster ID)
+  const { generateThreatFingerprint } = await import("../fingerprints");
+  const fingerprint = generateThreatFingerprint(inputUrl, flags, { base: score }, infrastructure);
+
   return {
     score: Math.min(Math.max(score, 0), 100),
     flags,
     analyzedDomains: [domain],
+    fingerprint,
+    infrastructure
   };
 }
