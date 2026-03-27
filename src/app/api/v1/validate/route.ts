@@ -6,7 +6,9 @@ import { analyzeInternalGraph } from "@/lib/validator/internal-graph";
 import { analyzeSemanticIntent } from "@/lib/validator/semantic";
 import { generateThreatFingerprint } from "@/lib/fingerprints";
 import { freeTierLimiter, enterpriseLimiter } from "@/lib/rate-limit";
-import { logScanEvent } from "@/lib/analytics";
+import { validateApiKey } from "@/lib/auth";
+import { logScanEvent, ScanEvent } from "@/lib/analytics";
+import { dispatchBrandAlert } from "@/lib/webhook-dispatcher";
 
 // In-memory fallback for local dev (when Upstash env vars not set)
 const localRateLimitMap = new Map<
@@ -124,32 +126,45 @@ export async function POST(req: Request) {
     // Log scan event asynchronously
     logScanEvent({
       url: input,
-      finalScore,
-      riskLevel,
-      triggeredLayers: [
-        L1.flags.length > 0 ? "heuristics" : "",
-        L2.flags.length > 0 ? "forensics" : "",
-        L3.flags.length > 0 ? "threatIntel" : "",
-        L4.flags.length > 0 ? "internalGraph" : "",
-        L5.score > 0 ? "semantic" : "",
-      ].filter(Boolean),
+      finalScore: result.score,
+      riskLevel: result.label as any,
+      triggeredLayers: result.layers.filter(l => l.score > 0).map(l => l.name),
       layerScores: {
-        heuristics: L1.score,
-        forensics: L2.score,
-        threatIntel: L3.score,
-        internalGraph: L4.score,
-        semantic: L5.score,
+        heuristics: result.layers.find(l => l.name === "Heuristics")?.score || 0,
+        forensics: result.layers.find(l => l.name === "Forensics")?.score || 0,
+        threatIntel: result.layers.find(l => l.name === "Threat Intel")?.score || 0,
+        internalGraph: result.layers.find(l => l.name === "Internal Trust Graph")?.score || 0,
+        semantic: result.layers.find(l => l.name === "Semantic AI")?.score || 0,
       },
       timestamp: new Date(),
       userAgent: req.headers.get("user-agent") || undefined,
-      apiKeyId: apiKey || undefined, // Track which key triggered the scan
-    }).catch((e) => console.error("Analytics logging error:", e));
+      ipHash: req.headers.get("x-forwarded-for") || "internal",
+      apiKeyId: apiKey || undefined, // Assuming keyData?.id maps to apiKey for now
+    };
+
+    await logScanEvent(scanEvent);
+
+    // 4. B2B Brand Monitoring Trigger
+    if (result.score <= 20) { // Changed from >= 85 to <= 20 to match "Critical Threat"
+      // Extract brand from result flags if possible (heuristic matches brands)
+      const brandMatch = result.details.find(d => d.includes("mimics '") || d.includes("spoofing major brand '"))
+      if (brandMatch) {
+         const brandName = brandMatch.match(/'([^']+)'/)?.[1]
+         if (brandName) {
+            await dispatchBrandAlert(brandName, {
+              alertType: "BRAND_MIMICRY",
+              severity: "CRITICAL",
+              targetBrand: brandName,
+              maliciousUrl: input, // Use 'input' as the URL
+              fingerprint: result.fingerprint,
+              detectedAt: new Date().toISOString(),
+              forensicSummary: result.details
+            })
+         }
+      }
+    }
 
     // 8. Return Intelligence Response
-    return NextResponse.json(
-      {
-        success: true,
-        meta: {
           timestamp: new Date().toISOString(),
           engineVersion: "v2.2.0-beta",
           tier: isEnterprise ? "enterprise" : "free",
