@@ -1,15 +1,19 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { auth } from "@/lib/firebase"
-import { signInWithEmailAndPassword } from "firebase/auth"
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { Loader2, Shield, Terminal } from "lucide-react"
+import { Loader2, Shield, Terminal, AlertTriangle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { ADMIN_CONFIG } from "@/lib/admin-config"
+import { recordFailedLoginAttempt, getAdminUser, type AdminUser } from "@/lib/admin-roles"
+import { logAuditAction } from "@/lib/audit-logger"
+import { isAccountLockedOut } from "@/lib/admin-roles"
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -18,21 +22,123 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [lockoutTimeRemaining, setLockoutTimeRemaining] = useState<number | null>(null)
+
+  // Check if email is locked out
+  useEffect(() => {
+    if (!lockoutTimeRemaining) return
+
+    const interval = setInterval(() => {
+      const now = Date.now()
+      const remaining = lockoutTimeRemaining - now
+
+      if (remaining <= 0) {
+        setLockoutTimeRemaining(null)
+        clearInterval(interval)
+      } else {
+        setLockoutTimeRemaining(lockoutTimeRemaining)
+      }
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [lockoutTimeRemaining])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      await signInWithEmailAndPassword(auth, email, password)
+      // Validate email domain if enabled
+      if (ADMIN_CONFIG.ENABLE_EMAIL_DOMAIN_CHECK && !ADMIN_CONFIG.isEmailDomainAllowed(email)) {
+        const domain = ADMIN_CONFIG.getEmailDomain(email)
+        throw new Error(`Email domain '${domain}' is not authorized for admin access.`)
+      }
+
+      // Attempt Firebase authentication
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const user = userCredential.user
+
+      // Check if user has admin role assigned
+      const adminUser = await getAdminUser(user.uid)
+
+      if (!adminUser) {
+        // Create admin user record on first login
+        console.log('[AUTH] First login - initializing admin user record')
+      } else if (!adminUser.isActive) {
+        await logAuditAction({
+          userId: user.uid,
+          userEmail: user.email || '',
+          action: 'ADMIN_LOGIN',
+          resourceType: 'auth',
+          resourceId: user.uid,
+          details: { reason: 'Account inactive' },
+          status: 'failure',
+          errorMessage: 'Account has been deactivated',
+        })
+
+        await auth.signOut()
+        throw new Error('Your account has been deactivated. Contact administrator.')
+      }
+
+      if (ADMIN_CONFIG.ENABLE_AUDIT_LOG) {
+        await logAuditAction({
+          userId: user.uid,
+          userEmail: user.email || '',
+          action: 'ADMIN_LOGIN',
+          resourceType: 'auth',
+          resourceId: user.uid,
+          details: {
+            emailVerified: user.emailVerified,
+            role: adminUser?.role,
+          },
+          status: 'success',
+        })
+      }
+
       toast({
         title: "ACCESS_GRANTED",
         description: "ROOT DIRECTORY INITIALIZING...",
       })
+
       router.push("/admin")
       router.refresh()
     } catch (error: any) {
       console.error("Login error:", error)
+
+      // Record failed login attempt
+      try {
+        // Extract UID if available from error (for existing users)
+        const isInvalidCredential = 
+          error.code === "auth/invalid-credential" || 
+          error.code === "auth/user-not-found" || 
+          error.code === "auth/wrong-password"
+
+        if (isInvalidCredential) {
+          // Try to get the user UID to record failed attempt
+          try {
+            // We can create a temporary user to get the UID, but we won't actually create them
+            // Instead, we'll just log the attempt with email
+            await recordFailedLoginAttempt('unknown-' + Date.now(), email)
+          } catch (e) {
+            console.error('Failed to record login attempt:', e)
+          }
+        }
+
+        if (ADMIN_CONFIG.ENABLE_AUDIT_LOG) {
+          await logAuditAction({
+            userId: 'unknown',
+            userEmail: email,
+            action: 'ADMIN_LOGIN',
+            resourceType: 'auth',
+            resourceId: email,
+            details: { errorCode: error.code },
+            status: 'failure',
+            errorMessage: error.message,
+          })
+        }
+      } catch (auditError) {
+        console.error('Failed to log audit action:', auditError)
+      }
 
       let errorMessage = "UNKNOWN_ERROR_DURING_HANDSHAKE"
       let errorTitle = "SYS_ERR: AUTH_FAILED"
@@ -40,6 +146,9 @@ export default function AdminLoginPage() {
       if (error.code === "auth/invalid-credential" || error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
         errorTitle = "SYS_ERR: INVALID_CREDENTIALS"
         errorMessage = "AUTH PAYLOAD REJECTED BY DATABASE FIREWALL."
+      } else if (error.message?.includes("not authorized")) {
+        errorTitle = "SYS_ERR: DOMAIN_REJECTED"
+        errorMessage = error.message
       } else if (error.message) {
         errorMessage = error.message
       }
