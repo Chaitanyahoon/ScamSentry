@@ -32,6 +32,19 @@ service cloud.firestore {
       allow delete: if request.auth != null;
     }
 
+    // OSINT Intelligence Feeds: Allow public read access for real-time telemetry
+    // This resolves the 'Missing or insufficient permissions' for ticker/dossier views
+    match /threat_intel_feeds/{threatId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
+    }
+
+    // Safety alias for OSINT threats
+    match /osint_threats/{threatId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
+    }
+
     // Default deny for other collections
     match /{document=**} {
       allow read, write: if false;
