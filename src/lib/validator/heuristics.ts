@@ -158,170 +158,181 @@ export function analyzeHeuristics(inputUrl: string) {
     );
   }
 
-  // 8. Deep Parsing (Subdomains, HTTPS, Ports, Dashes, Typosquatting, Entropy)
-  try {
-    const domainObj = new URL(url.startsWith("http") ? url : `http://${url}`);
+    // 8. Deep Parsing (Subdomains, HTTPS, Ports, Dashes, Typosquatting, Entropy)
+    try {
+      const domainObj = new URL(url.startsWith("http") ? url : `http://${url}`);
 
-    if (domainObj.protocol === "http:" && url.includes("login")) {
-      score += 40;
-      flags.push(
-        "High Risk: URL requests login credentials over an unencrypted HTTP connection.",
-      );
-    }
+      if (domainObj.protocol === "http:" && url.includes("login")) {
+        score += 40;
+        flags.push(
+          "High Risk: URL requests login credentials over an unencrypted HTTP connection."
+        );
+      }
 
-    if (domainObj.port && !["80", "443"].includes(domainObj.port)) {
-      score += 30;
-      flags.push("Suspicious: URL points to a non-standard network port.");
-    }
+      if (domainObj.port && !["80", "443"].includes(domainObj.port)) {
+        score += 30;
+        flags.push("Suspicious: URL points to a non-standard network port.");
+      }
 
-    const parts = domainObj.hostname.split(".");
-    if (parts.length > 4) {
-      score += 40;
-      flags.push(
-        "Suspicious: Excessive subdomains commonly used to spoof legitimate root domains.",
-      );
-    }
+      const parts = domainObj.hostname.split(".");
+      if (parts.length > 4) {
+        score += 40;
+        flags.push(
+          "Suspicious: Excessive subdomains commonly used to spoof legitimate root domains."
+        );
+      }
 
-    // Detect `google.com.example.com` style deliveries that abuse brand subdomain
-    if (
-      parts.length > 2 &&
-      TARGET_BRANDS.some((b) =>
-        domainObj.hostname.match(new RegExp(`(^|\\.)${b}\\.`, "i")),
-      )
-    ) {
-      score += 90;
-      flags.push(
-        "CRITICAL: Suspicious subdomain includes a major brand name as an embedded component.",
-      );
-    }
-
-    const dashCount = (domainObj.hostname.match(/-/g) || []).length;
-    if (dashCount >= 3) {
-      score += 35;
-      flags.push(
-        "Suspicious: Hostname uses excessive hyphen-stuffing, a common SEO/phishing obfuscation tactic.",
-      );
-    }
-
-    // Path-based anomalies
-    if (
-      MALICIOUS_URL_DICTIONARIES.suspiciousPaths.test(
-        domainObj.pathname + domainObj.search,
-      )
-    ) {
-      score += 35;
-      flags.push(
-        "Suspicious: URL path/query includes known phishing trigger words.",
-      );
-    }
-
-    if (MALICIOUS_URL_DICTIONARIES.embeddedRedirect.test(domainObj.href)) {
-      score += 30;
-      flags.push(
-        "Suspicious: URL contains embedded redirect or tracking markers.",
-      );
-    }
-
-    if (domainObj.pathname.length > 80 || domainObj.search.length > 80) {
-      score += 20;
-      flags.push(
-        "Suspicious: URL path or query is unusually long, indicating hidden nested redirects.",
-      );
-    }
-
-    // Credential harvesting detection
-    if (
-      MALICIOUS_URL_DICTIONARIES.credentialHarvesting.test(
-        domainObj.pathname + domainObj.search,
-      )
-    ) {
-      score += 25;
-      flags.push(
-        "Suspicious: URL contains credential-related keywords (password, token, auth).",
-      );
-    }
-
-    // Homoglyph character confusion detection
-    if (MALICIOUS_URL_DICTIONARIES.homoglyphPatterns.test(domainObj.hostname)) {
-      score += 45;
-      flags.push(
-        "High Risk: Hostname uses character homoglyphs (visually similar characters) to spoof legitimate domains.",
-      );
-    }
-
-    // Query string parameter suspicion check
-    const queryParams = domainObj.searchParams;
-    let suspiciousParamCount = 0;
-    for (const [key, value] of queryParams.entries()) {
+      // Detect `google.com.example.com` style deliveries that abuse brand subdomain
       if (
-        /redirect|callback|return|url|link|goto|redir|next|back|continue/i.test(
-          key,
+        parts.length > 2 &&
+        TARGET_BRANDS.some((b) =>
+          domainObj.hostname.match(new RegExp(`(^|\\.)${b}\\.`, "i"))
         )
       ) {
-        suspiciousParamCount++;
+        score += 90;
+        flags.push(
+          "CRITICAL: Suspicious subdomain includes a major brand name as an embedded component."
+        );
       }
-      if (value && value.length > 100) {
-        suspiciousParamCount++;
+
+      const dashCount = (domainObj.hostname.match(/-/g) || []).length;
+      if (dashCount >= 3) {
+        score += 35;
+        flags.push(
+          "Suspicious: Hostname uses excessive hyphen-stuffing, a common SEO/phishing obfuscation tactic."
+        );
       }
-    }
-    if (suspiciousParamCount >= 2) {
-      score += 40;
-      flags.push(
-        `High Risk: URL contains ${suspiciousParamCount} suspicious redirect/callback parameters.`,
-      );
-    }
 
-    // DGA / Entropy Check
-    // We check the entropy of the hostname (excluding TLD)
-    const hostnameWithoutTld =
-      parts.length > 1 ? parts.slice(0, -1).join("") : domainObj.hostname;
-    const entropy = calculateEntropy(hostnameWithoutTld);
-    if (entropy > 4.0 && hostnameWithoutTld.length > 10) {
-      score += 50;
-      flags.push(
-        `High Risk: Hostname has abnormally high entropy (${entropy.toFixed(2)}). Likely generated by a Domain Generation Algorithm (DGA).`,
-      );
-    }
-
-    // New: Levenshtein Typosquatting Check
-    // We check against TARGET_BRANDS finding distance 1 or 2
-    let isTyposquat = false;
-    for (const part of parts) {
-      if (part.length < 4) continue; // skip very short strings
-      for (const brand of TARGET_BRANDS) {
-        if (part === brand) {
-          // Strict check: if it's the brand exactly, is it acting as a subdomain to a scam root domain?
-          const rootDomainIndex = parts.length - 2;
-          const currentPartIndex = parts.indexOf(part);
-          if (currentPartIndex !== rootDomainIndex && parts.length >= 2) {
-            score += 85;
-            flags.push(
-              `CRITICAL: Subdomain explicitly spoofing major brand '${brand}'.`,
-            );
-            isTyposquat = true;
-            break;
-          }
-        } else {
-          const dist = levenshteinDistance(part, brand);
-          // Catch things like paypa1 (dist 1) or appIe (dist 1)
-          if (dist === 1 || (dist === 2 && part.length > 8)) {
-            score += 75;
-            flags.push(
-              `CRITICAL: Typosquatting detected. '${part}' is a visually similar spoof of '${brand}'.`,
-            );
-            isTyposquat = true;
-            break;
-          }
+      // NEW: Path & Query Entropy Analysis
+      const fullPath = domainObj.pathname + domainObj.search;
+      if (fullPath.length > 30) {
+        const pathEntropy = calculateEntropy(fullPath);
+        // Standard tokens like JWT/State frequently hit 4.5+. 
+        // We increase threshold to 5.2 to catch extreme obfuscation/DGA/Base64 masking.
+        if (pathEntropy > 5.2) {
+          score += 40;
+          flags.push(
+            `High Risk: URL path/query has extreme entropy (${pathEntropy.toFixed(2)}). Heavy obfuscation marker.`
+          );
         }
       }
-      if (isTyposquat) break;
+
+      // Path-based anomalies
+      if (
+        MALICIOUS_URL_DICTIONARIES.suspiciousPaths.test(
+          domainObj.pathname + domainObj.search
+        )
+      ) {
+        score += 35;
+        flags.push(
+          "Suspicious: URL path/query includes known phishing trigger words."
+        );
+      }
+
+      if (MALICIOUS_URL_DICTIONARIES.embeddedRedirect.test(domainObj.href)) {
+        score += 30;
+        flags.push(
+          "Suspicious: URL contains embedded redirect or tracking markers."
+        );
+      }
+
+      if (domainObj.pathname.length > 80 || domainObj.search.length > 80) {
+        score += 20;
+        flags.push(
+          "Suspicious: URL path or query is unusually long, indicating hidden nested redirects."
+        );
+      }
+
+      // Credential harvesting detection
+      if (
+        MALICIOUS_URL_DICTIONARIES.credentialHarvesting.test(
+          domainObj.pathname + domainObj.search
+        )
+      ) {
+        score += 25;
+        flags.push(
+          "Suspicious: URL contains credential-related keywords (password, token, auth)."
+        );
+      }
+
+      // Homoglyph character confusion detection
+      if (MALICIOUS_URL_DICTIONARIES.homoglyphPatterns.test(domainObj.hostname)) {
+        score += 45;
+        flags.push(
+          "High Risk: Hostname uses character homoglyphs (visually similar characters) to spoof legitimate domains."
+        );
+      }
+
+      // Query string parameter suspicion check
+      const queryParams = domainObj.searchParams;
+      let suspiciousParamCount = 0;
+      for (const [key, value] of queryParams.entries()) {
+        if (
+          /redirect|callback|return|url|link|goto|redir|next|back|continue/i.test(
+            key
+          )
+        ) {
+          suspiciousParamCount++;
+        }
+        if (value && value.length > 100) {
+          suspiciousParamCount++;
+        }
+      }
+      if (suspiciousParamCount >= 2) {
+        score += 40;
+        flags.push(
+          `High Risk: URL contains ${suspiciousParamCount} suspicious redirect/callback parameters.`
+        );
+      }
+
+      // DGA / Entropy Check
+      const hostnameWithoutTld =
+        parts.length > 1 ? parts.slice(0, -1).join("") : domainObj.hostname;
+      const entropy = calculateEntropy(hostnameWithoutTld);
+      if (entropy > 4.0 && hostnameWithoutTld.length > 10) {
+        score += 50;
+        flags.push(
+          `High Risk: Hostname has abnormally high entropy (${entropy.toFixed(2)}). Likely generated by a Domain Generation Algorithm (DGA).`
+        );
+      }
+
+      // NEW: Enhanced Levenshtein Typosquatting Check
+      let isTyposquat = false;
+      for (const part of parts) {
+        if (part.length < 4) continue;
+        for (const brand of TARGET_BRANDS) {
+          if (part === brand) {
+            const rootDomainIndex = parts.length - 2;
+            const currentPartIndex = parts.indexOf(part);
+            if (currentPartIndex !== rootDomainIndex && parts.length >= 2) {
+              score += 85;
+              flags.push(
+                `CRITICAL: Subdomain explicitly spoofing major brand '${brand}'.`
+              );
+              isTyposquat = true;
+              break;
+            }
+          } else {
+            const dist = levenshteinDistance(part, brand);
+            // Catch lookalikes: dist 1 is critical, dist 2 is high-suspicion for long names
+            if (dist === 1 || (dist === 2 && part.length > 8)) {
+              score += 80;
+              flags.push(
+                `CRITICAL: Advanced Typosquatting detected. '${part}' visually mimics '${brand}'.`
+              );
+              isTyposquat = true;
+              break;
+            }
+          }
+        }
+        if (isTyposquat) break;
+      }
+    } catch (e) {
+      score += 20;
+      flags.push(
+        "Warning: Target URL failed to parse perfectly, possible obfuscation."
+      );
     }
-  } catch (e) {
-    score += 20;
-    flags.push(
-      "Warning: Target URL failed to parse perfectly, possible obfuscation.",
-    );
-  }
 
   return {
     score: Math.min(score, 100),
