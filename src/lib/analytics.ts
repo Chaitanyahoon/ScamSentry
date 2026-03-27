@@ -110,6 +110,9 @@ export async function getAnalyticsMetrics(apiKeyId?: string, days: number = 30):
     const internalGraphTriggered = scans.filter(
       (s) => s.layerScores.internalGraph > 0,
     ).length;
+    const semanticTriggered = scans.filter(
+      (s) => s.layerScores.semantic > 0,
+    ).length;
 
     // Estimate false positives (Secure scans but reviewed as suspicious)
     const falsePositiveEstimate = scans.filter(
@@ -155,6 +158,7 @@ export async function getAnalyticsMetrics(apiKeyId?: string, days: number = 30):
         threatIntel: totalScans > 0 ? (threatIntelTriggered / totalScans) * 100 : 0,
         internalGraph:
           totalScans > 0 ? (internalGraphTriggered / totalScans) * 100 : 0,
+        semantic: totalScans > 0 ? (semanticTriggered / totalScans) * 100 : 0,
       },
       topUrlPatterns,
       scanTrend,
@@ -171,6 +175,7 @@ export async function getAnalyticsMetrics(apiKeyId?: string, days: number = 30):
         forensics: 0,
         threatIntel: 0,
         internalGraph: 0,
+        semantic: 0,
       },
       topUrlPatterns: [],
       scanTrend: [],
