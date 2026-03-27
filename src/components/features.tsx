@@ -12,88 +12,118 @@ export function Features() {
 
   const capabilities = [
     {
-      step: "01",
-      title: "Static heuristics",
+      step: "L1",
+      title: "Static Heuristics",
+      tag: "Deterministic",
       detail:
-        "Pattern-matches against known phishing signatures — punycode homographs, dash-stuffing, IP masking, burner-hosting abuse, and 60+ sketchy TLDs. Catches 90% of threats instantly, zero API calls.",
+        "Pattern-matches against known phishing signatures — punycode homographs, dash-stuffing, IP masking, and 60+ sketchy TLDs. Catches 90% of threats instantly, zero latency.",
     },
     {
-      step: "02",
-      title: "DNS forensics",
+      step: "L2",
+      title: "Infrastructure Forensics",
+      tag: "Deep Resolve",
       detail:
-        "Resolves the target domain and inspects its MX, A, and NS records for anomalies like recently registered nameservers or missing reverse-DNS.",
+        "Resolves target domains and inspects nameserver clusters, registrar clusters, and MX/A record patterns for infrastructure-based threat fingerprinting.",
     },
     {
-      step: "03",
-      title: "Threat-intel crosscheck",
+      step: "L3",
+      title: "Global Intelligence",
+      tag: "Collective Intel",
       detail:
-        "Queries Google Safe Browsing in real-time for known malware, social engineering, and unwanted software flags.",
+        "Real-time cross-referencing against PhishTank, OpenPhish, and Google Safe Browsing ecosystems to identify reported malware and social engineering campaigns.",
     },
     {
-      step: "04",
-      title: "Community ledger",
+      step: "L4",
+      title: "Neural Cluster DNA",
+      tag: "Forensic SHA-256",
       detail:
-        "Cross-references against our Firestore database of 2,400+ freelancer-verified scam reports submitted by the community.",
+        "Generates unique structural fingerprints for every threat, tracking the technical 'DNA' of threat actor infrastructure across different URLs and campaigns.",
     },
     {
-      step: "05",
+      step: "L5",
       title: "Semantic Intelligence",
+      tag: "AI Intent Detection",
       detail:
-        "Uses Gemini-1.5 AI to analyze the semantic intent and visual structure of the page, detecting psychological triggers and social engineering tactics.",
-      note: "Layer 5: Intent Detection Active"
+        "Uses Gemini-1.5 AI to analyze the semantic intent and visual structure of the page, identifying high-fidelity psychological triggers in milliseconds.",
+      active: true
     },
   ];
 
   return (
-    <section className="relative py-20 sm:py-28 bg-background border-b border-border">
-      <div className="container px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl">
-          {/* Section header — editorial style, not a badge */}
-          <div
-            className={cn("mb-14", mounted ? "animate-fade-in" : "opacity-0")}
-          >
-            <p className="text-xs font-mono text-primary tracking-wider mb-3">
-              How it works
-            </p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight leading-tight">
-              Five layers of analysis.
-              <br />
-              <span className="text-muted-foreground font-normal">
-                One forensic truth.
+    <section className="relative py-28 sm:py-36 bg-[#0C0A09] border-b border-[#1F1914] overflow-hidden">
+      {/* Dynamic Background Elements */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/3 rounded-full blur-[100px] pointer-events-none" />
+
+      <div className="container relative px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className={cn("mb-20 space-y-4", mounted ? "animate-fade-in" : "opacity-0")}>
+            <div className="flex items-center gap-3">
+              <span className="h-px w-8 bg-primary/50" />
+              <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.3em]">
+                System Architecture
               </span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight leading-none">
+              The Five Layers of <span className="text-primary italic">ScamSentry.</span>
             </h2>
+            <p className="text-sm text-muted-foreground max-w-xl leading-relaxed">
+              Our forensic engine doesn't just scan; it dissects. From deterministic heuristics to neural intent detection, every URL passes through a gauntlet of verification.
+            </p>
           </div>
 
-          {/* Vertical stack — not a grid. Each layer is a row. */}
-          <div className="space-y-0">
+          {/* Interactive Layer List */}
+          <div className="space-y-4">
             {capabilities.map((item, index) => (
               <div
                 key={item.step}
                 className={cn(
-                  "group flex gap-6 py-6 border-b border-border last:border-b-0 transition-colors hover:bg-card/50",
-                  mounted ? `animate-fade-in` : "opacity-0",
+                  "group relative p-6 sm:p-8 rounded-2xl border border-[#1F1914] bg-[#12100D] transition-all duration-300 hover:border-primary/30 hover:bg-[#15110E] hover:translate-x-1",
+                  mounted ? "animate-fade-in" : "opacity-0",
+                  item.active && "border-primary/20 bg-primary/[0.02]"
                 )}
-                style={{ animationDelay: `${index * 80}ms` }}
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                {/* Step number */}
-                <span className="text-xs font-mono text-primary pt-1 shrink-0 w-6 text-right tabular-nums">
-                  {item.step}
-                </span>
+                <div className="flex flex-col sm:flex-row gap-6">
+                  {/* Layer Marker */}
+                  <div className="flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-4 shrink-0 sm:w-24">
+                    <span className={cn(
+                      "text-xs font-mono font-bold tracking-widest",
+                      item.active ? "text-primary" : "text-muted-foreground/50"
+                    )}>
+                      {item.step}
+                    </span>
+                    <div className={cn(
+                      "px-2 py-0.5 rounded text-[8px] font-mono uppercase tracking-tighter border",
+                      item.active ? "bg-primary/10 border-primary/30 text-primary" : "border-[#1F1914] text-muted-foreground/30"
+                    )}>
+                      {item.tag}
+                    </div>
+                  </div>
 
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-foreground mb-1 tracking-tight">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {item.detail}
-                  </p>
-                  {item.note && (
-                    <p className="mt-2 text-xs text-primary/80 font-mono">
-                      ↳ {item.note}
+                  {/* Content */}
+                  <div className="flex-1 space-y-2">
+                    <h3 className="text-lg font-bold text-white group-hover:text-primary transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {item.detail}
                     </p>
-                  )}
+                  </div>
+
+                  {/* Data Visualizer (decoration) */}
+                  <div className="hidden lg:flex flex-col justify-center gap-1 opacity-10 group-hover:opacity-30 transition-opacity">
+                    <div className="h-1 w-12 bg-primary rounded-full"></div>
+                    <div className="h-1 w-8 bg-primary rounded-full"></div>
+                    <div className="h-1 w-10 bg-primary rounded-full"></div>
+                  </div>
                 </div>
+
+                {/* Layer Glow for active L5 */}
+                {item.active && (
+                  <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+                )}
               </div>
             ))}
           </div>
