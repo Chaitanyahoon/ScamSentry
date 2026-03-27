@@ -4,6 +4,7 @@ import { analyzeDomainForensics } from "@/lib/validator/forensics";
 import { analyzeThreatIntel } from "@/lib/validator/threat-intel";
 import { analyzeInternalGraph } from "@/lib/validator/internal-graph";
 import { freeTierLimiter, enterpriseLimiter } from "@/lib/rate-limit";
+import { logScanEvent } from "@/lib/analytics";
 
 // In-memory fallback for local dev (when Upstash env vars not set)
 const localRateLimitMap = new Map<
@@ -97,11 +98,32 @@ export async function POST(req: Request) {
     const combinedRisk = Math.min(preliminaryRisk, 100);
     const finalScore = 100 - combinedRisk;
 
-    let riskLevel = "Secure";
+    let riskLevel: "Secure" | "Suspicious" | "Critical Threat" = "Secure";
     if (finalScore <= 20) riskLevel = "Critical Threat";
     else if (finalScore <= 60) riskLevel = "Suspicious";
 
     const isBlacklisted = finalScore <= 20;
+
+    // Log scan event asynchronously (non-blocking)
+    logScanEvent({
+      url: input,
+      finalScore,
+      riskLevel,
+      triggeredLayers: [
+        L1.flags.length > 0 ? "heuristics" : "",
+        L2.flags.length > 0 ? "forensics" : "",
+        L3.flags.length > 0 ? "threatIntel" : "",
+        L4.flags.length > 0 ? "internalGraph" : "",
+      ].filter(Boolean),
+      layerScores: {
+        heuristics: L1.score,
+        forensics: L2.score,
+        threatIntel: L3.score,
+        internalGraph: L4.score,
+      },
+      timestamp: new Date(),
+      userAgent: req.headers.get("user-agent") || undefined,
+    }).catch((e) => console.error("Analytics logging error:", e));
 
     // 6. Return standard B2B developer response
     return NextResponse.json(
