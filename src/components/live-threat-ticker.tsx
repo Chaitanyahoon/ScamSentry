@@ -19,8 +19,12 @@ export function LiveThreatTicker() {
     const fetchThreats = async () => {
       try {
         const res = await fetch("/api/threats/recent");
+        if (!res.ok) {
+          console.warn("[Ticker] Intelligence feed currently unavailable (Rules Sync Pending)");
+          return;
+        }
         const data = await res.json();
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           setThreats(data);
         }
       } catch (error) {
