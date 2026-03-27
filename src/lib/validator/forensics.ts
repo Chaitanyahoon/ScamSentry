@@ -32,36 +32,49 @@ export async function analyzeDomainForensics(inputUrl: string) {
     );
   }
 
-  // 3. DNS Resolution
+  // 3. DNS & Mail Pedigree (MX Record)
   try {
     const addresses = await resolve4(domain);
     if (!addresses || addresses.length === 0) {
       throw new Error("No addresses");
     }
 
-    // Detect direct resolver anomaly and uncommon hosting patterns
+    // Detect fast-flux networks
     const uniqueIps = Array.from(new Set(addresses));
-    if (uniqueIps.length > 2) {
-      score += 20;
+    if (uniqueIps.length > 3) {
+      score += 30;
       flags.push(
-        `Suspicious: Domain resolves to multiple distinct IPs (${uniqueIps.length}), often seen in fast-flux networks.`,
+        `Suspicious: Domain resolves to ${uniqueIps.length} distinct IPs. Possible fast-flux botnet distribution.`
       );
     }
 
     if (domain.match(/^\d+\.\d+\.\d+\.\d+$/)) {
       score += 80;
       flags.push(
-        "CRITICAL: Domain is a raw IP address (no real hostname). Potentially malicious endpoint.",
+        "CRITICAL: Domain is a raw IP address (No hostname). Extreme risk marker."
       );
+    }
+
+    // NEW: Mail Exchange (MX) Record Check
+    const resolveMx = promisify(dns.resolveMx);
+    const mxRecords = await resolveMx(domain).catch(() => []);
+    if (mxRecords.length === 0 && !domain.includes("local")) {
+      score += 35;
+      flags.push(
+        "High Risk: Domain has no Mail Exchange (MX) records. Legitimate business domains rarely skip mail setup."
+      );
+    } else {
+      // Deduct minor risk if professional mail setup exists
+      score -= 5;
     }
   } catch (e) {
     flags.push(
-      `DNS validation failed. Domain ${domain} has no valid IPv4 records (Offline or Fake).`,
+      `Forensic Alert: Domain ${domain} failed basic DNS connectivity (Offline or Ghost domain).`
     );
-    score += 40;
+    score += 30;
   }
 
-  // 4. RDAP Domain Age Lookup
+  // 4. RDAP & Registrar Pedigree
   try {
     // We will extract the root domain since RDAP query for full subdomains usually fails
     // e.g., for secure.login.paypal.com.scam.net we want scam.net
@@ -78,35 +91,37 @@ export async function analyzeDomainForensics(inputUrl: string) {
 
     if (rdapRes.ok) {
       const rdapData = await rdapRes.json();
+      
+      // NEW: Nameserver Reputation Audit
+      const nameServers = (rdapData.nameservers || []).map((ns: any) => ns.ldhName || "");
+      const suspiciousNS = ["freenom", "freehost", "burner", "disposable"];
+      if (nameServers.some((ns: string) => suspiciousNS.some(s => ns.toLowerCase().includes(s)))) {
+        score += 40;
+        flags.push("High Risk: Domain uses nameservers linked to disposable or high-abuse hosting.");
+      }
+
       const events = rdapData.events || [];
       const registrationEvent = events.find(
-        (e: any) => e.eventAction === "registration",
+        (e: any) => e.eventAction === "registration"
       );
 
       if (registrationEvent && registrationEvent.eventDate) {
         const creationDate = new Date(registrationEvent.eventDate);
-        const MathNodeJS = Math; // Avoid collision if any
-        const ageInDays =
-          (Date.now() - creationDate.getTime()) / (1000 * 60 * 60 * 24);
+        const ageInDays = (Date.now() - creationDate.getTime()) / (1000 * 60 * 60 * 24);
 
-        if (ageInDays < 30) {
-          score += 65;
-          flags.push(
-            `CRITICAL: Domain is extremely new (${MathNodeJS.floor(ageInDays)} days old). High probability of being a burner phishing domain.`,
-          );
-        } else if (ageInDays < 90) {
-          score += 35;
-          flags.push(
-            `Suspicious: Domain is relatively new (${MathNodeJS.floor(ageInDays)} days old). Proceed with caution.`,
-          );
+        if (ageInDays < 15) {
+          score += 75;
+          flags.push(`CRITICAL: Domain is ultra-new (${Math.floor(ageInDays)} days). High-confidence burner domain signature.`);
+        } else if (ageInDays < 60) {
+          score += 45;
+          flags.push(`High Risk: Domain is very new (${Math.floor(ageInDays)} days). Potential seasonal phishing campaign.`);
         } else {
-          // Older domains carry inherent trust. Deduct risk score.
-          score -= 10;
+          score -= 15;
         }
       }
     }
   } catch (e) {
-    // RDAP failed (domain extension not supported or timeout), fail silently
+    // Fail silently on RDAP timeout
     // We do not push a flag here because many obscure foreign TLDs don't support RDAP well
   }
 

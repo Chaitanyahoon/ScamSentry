@@ -1,4 +1,18 @@
+import dns from 'dns'
 import { analyzeDomainForensics } from '@/lib/validator/forensics'
+
+jest.mock('dns', () => ({
+  resolve4: jest.fn((hostname: string, callback: any) => {
+    callback(null, ['1.1.1.1']);
+  }),
+  resolveMx: jest.fn((hostname: string, callback: any) => {
+    callback(null, [{ exchange: 'mail.example.com', priority: 10 }]);
+  }),
+  promises: {
+    resolve4: jest.fn().mockResolvedValue(['1.1.1.1']),
+    resolveMx: jest.fn().mockResolvedValue([{ exchange: 'mail.example.com', priority: 10 }]),
+  }
+}))
 
 describe('Forensics Layer (L2) - Domain Infrastructure Analysis', () => {
   describe('URL Parsing', () => {
