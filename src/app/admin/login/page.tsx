@@ -164,83 +164,129 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background py-12 relative overflow-hidden">
-      <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.2]" />
+    <div className="min-h-screen flex items-center justify-center bg-[#0C0A09] py-12 relative overflow-hidden">
+      {/* Decorative Scanlines */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]" 
+           style={{ backgroundImage: 'linear-gradient(rgba(255,191,0,0.1) 1px, transparent 1px)', backgroundSize: '100% 4px' }} />
+      <div className="absolute inset-x-0 top-0 h-px bg-primary/20 shadow-[0_0_15px_rgba(255,191,0,0.5)]" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-primary/20 shadow-[0_0_15px_rgba(255,191,0,0.5)]" />
 
       <div className="w-full max-w-md relative z-10 px-4">
-        <div className="glass-strong border-t-2 border-t-primary/50 shadow-[0_0_30px_rgba(0,0,0,0.8)] overflow-hidden">
-          <div className="bg-card/80 border-b border-border p-4">
-            <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground tracking-widest uppercase font-mono">
-              <Terminal className="h-4 w-4 text-primary" /> SECURE_LOGIN_TERMINAL
+        <div className="bg-[#15110E] border border-[#1F1914] shadow-2xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 [clip-path:polygon(100%_0,0_0,100%_100%)] opacity-20" />
+          
+          <div className="bg-[#0C0A09] border-b border-[#1F1914] p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-[10px] font-bold text-primary tracking-[0.2rem] uppercase font-mono">
+                <Terminal className="h-3 w-3" /> AUTH_TERMINAL_V4.2
+              </div>
+              <div className="flex gap-1">
+                <div className="w-2 h-2 bg-primary/20" />
+                <div className="w-2 h-2 bg-primary/10" />
+                <div className="w-2 h-2 bg-primary/5" />
+              </div>
             </div>
           </div>
 
-          <div className="p-8 bg-background/50">
-            <div className="text-center mb-8">
+          <div className="p-10 bg-transparent">
+            <div className="text-center mb-10">
               <div className="flex items-center justify-center mb-6">
-                <div className="flex h-16 w-16 items-center justify-center border border-primary/50 bg-primary/10 shadow-[0_0_15px_hsla(var(--primary),0.3)]">
-                  <Shield className="h-8 w-8 text-primary drop-shadow-[0_0_8px_currentColor]" />
+                <div className="relative group">
+                  <div className="absolute -inset-4 bg-primary/20 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
+                  <div className="relative flex h-20 w-20 items-center justify-center border-2 border-primary/20 bg-[#0C0A09] shadow-[0_0_30px_rgba(255,191,0,0.1)]">
+                    <Shield className="h-10 w-10 text-primary drop-shadow-[0_0_12px_rgba(255,191,0,0.6)]" />
+                    {/* Corner accents */}
+                    <div className="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-primary" />
+                    <div className="absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 border-primary" />
+                  </div>
                 </div>
               </div>
-              <h1 className="text-2xl font-extrabold tracking-widest uppercase text-foreground mb-2 drop-shadow-[0_0_5px_rgba(255,255,255,0.1)]">
-                ROOT <span className="text-primary">ACCESS</span>
+              <h1 className="text-3xl font-black tracking-[0.4rem] uppercase text-foreground mb-3 flex items-center justify-center gap-3">
+                SECURE <span className="text-primary italic">VAULT</span>
               </h1>
-              <p className="text-[10px] font-mono tracking-widest text-muted-foreground uppercase">
-                AUTHORIZED PERSONNEL ONLY. ALL ATTEMPTS ARE LOGGED.
-              </p>
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="h-px w-8 bg-primary/20" />
+                <p className="text-[9px] font-mono tracking-[0.25rem] text-muted-foreground/60 uppercase">
+                  ROOT_CLEARANCE_REQUIRED
+                </p>
+                <div className="h-px w-8 bg-primary/20" />
+              </div>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-6 font-mono">
-              <div>
-                <Label htmlFor="email" className="text-xs font-bold tracking-widest uppercase text-foreground mb-2 block">
-                  SYS_ADMIN_EMAIL
+            <form onSubmit={handleLogin} className="space-y-8 font-mono">
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-[10px] font-bold tracking-[0.2rem] uppercase text-primary/70 mb-2 block">
+                  NETWORK_ID::AUTH
                 </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@system.local"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={isLoading}
-                  className="bg-card border-border rounded-none tracking-widest text-xs h-12 focus-visible:ring-primary focus-visible:border-primary"
-                />
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <Terminal className="h-3 w-3 text-primary/30 group-focus-within:text-primary transition-colors" />
+                  </div>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="ADMIN@SCAMSENTRY.IO"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={isLoading}
+                    className="bg-[#0C0A09] border-[#1F1914] focus:border-primary/50 rounded-none tracking-[0.15rem] text-[10px] h-14 pl-10 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/20 uppercase transition-all"
+                  />
+                </div>
               </div>
-              <div>
-                <Label htmlFor="password" className="text-xs font-bold tracking-widest uppercase text-foreground mb-2 block">
-                  AUTHORIZATION_KEY
+              <div className="space-y-3">
+                <Label htmlFor="password" className="text-[10px] font-bold tracking-[0.2rem] uppercase text-primary/70 mb-2 block">
+                  PASSKEY::CRYPT
                 </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={isLoading}
-                  className="bg-card border-border rounded-none tracking-widest text-lg h-12 focus-visible:ring-primary focus-visible:border-primary text-primary font-sans"
-                />
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <AlertTriangle className="h-3 w-3 text-primary/30 group-focus-within:text-primary transition-colors" />
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={isLoading}
+                    className="bg-[#0C0A09] border-[#1F1914] focus:border-primary/50 rounded-none tracking-widest text-xl h-14 pl-10 focus-visible:ring-0 focus-visible:ring-offset-0 text-primary font-sans placeholder:text-muted-foreground/20 transition-all"
+                  />
+                </div>
               </div>
 
               <div className="pt-4">
                 <Button 
                   type="submit" 
-                  className="w-full h-12 rounded-none bg-primary text-black hover:bg-primary/80 border border-transparent hover:border-primary hover:shadow-[0_0_15px_hsla(var(--primary),0.5)] transition-all font-bold tracking-widest uppercase text-xs" 
+                  className="w-full h-14 rounded-none bg-primary text-black hover:bg-white transition-all font-black tracking-[0.3rem] uppercase text-[11px] shadow-[0_0_20px_rgba(255,191,0,0.1)] active:scale-[0.98]" 
                   disabled={isLoading}
                 >
                   {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      AUTHENTICATING...
-                    </>
+                    <div className="flex items-center gap-3">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      DECRYPTING_SIGNAL...
+                    </div>
                   ) : (
-                    "ESTABLISH_CONNECTION"
+                    "INITIALIZE_SESSION"
                   )}
                 </Button>
               </div>
             </form>
+            
+            <div className="mt-8 pt-8 border-t border-[#1F1914] text-center">
+              <p className="text-[8px] font-mono tracking-widest text-muted-foreground/40 uppercase">
+                ENCRYPTION_LAYER: AES-256-GCM | IP_LOGGING: ACTIVE
+              </p>
+            </div>
           </div>
         </div>
+        
+        {/* Decorative corner brackets for the login card area */}
+        <div className="absolute -top-2 -left-2 w-4 h-4 border-t border-l border-primary/40 pointer-events-none" />
+        <div className="absolute -top-2 -right-2 w-4 h-4 border-t border-r border-primary/40 pointer-events-none" />
+        <div className="absolute -bottom-2 -left-2 w-4 h-4 border-b border-l border-primary/40 pointer-events-none" />
+        <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b border-r border-primary/40 pointer-events-none" />
+
       </div>
     </div>
   )
