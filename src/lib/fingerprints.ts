@@ -14,7 +14,8 @@ export interface ForensicFingerprint {
 export function generateThreatFingerprint(
   url: string,
   flags: string[],
-  scores: Record<string, number>
+  scores: Record<string, number>,
+  infrastructure?: { nameservers?: string[], registrar?: string }
 ): ForensicFingerprint {
   const components: string[] = [];
 
@@ -31,7 +32,16 @@ export function generateThreatFingerprint(
     components.push("entropy:invalid-url");
   }
 
-  // 3. Score Profile (coarse-grained for clustering)
+  // 3. Infrastructure Fingerprint (NEW: Cluster tracking)
+  if (infrastructure?.nameservers && infrastructure.nameservers.length > 0) {
+    const sortedNS = [...new Set(infrastructure.nameservers)].sort();
+    components.push(`ns:${sortedNS.join(",")}`);
+  }
+  if (infrastructure?.registrar) {
+    components.push(`registrar:${infrastructure.registrar}`);
+  }
+
+  // 4. Score Profile (coarse-grained for clustering)
   const profile = Object.entries(scores)
     .map(([key, val]) => `${key[0]}${Math.floor(val / 10)}`)
     .join("");

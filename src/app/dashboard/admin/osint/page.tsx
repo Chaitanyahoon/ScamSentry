@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { 
   Database, 
   RefreshCcw, 
@@ -173,32 +174,49 @@ export default function OSINTPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1F1914]">
-              {/* Sample Row */}
-              {[...Array(6)].map((_, i) => (
+              {threats.length === 0 && !loading && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground font-mono text-xs">
+                    No threats detected in the current OSINT cycle.
+                  </td>
+                </tr>
+              )}
+              {threats.map((threat, i) => (
                 <tr key={i} className="hover:bg-[#15110E]/50 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                      <span className="font-mono text-foreground font-medium">paypa1-security-login.xyz</span>
-                      <span className="text-[10px] text-muted-foreground font-mono">ID: 0x4f...{i}d2</span>
+                      <Link 
+                        href={`/dashboard/admin/dossier/${threat.domain.replace(/\./g, "_")}`}
+                        className="font-mono text-foreground font-medium hover:text-primary transition-colors cursor-pointer"
+                      >
+                        {threat.domain}
+                      </Link>
+                      <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-tighter">
+                        Forensic Cluster: {threat.source}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
-                      {i % 2 === 0 ? "PhishTank" : "OpenPhish"}
+                      {threat.source}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-muted-foreground font-mono">credential-theft</td>
-                  <td className="px-6 py-4 text-muted-foreground font-mono">2026-03-27</td>
+                  <td className="px-6 py-4 text-muted-foreground font-mono text-xs italic">{threat.type || "unknown-vector"}</td>
+                  <td className="px-6 py-4 text-muted-foreground font-mono text-xs">
+                    {new Date(threat.firstSeen).toLocaleDateString()}
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-red-500"></div>
-                      <span className="text-red-400 font-bold text-[10px] uppercase">Blocked</span>
+                      <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                      <span className="text-red-400 font-bold text-[10px] uppercase">Active Threat</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button className="p-2 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-all">
-                      <ExternalLink className="h-4 w-4" />
-                    </button>
+                    <Link href={`/dashboard/admin/dossier/${threat.domain.replace(/\./g, "_")}`}>
+                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-all">
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </Link>
                   </td>
                 </tr>
               ))}

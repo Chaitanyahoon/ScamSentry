@@ -148,3 +148,26 @@ export async function getRecentThreats(limit: number = 50): Promise<OSINTThreat[
     return [];
   }
 }
+
+/**
+ * Fetch a single threat's full forensic dossier
+ */
+export async function getThreatDossier(domainOrId: string): Promise<OSINTThreat | null> {
+  try {
+    const db = getAdminDb();
+    const docId = domainOrId.replace(/\./g, "_");
+    const doc = await db.collection('threat_intel_feeds').doc(docId).get();
+
+    if (!doc.exists) return null;
+
+    const data = doc.data();
+    return {
+      ...data,
+      firstSeen: data?.firstSeen?.toDate(),
+      lastSync: data?.lastSync?.toDate()
+    } as OSINTThreat;
+  } catch (error) {
+    console.error('[OSINT] Failed to fetch dossier:', error);
+    return null;
+  }
+}
