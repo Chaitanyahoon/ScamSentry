@@ -74,7 +74,25 @@ export async function analyzeDomainForensics(inputUrl: string) {
     score += 30;
   }
 
-  // 4. RDAP & Registrar Pedigree
+  // 4. OSINT Blocklist Check (NEW)
+  try {
+    const { getAdminDb } = await import("../firebase-admin");
+    const db = getAdminDb();
+    const docId = domain.replace(/\./g, "_");
+    const threatDoc = await db.collection("threat_intel_feeds").doc(docId).get();
+
+    if (threatDoc.exists) {
+      const data = threatDoc.data();
+      score += 100;
+      flags.push(
+        `CRITICAL: Domain ${domain} is listed on the global ${data?.source || "OSINT"} blocklist for phishing.`
+      );
+    }
+  } catch (e) {
+    // Fail silently if OSINT DB is unavailable
+  }
+
+  // 5. RDAP & Registrar Pedigree
   try {
     // We will extract the root domain since RDAP query for full subdomains usually fails
     // e.g., for secure.login.paypal.com.scam.net we want scam.net
