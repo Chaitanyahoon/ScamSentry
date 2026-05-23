@@ -1,8 +1,6 @@
 # 🔐 ScamSentry | Forensic Threat Intelligence
 
 <div align="center">
-  <img src="public/logo.png" alt="ScamSentry Logo" width="110">
-  <br />
   <p align="center">
     <a href="https://github.com/Chaitanyahoon/ScamSentry/blob/main/LICENSE">
       <img src="https://img.shields.io/badge/License-MIT-B45309.svg?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="License">
@@ -18,28 +16,32 @@
   <h3>Zero-Trust URL Forensics & Offline Threat Analysis</h3>
   
   <p>
-    <strong>A high-performance forensic platform designed to neutralize industrial-scale employment fraud and phishing campaigns completely locally ($0 API overhead).</strong>
+    <strong>A high-performance forensic platform designed to neutralize industrial-scale employment fraud and sketchy URLs completely offline ($0 API cost, because cloud bills are the real threat).</strong>
   </p>
 
   <br />
   
-  <!-- Demonstration Frame -->
-  <img src="skeleton.gif" alt="ScamSentry Telemetry Terminal Demo" width="900" style="border: 2px solid #1F1914; border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.65);">
+  <!-- Centered and Resized Skeleton Banging Shield Meme -->
+  <img src="skeleton.gif" alt="ScamSentry Shield Defense (Skeleton Banging Shield Meme)" width="480" style="border: 2px solid #1F1914; border-radius: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);">
+  <br />
+  <sub><i>Live footage of our L1 Heuristics holding the firewall against "careers-apple@gmail.com" recruiters.</i></sub>
 </div>
 
 ---
 
 ## 🏛️ Platform Overview
 
-**ScamSentry** is a high-performance open-source forensic intelligence platform designed to intercept, dissect, and catalog malicious phishing URL networks and fraudulent recruiter profiles. Engineered to run completely offline without reliance on costly or unpredictable paid AI APIs, the core validator engine is built around a **4-Layer Deterministic Pipeline** that processes checks with sub-millisecond latencies.
+**ScamSentry** is a high-performance open-source forensic intelligence platform designed to intercept, dissect, and humiliate malicious phishing URL networks and fraudulent recruiter profiles. 
 
-The interface is styled entirely under the custom **"Forensic Amber"** design system—inspired by legacy amber CRT monitors and professional intelligence workstations (Shodan, Maltego, ShrewSoft)—blending retro command line aesthetics with smooth, modern responsive physics.
+In a world where developers are constantly told to "just throw an expensive LLM at it", we did the financially responsible thing: **we uninstalled the AI**. By purging heavy Gemini libraries, ScamSentry runs a completely offline, **4-Layer Deterministic Pipeline** that processes checks with sub-millisecond latencies and a grand total of **$0.00 in monthly API bills**.
+
+The interface is styled entirely under the custom **"Forensic Amber"** design system—inspired by legacy amber CRT monitors and professional intelligence workstations (Shodan, Maltego)—blending retro hacker aesthetics with smooth, modern responsive physics.
 
 ---
 
 ## ⚙️ Core Architecture & Analysis Pipeline
 
-Unlike generic security scanners, ScamSentry inspects target vectors across four distinct, offline-first verification layers:
+Every URL/Email submitted goes through a gauntlet of verification layers, engineered to keep your parent's retirement fund safe:
 
 ```
 [Target URL/Email]
@@ -54,30 +56,30 @@ Unlike generic security scanners, ScamSentry inspects target vectors across four
 ```
 
 ### 🔍 Layer 1: Heuristics (L1)
-*   **Visual Spoofing (Homoglyphs)**: Decodes Punycode strings (`xn--`) and normalizes Cyrillic/Greek character mappings to detect visual mimicry (e.g., matching lookalike letters in `paypa1.com` against the official `paypal` signature).
-*   **Recruiter Email Auditing**: Intercepts public/free email addresses claiming corporate representation (e.g., `hr-amazon@gmail.com`) and automatically applies critical warnings.
-*   **Path Entropy Obstruction**: Computes character entropy counts on long paths to detect Base64 obfuscations and Domain Generation Algorithm (DGA) signatures.
+*   **Visual Spoofing (Homoglyphs)**: Decodes Punycode strings (`xn--`) and checks if someone is trying to sneak `paypa1.com` past your filters.
+*   **Recruiter Email Auditing**: Instantly flags Gmail accounts claiming to be official brand representatives (`careers-google@gmail.com`). (Adds `+75` threat score because Google recruiters rarely use free webmail accounts to hire senior architects).
+*   **Path Entropy Obstruction**: Measures character randomness to flag DGA (Domain Generation Algorithms) and obfuscated Base64 pathways.
 
 ### 🌐 Layer 2: Infrastructure Forensics (L2)
-*   **Mail Exchange (MX) Fallback**: Queries records recursively on subdomains (e.g., resolving `scam-sentry.vercel.app` via `vercel.app` parent authority) to clear legitimate cloud subdomains while maintaining alerts for burner hosts.
-*   **Fast-Flux Detection**: Counts unique IP assignments per hostname to identify decentralized hosting botnets.
-*   **RDAP Registry Check**: Audits registrar creation dates to immediately flag ultra-new burner domains (under 15 days old).
+*   **Mail Exchange (MX) Subdomain Fallback**: Legitimate companies don't delegate subdomains on burner cloud hosts to send corporate emails. If a subdomain has no MX records (e.g., `scam-sentry.vercel.app`), the resolver recursively checks the root domain (`vercel.app`), clearing legitimate hosts while keeping the scanner highly suspicious of arbitrary hacker landing zones.
+*   **Fast-Flux Detection**: Flags domains resolving to excessive distinct IPs, indicating botnet proxy distributions.
+*   **RDAP Registry Check**: Audits domain age to instantly warn if a site is younger than a carton of milk (under 15 days).
 
 ### 🛡️ Layer 3: Global Threat Intelligence (L3)
-*   Checks processed URLs against standard Google Safe Browsing databases locally, bypassing processing arrays if API configurations are skipped.
+*   Queries standard Google Safe Browsing databases locally, failing silently if API keys are unconfigured, so your local dev workstation doesn't crash when you're offline.
 
 ### 📊 Layer 4: Trust Ledger Database (L4)
-*   Queries active community-submitted scam archives on Firestore to alert when the searched domain aligns with existing threat footprints.
+*   Queries active community-submitted scam archives on Firestore, because nothing is more deterministic than community spite.
 
 ---
 
 ## 💻 Tech Stack & Design System
 
 *   **Framework**: Next.js 16 (App Router / Turbopack), React 19, TypeScript
-*   **Styling**: Pure CSS Custom Variables (`#15110E` Burnt Amber / `#0C0A09` Deep Carbon), Tailwind CSS, Lucide icons
-*   **Data Tier**: Firebase (Auth, Firestore DB), Upstash Redis (Distributed Rate Limiting)
-*   **Data Visualizations**: Responsive interactive time-series `AreaChart` and distribution `PieChart` styled in terminal-amber via `recharts`
-*   **Test Suite**: 9 Jest Suites, **162 passing tests** covering spoofing distance formulas, email captures, and limits protection.
+*   **Styling**: Pure CSS Custom Variables (`#15110E` Burnt Amber / `#0C0A09` Deep Carbon), Tailwind CSS
+*   **Data Tier**: Firebase (Auth, Firestore DB), Upstash Redis (Distributed Rate Limiting, because we can't afford actors DDOSing our free database tier)
+*   **Data Visualizations**: Time-series `AreaChart` and distribution `PieChart` styled in terminal-amber via `recharts`
+*   **Test Suite**: 9 Jest Suites, **162 passing tests** to guarantee the pipeline remains rock solid.
 
 ---
 
@@ -136,5 +138,5 @@ Unlike generic security scanners, ScamSentry inspects target vectors across four
 ---
 
 <div align="center">
-  <sub>Managed by the ScamSentry Research Labs · Engineered for a Safer Web</sub>
+  <sub>Managed by the ScamSentry Research Labs · Engineered with ❤️ and a complete lack of venture capital funding</sub>
 </div>
