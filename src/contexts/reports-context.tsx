@@ -13,7 +13,8 @@ import {
   increment,
   query,
   orderBy,
-  Timestamp
+  Timestamp,
+  onSnapshot
 } from "firebase/firestore"
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import { storage } from "@/lib/firebase"
@@ -91,7 +92,7 @@ const getDeterministicCoords = (title: string) => {
   return GLOBAL_NODES[idx];
 };
 
-const firestoreDocToScamReport = (docSnap: any): ScamReport => {
+export const firestoreDocToScamReport = (docSnap: any): ScamReport => {
   const data = docSnap.data()
   let lat = data.lat;
   let lng = data.lng;
@@ -219,32 +220,25 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
   const [reports, setReports] = useState<ScamReport[]>([])
   const [isLoadingReports, setIsLoadingReports] = useState(true)
 
-  // Fetch reports from Firebase on mount
+  // Listen to reports from Firebase in real-time
   useEffect(() => {
-    const fetchReports = async () => {
-      setIsLoadingReports(true)
+    setIsLoadingReports(true)
+    const q = query(collection(db, "scam_reports"), orderBy("created_at", "desc"))
 
-      try {
-
-
-        const q = query(collection(db, "scam_reports"), orderBy("created_at", "desc"))
-        const querySnapshot = await getDocs(q)
-
-        const fetchedReports: ScamReport[] = []
-        querySnapshot.forEach((doc) => {
-          fetchedReports.push(firestoreDocToScamReport(doc))
-        })
-
-        setReports(fetchedReports)
-      } catch (error) {
-        console.error("Error fetching reports from Firebase:", error)
-        setReports(initialReports) // Fallback
-      }
-
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const fetchedReports: ScamReport[] = []
+      querySnapshot.forEach((doc) => {
+        fetchedReports.push(firestoreDocToScamReport(doc))
+      })
+      setReports(fetchedReports)
       setIsLoadingReports(false)
-    }
+    }, (error) => {
+      console.error("Error listening to reports from Firebase:", error)
+      setReports(initialReports) // Fallback
+      setIsLoadingReports(false)
+    })
 
-    fetchReports()
+    return () => unsubscribe()
   }, [])
 
   const addReport = useCallback(
