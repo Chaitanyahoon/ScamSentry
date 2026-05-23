@@ -62,6 +62,13 @@ export const TARGET_BRANDS = [
   "gitlab",
 ];
 
+export const TRUSTED_APP_DOMAINS = [
+  "scam-sentry.vercel.app",
+  "scam-sentry.app",
+  "scamsentry.app",
+  "scamsentry.com",
+];
+
 const HOMOGLYPH_MAP: Record<string, string> = {
   // Cyrillic
   'а': 'a', 'е': 'e', 'і': 'i', 'о': 'o', 'р': 'p', 'с': 'c', 'у': 'y', 'х': 'x',
@@ -164,6 +171,19 @@ export function analyzeHeuristics(inputUrl: string): { score: number; flags: str
     };
   }
 
+  let hostname = url;
+  try {
+    const tempUrl = url.startsWith("http") ? url : `http://${url}`;
+    const parsed = new URL(tempUrl);
+    hostname = parsed.hostname;
+  } catch (e) {
+    // Fall back to original url
+  }
+
+  const isTrustedAppDomain = TRUSTED_APP_DOMAINS.some(d => 
+    hostname === d || hostname.endsWith("." + d)
+  );
+
   // 1. IP Address Masking
   if (MALICIOUS_URL_DICTIONARIES.ipAddressMask.test(url)) {
     score += 80;
@@ -182,7 +202,7 @@ export function analyzeHeuristics(inputUrl: string): { score: number; flags: str
 
 
   // 3. Free Hosting / Dynamic DNS Abuse
-  if (MALICIOUS_URL_DICTIONARIES.freeHosting.test(url)) {
+  if (MALICIOUS_URL_DICTIONARIES.freeHosting.test(url) && !isTrustedAppDomain) {
     score += 45;
     flags.push(
       "High Risk: Domain relies on free hosting or Dynamic DNS, commonly abused by burner phishing sites.",

@@ -92,6 +92,19 @@ describe('Heuristics Layer (L1) - URL Pattern Detection', () => {
         expect(typeof result.score).toBe('number')
       })
     })
+
+    it('should NOT flag ScamSentry official domains as free hosting', () => {
+      const whitelistDomains = [
+        'https://scam-sentry.vercel.app',
+        'http://scam-sentry.vercel.app/validator',
+        'scam-sentry.vercel.app'
+      ]
+      whitelistDomains.forEach((url) => {
+        const result = analyzeHeuristics(url)
+        expect(result.score).toBe(0)
+        expect(result.flags.some(f => f.includes("free hosting"))).toBe(false)
+      })
+    })
   })
 
   describe('URL Structure Validation', () => {
