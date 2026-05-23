@@ -103,6 +103,7 @@ export function CyberNewsHub() {
   // Hero Selected Index
   const [activeHeroIndex, setActiveHeroIndex] = useState(0);
   const [isCarouselHovered, setIsCarouselHovered] = useState(false);
+  const [isTickerHovered, setIsTickerHovered] = useState(false);
   const autoAdvanceTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Decrypt Modal state
@@ -309,8 +310,8 @@ export function CyberNewsHub() {
       {/* ─── 1. HORIZONTAL BRAND STATUS TICKER MARQUEE ───────────────── */}
       <div 
         className="w-full bg-[#070605] border border-[#1F1914] py-2.5 overflow-hidden flex items-center relative select-none rounded-none"
-        onMouseEnter={() => setIsCarouselHovered(true)}
-        onMouseLeave={() => setIsCarouselHovered(false)}
+        onMouseEnter={() => setIsTickerHovered(true)}
+        onMouseLeave={() => setIsTickerHovered(false)}
       >
         <div className="absolute left-0 top-0 bottom-0 bg-[#070605] z-10 px-4 border-r border-[#1F1914] flex items-center gap-1.5 font-mono text-[9px] font-black text-muted-foreground/60 uppercase shrink-0">
           <Activity className="h-3 w-3 text-primary shrink-0" />
@@ -318,7 +319,10 @@ export function CyberNewsHub() {
         </div>
         
         {/* Ticker Content */}
-        <div className="flex gap-8 px-4 whitespace-nowrap animate-[marquee_50s_linear_infinite] hover:[animation-play-state:paused] pl-[130px]">
+        <div 
+          className="flex gap-8 px-4 whitespace-nowrap animate-[marquee_50s_linear_infinite] pl-[130px]"
+          style={{ animationPlayState: isTickerHovered ? 'paused' : 'running' }}
+        >
           {MONITORED_BRANDS.map((brand) => {
             const isLocked = lockdowns.some(l => l.toLowerCase() === brand.toLowerCase());
             return (
