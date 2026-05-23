@@ -2,7 +2,7 @@ name: "OSINT Cron Sync"
 
 on:
   schedule:
-    - cron: "0 */12 * * *" # every 12 hours
+    - cron: "0 * * * *" # every hour (100% free)
   workflow_dispatch: {}
 
 jobs:

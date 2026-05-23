@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area } from "recharts";
 import { Activity, AlertTriangle, TrendingUp, CheckCircle, ShieldAlert, TerminalSquare, LayoutDashboard } from "lucide-react";
+import { getAnalyticsMetrics, ScanEvent, getRecentScans, type AnalyticsMetrics } from "@/lib/analytics";
 
 export default function AnalyticsDashboard() {
   const [metrics, setMetrics] = useState<AnalyticsMetrics | null>(null);
@@ -173,7 +174,7 @@ export default function AnalyticsDashboard() {
               <h2 className="text-xs font-mono font-bold text-foreground uppercase tracking-[0.2rem]">RECURRING_VECTORS</h2>
             </div>
             <div className="space-y-3">
-              {metrics.topUrlPatterns.map((item, idx) => (
+              {metrics.topUrlPatterns.map((item: any, idx: number) => (
                 <div key={item.pattern} className="flex justify-between items-center p-4 bg-[#0C0A09] border border-[#1F1914] hover:border-primary/30 transition-colors group">
                   <div className="flex items-center gap-3">
                     <span className="text-[10px] font-mono text-muted-foreground/30">{String(idx + 1).padStart(2, '0')}</span>

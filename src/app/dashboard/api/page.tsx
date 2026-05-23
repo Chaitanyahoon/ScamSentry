@@ -31,6 +31,57 @@ export default function ApiDashboardPage() {
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(true)
 
+  const [webhookUrl, setWebhookUrl] = useState("")
+  const [alertType, setAlertType] = useState<"TYPOSQUAT" | "PHISHING" | "BRAND_MIMICRY">("BRAND_MIMICRY")
+  const [targetBrand, setTargetBrand] = useState("paypal")
+  const [isDispatching, setIsDispatching] = useState(false)
+  const [dispatchResult, setDispatchResult] = useState<string | null>(null)
+  const [dispatchSuccess, setDispatchSuccess] = useState<boolean | null>(null)
+
+  const handleTestWebhook = async () => {
+    if (!webhookUrl) return
+    setIsDispatching(true)
+    setDispatchResult("INITIALIZING HANDSHAKE...")
+    setDispatchSuccess(null)
+    
+    try {
+      const payload = {
+        alertType,
+        severity: "HIGH" as const,
+        targetBrand,
+        maliciousUrl: `https://${targetBrand}-security-alert-resolve.cc`,
+        fingerprint: "fc7a8" + Math.random().toString(16).substring(2, 10) + "e921b",
+        detectedAt: new Date().toISOString(),
+        forensicSummary: [
+          `CRITICAL: New domain age registered in suspicious offshore namespace.`,
+          `Suspicious: Domain missing active SPF and DMARC protection records.`
+        ]
+      }
+      
+      const response = await fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent": "ScamSentry-Forensic-Dispatcher-Simulator/1.0"
+        },
+        body: JSON.stringify({
+          event: "threat.detected",
+          timestamp: new Date().toISOString(),
+          data: payload
+        }),
+        mode: "no-cors"
+      })
+      
+      setDispatchSuccess(true)
+      setDispatchResult(`STATUS: 200 OK\nPAYLOAD TRANSMITTED SUCCESSFULLY.`)
+    } catch (e: any) {
+      setDispatchSuccess(false)
+      setDispatchResult(`CONNECTION_FAILURE:\n${e.message || 'Network lookup error'}`)
+    } finally {
+      setIsDispatching(false)
+    }
+  }
+
   useEffect(() => {
     if (user) {
       fetchDashboardData()
@@ -223,6 +274,83 @@ export default function ApiDashboardPage() {
               <p><span className="text-primary">curl</span> -X POST https://scamsentry.com/api/v1/verify \</p>
               <p>  -H "x-api-key: {apiKey?.key || 'ss_live_...'}" \</p>
               <p>  -d <span className="text-emerald-500">{`'{"payload": "sus-link.xyz"}'`}</span></p>
+            </div>
+          </div>
+
+          {/* B2B Webhook Dispatch Simulator */}
+          <div className="bg-[#0C0A09] border border-[#1F1914] rounded-xl p-6 space-y-4 shadow-xl">
+            <h2 className="text-sm font-bold font-mono text-foreground flex items-center gap-2 uppercase tracking-widest">
+              <Terminal className="h-4 w-4 text-primary" />
+              Webhook Simulator
+            </h2>
+            <p className="text-[10px] font-mono text-muted-foreground uppercase leading-relaxed">
+              Test your threat response firewalls or Slack/Discord alerts by dispatching simulated alert signatures.
+            </p>
+            
+            <div className="space-y-3 font-mono text-xs">
+              <div className="space-y-1">
+                <label className="text-[9px] font-bold text-primary/70 uppercase block">Target Webhook Endpoint</label>
+                <input
+                  type="url"
+                  placeholder="HTTPS://DISCORD.COM/API/WEBHOOKS/..."
+                  value={webhookUrl}
+                  onChange={(e) => setWebhookUrl(e.target.value)}
+                  className="w-full bg-[#050403] border border-[#1F1914] focus:border-primary/50 text-[10px] p-2.5 outline-none text-foreground placeholder:text-muted-foreground/20 rounded uppercase transition-all"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold text-primary/70 uppercase block">Threat Vector</label>
+                  <select
+                    value={alertType}
+                    onChange={(e: any) => setAlertType(e.target.value)}
+                    className="w-full bg-[#050403] border border-[#1F1914] focus:border-primary/50 text-[10px] p-2.5 outline-none text-foreground rounded uppercase cursor-pointer"
+                  >
+                    <option value="BRAND_MIMICRY">BRAND_MIMICRY</option>
+                    <option value="TYPOSQUAT">TYPOSQUAT</option>
+                    <option value="PHISHING">PHISHING</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold text-primary/70 uppercase block">Mimic Target</label>
+                  <select
+                    value={targetBrand}
+                    onChange={(e) => setTargetBrand(e.target.value)}
+                    className="w-full bg-[#050403] border border-[#1F1914] focus:border-primary/50 text-[10px] p-2.5 outline-none text-foreground rounded uppercase cursor-pointer"
+                  >
+                    <option value="paypal">Paypal</option>
+                    <option value="netflix">Netflix</option>
+                    <option value="amazon">Amazon</option>
+                    <option value="google">Google</option>
+                  </select>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleTestWebhook}
+                disabled={isDispatching || !webhookUrl}
+                className="w-full h-11 bg-primary text-black hover:bg-white transition-all font-black text-[10px] rounded uppercase active:scale-[0.98] shadow-[0_0_15px_rgba(255,191,0,0.15)]"
+              >
+                {isDispatching ? "DISPATCHING THREAT SIGNAL..." : "DISPATCH SIMULATED THREAT"}
+              </Button>
+
+              {dispatchResult && (
+                <div className="bg-[#050403] border border-[#1F1914] p-3 rounded font-mono text-[9px] overflow-hidden leading-normal">
+                  <div className="flex justify-between items-center mb-2 border-b border-[#1F1914] pb-1.5 text-muted-foreground uppercase tracking-widest text-[8px]">
+                    <span>TELEMETRY_LOG</span>
+                    <span className={cn(
+                      "font-bold",
+                      dispatchSuccess === true ? "text-emerald-500" :
+                      dispatchSuccess === false ? "text-red-500" : "text-primary animate-pulse"
+                    )}>
+                      {dispatchSuccess === true ? "SUCCESS" : dispatchSuccess === false ? "FAILED" : "PENDING"}
+                    </span>
+                  </div>
+                  <pre className="text-muted-foreground whitespace-pre-wrap font-mono uppercase leading-relaxed">{dispatchResult}</pre>
+                </div>
+              )}
             </div>
           </div>
         </div>

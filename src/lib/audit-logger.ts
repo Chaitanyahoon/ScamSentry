@@ -4,6 +4,7 @@ import { collection, addDoc, serverTimestamp, query, where, getDocs, limit, orde
 export type AuditAction = 
   | 'ADMIN_LOGIN' 
   | 'ADMIN_LOGOUT'
+  | 'ADMIN_REGISTER'
   | 'REPORT_APPROVED'
   | 'REPORT_REJECTED'
   | 'REPORT_DELETED'

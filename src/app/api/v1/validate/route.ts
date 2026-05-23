@@ -96,6 +96,7 @@ export async function POST(req: Request) {
 
     // 5. Intelligence Layer 5 (Semantic - Stripped)
     let L5 = { score: 0, flags: [] as string[], explanation: "" };
+    const deterministicRisk = L1.score + L2.score + L3.score + L4.score;
 
     // 6. Scoring Algorithm
     const combinedRisk = Math.min(deterministicRisk + L5.score, 100);
