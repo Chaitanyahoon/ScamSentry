@@ -67,20 +67,57 @@ const ReportsContext = createContext<ReportsContextType | undefined>(undefined)
 /* -------------------------------------------------------------------------- */
 /*  helpers: snake-case ↔ camel-case                                           */
 /* -------------------------------------------------------------------------- */
+const GLOBAL_NODES = [
+  { lat: 37.7749, lng: -122.4194, city: "San Francisco", country: "US" },
+  { lat: 51.5074, lng: -0.1278, city: "London", country: "GB" },
+  { lat: 35.6762, lng: 139.6503, city: "Tokyo", country: "JP" },
+  { lat: -33.8688, lng: 151.2093, city: "Sydney", country: "AU" },
+  { lat: 1.3521, lng: 103.8198, city: "Singapore", country: "SG" },
+  { lat: 52.5200, lng: 13.4050, city: "Berlin", country: "DE" },
+  { lat: 28.6139, lng: 77.2090, city: "New Delhi", country: "IN" },
+  { lat: -23.5505, lng: -46.6333, city: "Sao Paulo", country: "BR" },
+  { lat: 30.0444, lng: 31.2357, city: "Cairo", country: "EG" },
+  { lat: -26.2041, lng: 28.0473, city: "Johannesburg", country: "ZA" },
+  { lat: 45.4215, lng: -75.6972, city: "Ottawa", country: "CA" },
+  { lat: 35.9078, lng: 127.7669, city: "Seoul", country: "KR" }
+];
+
+const getDeterministicCoords = (title: string) => {
+  let hash = 0;
+  for (let i = 0; i < title.length; i++) {
+    hash = title.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const idx = Math.abs(hash) % GLOBAL_NODES.length;
+  return GLOBAL_NODES[idx];
+};
+
 const firestoreDocToScamReport = (docSnap: any): ScamReport => {
   const data = docSnap.data()
+  let lat = data.lat;
+  let lng = data.lng;
+  let city = data.city ?? "";
+  let country = data.country ?? "";
+
+  if (lat == null || lng == null) {
+    const fallback = getDeterministicCoords(data.title || docSnap.id);
+    lat = fallback.lat;
+    lng = fallback.lng;
+    if (!city || city === "Global") city = fallback.city;
+    if (!country || country === "WWW") country = fallback.country;
+  }
+
   return {
     id: docSnap.id,
     title: data.title,
     company: data.company ?? "Unknown Company",
     scamType: data.scam_type,
     industry: data.industry ?? "Other",
-    location: data.location ?? "",
-    city: data.city ?? "",
-    state: data.state ?? "",
-    country: data.country ?? "",
-    lat: data.lat ?? undefined,
-    lng: data.lng ?? undefined,
+    location: data.location || `${city}, ${country}` || "GLOBAL_NODE",
+    city,
+    state: data.state ?? "INT",
+    country,
+    lat,
+    lng,
     description: data.description,
     tags: data.tags ?? [],
     anonymous: data.anonymous ?? true,

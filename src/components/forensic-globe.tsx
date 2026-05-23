@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from "react"
 import dynamic from "next/dynamic"
-import { useReports } from "@/contexts/reports-context"
+import { useReports, type ScamReport } from "@/contexts/reports-context"
 import { getRecentScans, ScanEvent } from "@/lib/analytics"
 import { Loader2, Zap, Globe as GlobeIcon, Maximize2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -21,8 +21,13 @@ const Globe = dynamic(() => import("react-globe.gl"), {
   )
 })
 
-export function ForensicGlobe() {
-  const { reports } = useReports()
+interface ForensicGlobeProps {
+  reports?: ScamReport[]
+}
+
+export function ForensicGlobe({ reports: propReports }: ForensicGlobeProps) {
+  const { reports: contextReports } = useReports()
+  const reports = propReports ?? contextReports
   const [scans, setScans] = useState<ScanEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedIntel, setSelectedIntel] = useState<any>(null)
