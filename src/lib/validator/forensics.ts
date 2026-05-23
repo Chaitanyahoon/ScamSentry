@@ -57,14 +57,30 @@ export async function analyzeDomainForensics(inputUrl: string) {
 
     // NEW: Mail Exchange (MX) Record Check
     const resolveMx = promisify(dns.resolveMx);
-    const mxRecords = await resolveMx(domain).catch(() => []);
-    if (mxRecords.length === 0 && !domain.includes("local")) {
+    let mxRecords = await resolveMx(domain).catch(() => []);
+    
+    // Fallback: If no MX records are found on the subdomain (e.g. parts.length > 2), check the root domain
+    const parts = domain.split(/[.]/);
+    const rootDomain = parts.length > 1 ? parts.slice(-2).join(".") : domain;
+    
+    if (mxRecords.length === 0 && parts.length > 2) {
+      mxRecords = await resolveMx(rootDomain).catch(() => []);
+    }
+
+    const isTrustedAppDomain = [
+      "scam-sentry.vercel.app",
+      "scam-sentry.app",
+      "scamsentry.app",
+      "scamsentry.com"
+    ].includes(domain);
+
+    if (mxRecords.length === 0 && !domain.includes("local") && !isTrustedAppDomain) {
       score += 35;
       flags.push(
         "High Risk: Domain has no Mail Exchange (MX) records. Legitimate business domains rarely skip mail setup."
       );
     } else {
-      // Deduct minor risk if professional mail setup exists
+      // Deduct minor risk if professional mail setup exists or is whitelisted
       score -= 5;
     }
   } catch (e) {
