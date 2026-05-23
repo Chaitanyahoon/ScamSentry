@@ -118,10 +118,16 @@ async function processDomain(domain: string, source: string, col: FirebaseFirest
     const existing = await docRef.get();
 
     if (existing.exists) {
-      // Update last sync time
-      await docRef.update({
-        lastSync: new Date()
-      });
+      const data = existing.data();
+      const lastSyncTime = data?.lastSync?.toDate ? data.lastSync.toDate().getTime() : 0;
+      const oneDay = 24 * 60 * 60 * 1000;
+      
+      // Quota Shield: Only execute a document write if the last sync timestamp is older than 24 hours
+      if (Date.now() - lastSyncTime > oneDay) {
+        await docRef.update({
+          lastSync: new Date()
+        });
+      }
       return 'skipped';
     }
 

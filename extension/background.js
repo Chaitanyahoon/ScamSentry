@@ -120,3 +120,26 @@ async function updateStats(result) {
     console.error('[ScamSentry] Stats update error:', e);
   }
 }
+
+// 4. Context Menu Integration
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: "scan-link-forensics",
+    title: "Scan Link with ScamSentry",
+    contexts: ["link"]
+  });
+});
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === "scan-link-forensics" && info.linkUrl) {
+    handleUrlCheck(info.linkUrl).then((result) => {
+      chrome.tabs.sendMessage(tab.id, {
+        type: "SHOW_SCAN_RESULT",
+        url: info.linkUrl,
+        result: result
+      });
+    }).catch(err => {
+      console.error('[ScamSentry] Context scan error:', err);
+    });
+  }
+});
