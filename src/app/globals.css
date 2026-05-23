@@ -202,3 +202,12 @@
 .stagger-2 { animation-delay: 0.16s; }
 .stagger-3 { animation-delay: 0.26s; }
 .stagger-4 { animation-delay: 0.38s; }
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
