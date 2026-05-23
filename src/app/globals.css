@@ -211,3 +211,19 @@
     transform: translateX(-100%);
   }
 }
+
+/* ── Global Custom Webkit Scrollbars ────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0C0A09;
+}
+::-webkit-scrollbar-thumb {
+  background: #1F1914;
+  border-radius: 0px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #F59E0B;
+}

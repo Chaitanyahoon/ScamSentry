@@ -30,6 +30,24 @@ interface IncidentAlert {
   isHighlight: boolean;
 }
 
+function decodeHtmlEntities(str: string): string {
+  if (!str) return "";
+  return str
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&#038;/g, "&")
+    .replace(/&rsquo;/g, "'")
+    .replace(/&lsquo;/g, "'")
+    .replace(/&ldquo;/g, '"')
+    .replace(/&rdquo;/g, '"')
+    .replace(/&ndash;/g, "-")
+    .replace(/&mdash;/g, "-");
+}
+
 const MONITORED_BRANDS = [
   "vercel",
   "github",
@@ -134,7 +152,12 @@ export function CyberNewsHub() {
       const res = await fetch("/api/threats/recent");
       if (res.ok) {
         const data = await res.json();
-        setIncidents(data.incidents || []);
+        const decoded = (data.incidents || []).map((i: any) => ({
+          ...i,
+          title: decodeHtmlEntities(i.title),
+          description: decodeHtmlEntities(i.description)
+        }));
+        setIncidents(decoded);
         setLockdowns(data.lockdowns || []);
       }
     } catch (e) {
@@ -363,7 +386,7 @@ export function CyberNewsHub() {
               </span>
             </div>
 
-            <div className="divide-y divide-[#1F1914]/50 overflow-y-auto max-h-[300px] flex-1">
+            <div className="divide-y divide-[#1F1914]/50 overflow-y-auto max-h-[300px] flex-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-[#0C0A09] [&::-webkit-scrollbar-thumb]:bg-[#1F1914] hover:[&::-webkit-scrollbar-thumb]:bg-primary/40">
               {heroItems.map((item, idx) => {
                 const isActive = idx === activeHeroIndex;
                 return (
@@ -639,7 +662,7 @@ export function CyberNewsHub() {
 
             <div
               ref={terminalRef}
-              className="p-3.5 flex-1 bg-[#070605] font-mono text-[9.5px] text-emerald-500 space-y-2 overflow-y-auto max-h-[160px] select-text"
+              className="p-3.5 flex-1 bg-[#070605] font-mono text-[9.5px] text-emerald-500 space-y-2 overflow-y-auto max-h-[160px] select-text [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-[#070605] [&::-webkit-scrollbar-thumb]:bg-[#1F1914] hover:[&::-webkit-scrollbar-thumb]:bg-emerald-500/40"
             >
               {terminalLogs.map((log, i) => (
                 <div
@@ -743,7 +766,7 @@ export function CyberNewsHub() {
               {/* Typewriter details */}
               <div className="space-y-1.5">
                 <span className="text-[8px] font-mono text-muted-foreground/45 uppercase block select-none">DECRYPTED DATA</span>
-                <div className="bg-[#0C0A09] p-4 border border-[#1F1914] font-mono text-[10.5px] text-muted-foreground/80 leading-relaxed min-h-[100px] select-text whitespace-pre-wrap">
+                <div className="bg-[#0C0A09] p-4 border border-[#1F1914] font-mono text-[10.5px] text-muted-foreground/80 leading-relaxed min-h-[100px] max-h-[220px] overflow-y-auto select-text whitespace-pre-wrap [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-[#0C0A09] [&::-webkit-scrollbar-thumb]:bg-[#1F1914] hover:[&::-webkit-scrollbar-thumb]:bg-primary/40">
                   {decryptionText}
                 </div>
               </div>

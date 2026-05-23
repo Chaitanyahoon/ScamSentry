@@ -104,26 +104,26 @@ export function ScamMap() {
   })
 
   const riskLevels = [
-    { value: "high", label: "High Risk", classes: "bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20", count: displayedReports.filter(r => r.riskLevel === "high").length },
-    { value: "medium", label: "Medium Risk", classes: "bg-warning/10 text-warning border-warning/20 hover:bg-warning/20", count: displayedReports.filter(r => r.riskLevel === "medium").length },
-    { value: "low", label: "Low Risk", classes: "bg-secondary/10 text-secondary border-secondary/20 hover:bg-secondary/20", count: displayedReports.filter(r => r.riskLevel === "low").length },
+    { value: "high", label: "High Risk", classes: "bg-destructive border-destructive text-destructive-foreground", count: displayedReports.filter(r => r.riskLevel === "high").length },
+    { value: "medium", label: "Medium Risk", classes: "bg-[#F59E0B] border-[#F59E0B] text-black", count: displayedReports.filter(r => r.riskLevel === "medium").length },
+    { value: "low", label: "Low Risk", classes: "bg-[#8C5A1A] border-[#8C5A1A] text-white", count: displayedReports.filter(r => r.riskLevel === "low").length },
   ]
 
   return (
-    <section className="relative min-h-screen bg-background py-16">
+    <section className="relative min-h-screen bg-[#0C0A09] py-16 font-mono text-[#E8DBC8]">
 
       <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           {/* Header */}
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 border border-primary/20 bg-primary/5 text-primary mb-6 rounded-none font-mono text-xs tracking-widest uppercase">
-              <Layers className="h-3.5 w-3.5" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 border border-primary/20 bg-[#15110E] text-primary mb-6 rounded-none font-mono text-xs tracking-widest uppercase">
+              <Layers className="h-3.5 w-3.5 animate-pulse" />
               <span>Global Threat Map</span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-bold text-foreground mb-4 uppercase tracking-wider">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-foreground mb-4 uppercase tracking-wider">
               Interactive Heatmap
             </h2>
-            <p className="text-base text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xs text-muted-foreground uppercase tracking-widest max-w-2xl mx-auto border-l-2 border-primary/50 pl-4 py-1">
               Track reported scams and malicious organizations across geographic regions in real-time.
             </p>
           </div>
@@ -146,13 +146,13 @@ export function ScamMap() {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onKeyPress={(e) => e.key === "Enter" && handleCitySearch()}
-                      className="pl-12 h-12 bg-[#070605] border-[#1F1914] text-foreground font-mono text-xs uppercase tracking-widest rounded-none"
+                      className="pl-12 h-12 bg-[#070605] border-[#1F1914] text-foreground font-mono text-xs uppercase tracking-widest rounded-none focus-visible:ring-0 focus-visible:border-primary"
                     />
                   </div>
                   <Button
                     onClick={handleCitySearch}
                     disabled={isSearching}
-                    className="h-12 px-8 font-mono text-xs font-bold uppercase tracking-widest rounded-none bg-primary text-black hover:bg-primary/95 border border-primary/20"
+                    className="h-12 px-8 font-mono text-xs font-bold uppercase tracking-widest rounded-none bg-primary text-black hover:bg-white border border-primary transition-all shadow-[0_0_15px_rgba(245,158,11,0.1)]"
                   >
                     {isSearching ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Searching...</> : "Search Location"}
                   </Button>
@@ -181,34 +181,31 @@ export function ScamMap() {
             </div>
 
             {/* Risk Level Filters */}
-            <div className="flex flex-wrap gap-2 bg-[#0C0A09] border border-[#1F1914] p-4 rounded-none">
-              <Button
-                variant={selectedRiskFilter === null ? "default" : "outline"}
+            <div className="flex flex-wrap gap-2 bg-[#0C0A09] border border-[#1F1914] p-4 rounded-none select-none">
+              <button
                 onClick={() => setSelectedRiskFilter(null)}
                 className={cn(
-                  "h-9 text-sm font-semibold transition-colors",
-                  selectedRiskFilter === null 
-                    ? "bg-foreground text-background" 
-                    : "bg-transparent text-muted-foreground border-border hover:bg-muted"
+                  "px-4 h-9 font-mono text-[9px] font-bold uppercase tracking-widest border transition-all rounded-none",
+                  selectedRiskFilter === null
+                    ? "bg-primary border-primary text-black"
+                    : "bg-[#070605] border-[#1F1914] text-muted-foreground/60 hover:text-foreground hover:border-[#3E3329]"
                 )}
               >
-                <Filter className="mr-2 h-4 w-4" />
-                All Reports ({displayedReports.length})
-              </Button>
+                [ ALL_REPORTS ({displayedReports.length}) ]
+              </button>
               {riskLevels.map((level) => (
-                <Button
+                <button
                   key={level.value}
-                  variant={selectedRiskFilter === level.value ? "secondary" : "outline"}
                   onClick={() => setSelectedRiskFilter(selectedRiskFilter === level.value ? null : level.value)}
                   className={cn(
-                    "h-9 text-sm font-semibold transition-colors border",
-                    selectedRiskFilter === level.value 
-                      ? level.classes 
-                      : "bg-transparent text-muted-foreground border-border hover:bg-muted"
+                    "px-4 h-9 font-mono text-[9px] font-bold uppercase tracking-widest border transition-all rounded-none",
+                    selectedRiskFilter === level.value
+                      ? level.classes
+                      : "bg-[#070605] border-[#1F1914] text-muted-foreground/60 hover:text-foreground hover:border-[#3E3329]"
                   )}
                 >
-                  {level.label} ({level.count})
-                </Button>
+                  [ {level.label.replace(" ", "_").toUpperCase()} ({level.count}) ]
+                </button>
               ))}
             </div>
           </div>
