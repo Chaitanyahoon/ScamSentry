@@ -107,210 +107,190 @@ export default function ApiDashboardPage() {
   }
 
   return (
-    <div className="space-y-12 animate-fade-in stagger-1 relative overflow-hidden">
-      {/* Page Header - Command Center Style */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-[#1F1914] pb-10">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 text-primary">
-            <Terminal className="h-4 w-4" />
-            <span className="text-[10px] font-mono font-bold uppercase tracking-[0.3em]">NODE_ACCESS_POINT</span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground font-mono tracking-tighter uppercase leading-none">
-            API_<span className="text-primary text-glow-amber">CENTRAL</span>
+    <div className="space-y-10 animate-in fade-in duration-700">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground font-mono flex items-center gap-3">
+            API <span className="text-primary">CENTRAL</span>
           </h1>
-          <p className="text-muted-foreground/60 font-mono text-[11px] uppercase tracking-wider max-w-xl border-l border-primary/20 pl-4 mt-4">
-            Manage high-performance forensic keys and monitor real-time deterministic threat landscape hits. Secure Protocol v2.3 Active.
+          <p className="text-muted-foreground mt-2 max-w-lg">
+            Manage your high-performance forensic keys and monitor real-time deterministic threat landscape hits.
           </p>
         </div>
-        
-        <div className="flex items-center gap-4">
-          <div className="bg-[#15110E] border border-[#1F1914] px-5 py-3 flex items-center gap-3">
-            <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(255,191,0,0.8)]"></div>
-            <span className="text-[10px] font-mono font-bold uppercase text-foreground/80 tracking-widest leading-none">ENGINE_ONLINE_v2.3</span>
+        <div className="flex items-center gap-3">
+          <div className="bg-[#15110E] border border-[#1F1914] px-4 py-2 rounded flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+            <span className="text-[10px] font-mono font-bold uppercase text-foreground">v2.3 Core Logic Active</span>
           </div>
         </div>
       </div>
 
-      {/* Primary Telemetry Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Primary Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard 
-          label="TOTAL_SCANS" 
+          label="Total Scans" 
           value={metrics?.totalScans || 0} 
           icon={Activity} 
-          trend="+12%_CONSENSUS_UP"
+          trend="+12% from last week"
         />
         <StatCard 
-          label="THREATS_DEFLECTED" 
+          label="Threats Deflected" 
           value={metrics?.threatsDetected || 0} 
           icon={ShieldAlert} 
           color="text-primary"
-          trend="DETECTION_PEAK_STABLE"
+          trend="Critical Detection Active"
         />
         <StatCard 
-          label="ENGINE_LATENCY" 
+          label="Engine Latency" 
           value="42ms" 
           icon={Zap} 
-          trend="DETERMINISTIC_LOCK"
+          trend="Deterministic Peak"
         />
         <StatCard 
-          label="LAYER_INTEGRITY" 
+          label="Layer Integrity" 
           value="100%" 
           icon={ShieldCheck} 
-          trend="L1-L5_FULLY_LOADED"
+          trend="L1-L5 Fully Loaded"
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Side: API Key Management - Modular Box */}
-        <div className="lg:col-span-4 space-y-8">
-          <div className="bg-[#15110E] border border-[#1F1914] relative group transition-all duration-500 hover:border-primary/30">
-            {/* Corner Decorative Dots */}
-            <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-primary/20 group-hover:border-primary/50 transition-colors" />
-            <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-primary/20 group-hover:border-primary/50 transition-colors" />
-            
-            <div className="p-8 space-y-8">
-              <div className="flex items-center justify-between border-b border-[#1F1914] pb-6">
-                <h2 className="text-sm font-bold font-mono text-foreground flex items-center gap-3 uppercase tracking-[0.2em]">
-                  <Key className="h-4 w-4 text-primary" />
-                  ACCESS_CREDENTIALS
-                </h2>
-              </div>
-
-              {!apiKey ? (
-                <div className="text-center py-12 space-y-8">
-                  <p className="text-[10px] font-mono text-muted-foreground/40 uppercase tracking-[0.2em] leading-loose">No active API keys found in current directory. Initiate generation protocol to begin integration.</p>
-                  <Button onClick={generateKey} disabled={isGenerating} className="w-full h-12 rounded-none font-mono text-[10px] font-bold uppercase tracking-widest bg-primary text-black hover:bg-white transition-all">
-                    {isGenerating ? "INITIALIZING..." : "GENERATE_PRODUCTION_KEY"}
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-8">
-                  <div className="space-y-4">
-                    <label className="text-[9px] font-mono font-bold text-muted-foreground/40 uppercase tracking-[0.3em] block">PRODUCTION_KEY_LIVE</label>
-                    <div className="relative group/key">
-                      <div className="bg-[#0C0A09] border border-[#1F1914] p-5 font-mono text-xs text-primary transition-all duration-300 group-hover/key:border-primary/30 flex items-center justify-between">
-                        <span className="truncate tracking-wider">{apiKey.key}</span>
-                        <button onClick={copyToClipboard} className="text-muted-foreground hover:text-primary transition-colors ml-4 shrink-0">
-                          {copied ? <ShieldCheck className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Usage Telemetry */}
-                  <div className="space-y-6 pt-6 border-t border-[#1F1914]">
-                    <div className="flex justify-between items-end">
-                      <div className="space-y-1">
-                        <span className="text-[9px] font-mono text-muted-foreground/50 uppercase tracking-widest">USAGE_LIMIT_QUOTA</span>
-                        <div className="text-lg font-mono font-bold text-foreground">
-                          {apiKey.usageCount || 0} <span className="text-muted-foreground/30 font-normal">/</span> {apiKey.planLimit || 1000}
-                        </div>
-                      </div>
-                      <span className="text-[9px] font-mono text-primary/60 uppercase font-bold tracking-[0.2em]">Tier: STANDARD</span>
-                    </div>
-                    
-                    <div className="h-0.5 w-full bg-[#1F1914] overflow-hidden">
-                      <div 
-                        className="bg-primary h-full shadow-[0_0_10px_rgba(255,191,0,0.8)] transition-all duration-1000 ease-out" 
-                        style={{ width: `${Math.min(((apiKey.usageCount || 0) / (apiKey.planLimit || 1000)) * 100, 100)}%` }}
-                      />
-                    </div>
-                    
-                    <p className="text-[8px] font-mono text-muted-foreground/40 uppercase tracking-[0.3em] text-center">Protocol Reset in T-12 Days: 14:22:01</p>
-                  </div>
-
-                  <Button variant="ghost" className="w-full h-10 rounded-none text-[8px] font-mono font-bold uppercase tracking-[0.3em] text-muted-foreground hover:text-destructive hover:bg-destructive/5 border border-transparent hover:border-destructive/20 transition-all">
-                    REVOKE_AND_VOID_CREDENTIALS
-                  </Button>
-                </div>
-              )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* API Key Management */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="bg-[#0C0A09] border border-[#1F1914] rounded-xl p-6 shadow-xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Key className="h-32 w-32" />
             </div>
+            
+            <h2 className="text-lg font-bold font-mono text-foreground mb-6 flex items-center gap-2">
+              <Key className="h-5 w-5 text-primary" />
+              Developer Key
+            </h2>
+
+            {!apiKey ? (
+              <div className="text-center py-6">
+                <p className="text-sm text-muted-foreground mb-6">No active API key found. Generate one to start protecting your users.</p>
+                <Button onClick={generateKey} disabled={isGenerating} className="w-full font-mono bg-primary text-primary-foreground hover:bg-primary/90">
+                  {isGenerating ? "GENERATING..." : "GENERATE PRODUCTION KEY"}
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-6 relative z-10">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block">Live Production Key</label>
+                  <div className="flex items-center gap-2">
+                    <div className="bg-[#050403] border border-[#1F1914] px-4 py-3 font-mono text-sm text-primary flex-1 rounded flex items-center justify-between">
+                      <span className="truncate">{apiKey.key}</span>
+                      <button onClick={copyToClipboard} className="text-muted-foreground hover:text-primary transition-colors ml-2">
+                        {copied ? <ShieldCheck className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-[#1F1914] space-y-4">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-muted-foreground">Usage Limit</span>
+                    <span className="text-foreground font-mono">{apiKey.usageCount || 0} / {apiKey.planLimit || 1000}</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-[#15110E] rounded-full overflow-hidden">
+                    <div 
+                      className="bg-primary h-full shadow-[0_0_10px_rgba(255,165,0,0.4)]" 
+                      style={{ width: `${Math.min(((apiKey.usageCount || 0) / (apiKey.planLimit || 1000)) * 100, 100)}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between items-center text-[10px] font-mono uppercase tracking-tighter text-muted-foreground">
+                    <span>Free Tier</span>
+                    <span>Reset in 12 days</span>
+                  </div>
+                </div>
+
+                <Button variant="outline" className="w-full text-xs border-[#1F1914] hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30">
+                  Revoke and Re-issue Key
+                </Button>
+              </div>
+            )}
           </div>
 
-          {/* Quick Terminal Guide - High Fidelity */}
-          <div className="bg-[#15110E] border border-[#1F1914] p-8 space-y-6">
-            <h2 className="text-[10px] font-bold font-mono text-foreground flex items-center gap-3 uppercase tracking-[0.2em]">
-              <Terminal className="h-4 w-4 text-primary/50" />
-              INTEGRATION_SNIPPET
+          {/* Quick Terminal Guide */}
+          <div className="bg-[#0C0A09] border border-[#1F1914] rounded-xl p-6">
+            <h2 className="text-sm font-bold font-mono text-foreground mb-4 flex items-center gap-2 uppercase tracking-widest">
+              <Terminal className="h-4 w-4 text-primary" />
+              Quick SDK
             </h2>
-            <div className="bg-[#0C0A09] p-5 border border-[#1F1914] font-mono text-[10px] text-muted-foreground/70 space-y-2 overflow-x-auto leading-relaxed">
-              <p><span className="text-primary font-bold">curl</span> -X POST https://api.scamsentry.com/v1/verify \</p>
-              <p>  -H "auth-token: {apiKey?.key || 'ss_live_...'}" \</p>
-              <p>  -d <span className="text-primary/40">{`'{"target": "sus-link.xyz"}'`}</span></p>
+            <div className="bg-[#050403] p-4 rounded border border-[#1F1914] font-mono text-[11px] text-muted-foreground space-y-2 overflow-x-auto">
+              <p><span className="text-primary">curl</span> -X POST https://scamsentry.com/api/v1/verify \</p>
+              <p>  -H "x-api-key: {apiKey?.key || 'ss_live_...'}" \</p>
+              <p>  -d <span className="text-emerald-500">{`'{"payload": "sus-link.xyz"}'`}</span></p>
             </div>
           </div>
         </div>
 
-        {/* Right Side: Forensic Logs - High Fidelity HUD Table */}
-        <div className="lg:col-span-8 h-full">
-          <div className="bg-[#15110E] border border-[#1F1914] flex flex-col h-full relative group">
-             {/* Corner Decorative Accents */}
-            <div className="absolute top-0 right-0 w-6 h-6 border-t border-r border-[#1F1914] group-hover:border-primary/20 transition-colors" />
-            
-            <div className="p-8 border-b border-[#1F1914] flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <h2 className="text-sm font-bold font-mono text-foreground flex items-center gap-3 uppercase tracking-[0.2em]">
-                  <Database className="h-4 w-4 text-primary" />
-                  LIVE_FORENSIC_LEDGER
-                </h2>
-                <p className="text-[8px] font-mono text-muted-foreground/40 uppercase tracking-[0.3em]">Synchronizing Intelligence Nodes Across 12 Clusters</p>
-              </div>
-              <div className="flex items-center gap-3 px-3 py-1 bg-primary/5 border border-primary/10 rounded-none">
-                <Activity className="h-3 w-3 text-primary animate-pulse" />
-                <span className="text-[9px] font-mono font-bold text-primary uppercase tracking-widest">REAL_TIME_SYNC</span>
+        {/* Forensic Logs Table */}
+        <div className="lg:col-span-2">
+          <div className="bg-[#0C0A09] border border-[#1F1914] rounded-xl h-full flex flex-col shadow-xl">
+            <div className="p-6 border-b border-[#1F1914] flex items-center justify-between">
+              <h2 className="text-lg font-bold font-mono text-foreground flex items-center gap-2">
+                <Database className="h-5 w-5 text-primary" />
+                Live Forensic Archive
+              </h2>
+              <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono uppercase">
+                <Clock className="h-3 w-3" />
+                Real-time Sync
               </div>
             </div>
 
-            <div className="flex-1 overflow-x-auto p-2">
+            <div className="flex-1 overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-[0.3em] border-b border-[#1F1914]">
+                <thead className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-[#1F1914]">
                   <tr>
-                    <th className="px-6 py-5">TARGET_PAYLOAD</th>
-                    <th className="px-6 py-5 text-center">TRUST_SCORE</th>
-                    <th className="px-6 py-5">FORENSIC_NODE_ID</th>
-                    <th className="px-6 py-5 text-right">TIMESTAMP</th>
+                    <th className="px-6 py-4">Target Payload</th>
+                    <th className="px-6 py-4 text-center">Score</th>
+                    <th className="px-6 py-4">Forensic ID</th>
+                    <th className="px-6 py-4 text-right">Time</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#1F1914]/30">
+                <tbody className="divide-y divide-[#1F1914]">
                   {recentScans.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-6 py-24 text-center">
-                        <div className="flex flex-col items-center gap-4 opacity-20">
-                          <ShieldAlert className="h-12 w-12 text-muted-foreground" />
-                          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-[0.3em]">No telemetry signatures detected in current partition.</p>
-                        </div>
+                      <td colSpan={4} className="px-6 py-12 text-center text-sm text-muted-foreground font-mono">
+                        No telemetry data received yet. Run a scan to see forensic logs.
                       </td>
                     </tr>
                   ) : (
                     recentScans.map((scan, idx) => (
-                      <tr key={idx} className="hover:bg-[#0C0A09]/50 transition-all group/row duration-300">
-                        <td className="px-6 py-6 whitespace-nowrap">
-                          <div className="flex flex-col gap-2">
-                            <span className="text-xs font-mono text-foreground/90 font-bold truncate max-w-[280px] group-hover/row:text-primary transition-colors">{scan.url}</span>
-                            <div className={cn(
-                              "text-[8px] uppercase font-bold px-2 py-0.5 border w-fit font-mono tracking-widest transition-all",
-                              scan.riskLevel === "Secure" ? "border-primary/20 text-primary bg-primary/5" :
-                              scan.riskLevel === "Suspicious" ? "border-amber-500/20 text-amber-500 bg-amber-500/5" : 
-                              "border-destructive/20 text-destructive bg-destructive/5 shadow-[0_0_10px_rgba(192,41,42,0.1)]"
+                      <tr key={idx} className="hover:bg-[#15110E] transition-colors group">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-mono text-foreground truncate max-w-[200px]">{scan.url}</span>
+                            <span className={cn(
+                              "text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-sm w-fit mt-1",
+                              scan.riskLevel === "Secure" ? "bg-emerald-500/10 text-emerald-500" :
+                              scan.riskLevel === "Suspicious" ? "bg-amber-500/10 text-amber-500" : 
+                              "bg-red-500/10 text-red-500"
                             )}>
                               {scan.riskLevel}
-                            </div>
+                            </span>
                           </div>
                         </td>
-                        <td className="px-6 py-6 text-center">
-                          <div className={cn(
-                            "text-xl font-mono font-bold tracking-tighter transition-all",
-                            scan.finalScore > 70 ? "text-primary drop-shadow-[0_0_10px_rgba(255,191,0,0.3)]" :
-                            scan.finalScore > 30 ? "text-amber-500" : "text-destructive shadow-[0_0_10px_rgba(192,41,42,0.5)]"
+                        <td className="px-6 py-4 text-center">
+                          <span className={cn(
+                            "text-lg font-mono font-bold",
+                            scan.finalScore > 70 ? "text-emerald-500" :
+                            scan.finalScore > 30 ? "text-amber-500" : "text-red-500"
                           )}>
-                            {scan.finalScore}<span className="text-[10px] opacity-20 font-normal ml-1">/100</span>
+                            {scan.finalScore}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground group-hover:text-primary transition-colors">
+                            <Fingerprint className="h-3 w-3" />
+                            {scan.id?.substring(0, 6)}...
                           </div>
                         </td>
-                        <td className="px-6 py-6 font-mono text-[10px] text-muted-foreground/30 group-hover:text-muted-foreground/70 transition-colors uppercase tracking-widest">
-                          {scan.id?.substring(0, 12)}
-                        </td>
-                        <td className="px-6 py-6 text-right text-[10px] font-mono text-muted-foreground/40 group-hover:text-muted-foreground/80 transition-colors">
-                          {new Date(scan.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        <td className="px-6 py-4 text-right text-[10px] font-mono text-muted-foreground">
+                          {new Date(scan.timestamp).toLocaleTimeString()}
                         </td>
                       </tr>
                     ))
@@ -319,9 +299,9 @@ export default function ApiDashboardPage() {
               </table>
             </div>
 
-            <div className="p-8 border-t border-[#1F1914] bg-[#0C0A09] flex justify-center">
-              <Button variant="ghost" className="text-[10px] font-mono font-bold text-primary hover:bg-primary/5 uppercase tracking-[0.2em] h-10 rounded-none px-10 transition-all">
-                REQUEST_FULL_LEDGER_DUMP <ArrowUpRight className="h-3 w-3 ml-3" />
+            <div className="p-4 border-t border-[#1F1914] bg-[#050403] rounded-b-xl flex justify-center">
+              <Button variant="ghost" className="text-xs font-mono text-primary hover:bg-primary/10">
+                View Full Forensic Ledger <ArrowUpRight className="h-3 w-3 ml-2" />
               </Button>
             </div>
           </div>
@@ -333,23 +313,17 @@ export default function ApiDashboardPage() {
 
 function StatCard({ label, value, icon: Icon, trend, color = "text-foreground" }: any) {
   return (
-    <div className="bg-[#15110E] border border-[#1F1914] p-8 relative overflow-hidden group hover:border-primary/30 transition-all duration-500">
-      <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 [clip-path:polygon(100%_0,0_0,100%_100%)] opacity-[0.05] group-hover:opacity-[0.15] transition-opacity" />
-      
-      <div className="space-y-6 relative z-10">
-        <div className="flex justify-between items-center border-b border-[#1F1914] pb-4">
-          <h4 className="text-[9px] font-mono font-bold text-muted-foreground/40 uppercase tracking-[0.3em]">{label}</h4>
-          <Icon className="h-4 w-4 text-primary/30 group-hover:text-primary transition-colors" />
-        </div>
-        
-        <div className="space-y-1">
-          <p className={cn("text-4xl font-bold font-mono tracking-tighter", color)}>{value}</p>
-          <div className="flex items-center gap-2">
-            <div className="h-1 w-1 bg-primary/60 rounded-full animate-pulse" />
-            <p className="text-[9px] font-mono text-primary/40 uppercase tracking-widest leading-none">{trend}</p>
-          </div>
+    <div className="bg-[#0C0A09] border border-[#1F1914] p-6 rounded-xl space-y-4 hover:border-primary/30 transition-all group">
+      <div className="flex justify-between items-start">
+        <div className="bg-[#15110E] p-2 rounded border border-[#1F1914] group-hover:border-primary/40 transition-colors">
+          <Icon className="h-5 w-5 text-primary" />
         </div>
       </div>
+      <div>
+        <h4 className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">{label}</h4>
+        <p className={cn("text-2xl font-bold font-mono mt-1", color)}>{value}</p>
+      </div>
+      <p className="text-[10px] font-mono text-emerald-500/70">{trend}</p>
     </div>
   )
 }

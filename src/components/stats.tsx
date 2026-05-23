@@ -49,78 +49,54 @@ export function Stats() {
   ]
 
   return (
-    <section className="relative py-32 bg-[#0C0A09] border-y border-[#1F1914] overflow-hidden">
-      {/* Background Decorative - HUD Ornaments */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent shadow-[0_0_15px_rgba(255,191,0,0.1)]" />
-      <div className="absolute inset-0 bg-grid-cyber opacity-[0.05] pointer-events-none" />
-      
-      <div className="container relative z-10 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-        {/* Telemetry Header */}
-        <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8 border-l border-primary/20 pl-8">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div className="h-1 w-1 bg-primary animate-pulse" />
-              <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.4em]">SYSTEM_METRICS</span>
-            </div>
-            <h2 className="text-3xl font-bold text-white tracking-tighter uppercase font-mono">GLOBAL_THREAT_CORRELATION</h2>
-          </div>
-          <div className="hidden md:block">
-            <span className="text-[9px] font-mono text-muted-foreground/30 uppercase tracking-[0.3em]">REFRESH_RATE: 30S_REALTIME</span>
-          </div>
-        </div>
+    <section className="relative py-24 bg-background border-y border-[#1F1914] overflow-hidden">
+      {/* Background Decorative - Scanlines & Hex */}
+      <div className="absolute inset-0 pointer-events-none opacity-20">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,13,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,191,0,0.02),rgba(0,0,0,0),rgba(255,191,0,0.02))] bg-[length:100%_2px,3px_100%]" />
+      </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-[#1F1914] border border-[#1F1914] shadow-2xl shadow-primary/5">
+      <div className="container relative px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[#1F1914] border border-[#1F1914] rounded-2xl overflow-hidden shadow-2xl shadow-primary/5">
           {stats.map((stat, i) => {
             const { count, ref } = useCountUp(stat.value)
             return (
               <div 
                 key={stat.label} 
                 ref={ref} 
-                className="bg-[#15110E] p-10 space-y-6 hover:bg-[#1A1612] transition-all group relative overflow-hidden"
+                className="bg-[#0C0A09] p-8 sm:p-10 space-y-4 hover:bg-[#15110E] transition-colors group"
               >
-                {/* HUD Scanline per Card */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,191,0,0.01)_1px,transparent_1px)] bg-[length:100%_4px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                
-                <div className="relative z-10 space-y-4">
-                  <dt className="text-[10px] font-mono font-bold text-muted-foreground/40 uppercase tracking-[0.2em] flex items-center gap-2">
-                    <div className="h-1 w-3 bg-primary/20 group-hover:bg-primary/60 transition-colors" />
+                <div>
+                  <dt className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
+                    <span className="h-1 w-1 rounded-full bg-primary animate-pulse" />
                     {stat.label}
                   </dt>
-                  <dd className="text-4xl sm:text-5xl font-bold text-foreground font-mono tracking-tighter tabular-nums flex items-baseline gap-1">
-                    <span className="group-hover:text-primary group-hover:text-glow-amber transition-all duration-500">
-                      {count.toLocaleString()}
-                    </span>
-                    <span className="text-primary/30 text-xl font-normal tracking-normal">{stat.symbol}</span>
+                  <dd className="mt-2 text-3xl sm:text-4xl font-bold text-foreground font-mono tracking-tighter tabular-nums flex items-baseline gap-1">
+                    {count.toLocaleString()}
+                    <span className="text-primary text-xl font-normal opacity-50">{stat.symbol}</span>
                   </dd>
                 </div>
                 
-                <div className="pt-6 border-t border-[#1F1914] group-hover:border-primary/20 transition-colors relative z-10">
-                  <p className="text-[9px] font-mono text-muted-foreground/40 uppercase tracking-widest leading-none">
-                    DATA_SOURCE: <span className="text-muted-foreground/60">{stat.sub}</span>
+                <div className="pt-4 border-t border-[#1F1914] group-hover:border-primary/20 transition-colors">
+                  <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider italic">
+                    {stat.sub}
                   </p>
                 </div>
-
-                {/* Corner Accents */}
-                <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-[#1F1914] group-hover:border-primary/20 transition-colors" />
               </div>
             )
           })}
         </div>
 
-        {/* Distributed Computing Overlay status */}
-        <div className="mt-16 bg-[#15110E]/50 border border-[#1F1914] p-6 flex flex-wrap items-center justify-between gap-6">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2">
-              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-              <span className="text-[10px] font-mono text-muted-foreground/60 font-bold uppercase tracking-widest">GLOBAL_WATCH_ACTIVE</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-              <span className="text-[10px] font-mono text-muted-foreground/60 font-bold uppercase tracking-widest">DRM_VERIFIED: FORENSIC_INTEGRITY</span>
-            </div>
+        {/* Neural Live Status indicator below stats */}
+        <div className="flex items-center justify-center gap-6 mt-10">
+          <div className="flex items-center gap-2">
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+            <span className="text-[10px] font-mono text-muted-foreground font-bold uppercase tracking-widest">Global Watch Active</span>
           </div>
-          <div className="flex items-center gap-4 border-l border-[#1F1914] pl-8">
-            <span className="text-[9px] font-mono text-muted-foreground/20 italic">v4.2.0_STABLE_RELEASE</span>
+          <div className="h-px w-12 bg-[#1F1914]"></div>
+          <div className="flex items-center gap-2">
+            <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+            <span className="text-[10px] font-mono text-muted-foreground font-bold uppercase tracking-widest">Forensic Integrity: Verified</span>
           </div>
         </div>
       </div>
