@@ -211,25 +211,26 @@ export default function ReportPage() {
       <div className="container px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto relative z-10">
 
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="mb-6 inline-flex p-4 border border-red-900/40 bg-red-900/10 text-red-500 rounded-none animate-pulse">
-            <AlertTriangle className="h-8 w-8" />
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 bg-red-950/30 border border-red-500/20 text-[9px] font-bold text-red-500 uppercase tracking-[0.2em]">
+            <AlertTriangle className="h-3.5 w-3.5 animate-pulse" />
+            SECURE_THREAT_INGESTION_CHANNEL
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-foreground uppercase tracking-widest mb-4">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground uppercase tracking-widest mb-2">
             Log Threat Scenario
           </h1>
-          <p className="text-xs text-muted-foreground uppercase tracking-widest mb-8">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-4">
             TRANCHE_INGESTION_STEP: {step} OF {totalSteps}
           </p>
           
           {/* Progress Bar */}
-          <div className="h-4 w-full max-w-md mx-auto bg-[#070605] border border-[#1F1914] p-0.5 rounded-none overflow-hidden relative">
+          <div className="h-2 w-full max-w-xs mx-auto bg-[#070605] border border-[#1F1914] p-[1px] rounded-none overflow-hidden relative">
             <div 
               className="h-full bg-primary transition-all duration-300 relative" 
               style={{ width: `${(step / totalSteps) * 100}%` }}
             >
               {/* Scanline stripe overlay */}
-              <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_50%,rgba(0,0,0,0.4)_50%)] bg-[size:6px_100%] pointer-events-none" />
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_50%,rgba(0,0,0,0.4)_50%)] bg-[size:4px_100%] pointer-events-none" />
             </div>
           </div>
         </div>
