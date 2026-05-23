@@ -12,6 +12,24 @@ interface TickerItem {
   time: string;
 }
 
+function decodeHtmlEntities(str: string): string {
+  if (!str) return "";
+  return str
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&#038;/g, "&")
+    .replace(/&rsquo;/g, "'")
+    .replace(/&lsquo;/g, "'")
+    .replace(/&ldquo;/g, '"')
+    .replace(/&rdquo;/g, '"')
+    .replace(/&ndash;/g, "-")
+    .replace(/&mdash;/g, "-");
+}
+
 export function LiveThreatTicker() {
   const [items, setItems] = useState<TickerItem[]>([]);
   const [mounted, setMounted] = useState(false);
@@ -36,7 +54,7 @@ export function LiveThreatTicker() {
         }));
 
         const parsedIncidents = (data.incidents || []).map((i: any) => ({
-          text: i.title,
+          text: decodeHtmlEntities(i.title),
           source: i.source || "Advisory",
           isIncident: true,
           isHighlight: i.isHighlight || false,
@@ -79,7 +97,7 @@ export function LiveThreatTicker() {
       </div>
 
       {/* Scrolling Container */}
-      <div className="flex whitespace-nowrap animate-marquee group-hover:pause-marquee pl-[180px]">
+      <div className="flex whitespace-nowrap animate-marquee group-hover:[animation-play-state:paused] pl-[180px]">
         {scrollingItems.map((item, idx) => (
           <div 
             key={`${item.text}-${idx}`}
@@ -95,7 +113,7 @@ export function LiveThreatTicker() {
                   item.isHighlight ? "text-red-500 animate-bounce" : "text-amber-500"
                 )} />
               ) : (
-                <ShieldAlert className="h-3 w-3 text-primary opacity-70" />
+                <ShieldAlert className="h-3.5 w-3.5 text-primary opacity-70" />
               )}
               <span className={cn(
                 "text-[11px] font-mono tracking-tight",
@@ -139,9 +157,6 @@ export function LiveThreatTicker() {
           display: flex;
           width: fit-content;
           animation: marquee 50s linear infinite;
-        }
-        .pause-marquee {
-          animation-play-state: paused;
         }
       `}</style>
     </div>
