@@ -19,6 +19,12 @@ export const MALICIOUS_URL_DICTIONARIES = {
   homoglyphPatterns: /[il1][il1]{1,}|[o0]{1,}o[o0]{1,}|[rn]{2,}/i,
 };
 
+export const EMAIL_PATTERN_DICTIONARY = {
+  emailDetect: /^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/i,
+  freeMailProviders: /^(gmail|yahoo|outlook|hotmail|aol|zoho|protonmail|yandex|mail|gmx|icloud)\.com$/i,
+};
+
+
 export const TARGET_BRANDS = [
   "paypal",
   "apple",
@@ -119,6 +125,45 @@ export function analyzeHeuristics(inputUrl: string): { score: number; flags: str
   const flags: string[] = [];
   const url = inputUrl.trim().toLowerCase();
 
+  // Check if the input is a recruiter email address
+  const emailMatch = url.match(EMAIL_PATTERN_DICTIONARY.emailDetect);
+  if (emailMatch) {
+    const emailDomain = emailMatch[1];
+    const isFreeProvider = EMAIL_PATTERN_DICTIONARY.freeMailProviders.test(emailDomain);
+    const brandDomainPart = emailDomain.split('.')[0];
+    
+    if (isFreeProvider) {
+      // Case A: Recruiter uses free public email providers to spoof brands (Gmail, Yahoo, etc.)
+      for (const brand of TARGET_BRANDS) {
+        const brandRegex = new RegExp(brand, "i");
+        if (brandRegex.test(url)) {
+          score += 75;
+          flags.push(
+            `CRITICAL: Recruiter uses a free public address (${emailDomain}) to represent official brand '${brand}'.`
+          );
+        }
+      }
+    } else {
+      // Case B: Recruiter domain is custom and typosquatted mimicking a target brand
+      for (const brand of TARGET_BRANDS) {
+        if (brandDomainPart !== brand) {
+          const dist = levenshteinDistance(brandDomainPart, brand);
+          if (dist === 1 || (dist === 2 && brandDomainPart.length > 8)) {
+            score += 90;
+            flags.push(
+              `CRITICAL: Recruiter email domain '${emailDomain}' visually mimics official brand '${brand}' (Typosquatting).`
+            );
+          }
+        }
+      }
+    }
+    
+    return {
+      score: Math.min(score, 100),
+      flags
+    };
+  }
+
   // 1. IP Address Masking
   if (MALICIOUS_URL_DICTIONARIES.ipAddressMask.test(url)) {
     score += 80;
@@ -134,6 +179,7 @@ export function analyzeHeuristics(inputUrl: string): { score: number; flags: str
       "CRITICAL: Punycode (xn--) detected. Likely a homograph attack spoofing a legitimate brand.",
     );
   }
+
 
   // 3. Free Hosting / Dynamic DNS Abuse
   if (MALICIOUS_URL_DICTIONARIES.freeHosting.test(url)) {
@@ -194,6 +240,14 @@ export function analyzeHeuristics(inputUrl: string): { score: number; flags: str
         score += 40;
         flags.push(
           "Suspicious: Excessive subdomains commonly used to spoof legitimate root domains."
+        );
+      }
+
+      // Homoglyph / ASCII Lookalike Pattern Detection on the hostname only
+      if (MALICIOUS_URL_DICTIONARIES.homoglyphPatterns.test(domainObj.hostname)) {
+        score += 35;
+        flags.push(
+          "Suspicious: Hostname contains character combinations frequently used to spoof letters (e.g., 'rn' for 'm')."
         );
       }
 

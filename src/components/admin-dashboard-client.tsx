@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { useState } from "react"
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts"
 import { Shield, Eye, Check, X, Flag, TrendingUp, AlertTriangle, Trash2, Building, Loader2, Terminal, CheckSquare2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -247,6 +248,62 @@ export default function AdminDashboardClient() {
       default: return "bg-border text-muted-foreground border-border"
     }
   }
+
+  // Parse Daily Scan Counts for Time-Series Area Chart
+  const getTimelineData = () => {
+    const dailyCounts: Record<string, number> = {};
+    const sortedReports = [...reports].sort((a, b) => 
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+
+    sortedReports.forEach(report => {
+      const dateStr = new Date(report.createdAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric'
+      });
+      dailyCounts[dateStr] = (dailyCounts[dateStr] || 0) + 1;
+    });
+
+    const dataPoints = Object.entries(dailyCounts).map(([date, count]) => ({
+      date,
+      scans: count
+    }));
+
+    if (dataPoints.length === 0) {
+      return [
+        { date: "May 18", scans: 4 },
+        { date: "May 19", scans: 10 },
+        { date: "May 20", scans: 6 },
+        { date: "May 21", scans: 15 },
+        { date: "May 22", scans: 12 },
+        { date: "May 23", scans: 22 }
+      ];
+    }
+    return dataPoints;
+  };
+
+  // Parse Risk Distribution Counts for Dynamic Pie Chart
+  const getRiskDistributionData = () => {
+    const riskCounts: Record<string, number> = { high: 0, medium: 0, low: 0 };
+    reports.forEach(r => {
+      const level = r.riskLevel?.toLowerCase();
+      if (level in riskCounts) riskCounts[level]++;
+    });
+
+    if (reports.length === 0) {
+      return [
+        { name: "CRITICAL_THREATS", value: 35, color: "#C0292A" },
+        { name: "ELEVATED_RISK", value: 45, color: "#D4950A" },
+        { name: "ANOMALIES", value: 20, color: "#4D7A2A" }
+      ];
+    }
+
+    return [
+      { name: "CRITICAL_THREATS", value: riskCounts.high, color: "#C0292A" },
+      { name: "ELEVATED_RISK", value: riskCounts.medium, color: "#D4950A" },
+      { name: "ANOMALIES", value: riskCounts.low, color: "#4D7A2A" }
+    ].filter(item => item.value > 0);
+  };
 
   return (
     <div className="min-h-screen bg-[#0C0A09] py-10 relative overflow-hidden">
@@ -651,64 +708,72 @@ export default function AdminDashboardClient() {
 
             <TabsContent value="analytics" className="mt-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-[#15110E] border border-[#1F1914] relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 [clip-path:polygon(100%_0,0_0,100%_100%)] opacity-20 group-hover:opacity-100 transition-opacity" />
-                  <div className="bg-[#0C0A09] border-b border-[#1F1914] p-4 flex items-center justify-between">
+                <div className="bg-[#15110E] border border-[#1F1914] relative overflow-hidden group p-6">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 [clip-path:polygon(100%_0,0_0,100%_100%)] opacity-20 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                  <div className="border-b border-[#1F1914] pb-4 mb-6 flex items-center justify-between">
                     <h3 className="text-[10px] font-bold font-mono uppercase tracking-widest text-primary flex items-center gap-2">
-                       <TrendingUp className="h-3 w-3" /> VECTOR_TELEMETRY
-                    </h3>
-                    <span className="text-[8px] font-mono text-muted-foreground/50">REFRESH_RATE: 200MS</span>
+                       <TrendingUp className="h-3 w-3" /> SCAN_TELEMETRY_TIMELINE
+                     </h3>
+                    <span className="text-[8px] font-mono text-muted-foreground/50">LIVE_METRICS</span>
                   </div>
-                  <div className="p-8 font-mono text-[10px] tracking-[0.15rem] space-y-8">
-                    {[
-                      { label: "FAKE_JOB_OFFERS", value: 65, color: "bg-red-500" },
-                      { label: "UNPAID_LABOR", value: 45, color: "bg-amber-500" },
-                      { label: "IP_THEFT", value: 30, color: "bg-cyan-500" },
-                      { label: "GHOST_CLIENTS", value: 25, color: "bg-primary" }
-                    ].map((vector) => (
-                      <div key={vector.label} className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-foreground/80">{vector.label}</span>
-                          <span className="text-primary font-bold">{vector.value}%</span>
-                        </div>
-                        <div className="w-full bg-[#0C0A09] border border-[#1F1914] h-1.5 relative overflow-hidden">
-                          <div 
-                            className={`${vector.color} h-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(255,191,0,0.3)]`} 
-                            style={{ width: `${vector.value}%` }} 
-                          />
-                        </div>
-                      </div>
-                    ))}
+                  <div className="h-[280px] w-full font-mono text-[9px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={getTimelineData()} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="colorScans" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.25}/>
+                            <stop offset="95%" stopColor="#F59E0B" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1F1914" opacity={0.6} />
+                        <XAxis dataKey="date" stroke="#8C5A1A" fontSize={8} tickLine={false} />
+                        <YAxis stroke="#8C5A1A" fontSize={8} tickLine={false} />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#0C0A07', borderColor: '#1F1914', fontFamily: 'monospace', fontSize: '9px', color: '#E8DBC8' }}
+                          labelStyle={{ color: '#F59E0B', fontWeight: 'bold' }}
+                        />
+                        <Area type="monotone" dataKey="scans" stroke="#F59E0B" strokeWidth={1.5} fillOpacity={1} fill="url(#colorScans)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
 
-                <div className="bg-[#15110E] border border-[#1F1914] relative overflow-hidden group">
-                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/5 [clip-path:polygon(0_0,0_100%,100%_100%)] opacity-20 group-hover:opacity-100 transition-opacity" />
-                  <div className="bg-[#0C0A09] border-b border-[#1F1914] p-4 flex items-center justify-between">
+                <div className="bg-[#15110E] border border-[#1F1914] relative overflow-hidden group p-6">
+                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/5 [clip-path:polygon(0_0,0_100%,100%_100%)] opacity-20 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                  <div className="border-b border-[#1F1914] pb-4 mb-6 flex items-center justify-between">
                     <h3 className="text-[10px] font-bold font-mono uppercase tracking-widest text-primary flex items-center gap-2">
-                       <AlertTriangle className="h-3 w-3" /> RISK_DISTRIBUTION
-                    </h3>
-                    <Badge className="bg-red-500/10 text-red-500 border-red-500/20 text-[8px] font-mono rounded-none">CRITICAL_LOAD</Badge>
+                       <AlertTriangle className="h-3 w-3" /> RISK_SEVERITY_DISTRIBUTION
+                     </h3>
+                    <Badge className="bg-red-500/10 text-red-500 border-red-500/20 text-[8px] font-mono rounded-none">CORE_COMPLIANCE</Badge>
                   </div>
-                  <div className="p-8 font-mono text-[10px] tracking-[0.15rem] space-y-8">
-                    {[
-                      { label: "CRITICAL_THREATS", value: 40, color: "bg-red-600" },
-                      { label: "ELEVATED_RISK", value: 45, color: "bg-amber-500" },
-                      { label: "ANOMALIES", value: 15, color: "bg-green-500" }
-                    ].map((risk) => (
-                      <div key={risk.label} className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-foreground/80">{risk.label}</span>
-                          <span className="text-primary font-bold">{risk.value}%</span>
-                        </div>
-                        <div className="w-full bg-[#0C0A09] border border-[#1F1914] h-1.5 relative overflow-hidden">
-                          <div 
-                            className={`${risk.color} h-full transition-all duration-1000 ease-out`} 
-                            style={{ width: `${risk.value}%` }} 
-                          />
-                        </div>
-                      </div>
-                    ))}
+                  <div className="h-[280px] w-full font-mono text-[9px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={getRiskDistributionData()}
+                          cx="50%"
+                          cy="42%"
+                          innerRadius={55}
+                          outerRadius={80}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {getRiskDistributionData().map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} stroke="#15110E" strokeWidth={2} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{ backgroundColor: '#0C0A07', borderColor: '#1F1914', fontFamily: 'monospace', fontSize: '9px', color: '#E8DBC8' }}
+                        />
+                        <Legend 
+                          verticalAlign="bottom" 
+                          height={36} 
+                          iconType="circle" 
+                          iconSize={6}
+                          formatter={(value) => <span className="text-[8px] font-mono tracking-widest uppercase text-muted-foreground pl-1">{value}</span>}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               </div>

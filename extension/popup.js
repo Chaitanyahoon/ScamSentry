@@ -38,14 +38,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       badgeEl.textContent = isMalicious ? 'Malicious' : 'Safe';
       badgeEl.className = `risk-badge ${isMalicious ? 'malicious' : 'safe'}`;
       
-      // Update score display
-      const score = result.score || 0;
-      scoreBarEl.style.width = `${score}%`;
-      scoreValEl.textContent = `${score}%`;
+      // Update score display - display true Trust Score (100 - threat penalty)
+      const threatScore = result.score || 0;
+      const trustScore = Math.max(0, 100 - threatScore);
+      scoreBarEl.style.width = `${trustScore}%`;
+      scoreValEl.textContent = `${trustScore}%`;
       
       if (isMalicious) {
         scoreBarEl.style.backgroundColor = '#FF4D4D';
         scoreValEl.style.color = '#FF4D4D';
+      } else {
+        scoreBarEl.style.backgroundColor = ''; // Reverts to CSS primary amber
+        scoreValEl.style.color = '';
       }
     }
   });

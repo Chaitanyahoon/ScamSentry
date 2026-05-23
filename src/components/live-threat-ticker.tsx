@@ -43,44 +43,52 @@ export function LiveThreatTicker() {
   const scrollingThreats = [...threats, ...threats];
 
   return (
-    <div className="w-full bg-[#0C0A09] border-y border-[#1F1914] py-3 overflow-hidden relative group">
-      {/* Ticker Header / Label */}
-      <div className="absolute left-0 top-0 bottom-0 z-10 bg-[#0C0A09] border-r border-[#1F1914] flex items-center px-4 shadow-[10px_0_20px_rgba(0,0,0,0.5)]">
-        <div className="flex items-center gap-2">
-          <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-          <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em] whitespace-nowrap">
-            Live Intelligence
+    <div className="w-full bg-[#0C0A09] border-y border-[#1F1914] py-4 overflow-hidden relative group">
+      {/* Ticker Header / Label - Pro HUD Style */}
+      <div className="absolute left-0 top-0 bottom-0 z-20 bg-[#0C0A09]/95 backdrop-blur-sm border-r border-primary/20 flex items-center px-6 shadow-[20px_0_40px_rgba(0,0,0,0.8)]">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="h-2 w-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(255,191,0,0.8)]" />
+            <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping" />
+          </div>
+          <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.4em] whitespace-nowrap text-glow-amber">
+            LIVE_INTEL_STREAM
           </span>
         </div>
       </div>
 
       {/* Scrolling Container */}
-      <div className="flex whitespace-nowrap animate-marquee group-hover:pause-marquee pl-[140px]">
+      <div className="flex whitespace-nowrap animate-marquee group-hover:pause-marquee pl-[180px]">
         {scrollingThreats.map((threat, idx) => (
           <div 
             key={`${threat.domain}-${idx}`}
-            className="inline-flex items-center gap-4 px-6 border-r border-[#1F1914] last:border-r-0"
+            className="inline-flex items-center gap-6 px-10 border-r border-[#1F1914] last:border-r-0 group/item transition-colors hover:bg-primary/[0.02]"
           >
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="h-3 w-3 text-primary opacity-70" />
-              <span className="text-[11px] font-mono text-white font-medium lowercase tracking-tight">
+            <div className="flex items-center gap-3">
+              <div className="p-1 bg-primary/5 border border-primary/10">
+                <ShieldAlert className="h-3 w-3 text-primary opacity-70" />
+              </div>
+              <span className="text-[11px] font-mono text-white/90 font-medium lowercase tracking-tight group-hover/item:text-primary transition-colors">
                 {threat.domain}
               </span>
             </div>
-            <div className="px-1.5 py-0.5 rounded-[4px] bg-primary/10 border border-primary/20">
-              <span className="text-[8px] font-mono text-primary font-bold uppercase tracking-tighter">
+            <div className="px-2 py-0.5 border border-primary/20 bg-primary/5">
+              <span className="text-[8px] font-mono text-primary font-bold uppercase tracking-[0.2em] leading-none">
                 {threat.source}
               </span>
             </div>
-            <span className="text-[9px] font-mono text-muted-foreground/40 tabular-nums">
-              {new Date(threat.firstSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            <span className="text-[9px] font-mono text-muted-foreground/30 tabular-nums">
+              [{new Date(threat.firstSeen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}]
             </span>
           </div>
         ))}
       </div>
 
+      {/* HUD Scanline Overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[length:100%_2px]" />
+
       {/* Right Gradient Fade */}
-      <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#0C0A09] to-transparent pointer-events-none z-10" />
+      <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#0C0A09] via-[#0C0A09]/50 to-transparent pointer-events-none z-10" />
 
       <style jsx global>{`
         @keyframes marquee {
@@ -90,7 +98,7 @@ export function LiveThreatTicker() {
         .animate-marquee {
           display: flex;
           width: fit-content;
-          animation: marquee 40s linear infinite;
+          animation: marquee 60s linear infinite;
         }
         .pause-marquee {
           animation-play-state: paused;

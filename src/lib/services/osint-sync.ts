@@ -31,7 +31,19 @@ export async function syncOSINTFeeds() {
   };
 
   try {
-    const db = getAdminDb();
+    let db;
+    try {
+      db = getAdminDb();
+    } catch (e) {
+      console.warn('[OSINT] Graceful skip: Firebase Admin environment variables are not configured.');
+      return {
+        processed: 0,
+        added: 0,
+        skipped: 0,
+        errors: 0,
+        warning: 'Firebase Service Account is missing; database sync bypassed.'
+      };
+    }
     const threatFeedCol = db.collection('threat_intel_feeds');
 
     // 1. Fetch OpenPhish (Community Text Feed)
@@ -51,7 +63,8 @@ export async function syncOSINTFeeds() {
         })
         .filter(Boolean) as string[];
 
-      for (const domain of new Set(openPhishDomains)) {
+      const uniqueOpenPhish = Array.from(new Set(openPhishDomains)).slice(0, 250);
+      for (const domain of uniqueOpenPhish) {
         const result = await processDomain(domain, 'OpenPhish', threatFeedCol);
         if (result === 'added') stats.added++;
         else if (result === 'skipped') stats.skipped++;
@@ -79,7 +92,8 @@ export async function syncOSINTFeeds() {
         }
       }).filter(Boolean) as string[];
 
-      for (const domain of new Set(phishTankDomains)) {
+      const uniquePhishTank = Array.from(new Set(phishTankDomains)).slice(0, 250);
+      for (const domain of uniquePhishTank) {
         const result = await processDomain(domain, 'PhishTank', threatFeedCol);
         if (result === 'added') stats.added++;
         else if (result === 'skipped') stats.skipped++;
