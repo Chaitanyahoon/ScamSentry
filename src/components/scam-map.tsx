@@ -22,6 +22,7 @@ export function ScamMap() {
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<GeocodingResult | null>(null)
   const [selectedRiskFilter, setSelectedRiskFilter] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<"2d" | "3d">("3d")
 
   useEffect(() => {
     if (searchResults) {
@@ -254,92 +255,185 @@ export function ScamMap() {
           </div>
 
           {/* Map Section */}
-          <div className="mb-10 bg-[#0C0A09] border border-[#1F1914] shadow-2xl overflow-hidden h-[600px] sm:h-[800px] relative rounded-xl group">
-             <div className="absolute inset-0 z-0">
-                <ForensicGlobe />
-             </div>
+          <div className="mb-10 bg-[#0C0A09] border border-[#1F1914] shadow-2xl overflow-hidden h-[600px] sm:h-[800px] relative rounded-none group">
+             {viewMode === "3d" ? (
+               <div className="absolute inset-0 z-0">
+                  <ForensicGlobe reports={filteredReports} />
+               </div>
+             ) : (
+               <div className="absolute inset-0 z-0">
+                  <InteractiveMap
+                    centerLat={mapCenter.lat}
+                    centerLng={mapCenter.lng}
+                    reports={filteredReports}
+                    currentLocation={searchResults ? { lat: searchResults.lat, lng: searchResults.lng } : null}
+                  />
+               </div>
+             )}
              
              {/* Map Overlay for Info */}
              <div className="absolute bottom-6 left-6 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <div className="bg-[#0C0A09]/80 backdrop-blur-sm border border-[#1F1914] p-4 rounded-lg">
+                <div className="bg-[#0C0A09]/80 backdrop-blur-sm border border-[#1F1914] p-4 rounded-none">
                   <p className="font-mono text-[10px] text-primary uppercase tracking-[0.2em]">Neural Engine v2.6</p>
                   <p className="text-muted-foreground text-xs mt-1 italic">Mapping global attack vectors using deterministic telemetry...</p>
                 </div>
              </div>
+
+             {/* View Mode Toggle Controls */}
+             <div className="absolute top-6 right-6 z-10 flex gap-1.5 bg-[#0C0A09]/95 backdrop-blur-md border border-[#1F1914] p-1.5 shadow-2xl">
+               <button
+                 onClick={() => setViewMode("2d")}
+                 className={cn(
+                   "px-3 py-1.5 font-mono text-[9px] font-black uppercase tracking-widest transition-all rounded-none border",
+                   viewMode === "2d"
+                     ? "bg-primary border-primary text-black"
+                     : "bg-[#070605] border-[#1F1914] text-muted-foreground/60 hover:text-foreground hover:border-[#3E3329]"
+                 )}
+               >
+                 [ 2D_MAP ]
+               </button>
+               <button
+                 onClick={() => setViewMode("3d")}
+                 className={cn(
+                   "px-3 py-1.5 font-mono text-[9px] font-black uppercase tracking-widest transition-all rounded-none border",
+                   viewMode === "3d"
+                     ? "bg-primary border-primary text-black"
+                     : "bg-[#070605] border-[#1F1914] text-muted-foreground/60 hover:text-foreground hover:border-[#3E3329]"
+                 )}
+               >
+                 [ 3D_GLOBE ]
+               </button>
+             </div>
           </div>
 
-          {/* Reports Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredReports.map((report) => (
-              <div
-                key={report.id}
-                className="bg-card flex flex-col justify-between border border-border shadow-sm hover:border-primary/50 transition-colors"
-              >
-                <div className="p-6 border-b border-border bg-card">
-                  <div className="flex items-start justify-between mb-4 gap-4">
-                    <h3 className="font-semibold text-foreground text-base clamp-1">
-                      {report.title}
-                    </h3>
-                    <Badge
-                      className={cn(
-                        "rounded-sm text-xs font-semibold shrink-0 cursor-default",
-                        report.riskLevel === "high" && "bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/10",
-                        report.riskLevel === "medium" && "bg-warning/10 text-warning border-warning/20 hover:bg-warning/10",
-                        report.riskLevel === "low" && "bg-secondary/10 text-secondary border-secondary/20 hover:bg-secondary/10"
-                      )}
-                    >
-                      {report.riskLevel}
-                    </Badge>
-                  </div>
-                  
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Company:</span>
-                      <span className="font-medium text-foreground truncate ml-4">{report.company}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Location:</span>
-                      <span className="font-medium text-foreground truncate ml-4 flex items-center">
-                         <MapPin className="h-3 w-3 mr-1" />
-                         {report.city}, {report.state}
-                      </span>
-                    </div>
-                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Method:</span>
-                      <span className="font-medium">{report.scamType}</span>
-                    </div>
-                  </div>
-                </div>
+          {/* Threat Registry Ledger Table */}
+          {filteredReports.length > 0 ? (
+            <div className="border border-[#1F1914] bg-[#0C0A09] relative overflow-hidden select-text">
+              {/* Corner accents */}
+              <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-primary/20 pointer-events-none" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-primary/20 pointer-events-none" />
 
-                <div className="p-6 bg-background/50 flex flex-col flex-1">
-                  <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed mb-6 flex-1">
-                    {report.description}
-                  </p>
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="w-full font-semibold"
-                  >
-                    <Link href={`/reports/${report.id}`}>
-                      View Full Details <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
+              {/* Table Title Bar */}
+              <div className="bg-[#15110E] p-4 border-b border-[#1F1914] flex justify-between items-center select-none">
+                <div className="flex items-center gap-2">
+                  <TerminalSquare className="h-4 w-4 text-primary" />
+                  <span className="text-[9px] font-mono font-black uppercase tracking-[0.25em] text-foreground">
+                    [ GLOBAL_THREAT_REGISTRY_LEDGER ]
+                  </span>
                 </div>
+                <span className="text-[8px] font-mono text-muted-foreground/40 uppercase tracking-widest hidden sm:inline">
+                  VERIFICATION_PROTOCOL: PEER_CONSENSUS
+                </span>
               </div>
-            ))}
-          </div>
 
-          {filteredReports.length === 0 && (
-            <div className="border border-border p-12 text-center bg-card shadow-sm mt-8">
-              <div className="inline-flex h-16 w-16 items-center justify-center bg-muted rounded-full mb-6">
-                <MapPin className="h-8 w-8 text-muted-foreground" />
+              {/* Table Container */}
+              <div className="overflow-x-auto w-full">
+                <table className="w-full font-mono text-[11px] text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-[#1F1914] bg-[#120F0D] text-muted-foreground select-none uppercase tracking-widest text-[9px]">
+                      <th className="p-4 font-black">STATUS</th>
+                      <th className="p-4 font-black">IDENTIFIER / TARGET</th>
+                      <th className="p-4 font-black">GEOGRAPHIC NODE</th>
+                      <th className="p-4 font-black">ATTACK VECTOR</th>
+                      <th className="p-4 font-black text-center">RISK</th>
+                      <th className="p-4 font-black text-right">DOSSIER</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#1F1914]/50">
+                    {filteredReports.map((report) => (
+                      <tr 
+                        key={report.id}
+                        className="hover:bg-[#12100E]/70 transition-colors group"
+                      >
+                        {/* Status */}
+                        <td className="p-4 align-middle">
+                          <div className="flex items-center gap-2">
+                            <span className={cn(
+                              "h-2 w-2 rounded-full",
+                              report.riskLevel === "high" ? "bg-red-500 animate-ping" : "bg-emerald-500 animate-pulse"
+                            )} />
+                            <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/60">
+                              {report.status.toUpperCase()}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Identifier */}
+                        <td className="p-4 align-middle max-w-[280px]">
+                          <div className="space-y-1">
+                            <p className="font-bold text-[#E7E5E4] group-hover:text-primary transition-colors line-clamp-1 uppercase">
+                              {report.title}
+                            </p>
+                            <p className="text-[9px] text-muted-foreground/40 uppercase">
+                              TARGET: {report.company}
+                            </p>
+                          </div>
+                        </td>
+
+                        {/* Geographic Node */}
+                        <td className="p-4 align-middle text-muted-foreground/80">
+                          <div className="flex items-center gap-1.5 uppercase">
+                            <MapPin className="h-3.5 w-3.5 text-primary/60 shrink-0" />
+                            <span>{report.city || "GLOBAL"}, {report.state || "INT"}</span>
+                          </div>
+                        </td>
+
+                        {/* Attack Vector */}
+                        <td className="p-4 align-middle text-muted-foreground/60 uppercase">
+                          {report.scamType}
+                        </td>
+
+                        {/* Risk */}
+                        <td className="p-4 align-middle text-center">
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "rounded-none text-[8px] font-black uppercase tracking-widest px-2.5 py-0.5",
+                              report.riskLevel === "high" && "bg-red-500/10 border-red-500/30 text-red-400",
+                              report.riskLevel === "medium" && "bg-amber-500/5 border-amber-500/20 text-amber-500",
+                              report.riskLevel === "low" && "bg-[#1C1917] border-[#292524] text-muted-foreground/70"
+                            )}
+                          >
+                            {report.riskLevel}
+                          </Badge>
+                        </td>
+
+                        {/* Dossier */}
+                        <td className="p-4 align-middle text-right">
+                          <Button
+                            asChild
+                            variant="outline"
+                            className="h-7 px-3.5 rounded-none font-mono text-[9px] font-black uppercase tracking-widest border-[#1F1914] bg-primary/5 hover:bg-primary hover:text-black hover:border-primary transition-all"
+                          >
+                            <Link href={`/reports/${report.id}`}>
+                              [ ACCESS ]
+                            </Link>
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">No Reports Found</h3>
-              <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                {searchResults
-                  ? `There are no active threat reports logged for ${searchResults.city}.`
-                  : "Search for a city or region to view active threat reports in that area."}
+            </div>
+          ) : (
+            <div className="border border-[#1F1914] p-16 text-center bg-[#15110E] relative overflow-hidden group rounded-none">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,191,0,0.05)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+              <TerminalSquare className="h-12 w-12 text-muted-foreground/30 mx-auto mb-6" />
+              <h3 className="text-sm font-mono font-bold uppercase tracking-widest text-foreground mb-2">[ ERROR_404: NO_TELEMETRY_FOUND ]</h3>
+              <p className="text-xs font-mono text-muted-foreground/70 uppercase tracking-widest max-w-md mx-auto">
+                The current matrix query yielded zero results. Adjust filtering parameters to expand search radius.
               </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchTerm("")
+                  setSelectedRiskFilter(null)
+                }}
+                className="mt-8 rounded-none border-primary/50 text-primary hover:bg-primary hover:text-black font-mono text-[10px] font-bold uppercase tracking-widest h-10 px-8 transition-all"
+              >
+                RESET_QUERY_MATRIX
+              </Button>
             </div>
           )}
         </div>

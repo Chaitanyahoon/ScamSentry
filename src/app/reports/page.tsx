@@ -98,12 +98,14 @@ export default function ReportsPage() {
           <div className="mb-8 space-y-6">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1 group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/50 group-focus-within:text-primary transition-colors z-10" />
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-[10px] text-primary/70 font-black tracking-widest select-none">
+                  &gt;_QUERY:
+                </span>
                 <Input
-                  placeholder="QUERY DATASTORE BY STRING..."
+                  placeholder="ENTER TARGET DATA FOR DOSSIER SCAN..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 h-12 bg-[#15110E] border-[#1F1914] text-foreground font-mono text-xs uppercase tracking-widest rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 border-b-2 focus-visible:border-b-primary focus-visible:bg-[#1E1915] transition-all placeholder:text-muted-foreground/30 relative z-0 shadow-inner group-focus-within:shadow-[0_0_15px_rgba(255,191,0,0.1)]"
+                  className="pl-16 h-12 bg-[#15110E] border-[#1F1914] text-foreground font-mono text-xs uppercase tracking-widest rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 border-b-2 focus-visible:border-b-primary focus-visible:bg-[#1E1915] transition-all placeholder:text-muted-foreground/30 relative z-0 shadow-inner group-focus-within:shadow-[0_0_15px_rgba(255,191,0,0.1)]"
                 />
               </div>
               <div className="flex gap-4">
@@ -170,88 +172,101 @@ export default function ReportsPage() {
 
           <div className="space-y-4">
             {sortedReports.map((report) => (
-              <div key={report.id} className="bg-[#15110E] border border-[#1F1914] flex flex-col sm:flex-row group hover:border-primary/50 transition-all duration-300 ease-out shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(255,191,0,0.15)] relative">
-                
-                {/* HUD Corner Accents */}
-                <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-primary/20 group-hover:border-primary/80 transition-colors pointer-events-none" />
-                <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-primary/20 group-hover:border-primary/80 transition-colors pointer-events-none z-10" />
-
-                {/* Left Accent Bar */}
-                <div className={`w-1 shrink-0 transition-colors ${report.riskLevel === 'high' ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-[#1F1914] group-hover:bg-primary group-hover:shadow-[0_0_10px_rgba(255,191,0,0.5)]'}`} />
-
-                {/* Main Content */}
-                <div className="flex-1 min-w-0 p-6 flex flex-col justify-between border-b sm:border-b-0 sm:border-r border-[#1F1914] relative overflow-hidden">
-                  {/* Subtle scanline overlay on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent -translate-y-full group-hover:translate-y-full transition-transform duration-1000 ease-in-out pointer-events-none" />
-                  
-                  <div className="relative z-10">
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                      <Link href={`/reports/${report.id}`} className="hover:text-primary transition-colors block truncate w-full">
-                        <h2 className="text-lg font-bold text-foreground uppercase tracking-wider truncate group-hover:drop-shadow-[0_0_5px_rgba(255,191,0,0.5)] transition-all">{report.title}</h2>
-                      </Link>
-                      {report.riskLevel === 'high' && (
-                        <span className="shrink-0 inline-flex items-center gap-1.5 px-2 py-0.5 border border-red-500/30 text-[9px] font-mono font-bold tracking-widest uppercase bg-red-500/10 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]">
-                          <AlertTriangle className="w-3 h-3" />
-                          [ CRITICAL ]
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="text-xs text-muted-foreground/80 font-mono line-clamp-2 leading-relaxed mb-6 border-l-2 border-[#1F1914] pl-3">
-                      {report.description}
-                    </p>
+              <div 
+                key={report.id} 
+                className="flex flex-col relative group select-text"
+              >
+                {/* Folder Tab Notch */}
+                <div className="flex select-none">
+                  <div className="bg-[#15110E] border-t border-l border-r border-[#1F1914] group-hover:border-primary/30 px-4 py-1.5 text-[8.5px] font-mono text-primary font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 bg-primary rounded-full animate-pulse" />
+                    DOSSIER_ID: {report.id.substring(0, 8).toUpperCase()}
                   </div>
-
-                  {/* Meta layout */}
-                  <div className="flex flex-wrap items-center gap-4 text-[10px] text-muted-foreground font-mono uppercase tracking-widest">
-                    <div className="flex items-center gap-1.5 bg-[#0C0A09] border border-[#1F1914] px-2 py-1">
-                      <MapPin className="h-3 w-3 text-primary/70" />
-                      {report.company} ({report.location})
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-[#0C0A09] border border-[#1F1914] px-2 py-1">
-                      <Clock className="h-3 w-3 text-primary/70" />
-                      T-{new Date(report.createdAt).toISOString().split('T')[0]}
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-[#0C0A09] border border-[#1F1914] px-2 py-1">
-                       <Flag className="h-3 w-3 text-primary/70" />
-                       {report.scamType}
-                    </div>
-                  </div>
+                  <div className="flex-1 border-b border-[#1F1914] group-hover:border-primary/20 transition-colors" />
                 </div>
 
-                {/* Actions sidebar */}
-                <div className="sm:w-48 bg-[#0C0A09] shrink-0 p-6 flex flex-col justify-center items-stretch gap-3">
-                   <div className="text-[9px] font-mono text-center text-muted-foreground/50 tracking-[0.2em] mb-2 uppercase">
-                     [ NODE_ACTIONS ]
-                   </div>
-                   
-                  <Button
-                    variant="outline"
-                    className="w-full text-[10px] font-mono uppercase tracking-widest font-bold rounded-none h-9 border-[#1F1914] hover:bg-success/10 hover:border-success/30 hover:text-success transition-all disabled:opacity-50"
-                    onClick={() => handleHelpfulVote(report.id)}
-                    disabled={votedReports.has(report.id)}
-                  >
-                    <ThumbsUp className="h-3 w-3 mr-2" />
-                    {votedReports.has(report.id) ? "LOGGED" : "VERIFY"} [{report.helpfulVotes}]
-                  </Button>
-                  
-                  <Link href={`/reports/${report.id}`} className="w-full">
-                    <Button 
-                      variant="outline" 
-                      className="w-full text-[10px] font-mono uppercase tracking-widest font-bold rounded-none h-9 border-[#1F1914] hover:border-primary/50 text-foreground hover:text-primary transition-all bg-primary/5"
-                    >
-                      DOSSIER <TerminalSquare className="ml-2 h-3 w-3" />
-                    </Button>
-                  </Link>
+                {/* Main Folder Body */}
+                <div className="bg-[#15110E] border-l border-r border-b border-[#1F1914] group-hover:border-primary/30 flex flex-col sm:flex-row hover:bg-[#1C1814]/10 transition-all duration-300 relative">
+                  {/* HUD Corner Accents */}
+                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 border-b border-r border-primary/20 group-hover:border-primary/50 transition-colors pointer-events-none z-10" />
 
-                  <Button
-                    variant="ghost"
-                    className="w-full h-8 text-[9px] font-mono font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-red-500 hover:bg-red-500/10 rounded-none transition-all mt-2"
-                    onClick={() => handleFlag(report.id)}
-                    disabled={flaggedReportsLocal.has(report.id)}
-                  >
-                    REPORT_ANOMALY
-                  </Button>
+                  {/* Left Accent Bar */}
+                  <div className={`w-1 shrink-0 transition-colors ${report.riskLevel === 'high' ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-[#1F1914] group-hover:bg-primary group-hover:shadow-[0_0_10px_rgba(255,191,0,0.5)]'}`} />
+
+                  {/* Main Content */}
+                  <div className="flex-1 min-w-0 p-6 flex flex-col justify-between border-b sm:border-b-0 sm:border-r border-[#1F1914] relative overflow-hidden">
+                    {/* Subtle scanline overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent -translate-y-full group-hover:translate-y-full transition-transform duration-1000 ease-in-out pointer-events-none" />
+                    
+                    <div className="relative z-10">
+                      <div className="flex items-start justify-between gap-4 mb-3">
+                        <Link href={`/reports/${report.id}`} className="hover:text-primary transition-colors block truncate w-full">
+                          <h2 className="text-sm font-black text-foreground uppercase tracking-wider truncate group-hover:drop-shadow-[0_0_5px_rgba(255,191,0,0.5)] transition-all">{report.title}</h2>
+                        </Link>
+                        {report.riskLevel === 'high' && (
+                          <span className="shrink-0 inline-flex items-center gap-1.5 px-2 py-0.5 border border-red-500/30 text-[9px] font-mono font-bold tracking-widest uppercase bg-red-500/10 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]">
+                            <AlertTriangle className="w-3 h-3" />
+                            [ CRITICAL ]
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-xs text-muted-foreground/80 font-mono line-clamp-2 leading-relaxed mb-6 border-l-2 border-[#1F1914] pl-3">
+                        {report.description}
+                      </p>
+                    </div>
+
+                    {/* Meta layout */}
+                    <div className="flex flex-wrap items-center gap-4 text-[10px] text-muted-foreground font-mono uppercase tracking-widest select-none">
+                      <div className="flex items-center gap-1.5 bg-[#0C0A09] border border-[#1F1914] px-2 py-1">
+                        <MapPin className="h-3 w-3 text-primary/70" />
+                        {report.company} ({report.location})
+                      </div>
+                      <div className="flex items-center gap-1.5 bg-[#0C0A09] border border-[#1F1914] px-2 py-1">
+                        <Clock className="h-3 w-3 text-primary/70" />
+                        T-{new Date(report.createdAt).toISOString().split('T')[0]}
+                      </div>
+                      <div className="flex items-center gap-1.5 bg-[#0C0A09] border border-[#1F1914] px-2 py-1">
+                         <Flag className="h-3 w-3 text-primary/70" />
+                         {report.scamType}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions sidebar */}
+                  <div className="sm:w-48 bg-[#0C0A09]/80 shrink-0 p-6 flex flex-col justify-center items-stretch gap-3 select-none">
+                     <div className="text-[9px] font-mono text-center text-muted-foreground/50 tracking-[0.2em] mb-2 uppercase">
+                       [ NODE_ACTIONS ]
+                     </div>
+                     
+                    <Button
+                      variant="outline"
+                      className="w-full text-[10px] font-mono uppercase tracking-widest font-bold rounded-none h-9 border-[#1F1914] hover:bg-success/10 hover:border-success/30 hover:text-success transition-all disabled:opacity-50"
+                      onClick={() => handleHelpfulVote(report.id)}
+                      disabled={votedReports.has(report.id)}
+                    >
+                      <ThumbsUp className="h-3 w-3 mr-2" />
+                      {votedReports.has(report.id) ? "LOGGED" : "VERIFY"} [{report.helpfulVotes}]
+                    </Button>
+                    
+                    <Link href={`/reports/${report.id}`} className="w-full">
+                      <Button 
+                        variant="outline" 
+                        className="w-full text-[10px] font-mono uppercase tracking-widest font-bold rounded-none h-9 border-[#1F1914] hover:border-primary/50 text-foreground hover:text-primary transition-all bg-primary/5"
+                      >
+                        DOSSIER <TerminalSquare className="ml-2 h-3 w-3" />
+                      </Button>
+                    </Link>
+
+                    <Button
+                      variant="ghost"
+                      className="w-full h-8 text-[9px] font-mono font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-red-500 hover:bg-red-500/10 rounded-none transition-all mt-2"
+                      onClick={() => handleFlag(report.id)}
+                      disabled={flaggedReportsLocal.has(report.id)}
+                    >
+                      REPORT_ANOMALY
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
