@@ -29,41 +29,71 @@ async function handleUrlCheck(url) {
     // 2. Fetch from Forensic Engine
     console.log(`[ScamSentry] Scanning link: ${url}`);
     
-    // Note: In production, this would use a secure Extension Key
-    const response = await fetch(`${API_BASE_URL}/verify?url=${encodeURIComponent(url)}`, {
+    // Extract domain from url for verify parameter
+    let domain = '';
+    try {
+      domain = new URL(url).hostname;
+    } catch (e) {
+      domain = url; // Fallback
+    }
+
+    const response = await fetch(`${API_BASE_URL}/verify?domain=${encodeURIComponent(domain)}`, {
       headers: {
         'x-api-key': 'ss_ext_public_v1'
       }
     });
 
+    let result;
+
     if (!response.ok) {
-        // Fallback for dev/local or if verify is not available
-        const fallbackResponse = await fetch(`${API_BASE_URL}/validate?url=${encodeURIComponent(url)}`);
-        const data = await fallbackResponse.json();
-        const result = {
-            status: data.threatLevel > 0 ? 'malicious' : 'safe',
-            score: data.threatLevel || 0,
-            flags: data.diagnostics?.flags || []
-        };
-        
-        // Cache result
-        await chrome.storage.local.set({
-            [cacheKey]: {
-                timestamp: Date.now(),
-                data: result
-            }
+        // Fallback: Perform a POST validate query
+        console.log(`[ScamSentry] Fallback triggered to validate URL: ${url}`);
+        const fallbackResponse = await fetch(`${API_BASE_URL}/validate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': 'ss_ext_public_v1'
+            },
+            body: JSON.stringify({ payload: url })
         });
         
-        return result;
+        if (!fallbackResponse.ok) {
+            throw new Error(`Fallback validation failed with status ${fallbackResponse.status}`);
+        }
+
+        const serverData = await fallbackResponse.json();
+        const serverResult = serverData.data || {};
+        const trustScore = serverResult.trustScore !== undefined ? serverResult.trustScore : 100;
+        const threatScore = 100 - trustScore;
+        const isMalicious = serverResult.isBlacklisted || threatScore > 70;
+        
+        result = {
+            status: isMalicious ? 'malicious' : 'safe',
+            score: threatScore,
+            flags: serverResult.details || []
+        };
+    } else {
+        const serverData = await response.json();
+        const serverResult = serverData.data || {};
+        const trustScore = serverResult.trustScore !== undefined ? serverResult.trustScore : 100;
+        const threatScore = 100 - trustScore;
+        const forensicSignals = serverResult.forensicSignals || {};
+        const isMalicious = threatScore > 70 || forensicSignals.isSuspiciousRegistrar;
+        
+        result = {
+            status: isMalicious ? 'malicious' : 'safe',
+            score: threatScore,
+            flags: Object.entries(forensicSignals)
+                         .filter(([_, active]) => active)
+                         .map(([signal]) => signal)
+        };
     }
 
-    const data = await response.json();
-    
     // Cache result
     await chrome.storage.local.set({
       [cacheKey]: {
         timestamp: Date.now(),
-        data: data
+        data: result
       }
     });
 

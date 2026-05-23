@@ -144,6 +144,27 @@ describe('Heuristics Layer (L1) - URL Pattern Detection', () => {
     })
   })
 
+  describe('Recruiter Email Spoofing Detection', () => {
+    it('should detect free email address brand spoofs', () => {
+      const emailRes = analyzeHeuristics('careers-amazon@gmail.com')
+      expect(emailRes.score).toBe(75)
+      expect(emailRes.flags[0]).toContain("free public address")
+      expect(emailRes.flags[0]).toContain("amazon")
+    })
+
+    it('should detect typosquatted custom domains', () => {
+      const emailRes = analyzeHeuristics('recruiting@amaz0n.com')
+      expect(emailRes.score).toBe(90)
+      expect(emailRes.flags[0]).toContain("visually mimics official brand 'amazon'")
+    })
+
+    it('should ignore legitimate safe domains and non-spoofed free emails', () => {
+      const safeEmail = analyzeHeuristics('hello@gmail.com')
+      expect(safeEmail.score).toBe(0)
+      expect(safeEmail.flags.length).toBe(0)
+    })
+  })
+
   describe('Return Value Structure', () => {
     it('should return score and flags array', () => {
       const result = analyzeHeuristics('http://example.com')

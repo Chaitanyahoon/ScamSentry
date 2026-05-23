@@ -50,82 +50,105 @@ export function Features() {
   ];
 
   return (
-    <section className="relative py-28 sm:py-36 bg-[#0C0A09] border-b border-[#1F1914] overflow-hidden">
-      {/* Dynamic Background Elements */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/3 rounded-full blur-[100px] pointer-events-none" />
+    <section className="relative py-32 sm:py-48 bg-[#0C0A09] border-b border-[#1F1914] overflow-hidden">
+      {/* Background Ornaments */}
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[150px] pointer-events-none opacity-20" />
+      <div className="absolute inset-0 bg-grid-cyber opacity-[0.05] z-0" />
 
-      <div className="container relative px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className={cn("mb-20 space-y-4", mounted ? "animate-fade-in" : "opacity-0")}>
-            <div className="flex items-center gap-3">
-              <span className="h-px w-8 bg-primary/50" />
-              <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.3em]">
-                System Architecture
+      <div className="container relative z-10 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+        <div className="space-y-24">
+          {/* Section Header - Command Center Style */}
+          <div className={cn("space-y-8 text-center sm:text-left", mounted ? "animate-fade-in" : "opacity-0")}>
+            <div className="inline-flex items-center gap-4 border border-primary/20 px-4 py-2 bg-primary/5">
+              <span className="h-1 w-1 bg-primary animate-pulse" />
+              <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.4em]">
+                DETECTION_ARCHITECTURE_v4
               </span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight leading-none">
-              The Five Layers of <span className="text-primary italic">ScamSentry.</span>
-            </h2>
-            <p className="text-sm text-muted-foreground max-w-xl leading-relaxed">
-              Our forensic engine doesn't just scan; it dissects. From deterministic heuristics to neural intent detection, every URL passes through a gauntlet of verification.
-            </p>
+            <div className="space-y-4">
+              <h2 className="text-4xl sm:text-6xl font-bold text-white tracking-tighter uppercase font-mono leading-none">
+                THE_FIVE_LAYERS_OF_<span className="text-primary text-glow-amber italic">SCAMSENTRY.</span>
+              </h2>
+              <p className="text-sm sm:text-lg text-muted-foreground/60 font-mono tracking-tight max-w-2xl border-l border-primary/20 pl-8 leading-relaxed">
+                Our forensic engine doesn't just scan; it dissects. From deterministic heuristics to neural intent detection, every URL passes through a gauntlet of verification protocols. Multi-stage cross-correlation.
+              </p>
+            </div>
           </div>
 
-          {/* Interactive Layer List */}
-          <div className="space-y-4">
+          {/* Forensic Intelligence Gauntlet */}
+          <div className="grid grid-cols-1 gap-8 stagger-2">
             {capabilities.map((item, index) => (
               <div
                 key={item.step}
                 className={cn(
-                  "group relative p-6 sm:p-8 rounded-2xl border border-[#1F1914] bg-[#12100D] transition-all duration-300 hover:border-primary/30 hover:bg-[#15110E] hover:translate-x-1",
+                  "group relative bg-[#15110E] border border-[#1F1914] transition-all duration-700 hover:border-primary/40 hover:-translate-y-1 overflow-hidden",
                   mounted ? "animate-fade-in" : "opacity-0",
-                  item.active && "border-primary/20 bg-primary/[0.02]"
+                  item.active && "border-primary/20 shadow-[0_0_30px_rgba(255,191,0,0.05)_inset]"
                 )}
-                style={{ animationDelay: `${index * 100}ms` }}
+                style={{ animationDelay: `${index * 150}ms` }}
               >
-                <div className="flex flex-col sm:flex-row gap-6">
-                  {/* Layer Marker */}
-                  <div className="flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-4 shrink-0 sm:w-24">
-                    <span className={cn(
-                      "text-xs font-mono font-bold tracking-widest",
-                      item.active ? "text-primary" : "text-muted-foreground/50"
-                    )}>
-                      {item.step}
-                    </span>
+                {/* HUD Scanline Overlay on Hover */}
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,191,0,0.02)_1px,transparent_1px)] bg-[length:100%_4px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                
+                <div className="p-8 sm:p-12 flex flex-col md:flex-row gap-8 md:items-center relative z-10">
+                  {/* Layer Metadata Node */}
+                  <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-center gap-6 shrink-0 md:w-40 border-b md:border-b-0 md:border-r border-primary/10 pb-6 md:pb-0 md:pr-10">
+                    <div className="space-y-1">
+                      <span className={cn(
+                        "text-3xl font-mono font-black tracking-tighter leading-none block",
+                        item.active ? "text-primary text-glow-amber" : "text-muted-foreground/20"
+                      )}>
+                        {item.step}
+                      </span>
+                      <span className="text-[9px] font-mono text-muted-foreground/30 uppercase tracking-[0.3em]">NODE_INDEX</span>
+                    </div>
                     <div className={cn(
-                      "px-2 py-0.5 rounded text-[8px] font-mono uppercase tracking-tighter border",
-                      item.active ? "bg-primary/10 border-primary/30 text-primary" : "border-[#1F1914] text-muted-foreground/30"
+                      "px-3 py-1 border font-mono text-[9px] font-bold uppercase tracking-widest leading-none",
+                      item.active ? "bg-primary/10 border-primary/30 text-primary" : "border-[#1F1914] text-muted-foreground/20"
                     )}>
                       {item.tag}
                     </div>
                   </div>
 
-                  {/* Content */}
-                  <div className="flex-1 space-y-2">
-                    <h3 className="text-lg font-bold text-white group-hover:text-primary transition-colors">
+                  {/* Core Content Layer */}
+                  <div className="flex-1 space-y-4">
+                    <h3 className="text-xl sm:text-2xl font-bold text-white font-mono uppercase tracking-tight group-hover:text-primary transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                    <p className="text-sm sm:text-base text-muted-foreground/60 font-mono tracking-tight leading-relaxed max-w-xl">
                       {item.detail}
                     </p>
                   </div>
 
-                  {/* Data Visualizer (decoration) */}
-                  <div className="hidden lg:flex flex-col justify-center gap-1 opacity-10 group-hover:opacity-30 transition-opacity">
-                    <div className="h-1 w-12 bg-primary rounded-full"></div>
-                    <div className="h-1 w-8 bg-primary rounded-full"></div>
-                    <div className="h-1 w-10 bg-primary rounded-full"></div>
+                  {/* Decorative Terminal Data Stream hide on mobile */}
+                  <div className="hidden lg:flex flex-col items-end gap-2 opacity-5 group-hover:opacity-20 transition-all duration-700">
+                    <div className="h-0.5 w-24 bg-primary/20" />
+                    <div className="h-0.5 w-16 bg-primary" />
+                    <div className="h-0.5 w-32 bg-primary/40" />
+                    <div className="text-[8px] font-mono text-primary uppercase tracking-[0.4em] mt-2">PARSING_DNA_{index}</div>
                   </div>
                 </div>
 
-                {/* Layer Glow for active L5 */}
+                {/* Corner Decorative Brackets */}
+                <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-primary/0 group-hover:border-primary transition-all duration-300" />
+                <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-primary/0 group-hover:border-primary transition-all duration-300" />
+                
+                {/* Active Layer Status Bar */}
                 {item.active && (
-                  <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+                  <div className="absolute bottom-0 inset-x-0 h-1 bg-primary/40 shadow-[0_0_15px_rgba(255,191,0,0.5)]" />
                 )}
               </div>
             ))}
+          </div>
+
+          {/* Source Verification Footer */}
+          <div className="pt-20 border-t border-[#1F1914] flex flex-wrap justify-center gap-16 opacity-30 grayscale hover:grayscale-0 transition-all duration-1000">
+             {["Deterministic Heuristics", "OSINT Threat Feeds", "Community Consensus", "Neural Intent Matrix"].map((source) => (
+                <div key={source} className="flex items-center gap-3">
+                  <div className="h-1 w-1 bg-primary" />
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-[0.4em]">{source}</span>
+                </div>
+             ))}
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { analyzeHeuristics } from "@/lib/validator/heuristics";
 import { analyzeDomainForensics } from "@/lib/validator/forensics";
 import { analyzeThreatIntel } from "@/lib/validator/threat-intel";
 import { analyzeInternalGraph } from "@/lib/validator/internal-graph";
-import { analyzeSemanticIntent } from "@/lib/validator/semantic";
+
 import { generateThreatFingerprint } from "@/lib/fingerprints";
 import { freeTierLimiter, enterpriseLimiter } from "@/lib/rate-limit";
 import { logScanEvent, ScanEvent } from "@/lib/analytics";
@@ -94,14 +94,8 @@ export async function POST(req: Request) {
       analyzeThreatIntel(urls),
     ]);
 
-    // 5. Intelligence Layer 5 (Semantic - Conditional)
+    // 5. Intelligence Layer 5 (Semantic - Stripped)
     let L5 = { score: 0, flags: [] as string[], explanation: "" };
-    const deterministicRisk = L1.score + L2.score + L3.score + L4.score;
-    
-    // Only trigger AI for edge cases (Suspicious zone)
-    if (deterministicRisk > 20 && deterministicRisk < 70 && process.env.GEMINI_API_KEY) {
-      L5 = await analyzeSemanticIntent(input);
-    }
 
     // 6. Scoring Algorithm
     const combinedRisk = Math.min(deterministicRisk + L5.score, 100);
@@ -114,13 +108,13 @@ export async function POST(req: Request) {
     const isBlacklisted = finalScore <= 20;
 
     // 7. Forensic Fingerprinting
-    const forensicDetails = [...L1.flags, ...L2.flags, ...L3.flags, ...L5.flags];
+    const forensicDetails = [...L1.flags, ...L2.flags, ...L3.flags];
     const fingerprint = generateThreatFingerprint(input, forensicDetails, {
       heuristics: L1.score,
       forensics: L2.score,
       threatIntel: L3.score,
       internalGraph: L4.score,
-      semantic: L5.score
+      semantic: 0
     } as Record<string, number>);
 
     // 8. Log scan event for analytics
@@ -133,14 +127,13 @@ export async function POST(req: Request) {
         L2.score > 0 ? "Forensics" : "",
         L3.score > 0 ? "Threat Intel" : "",
         L4.score > 0 ? "Internal Trust Graph" : "",
-        L5.score > 0 ? "Semantic AI" : "",
       ].filter(Boolean),
       layerScores: {
         heuristics: L1.score,
         forensics: L2.score,
         threatIntel: L3.score,
         internalGraph: L4.score,
-        semantic: L5.score,
+        semantic: 0,
       },
       timestamp: new Date(),
       userAgent: req.headers.get("user-agent") || undefined,
@@ -189,11 +182,7 @@ export async function POST(req: Request) {
             dnsForensics: { scorePenalty: L2.score, flags: L2.flags },
             threatIntel: { scorePenalty: L3.score, flags: L3.flags },
             internalLedger: { verifiedScamsFound: L4.score > 0 },
-            semanticAI: L5.score > 0 ? {
-              scorePenalty: L5.score,
-              flags: L5.flags,
-              assessment: L5.explanation
-            } : undefined
+            semanticAI: undefined
           },
           details: forensicDetails
         },

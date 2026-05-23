@@ -173,12 +173,35 @@
     transform: scaleX(1);
   }
 
-  /* ── Grid Background — warm amber ───────────────────── */
+  /* ── Grid Background — High-Fidelity Amber ───────────── */
   .bg-grid-cyber {
-    background-image:
-      linear-gradient(to right,  hsla(38, 60%, 40%, 0.07) 1px, transparent 1px),
-      linear-gradient(to bottom, hsla(38, 60%, 40%, 0.07) 1px, transparent 1px);
-    background-size: 48px 48px;
+    background-image: 
+      linear-gradient(to right,  hsla(38, 92%, 50%, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, hsla(38, 92%, 50%, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ── High-Fidelity HUD Utilities ───────────────────── */
+  .text-glow-amber {
+    text-shadow: 0 0 12px hsla(38, 92%, 50%, 0.4);
+  }
+
+  .text-glow-red {
+    text-shadow: 0 0 12px hsla(0, 72%, 45%, 0.4);
+  }
+
+  .scanline-overlay {
+    background: linear-gradient(
+      to bottom,
+      transparent 50%,
+      rgba(0, 0, 0, 0.05) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+  }
+
+  .hud-border-gradient {
+    border-image: linear-gradient(to right, transparent, hsl(var(--primary)), transparent) 1;
   }
 }
 

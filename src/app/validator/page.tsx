@@ -41,69 +41,114 @@ export default function ValidatorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-16">
-      <div className="container px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-12">
+    <div className="min-h-screen bg-[#0C0A09] relative overflow-hidden">
+      {/* HUD Background Elements */}
+      <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.15]" />
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,191,0,0.05),transparent_70%)]" />
+      
+      {/* Scanline Overlay */}
+      <div className="absolute inset-0 z-10 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,128,0.06))] bg-[length:100%_2px,3px_100%]" />
+
+      <div className="container px-4 py-20 relative z-20 max-w-5xl mx-auto space-y-16">
         
-        {/* Header */}
-        <div className="text-left space-y-6">
-          <div className="inline-flex items-center justify-center p-4 bg-primary/10 text-primary rounded-md">
-            <TerminalSquare className="h-8 w-8 text-primary" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-            Zero-Trust URL Scanner
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Execute deterministic malware evaluation modules against suspicious web addresses.
-          </p>
-        </div>
-
-        {/* Input Area */}
-        <div className="bg-card border border-border shadow-sm">
-          <div className="bg-card border-b border-border p-4 sm:p-6 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              <LinkIcon className="h-4 w-4" /> Threat Vector Scan
+        {/* Header Section - Asymmetric Alignment */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-[#1F1914] pb-12">
+          <div className="space-y-6 max-w-2xl">
+            <div className="inline-flex items-center gap-3 px-3 py-1 bg-primary/10 border border-primary/20 text-primary rounded-none self-start">
+              <TerminalSquare className="h-4 w-4" />
+              <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em]">Scanner_Module_v2.4</span>
             </div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-primary/80 bg-primary/10 border border-primary/20 px-3 py-1 rounded-sm uppercase tracking-wider">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-              Live Monitoring
-            </div>
+            <h1 className="text-5xl md:text-7xl font-bold font-mono tracking-tighter text-foreground leading-none">
+              ZERO_TRUST<br />
+              <span className="text-primary">VALIDATOR</span>
+            </h1>
+            <p className="text-lg text-muted-foreground/60 font-mono tracking-tight max-w-xl">
+              Execute deterministic malware evaluation modules against suspicious URL vectors. Direct interface to Forensic Neural Cluster.
+            </p>
           </div>
-          <div className="p-6 sm:p-8 space-y-4 bg-background/50">
-            <label htmlFor="payload" className="text-sm font-semibold mb-1 block">
-              Target URL
-            </label>
-            <Textarea 
-              id="payload" 
-              placeholder="Enter suspicious URL (e.g., https://amazon-secure-login.com)..." 
-              className="min-h-[140px] bg-card border-border font-mono text-base resize-none"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-            />
-          </div>
-          <div className="p-5 sm:p-6 bg-card border-t border-border flex justify-end">
-            <Button 
-              size="lg" 
-              className="px-8 font-semibold"
-              onClick={handleAnalyze}
-              disabled={isAnalyzing}
-            >
-              {isAnalyzing ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing...</>
-              ) : (
-                <>Run Forensics <ArrowRight className="ml-2 h-4 w-4" /></>
-              )}
-            </Button>
+          <div className="hidden md:block text-right space-y-2 opacity-40">
+            <p className="text-[9px] font-mono uppercase tracking-widest">Lat: 37.7749 | Lon: -122.4194</p>
+            <p className="text-[9px] font-mono uppercase tracking-widest text-primary">Status: Operational_Link_Sync</p>
           </div>
         </div>
 
-        {/* Results */}
+        {/* Workstation Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Main Input - Fragmented HUD Container */}
+          <div className="lg:col-span-12 relative group">
+            <div className="absolute -top-3 -left-3 w-10 h-10 border-t-2 border-l-2 border-primary/40 group-focus-within:border-primary transition-colors pointer-events-none" />
+            <div className="absolute -bottom-3 -right-3 w-10 h-10 border-b-2 border-r-2 border-primary/40 group-focus-within:border-primary transition-colors pointer-events-none" />
+            
+            <div className="bg-[#15110E] border border-[#1F1914] shadow-2xl relative overflow-hidden">
+              <div className="bg-[#0C0A09] border-b border-[#1F1914] p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-foreground/70">Terminal_Input_Buffer</span>
+                </div>
+                <div className="flex gap-2">
+                  <div className="w-2 h-2 border border-[#1F1914]" />
+                  <div className="w-2 h-2 border border-[#1F1914]" />
+                  <div className="w-2 h-2 border border-[#1F1914] bg-primary/20" />
+                </div>
+              </div>
+              
+              <div className="p-8 space-y-6">
+                <div className="relative">
+                  <Textarea 
+                    id="payload" 
+                    placeholder="ENTER SUSPICIOUS URL FOR SCAN..." 
+                    className="min-h-[160px] bg-[#0C0A09] border-[#1F1914] font-mono text-lg text-primary placeholder:text-primary/20 resize-none rounded-none focus-visible:ring-1 focus-visible:ring-primary/50"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                  />
+                  <div className="absolute top-4 right-4 text-[8px] font-mono text-primary/30 uppercase">READY_FOR_VECTOR</div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4 border-t border-[#1F1914]">
+                  <div className="flex items-center gap-6 opacity-40">
+                    <div className="flex flex-col">
+                      <span className="text-[8px] font-mono uppercase">Memory_Pool</span>
+                      <span className="text-[10px] font-mono font-bold">128GB_ALLOC</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[8px] font-mono uppercase">Encryption</span>
+                      <span className="text-[10px] font-mono font-bold">SHA-256_ACTIVE</span>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    size="lg" 
+                    className="w-full sm:w-auto px-12 py-8 bg-primary hover:bg-primary/90 text-black font-bold font-mono text-xs uppercase tracking-[0.2em] rounded-none group relative overflow-hidden"
+                    onClick={handleAnalyze}
+                    disabled={isAnalyzing}
+                  >
+                    <span className="relative z-10 flex items-center gap-3">
+                      {isAnalyzing ? (
+                        <><Loader2 className="h-4 w-4 animate-spin" /> EXECUTING_SCAN...</>
+                      ) : (
+                        <>RUN_FORENSICS <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" /></>
+                      )}
+                    </span>
+                    <div className="absolute inset-0 bg-white/20 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 skew-x-[-20deg]" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Results Stream */}
         {result && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <ForensicReport 
-              report={result.forensicReport} 
-              finalScore={result.finalScore} 
-              riskLevel={result.riskLevel} 
-            />
+          <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 pt-8 relative">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-16 w-[1px] bg-primary/20" />
+            <div className="pt-16">
+              <ForensicReport 
+                report={result.forensicReport} 
+                finalScore={result.finalScore} 
+                riskLevel={result.riskLevel} 
+              />
+            </div>
           </div>
         )}
       </div>
