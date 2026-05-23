@@ -9,8 +9,8 @@ export async function GET() {
     // Fetch latest 15 threats for the public ticker
     const threats = await getRecentThreats(15);
     
-    // Fetch latest 10 cybersecurity incidents
-    const incidents = await getRecentIncidents(10).catch(() => []);
+    // Fetch latest 30 cybersecurity incidents
+    const incidents = await getRecentIncidents(30).catch(() => []);
     
     // Fetch active brand lockdowns
     const lockdowns = await getActiveBrandLockdowns().catch(() => []);
