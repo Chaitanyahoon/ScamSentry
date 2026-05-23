@@ -14,6 +14,23 @@ jest.mock('dns', () => ({
   }
 }))
 
+jest.mock('@/lib/validator/ssl-audit', () => ({
+  getCertificateInfo: jest.fn((domain: string) => {
+    if (domain.includes('ultra-new-ssl')) {
+      return Promise.resolve({
+        validFrom: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+        validTo: new Date(Date.now() + 89 * 24 * 60 * 60 * 1000),
+        ageInDays: 0.08 // Under 48 hours
+      });
+    }
+    return Promise.resolve({
+      validFrom: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+      validTo: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+      ageInDays: 30
+    });
+  })
+}))
+
 describe('Forensics Layer (L2) - Domain Infrastructure Analysis', () => {
   describe('URL Parsing', () => {
     it('should extract domain from various URL formats', async () => {
@@ -129,6 +146,19 @@ describe('Forensics Layer (L2) - Domain Infrastructure Analysis', () => {
         // These should generally be safe (low score)
         expect(result.score).toBeLessThan(50)
       }
+    })
+  })
+
+  describe('SSL Certificate & Registrar Verification', () => {
+    it('should detect ultra-new SSL certificates under 48 hours old', async () => {
+      const result = await analyzeDomainForensics('https://ultra-new-ssl-phish.xyz')
+      expect(result.score).toBe(40)
+      expect(result.flags.some(f => f.includes('certificate was created less than 48 hours ago'))).toBe(true)
+    })
+
+    it('should bypass SSL creation penalty for mature certificates', async () => {
+      const result = await analyzeDomainForensics('https://mature-ssl-legit.com')
+      expect(result.flags.some(f => f.includes('certificate was created less than 48 hours ago'))).toBe(false)
     })
   })
 })

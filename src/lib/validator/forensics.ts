@@ -1,5 +1,6 @@
 import dns from "dns";
 import { promisify } from "util";
+import { getCertificateInfo } from "./ssl-audit";
 
 const resolve4 = promisify(dns.resolve4);
 
@@ -30,6 +31,22 @@ export async function analyzeDomainForensics(inputUrl: string) {
     flags.push(
       `CRITICAL: Domain ${domain} contains non-ASCII characters (Possible IDN Homograph Phishing Attack).`,
     );
+  }
+
+  // NEW: SSL Certificate Age Audit
+  const sslInfo = await getCertificateInfo(domain);
+  if (sslInfo) {
+    if (sslInfo.ageInDays < 2) {
+      score += 45;
+      flags.push(
+        `CRITICAL: SSL/TLS certificate was created less than 48 hours ago (${Math.floor(sslInfo.ageInDays * 24)} hours). Modern burner SSL footprint.`
+      );
+    } else if (sslInfo.ageInDays < 15) {
+      score += 20;
+      flags.push(
+        `Suspicious: SSL/TLS certificate is very new (${Math.floor(sslInfo.ageInDays)} days).`
+      );
+    }
   }
 
   // 3. DNS & Mail Pedigree (MX Record)
@@ -132,6 +149,14 @@ export async function analyzeDomainForensics(inputUrl: string) {
       const registrar = rdapData.entities?.find((e: any) => e.roles?.includes("registrar"))?.vcardArray?.[1]?.find((v: any) => v[0] === "fn")?.[3] || "";
       
       infrastructure = { nameservers: nameServers, registrar };
+
+      const suspiciousRegistrars = ["reg.ru", "todaynic", "eranet", "cheapdomain", "hostinger", "namesilo", "1api", "porkbun", "bizcn", "tucows"];
+      if (registrar && suspiciousRegistrars.some((r) => registrar.toLowerCase().includes(r))) {
+        score += 30;
+        flags.push(
+          `High Risk: Domain registered through highly abused provider (${registrar}). Associated with ephemeral phishing.`
+        );
+      }
 
       const suspiciousNS = ["freenom", "freehost", "burner", "disposable"];
       if (nameServers.some((ns: string) => suspiciousNS.some(s => ns.toLowerCase().includes(s)))) {

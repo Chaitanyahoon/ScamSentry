@@ -15,6 +15,7 @@ import LogoutButton from "@/components/logout-button"
 import { db } from "@/lib/firebase"
 import { collection, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore"
 import { cn } from "@/lib/utils"
+import ThreatNodeGraph from "@/components/threat-node-graph"
 
 interface SafeCompany {
   id: string
@@ -707,74 +708,80 @@ export default function AdminDashboardClient() {
             </TabsContent>
 
             <TabsContent value="analytics" className="mt-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-[#15110E] border border-[#1F1914] relative overflow-hidden group p-6">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 [clip-path:polygon(100%_0,0_0,100%_100%)] opacity-20 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                  <div className="border-b border-[#1F1914] pb-4 mb-6 flex items-center justify-between">
-                    <h3 className="text-[10px] font-bold font-mono uppercase tracking-widest text-primary flex items-center gap-2">
-                       <TrendingUp className="h-3 w-3" /> SCAN_TELEMETRY_TIMELINE
-                     </h3>
-                    <span className="text-[8px] font-mono text-muted-foreground/50">LIVE_METRICS</span>
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div className="bg-[#15110E] border border-[#1F1914] relative overflow-hidden group p-6">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 [clip-path:polygon(100%_0,0_0,100%_100%)] opacity-20 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                    <div className="border-b border-[#1F1914] pb-4 mb-6 flex items-center justify-between">
+                      <h3 className="text-[10px] font-bold font-mono uppercase tracking-widest text-primary flex items-center gap-2">
+                         <TrendingUp className="h-3 w-3" /> SCAN_TELEMETRY_TIMELINE
+                       </h3>
+                      <span className="text-[8px] font-mono text-muted-foreground/50">LIVE_METRICS</span>
+                    </div>
+                    <div className="h-[280px] w-full font-mono text-[9px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={getTimelineData()} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="colorScans" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.25}/>
+                              <stop offset="95%" stopColor="#F59E0B" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#1F1914" opacity={0.6} />
+                          <XAxis dataKey="date" stroke="#8C5A1A" fontSize={8} tickLine={false} />
+                          <YAxis stroke="#8C5A1A" fontSize={8} tickLine={false} />
+                          <Tooltip 
+                            contentStyle={{ backgroundColor: '#0C0A07', borderColor: '#1F1914', fontFamily: 'monospace', fontSize: '9px', color: '#E8DBC8' }}
+                            labelStyle={{ color: '#F59E0B', fontWeight: 'bold' }}
+                          />
+                          <Area type="monotone" dataKey="scans" stroke="#F59E0B" strokeWidth={1.5} fillOpacity={1} fill="url(#colorScans)" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
-                  <div className="h-[280px] w-full font-mono text-[9px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={getTimelineData()} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="colorScans" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.25}/>
-                            <stop offset="95%" stopColor="#F59E0B" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1F1914" opacity={0.6} />
-                        <XAxis dataKey="date" stroke="#8C5A1A" fontSize={8} tickLine={false} />
-                        <YAxis stroke="#8C5A1A" fontSize={8} tickLine={false} />
-                        <Tooltip 
-                          contentStyle={{ backgroundColor: '#0C0A07', borderColor: '#1F1914', fontFamily: 'monospace', fontSize: '9px', color: '#E8DBC8' }}
-                          labelStyle={{ color: '#F59E0B', fontWeight: 'bold' }}
-                        />
-                        <Area type="monotone" dataKey="scans" stroke="#F59E0B" strokeWidth={1.5} fillOpacity={1} fill="url(#colorScans)" />
-                      </AreaChart>
-                    </ResponsiveContainer>
+
+                  <div className="bg-[#15110E] border border-[#1F1914] relative overflow-hidden group p-6">
+                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/5 [clip-path:polygon(0_0,0_100%,100%_100%)] opacity-20 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                    <div className="border-b border-[#1F1914] pb-4 mb-6 flex items-center justify-between">
+                      <h3 className="text-[10px] font-bold font-mono uppercase tracking-widest text-primary flex items-center gap-2">
+                         <AlertTriangle className="h-3 w-3" /> RISK_SEVERITY_DISTRIBUTION
+                       </h3>
+                      <Badge className="bg-red-500/10 text-red-500 border-red-500/20 text-[8px] font-mono rounded-none">CORE_COMPLIANCE</Badge>
+                    </div>
+                    <div className="h-[280px] w-full font-mono text-[9px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={getRiskDistributionData()}
+                            cx="50%"
+                            cy="42%"
+                            innerRadius={55}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="value"
+                          >
+                            {getRiskDistributionData().map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} stroke="#15110E" strokeWidth={2} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{ backgroundColor: '#0C0A07', borderColor: '#1F1914', fontFamily: 'monospace', fontSize: '9px', color: '#E8DBC8' }}
+                          />
+                          <Legend 
+                            verticalAlign="bottom" 
+                            height={36} 
+                            iconType="circle" 
+                            iconSize={6}
+                            formatter={(value) => <span className="text-[8px] font-mono tracking-widest uppercase text-muted-foreground pl-1">{value}</span>}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
                 </div>
 
-                <div className="bg-[#15110E] border border-[#1F1914] relative overflow-hidden group p-6">
-                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/5 [clip-path:polygon(0_0,0_100%,100%_100%)] opacity-20 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                  <div className="border-b border-[#1F1914] pb-4 mb-6 flex items-center justify-between">
-                    <h3 className="text-[10px] font-bold font-mono uppercase tracking-widest text-primary flex items-center gap-2">
-                       <AlertTriangle className="h-3 w-3" /> RISK_SEVERITY_DISTRIBUTION
-                     </h3>
-                    <Badge className="bg-red-500/10 text-red-500 border-red-500/20 text-[8px] font-mono rounded-none">CORE_COMPLIANCE</Badge>
-                  </div>
-                  <div className="h-[280px] w-full font-mono text-[9px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={getRiskDistributionData()}
-                          cx="50%"
-                          cy="42%"
-                          innerRadius={55}
-                          outerRadius={80}
-                          paddingAngle={5}
-                          dataKey="value"
-                        >
-                          {getRiskDistributionData().map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} stroke="#15110E" strokeWidth={2} />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={{ backgroundColor: '#0C0A07', borderColor: '#1F1914', fontFamily: 'monospace', fontSize: '9px', color: '#E8DBC8' }}
-                        />
-                        <Legend 
-                          verticalAlign="bottom" 
-                          height={36} 
-                          iconType="circle" 
-                          iconSize={6}
-                          formatter={(value) => <span className="text-[8px] font-mono tracking-widest uppercase text-muted-foreground pl-1">{value}</span>}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
+                <div className="w-full">
+                  <ThreatNodeGraph reports={reports} />
                 </div>
               </div>
             </TabsContent>
