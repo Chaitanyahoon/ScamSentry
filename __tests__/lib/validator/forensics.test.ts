@@ -8,9 +8,22 @@ jest.mock('dns', () => ({
   resolveMx: jest.fn((hostname: string, callback: any) => {
     callback(null, [{ exchange: 'mail.example.com', priority: 10 }]);
   }),
+  resolveTxt: jest.fn((hostname: string, callback: any) => {
+    if (hostname.includes('_dmarc')) {
+      callback(null, [['v=DMARC1; p=reject']]);
+    } else {
+      callback(null, [['v=spf1 include:example.com ~all']]);
+    }
+  }),
   promises: {
     resolve4: jest.fn().mockResolvedValue(['1.1.1.1']),
     resolveMx: jest.fn().mockResolvedValue([{ exchange: 'mail.example.com', priority: 10 }]),
+    resolveTxt: jest.fn().mockImplementation((hostname: string) => {
+      if (hostname.includes('_dmarc')) {
+        return Promise.resolve([['v=DMARC1; p=reject']]);
+      }
+      return Promise.resolve([['v=spf1 include:example.com ~all']]);
+    }),
   }
 }))
 

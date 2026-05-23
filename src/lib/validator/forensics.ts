@@ -3,6 +3,7 @@ import { promisify } from "util";
 import { getCertificateInfo } from "./ssl-audit";
 
 const resolve4 = promisify(dns.resolve4);
+const resolveTxt = promisify(dns.resolveTxt);
 
 export async function analyzeDomainForensics(inputUrl: string) {
   let score = 0;
@@ -100,6 +101,48 @@ export async function analyzeDomainForensics(inputUrl: string) {
       // Deduct minor risk if professional mail setup exists or is whitelisted
       score -= 5;
     }
+
+    // NEW: SPF (Sender Policy Framework) Record Check
+    let spfRecords = await resolveTxt(domain).catch(() => [] as string[][]);
+    if (spfRecords.length === 0 && parts.length > 2) {
+      spfRecords = await resolveTxt(rootDomain).catch(() => [] as string[][]);
+    }
+    
+    // TXT records are returned as arrays of strings. Let's flatten them.
+    const flatTxtRecords = spfRecords.map(r => r.join(""));
+    const hasSpf = flatTxtRecords.some(r => r.toLowerCase().includes("v=spf1"));
+    
+    // NEW: DMARC (Domain-based Message Authentication) Record Check
+    let dmarcRecords = await resolveTxt(`_dmarc.${domain}`).catch(() => [] as string[][]);
+    if (dmarcRecords.length === 0 && parts.length > 2) {
+      dmarcRecords = await resolveTxt(`_dmarc.${rootDomain}`).catch(() => [] as string[][]);
+    }
+    const flatDmarcRecords = dmarcRecords.map(r => r.join(""));
+    const hasDmarc = flatDmarcRecords.some(r => r.toLowerCase().includes("v=dmarc1"));
+
+    let emailSecurityScore = 0;
+    if (!hasSpf && !domain.includes("local") && !isTrustedAppDomain) {
+      emailSecurityScore += 15;
+      flags.push(
+        `High Risk: Domain is missing SPF (Sender Policy Framework) records. Highly vulnerable to recruiter email spoofing.`
+      );
+    }
+    
+    if (!hasDmarc && !domain.includes("local") && !isTrustedAppDomain) {
+      emailSecurityScore += 10;
+      flags.push(
+        `Suspicious: Domain is missing DMARC protection records. Associated with spoofable talent recruitment outreach.`
+      );
+    }
+
+    if (hasSpf && hasDmarc) {
+      // Bonus deduction for extremely secure email configuration only if not otherwise highly risky
+      if (score < 40) {
+        score -= 5;
+      }
+    } else {
+      score += emailSecurityScore;
+    }
   } catch (e) {
     flags.push(
       `Forensic Alert: Domain ${domain} failed basic DNS connectivity (Offline or Ghost domain).`
@@ -187,6 +230,33 @@ export async function analyzeDomainForensics(inputUrl: string) {
   } catch (e) {
     // Fail silently on RDAP timeout
     // We do not push a flag here because many obscure foreign TLDs don't support RDAP well
+  }
+
+  // NEW: Active Brand Lockdown Forensics
+  try {
+    const { getActiveBrandLockdowns } = await import("../services/incident-scraper");
+    const activeLockdowns = await getActiveBrandLockdowns().catch(() => []);
+    
+    for (const brand of activeLockdowns) {
+      const brandClean = brand.toLowerCase();
+      if (domain.toLowerCase().includes(brandClean)) {
+        const isOfficial = 
+          domain === `${brandClean}.com` || 
+          domain === `${brandClean}.io` || 
+          domain === `${brandClean}.org` ||
+          domain.endsWith(`.${brandClean}.com`) ||
+          domain.endsWith(`.${brandClean}.io`);
+
+        if (!isOfficial) {
+          score += 35;
+          flags.push(
+            `CRITICAL ALERT: Domain mimics '${brandClean.toUpperCase()}' which is currently flagged under an ACTIVE CYBERSECURITY INCIDENT compromise! Phishing risk is extremely elevated during this exploit window.`
+          );
+        }
+      }
+    }
+  } catch (e) {
+    // Fail silently if database or lockdowns list query is unavailable
   }
 
   // 6. Threat Fingerprinting (NEW: Neural Cluster ID)

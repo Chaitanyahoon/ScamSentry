@@ -14,11 +14,13 @@ import { ADMIN_CONFIG } from "@/lib/admin-config"
 import { recordFailedLoginAttempt, getAdminUser, type AdminUser } from "@/lib/admin-roles"
 import { logAuditAction } from "@/lib/audit-logger"
 import { isAccountLockedOut } from "@/lib/admin-roles"
+import { cn } from "@/lib/utils"
 
 export default function AdminLoginPage() {
   const router = useRouter()
   const { toast } = useToast()
 
+  const [mode, setMode] = useState<"login" | "register">("login")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -43,10 +45,7 @@ export default function AdminLoginPage() {
     return () => clearInterval(interval)
   }, [lockoutTimeRemaining])
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-
+  const handleLogin = async () => {
     try {
       // Validate email domain if enabled
       if (ADMIN_CONFIG.ENABLE_EMAIL_DOMAIN_CHECK && !ADMIN_CONFIG.isEmailDomainAllowed(email)) {
@@ -158,9 +157,76 @@ export default function AdminLoginPage() {
         description: errorMessage,
         variant: "destructive",
       })
-    } finally {
-      setIsLoading(false)
     }
+  }
+
+  const handleRegister = async () => {
+    try {
+      // Validate email domain if enabled
+      if (ADMIN_CONFIG.ENABLE_EMAIL_DOMAIN_CHECK && !ADMIN_CONFIG.isEmailDomainAllowed(email)) {
+        const domain = ADMIN_CONFIG.getEmailDomain(email)
+        throw new Error(`Email domain '${domain}' is not authorized for registration.`)
+      }
+
+      // Call Firebase createUserWithEmailAndPassword
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      const user = userCredential.user
+
+      if (ADMIN_CONFIG.ENABLE_AUDIT_LOG) {
+        await logAuditAction({
+          userId: user.uid,
+          userEmail: user.email || '',
+          action: 'ADMIN_REGISTER',
+          resourceType: 'auth',
+          resourceId: user.uid,
+          details: {
+            emailVerified: user.emailVerified,
+          },
+          status: 'success',
+        })
+      }
+
+      toast({
+        title: "ACCOUNT_CREATED",
+        description: "DEVELOPER NODE PROVISIONED. DECRYPTING STORAGE...",
+      })
+
+      router.push("/admin")
+      router.refresh()
+    } catch (error: any) {
+      console.error("Registration error:", error)
+      let errorMessage = "UNKNOWN_ERROR_DURING_PROVISIONING"
+      let errorTitle = "SYS_ERR: PROVISION_FAILED"
+
+      if (error.code === "auth/email-already-in-use") {
+        errorTitle = "SYS_ERR: EMAIL_TAKEN"
+        errorMessage = "THIS NETWORK ID IS ALREADY REGISTERED IN THE DATABASE."
+      } else if (error.code === "auth/weak-password") {
+        errorTitle = "SYS_ERR: WEAK_PASSKEY"
+        errorMessage = "PASSKEY STRENGTH UNACCEPTABLE (MUST BE AT LEAST 6 CHARACTERS)."
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
+      toast({
+        title: errorTitle,
+        description: errorMessage,
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    if (mode === "login") {
+      await handleLogin()
+    } else {
+      await handleRegister()
+    }
+
+    setIsLoading(false)
   }
 
   return (
@@ -213,10 +279,38 @@ export default function AdminLoginPage() {
               </div>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-8 font-mono">
+            {/* Mode Switcher */}
+            <div className="flex border-b border-[#1F1914] mb-8 font-mono text-[9px] uppercase tracking-wider">
+              <button
+                type="button"
+                onClick={() => setMode("login")}
+                className={cn(
+                  "flex-1 py-3 text-center transition-all relative border-b-2",
+                  mode === "login"
+                    ? "text-primary border-primary font-bold shadow-[0_4px_12px_rgba(255,191,0,0.15)]"
+                    : "text-muted-foreground/30 border-transparent hover:text-muted-foreground/60"
+                )}
+              >
+                [ SESSION::LOGIN ]
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("register")}
+                className={cn(
+                  "flex-1 py-3 text-center transition-all relative border-b-2",
+                  mode === "register"
+                    ? "text-primary border-primary font-bold shadow-[0_4px_12px_rgba(255,191,0,0.15)]"
+                    : "text-muted-foreground/30 border-transparent hover:text-muted-foreground/60"
+                )}
+              >
+                [ GATEWAY::REGISTER ]
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-8 font-mono">
               <div className="space-y-3">
                 <Label htmlFor="email" className="text-[10px] font-bold tracking-[0.2rem] uppercase text-primary/70 mb-2 block">
-                  NETWORK_ID::AUTH
+                  {mode === "login" ? "NETWORK_ID::AUTH" : "NEW_NETWORK_ID::PROVISION"}
                 </Label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -225,7 +319,7 @@ export default function AdminLoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="ADMIN@SCAMSENTRY.IO"
+                    placeholder={mode === "login" ? "ADMIN@SCAMSENTRY.IO" : "DEV@SCAMSENTRY.IO"}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -236,7 +330,7 @@ export default function AdminLoginPage() {
               </div>
               <div className="space-y-3">
                 <Label htmlFor="password" className="text-[10px] font-bold tracking-[0.2rem] uppercase text-primary/70 mb-2 block">
-                  PASSKEY::CRYPT
+                  {mode === "login" ? "PASSKEY::CRYPT" : "NEW_PASSKEY::CRYPT"}
                 </Label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -264,10 +358,10 @@ export default function AdminLoginPage() {
                   {isLoading ? (
                     <div className="flex items-center gap-3">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      DECRYPTING_SIGNAL...
+                      {mode === "login" ? "DECRYPTING_SIGNAL..." : "PROVISIONING_NODE..."}
                     </div>
                   ) : (
-                    "INITIALIZE_SESSION"
+                    mode === "login" ? "INITIALIZE_SESSION" : "CREATE_DEVELOPER_NODE"
                   )}
                 </Button>
               </div>

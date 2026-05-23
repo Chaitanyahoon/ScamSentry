@@ -160,9 +160,12 @@ export default function ThreatNodeGraph({ reports }: ThreatNodeGraphProps) {
                 key={node.id}
                 transform={`translate(${node.x}, ${node.y})`}
                 className="cursor-crosshair"
-                onMouseEnter={() => setNodes(prev => 
-                  prev.map(n => n.id === node.id ? { ...n } : n)
-                ) || setHoveredNode(node)}
+                onMouseEnter={() => {
+                  setNodes(prev => 
+                    prev.map(n => n.id === node.id ? { ...n } : n)
+                  )
+                  setHoveredNode(node)
+                }}
                 onMouseLeave={() => setHoveredNode(null)}
               >
                 {/* Node outer glowing rings */}

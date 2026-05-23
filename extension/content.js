@@ -13,9 +13,14 @@ const SCAN_CLASSES = {
   MALICIOUS: 'ss-scan-malicious'
 };
 
+const isGmail = window.location.hostname.includes('mail.google.com');
+const isLinkedIn = window.location.hostname.includes('linkedin.com');
+
 // Start scanning the initial page
 scanLinks(document.body);
 scanEmails(document.body);
+if (isGmail) scanGmailSenders(document.body);
+if (isLinkedIn) scanLinkedInRecruiter(document.body);
 
 // Observe DOM changes for single-page applications or dynamic content
 const observer = new MutationObserver((mutations) => {
@@ -24,6 +29,8 @@ const observer = new MutationObserver((mutations) => {
       if (node.nodeType === 1) { // Element node
         scanLinks(node);
         scanEmails(node);
+        if (isGmail) scanGmailSenders(node);
+        if (isLinkedIn) scanLinkedInRecruiter(node);
       }
     });
   });
@@ -234,4 +241,106 @@ function showScanResultOverlay(url, result) {
   setTimeout(() => {
     if (root.parentElement) root.remove();
   }, 12000);
+}
+
+/**
+ * Hook sender email details inside Gmail
+ */
+function scanGmailSenders(container) {
+  const senders = container.querySelectorAll('.gD, span[email], a[href^="mailto:"]');
+  
+  senders.forEach(sender => {
+    if (sender.classList.contains('ss-gmail-scanned')) return;
+    sender.classList.add('ss-gmail-scanned');
+    
+    let email = sender.getAttribute('email') || sender.getAttribute('data-hovercard-id') || sender.innerText || "";
+    if (sender.href && sender.href.startsWith("mailto:")) {
+      email = sender.href.replace("mailto:", "");
+    }
+    
+    const emailMatch = email.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/);
+    if (!emailMatch) return;
+    
+    const validEmail = emailMatch[0];
+    
+    chrome.runtime.sendMessage({ type: 'CHECK_URL', url: validEmail }, (result) => {
+      if (!result || result.status === 'error') return;
+      injectTrustShieldBadge(sender, result);
+    });
+  });
+}
+
+/**
+ * Scan messaging and connection panels on LinkedIn for Recruiter profiles
+ */
+function scanLinkedInRecruiter(container) {
+  const candidateRecruiterNames = container.querySelectorAll('.msg-conversation-card__participant-name, .pv-text-details__left-panel h1, .artdeco-entity-lockup__title');
+  
+  candidateRecruiterNames.forEach(elem => {
+    if (elem.classList.contains('ss-li-scanned')) return;
+    elem.classList.add('ss-li-scanned');
+    
+    const pageText = document.body.innerText.toLowerCase();
+    const hasRecruiterKeyword = pageText.includes('recruiter') || pageText.includes('talent acquisition') || pageText.includes('hr manager') || pageText.includes('hiring manager');
+    
+    if (!hasRecruiterKeyword) return;
+    
+    const companyLinks = document.querySelectorAll('a[href*="/company/"]');
+    let companyDomain = "linkedin.company";
+    if (companyLinks.length > 0) {
+      const match = companyLinks[0].href.match(/\/company\/([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        companyDomain = match[1] + ".com";
+      }
+    }
+    
+    chrome.runtime.sendMessage({ type: 'CHECK_URL', url: companyDomain }, (result) => {
+      if (!result || result.status === 'error') return;
+      injectTrustShieldBadge(elem, result);
+    });
+  });
+}
+
+/**
+ * Standardized inline SVG badge rendering for Gmail and LinkedIn integration
+ */
+function injectTrustShieldBadge(element, result) {
+  if (element.querySelector('.ss-platform-shield')) return;
+
+  const isThreat = result.status === 'malicious' || result.score > 70;
+  const isSuspicious = result.score > 20 && result.score <= 70;
+  
+  let type = "safe";
+  let iconColor = '#10B981';
+  let iconGlow = 'rgba(16, 185, 129, 0.4)';
+  if (isThreat) {
+    type = "malicious";
+    iconColor = '#EF4444';
+    iconGlow = 'rgba(239, 68, 68, 0.4)';
+  } else if (isSuspicious) {
+    type = "suspicious";
+    iconColor = '#F59E0B';
+    iconGlow = 'rgba(245, 158, 11, 0.4)';
+  }
+  
+  const shield = document.createElement('span');
+  shield.className = `ss-platform-shield ss-shield-${type}`;
+  shield.style.display = 'inline-flex';
+  shield.style.alignItems = 'center';
+  shield.style.marginLeft = '8px';
+  shield.style.verticalAlign = 'middle';
+  shield.style.cursor = 'help';
+  
+  const tooltipText = `ScamSentry: ${type.toUpperCase()} Recruiter Node (${result.score}% risk).\n${result.flags && result.flags.length > 0 ? result.flags.join(', ') : 'Infrastructure verified secure.'}`;
+  shield.title = tooltipText;
+  
+  const shieldPath = "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z";
+  
+  shield.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 3px ${iconGlow})">
+      <path d="${shieldPath}"></path>
+    </svg>
+  `;
+  
+  element.appendChild(shield);
 }
