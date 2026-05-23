@@ -252,7 +252,7 @@ export function ScamMap() {
           </div>
 
           {/* Map Section */}
-          <div className="mb-10 bg-[#0C0A09] border border-[#1F1914] overflow-hidden h-[600px] sm:h-[800px] relative rounded-none group">
+          <div className="mb-10 bg-[#0C0A09] border border-[#1F1914] overflow-hidden h-[400px] sm:h-[600px] lg:h-[800px] relative rounded-none group">
              {viewMode === "3d" ? (
                 <div className="absolute inset-0 z-0">
                    <ForensicGlobe reports={filteredReports} />
