@@ -23,3 +23,22 @@ jobs:
         env:
           SITE_DOMAIN: scam-sentry.vercel.app
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+  incident-scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call /api/cron/incident-scrape
+        run: |
+          URL="https://${{ env.SITE_DOMAIN }}/api/cron/incident-scrape"
+          echo "Calling $URL"
+          STATUS=$(curl -sS -o /tmp/resp.json -w "%{http_code}" -H "Authorization: Bearer $CRON_SECRET" "$URL")
+          cat /tmp/resp.json
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "Incident scrape call failed"
+            exit 1
+          fi
+        env:
+          SITE_DOMAIN: scam-sentry.vercel.app
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
