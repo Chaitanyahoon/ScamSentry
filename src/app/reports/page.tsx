@@ -72,9 +72,9 @@ export default function ReportsPage() {
 
   return (
     <div className="min-h-screen bg-[#0C0A09] py-16 relative">
-      {/* Decorative Scanlines */}
-      <div className="absolute inset-x-0 top-0 h-px bg-primary/20 shadow-[0_0_20px_rgba(255,191,0,0.5)] z-0" />
-      <div className="fixed inset-0 pointer-events-none z-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:32px_32px] opacity-20 mask-image:linear-gradient(to_bottom,white,transparent)" />
+      {/* Decorative Grid Line */}
+      <div className="absolute inset-x-0 top-0 h-px bg-[#1F1914] z-0" />
+      <div className="fixed inset-0 pointer-events-none z-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:32px_32px] opacity-25" />
       
       <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
@@ -86,8 +86,8 @@ export default function ReportsPage() {
                 GLOBAL_ARCHIVE_ACCESS
               </span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground tracking-widest uppercase drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] mb-4">
-              Community <span className="text-primary drop-shadow-[0_0_10px_rgba(255,191,0,0.3)]">Database</span>
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground tracking-widest uppercase mb-4">
+              Community <span className="text-primary">Database</span>
             </h1>
             <p className="text-sm font-mono text-muted-foreground/80 uppercase tracking-widest max-w-2xl border-l-2 border-primary/50 pl-4">
               Search and filter decentralized threat telemetry. verified by rigorous peer consensus protocols.
@@ -105,7 +105,7 @@ export default function ReportsPage() {
                   placeholder="ENTER TARGET DATA FOR DOSSIER SCAN..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-16 h-12 bg-[#15110E] border-[#1F1914] text-foreground font-mono text-xs uppercase tracking-widest rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 border-b-2 focus-visible:border-b-primary focus-visible:bg-[#1E1915] transition-all placeholder:text-muted-foreground/30 relative z-0 shadow-inner group-focus-within:shadow-[0_0_15px_rgba(255,191,0,0.1)]"
+                  className="pl-16 h-12 bg-[#15110E] border-[#1F1914] text-foreground font-mono text-xs uppercase tracking-widest rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 border-b-2 focus-visible:border-b-primary focus-visible:bg-[#1E1915] transition-all placeholder:text-muted-foreground/30 relative z-0"
                 />
               </div>
               <div className="flex gap-4">
@@ -154,7 +154,7 @@ export default function ReportsPage() {
               <button
                 onClick={() => setActiveTab("high-risk")}
                 className={`flex-1 sm:flex-none px-6 py-3 font-mono text-[10px] uppercase tracking-widest font-bold transition-all border-b-2 ${
-                  activeTab === "high-risk" ? "border-red-500 text-red-500 bg-red-500/5 shadow-[0_0_15px_rgba(239,68,68,0.1)_inset]" : "border-transparent text-muted-foreground hover:text-red-400 hover:bg-[#15110E]"
+                  activeTab === "high-risk" ? "border-red-500 text-red-500 bg-red-500/5" : "border-transparent text-muted-foreground hover:text-red-400 hover:bg-[#15110E]"
                 }`}
               >
                 CRITICAL_THREATS [{approvedReports.filter((r) => r.riskLevel === "high").length}]
@@ -191,20 +191,17 @@ export default function ReportsPage() {
                   <div className="absolute bottom-0 right-0 w-2.5 h-2.5 border-b border-r border-primary/20 group-hover:border-primary/50 transition-colors pointer-events-none z-10" />
 
                   {/* Left Accent Bar */}
-                  <div className={`w-1 shrink-0 transition-colors ${report.riskLevel === 'high' ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-[#1F1914] group-hover:bg-primary group-hover:shadow-[0_0_10px_rgba(255,191,0,0.5)]'}`} />
+                  <div className={`w-1 shrink-0 transition-colors ${report.riskLevel === 'high' ? 'bg-red-500' : 'bg-[#1F1914] group-hover:bg-primary'}`} />
 
                   {/* Main Content */}
                   <div className="flex-1 min-w-0 p-6 flex flex-col justify-between border-b sm:border-b-0 sm:border-r border-[#1F1914] relative overflow-hidden">
-                    {/* Subtle scanline overlay on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent -translate-y-full group-hover:translate-y-full transition-transform duration-1000 ease-in-out pointer-events-none" />
-                    
                     <div className="relative z-10">
                       <div className="flex items-start justify-between gap-4 mb-3">
                         <Link href={`/reports/${report.id}`} className="hover:text-primary transition-colors block truncate w-full">
-                          <h2 className="text-sm font-black text-foreground uppercase tracking-wider truncate group-hover:drop-shadow-[0_0_5px_rgba(255,191,0,0.5)] transition-all">{report.title}</h2>
+                          <h2 className="text-sm font-black text-foreground uppercase tracking-wider truncate transition-all">{report.title}</h2>
                         </Link>
                         {report.riskLevel === 'high' && (
-                          <span className="shrink-0 inline-flex items-center gap-1.5 px-2 py-0.5 border border-red-500/30 text-[9px] font-mono font-bold tracking-widest uppercase bg-red-500/10 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]">
+                          <span className="shrink-0 inline-flex items-center gap-1.5 px-2 py-0.5 border border-red-500/30 text-[9px] font-mono font-bold tracking-widest uppercase bg-red-500/10 text-red-500">
                             <AlertTriangle className="w-3 h-3" />
                             [ CRITICAL ]
                           </span>
@@ -272,8 +269,7 @@ export default function ReportsPage() {
             ))}
 
             {sortedReports.length === 0 && (
-              <div className="border border-[#1F1914] p-16 text-center bg-[#15110E] relative overflow-hidden group">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,191,0,0.05)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+              <div className="border border-[#1F1914] p-16 text-center bg-[#15110E] relative overflow-hidden">
                 <TerminalSquare className="h-12 w-12 text-muted-foreground/30 mx-auto mb-6" />
                 <h3 className="text-sm font-mono font-bold uppercase tracking-widest text-foreground mb-2">[ ERROR_404: NO_TELEMETRY_FOUND ]</h3>
                 <p className="text-xs font-mono text-muted-foreground/70 uppercase tracking-widest max-w-md mx-auto">

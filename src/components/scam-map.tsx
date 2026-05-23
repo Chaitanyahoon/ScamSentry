@@ -116,11 +116,11 @@ export function ScamMap() {
         <div className="mx-auto max-w-7xl">
           {/* Header */}
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary mb-6 rounded-sm font-semibold text-sm">
-              <Layers className="h-4 w-4" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 border border-primary/20 bg-primary/5 text-primary mb-6 rounded-none font-mono text-xs tracking-widest uppercase">
+              <Layers className="h-3.5 w-3.5" />
               <span>Global Threat Map</span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-bold text-foreground mb-4">
+            <h2 className="text-3xl sm:text-5xl font-bold text-foreground mb-4 uppercase tracking-wider">
               Interactive Heatmap
             </h2>
             <p className="text-base text-muted-foreground max-w-2xl mx-auto">
@@ -131,37 +131,37 @@ export function ScamMap() {
           {/* Search & Filters */}
           <div className="mb-10 space-y-4">
             {/* Search Bar */}
-            <div className="bg-card border border-border shadow-sm">
-              <div className="bg-card border-b border-border p-4 sm:p-5 flex gap-5">
-                <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground tracking-wider uppercase">
-                  <TerminalSquare className="h-4 w-4 text-primary" /> Location Search
+            <div className="bg-[#0C0A09] border border-[#1F1914]">
+              <div className="bg-[#15110E] border-b border-[#1F1914] p-4 sm:p-5 flex gap-5">
+                <div className="flex items-center gap-2 text-xs font-mono font-black text-muted-foreground/60 tracking-wider uppercase">
+                  <TerminalSquare className="h-3.5 w-3.5 text-primary" /> LOCATION_QUERY_INPUT
                 </div>
               </div>
-              <div className="p-5 sm:p-6 bg-background/50">
+              <div className="p-5 sm:p-6 bg-[#070605]">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                    <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/40" />
                     <Input
                       placeholder="Enter city or region name..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onKeyPress={(e) => e.key === "Enter" && handleCitySearch()}
-                      className="pl-12 h-12 bg-card border-border text-foreground text-base"
+                      className="pl-12 h-12 bg-[#070605] border-[#1F1914] text-foreground font-mono text-xs uppercase tracking-widest rounded-none"
                     />
                   </div>
                   <Button
                     onClick={handleCitySearch}
                     disabled={isSearching}
-                    className="h-12 px-8 font-semibold"
+                    className="h-12 px-8 font-mono text-xs font-bold uppercase tracking-widest rounded-none bg-primary text-black hover:bg-primary/95 border border-primary/20"
                   >
-                    {isSearching ? <><Loader2 className="h-5 w-5 animate-spin mr-2" /> Searching...</> : "Search Location"}
+                    {isSearching ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Searching...</> : "Search Location"}
                   </Button>
                 </div>
 
                 {searchResults && (
                   <div className="mt-4 flex items-center gap-3">
-                    <Badge className="bg-primary/10 text-primary border-primary/20 px-3 py-1 text-sm font-medium">
-                      <MapPin className="mr-2 h-3.5 w-3.5 inline-block" />
+                    <Badge className="bg-primary/5 text-primary border-primary/20 px-3 py-1 text-[10px] font-mono font-bold tracking-widest rounded-none uppercase">
+                      <MapPin className="mr-1.5 h-3 w-3 inline-block" />
                       Showing: {searchResults.city}, {searchResults.state}
                     </Badge>
                     <Button
@@ -171,7 +171,7 @@ export function ScamMap() {
                         setSearchResults(null)
                         setSearchTerm("")
                       }}
-                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8"
+                      className="text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 h-8 rounded-none font-mono text-[9px] uppercase tracking-widest"
                     >
                       Clear Filter
                     </Button>
@@ -181,7 +181,7 @@ export function ScamMap() {
             </div>
 
             {/* Risk Level Filters */}
-            <div className="flex flex-wrap gap-2 sm:gap-4 bg-card border border-border p-4">
+            <div className="flex flex-wrap gap-2 bg-[#0C0A09] border border-[#1F1914] p-4 rounded-none">
               <Button
                 variant={selectedRiskFilter === null ? "default" : "outline"}
                 onClick={() => setSelectedRiskFilter(null)}
@@ -214,73 +214,73 @@ export function ScamMap() {
           </div>
 
           {/* Stats Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-10">
-            <div className="bg-card border border-border p-6 shadow-sm flex items-center justify-between">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-10 select-none">
+            <div className="bg-[#0C0A09] border border-[#1F1914] p-6 flex items-center justify-between rounded-none">
               <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">Total Threats</p>
-                <p className="text-3xl font-bold text-foreground">
+                <p className="text-[10px] font-mono font-bold text-muted-foreground/50 mb-1 uppercase tracking-widest">TOTAL THREATS</p>
+                <p className="text-3xl font-black text-foreground font-mono">
                   {filteredReports.length}
                 </p>
               </div>
-              <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center">
-                <MapPin className="h-6 w-6 text-primary" />
+              <div className="h-10 w-10 bg-primary/5 border border-primary/20 flex items-center justify-center rounded-none">
+                <MapPin className="h-5 w-5 text-primary" />
               </div>
             </div>
 
-            <div className="bg-card border border-border p-6 shadow-sm flex items-center justify-between">
+            <div className="bg-[#0C0A09] border border-[#1F1914] p-6 flex items-center justify-between rounded-none">
               <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">High Risk Entities</p>
-                <p className="text-3xl font-bold text-destructive">
+                <p className="text-[10px] font-mono font-bold text-muted-foreground/50 mb-1 uppercase tracking-widest">HIGH RISK ENTITIES</p>
+                <p className="text-3xl font-black text-destructive font-mono">
                   {filteredReports.filter(r => r.riskLevel === "high").length}
                 </p>
               </div>
-              <div className="h-12 w-12 bg-destructive/10 rounded-full flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-destructive" />
+              <div className="h-10 w-10 bg-destructive/5 border border-destructive/20 flex items-center justify-center rounded-none">
+                <TrendingUp className="h-5 w-5 text-destructive" />
               </div>
             </div>
 
-            <div className="bg-card border border-border p-6 shadow-sm flex items-center justify-between">
+            <div className="bg-[#0C0A09] border border-[#1F1914] p-6 flex items-center justify-between rounded-none">
               <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">Avg Trust Score</p>
-                <p className="text-3xl font-bold text-success">
+                <p className="text-[10px] font-mono font-bold text-muted-foreground/50 mb-1 uppercase tracking-widest">AVG TRUST SCORE</p>
+                <p className="text-3xl font-black text-success font-mono">
                   {filteredReports.length > 0
                     ? Math.round(filteredReports.reduce((sum, r) => sum + r.trustScore, 0) / filteredReports.length)
                     : 0}%
                 </p>
               </div>
-              <div className="h-12 w-12 bg-success/10 rounded-full flex items-center justify-center">
-                <TerminalSquare className="h-6 w-6 text-success" />
+              <div className="h-10 w-10 bg-success/5 border border-success/20 flex items-center justify-center rounded-none">
+                <TerminalSquare className="h-5 w-5 text-success" />
               </div>
             </div>
           </div>
 
           {/* Map Section */}
-          <div className="mb-10 bg-[#0C0A09] border border-[#1F1914] shadow-2xl overflow-hidden h-[600px] sm:h-[800px] relative rounded-none group">
+          <div className="mb-10 bg-[#0C0A09] border border-[#1F1914] overflow-hidden h-[600px] sm:h-[800px] relative rounded-none group">
              {viewMode === "3d" ? (
-               <div className="absolute inset-0 z-0">
-                  <ForensicGlobe reports={filteredReports} />
-               </div>
+                <div className="absolute inset-0 z-0">
+                   <ForensicGlobe reports={filteredReports} />
+                </div>
              ) : (
-               <div className="absolute inset-0 z-0">
-                  <InteractiveMap
-                    centerLat={mapCenter.lat}
-                    centerLng={mapCenter.lng}
-                    reports={filteredReports}
-                    currentLocation={searchResults ? { lat: searchResults.lat, lng: searchResults.lng } : null}
-                  />
-               </div>
+                <div className="absolute inset-0 z-0">
+                   <InteractiveMap
+                     centerLat={mapCenter.lat}
+                     centerLng={mapCenter.lng}
+                     reports={filteredReports}
+                     currentLocation={searchResults ? { lat: searchResults.lat, lng: searchResults.lng } : null}
+                   />
+                </div>
              )}
              
              {/* Map Overlay for Info */}
              <div className="absolute bottom-6 left-6 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <div className="bg-[#0C0A09]/80 backdrop-blur-sm border border-[#1F1914] p-4 rounded-none">
+                <div className="bg-[#0C0A09]/95 border border-[#1F1914] p-4 rounded-none">
                   <p className="font-mono text-[10px] text-primary uppercase tracking-[0.2em]">Neural Engine v2.6</p>
                   <p className="text-muted-foreground text-xs mt-1 italic">Mapping global attack vectors using deterministic telemetry...</p>
                 </div>
              </div>
 
              {/* View Mode Toggle Controls */}
-             <div className="absolute top-6 right-6 z-10 flex gap-1.5 bg-[#0C0A09]/95 backdrop-blur-md border border-[#1F1914] p-1.5 shadow-2xl">
+             <div className="absolute top-6 right-6 z-10 flex gap-1.5 bg-[#0C0A09] border border-[#1F1914] p-1.5">
                <button
                  onClick={() => setViewMode("2d")}
                  className={cn(
@@ -417,8 +417,7 @@ export function ScamMap() {
               </div>
             </div>
           ) : (
-            <div className="border border-[#1F1914] p-16 text-center bg-[#15110E] relative overflow-hidden group rounded-none">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,191,0,0.05)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+            <div className="border border-[#1F1914] p-16 text-center bg-[#15110E] relative overflow-hidden rounded-none">
               <TerminalSquare className="h-12 w-12 text-muted-foreground/30 mx-auto mb-6" />
               <h3 className="text-sm font-mono font-bold uppercase tracking-widest text-foreground mb-2">[ ERROR_404: NO_TELEMETRY_FOUND ]</h3>
               <p className="text-xs font-mono text-muted-foreground/70 uppercase tracking-widest max-w-md mx-auto">
