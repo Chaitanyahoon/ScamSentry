@@ -24,12 +24,12 @@ export const metadata: Metadata = {
   authors: [{ name: "ScamSentry Team" }],
   icons: {
     icon: [
-      { url: "/logo.png", sizes: "any" },
-      { url: "/logo.png", sizes: "32x32", type: "image/png" },
-      { url: "/logo.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon.png", sizes: "any" },
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.png", sizes: "16x16", type: "image/png" },
     ],
     apple: [
-      { url: "/logo.png", sizes: "180x180", type: "image/png" },
+      { url: "/favicon.png", sizes: "180x180", type: "image/png" },
     ],
   },
   manifest: "/site.webmanifest",
@@ -54,7 +54,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${ibmPlexMono.variable} font-mono flex flex-col min-h-screen`} suppressHydrationWarning>
+      <body className={`${ibmPlexMono.variable} flex flex-col min-h-screen`} suppressHydrationWarning>
         {/* ThemeProvider removed */}
         <ReportsProvider>
           <AuthProvider>

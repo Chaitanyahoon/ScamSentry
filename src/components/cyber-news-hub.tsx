@@ -81,14 +81,14 @@ function formatTimeAgo(dateString: string): string {
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffSecs < 60) return "JUST NOW";
-    if (diffMins < 60) return `${diffMins}M AGO`;
-    if (diffHours < 24) return `${diffHours}H AGO`;
-    if (diffDays === 1) return "YESTERDAY";
-    if (diffDays < 7) return `${diffDays}D AGO`;
-    return new Date(dateString).toLocaleDateString(undefined, { month: "short", day: "numeric" }).toUpperCase();
+    if (diffSecs < 60) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return new Date(dateString).toLocaleDateString(undefined, { month: "short", day: "numeric" });
   } catch {
-    return "T-LIVE";
+    return "Live";
   }
 }
 
@@ -269,17 +269,22 @@ export function CyberNewsHub() {
     let logIdx = 0;
     const interval = setInterval(() => {
       if (logIdx < logsSequence.length) {
-        setTerminalLogs((prev) => [...prev, `[OSINT] ${logsSequence[logIdx]}`]);
+        const logMsg = logsSequence[logIdx];
+        if (logMsg) {
+          setTerminalLogs((prev) => [...prev, `[OSINT] ${logMsg}`]);
+        }
         logIdx++;
       } else {
         clearInterval(interval);
         scraperPromise.then((data) => {
           if (data && data.success) {
             fetchData(true).then(() => {
+              const processedCount = data.processed ?? data.processed_count ?? "0";
+              const lockdownsCount = data.lockdownsTriggered ?? data.lockdowns_triggered ?? "0";
               setTerminalLogs((prev) => [
                 ...prev,
-                `[OSINT] SCRAPE SUCCESS. TOTAL INGESTED: ${data.processed}`,
-                `[OSINT] LOCKDOWNS CREATED: ${data.lockdownsTriggered}`,
+                `[OSINT] SCRAPE SUCCESS. TOTAL INGESTED: ${processedCount}`,
+                `[OSINT] LOCKDOWNS CREATED: ${lockdownsCount}`,
                 `[${new Date().toLocaleTimeString()}] SYSTEM READY.`
               ]);
               setSyncingScraper(false);
@@ -332,18 +337,18 @@ export function CyberNewsHub() {
       
       {/* ─── 1. HORIZONTAL BRAND STATUS TICKER MARQUEE ───────────────── */}
       <div 
-        className="w-full bg-[#070605] border border-[#1F1914] py-2.5 overflow-hidden flex items-center relative select-none rounded-none"
+        className="w-full glass-card py-3 overflow-hidden flex items-center relative select-none rounded-2xl"
         onMouseEnter={() => setIsTickerHovered(true)}
         onMouseLeave={() => setIsTickerHovered(false)}
       >
-        <div className="absolute left-0 top-0 bottom-0 bg-[#070605] z-10 px-4 border-r border-[#1F1914] flex items-center gap-1.5 font-mono text-[9px] font-black text-muted-foreground/60 uppercase shrink-0">
-          <Activity className="h-3 w-3 text-primary shrink-0" />
-          <span>BRAND_SHIELDS:</span>
+        <div className="absolute left-0 top-0 bottom-0 bg-[#070605]/95 z-10 px-4 border-r border-border flex items-center gap-1.5 text-xs font-bold text-muted-foreground uppercase shrink-0 backdrop-blur-sm">
+          <Activity className="h-3.5 w-3.5 text-primary shrink-0" />
+          <span>Brand Safeguards:</span>
         </div>
         
         {/* Ticker Content */}
         <div 
-          className="flex gap-8 px-4 whitespace-nowrap animate-[marquee_50s_linear_infinite] pl-[130px]"
+          className="flex gap-8 px-4 whitespace-nowrap animate-[marquee_50s_linear_infinite] pl-[150px]"
           style={{ animationPlayState: isTickerHovered ? 'paused' : 'running' }}
         >
           {MONITORED_BRANDS.map((brand) => {
@@ -351,16 +356,16 @@ export function CyberNewsHub() {
             return (
               <div 
                 key={brand}
-                className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-wider"
+                className="inline-flex items-center gap-2 text-xs"
               >
-                <span className="text-[#888888] font-semibold">{brand}</span>
+                <span className="text-foreground/80 font-medium capitalize">{brand}</span>
                 <span className={cn(
-                  "px-1 py-0.2 text-[8px] font-bold border rounded-none",
+                  "px-2.5 py-0.5 text-[10px] font-semibold border rounded-full",
                   isLocked 
-                    ? "bg-red-500/10 border-red-500/30 text-red-500" 
-                    : "bg-emerald-500/5 border-emerald-500/15 text-emerald-500/80"
+                    ? "bg-destructive/15 border-destructive/25 text-destructive" 
+                    : "bg-success/15 border-success/25 text-success"
                 )}>
-                  {isLocked ? "LOCKDOWN" : "OK"}
+                  {isLocked ? "Threat Alert" : "Protected"}
                 </span>
               </div>
             );
@@ -371,22 +376,22 @@ export function CyberNewsHub() {
       {/* ─── 2. TACTICAL RADAR EVENTS LOGS & INSPECTOR PANEL ──────────── */}
       {!loading && heroItems.length > 0 && (
         <div 
-          className="grid grid-cols-1 lg:grid-cols-3 border border-[#1F1914] bg-[#0C0A09] rounded-none overflow-hidden"
+          className="grid grid-cols-1 lg:grid-cols-3 glass-card rounded-2xl overflow-hidden"
           onMouseEnter={() => setIsCarouselHovered(true)}
           onMouseLeave={() => setIsCarouselHovered(false)}
         >
           {/* LEFT PANE: EVENTS RADAR (40% width) */}
-          <div className="lg:col-span-1 border-b lg:border-b-0 lg:border-r border-[#1F1914] flex flex-col justify-between">
-            <div className="bg-[#15110E] p-4 border-b border-[#1F1914] flex items-center justify-between">
-              <span className="font-mono text-[9px] font-black text-primary uppercase tracking-widest">
-                [ 01. ACTIVE_OSINT_RADAR ]
+          <div className="lg:col-span-1 border-b lg:border-b-0 lg:border-r border-border flex flex-col justify-between">
+            <div className="bg-card p-4 border-b border-border flex items-center justify-between">
+              <span className="text-xs font-bold text-foreground tracking-wide">
+                Active Advisory Radar
               </span>
-              <span className="font-mono text-[8px] text-muted-foreground/30 uppercase tracking-widest">
-                STREAM_A
+              <span className="text-[10px] text-muted-foreground/60 uppercase font-medium">
+                Live Feed
               </span>
             </div>
 
-            <div className="divide-y divide-[#1F1914]/50 overflow-y-auto max-h-[300px] flex-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-[#0C0A09] [&::-webkit-scrollbar-thumb]:bg-[#1F1914] hover:[&::-webkit-scrollbar-thumb]:bg-primary/40">
+            <div className="divide-y divide-border/30 overflow-y-auto max-h-[300px] flex-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-primary/40">
               {heroItems.map((item, idx) => {
                 const isActive = idx === activeHeroIndex;
                 return (
@@ -394,32 +399,32 @@ export function CyberNewsHub() {
                     key={`radar-${idx}`}
                     onClick={() => setActiveHeroIndex(idx)}
                     className={cn(
-                      "p-4 cursor-pointer font-mono transition-colors relative flex flex-col gap-1.5",
+                      "p-4 cursor-pointer transition-colors relative flex flex-col gap-2 border-b border-border/40 last:border-b-0",
                       isActive 
-                        ? "bg-[#15110E] text-foreground" 
-                        : "text-muted-foreground/50 hover:text-foreground hover:bg-[#15110E]/40"
+                        ? "bg-card/75 text-foreground" 
+                        : "text-muted-foreground/70 hover:text-foreground hover:bg-card/30"
                     )}
                   >
                     {/* Active highlight side line */}
                     {isActive && (
                       <div className={cn(
                         "absolute left-0 top-0 bottom-0 w-1",
-                        item.isHighlight ? "bg-red-500" : "bg-amber-500"
+                        item.isHighlight ? "bg-destructive" : "bg-primary"
                       )} />
                     )}
 
-                    <div className="flex items-center justify-between text-[8px] tracking-wider">
+                    <div className="flex items-center justify-between text-xs">
                       <span className={cn(
-                        "font-bold uppercase",
-                        isActive ? "text-primary" : "text-muted-foreground/40"
+                        "font-semibold uppercase tracking-wider text-[10px]",
+                        isActive ? "text-primary" : "text-muted-foreground/50"
                       )}>
                         {item.source}
                       </span>
-                      <span>T-{formatCompactTime(item.publishedAt)}</span>
+                      <span className="text-[10px] text-muted-foreground font-mono">T-{formatCompactTime(item.publishedAt)}</span>
                     </div>
                     
-                    <p className="text-[10px] font-bold uppercase tracking-wide leading-tight line-clamp-2">
-                      {isActive ? ">>> " : ""}{item.title}
+                    <p className="text-xs font-medium leading-normal line-clamp-2">
+                      {item.title}
                     </p>
                   </div>
                 );
@@ -428,59 +433,59 @@ export function CyberNewsHub() {
           </div>
 
           {/* RIGHT PANE: DOSSIER INSPECTOR SCREEN (60% width) */}
-          <div className="lg:col-span-2 bg-[#070605]/50 p-6 flex flex-col justify-between min-h-[300px]">
+          <div className="lg:col-span-2 bg-card/20 p-6 flex flex-col justify-between min-h-[300px]">
             {activeHeroItem ? (
               <div className="space-y-4 flex-1 flex flex-col justify-between">
                 <div>
                   {/* Header labels */}
-                  <div className="flex flex-wrap gap-2.5 items-center justify-between border-b border-[#1F1914] pb-3">
+                  <div className="flex flex-wrap gap-2.5 items-center justify-between border-b border-border pb-4">
                     <div className="flex items-center gap-2">
                       <Badge className={cn(
-                        "rounded-none font-mono text-[8px] font-black uppercase tracking-widest px-2 py-0.5 border",
+                        "rounded-full text-[10px] font-semibold px-2.5 py-0.5 border",
                         activeHeroItem.isHighlight 
-                          ? "bg-red-500/10 border-red-500/30 text-red-500"
-                          : "bg-amber-500/5 border-amber-500/20 text-amber-500"
+                          ? "bg-destructive/15 border-destructive/25 text-destructive"
+                          : "bg-primary/10 border-primary/20 text-primary"
                       )}>
-                        {activeHeroItem.isHighlight ? "CRITICAL_THREAT" : "STANDARD_VECTOR"}
+                        {activeHeroItem.isHighlight ? "Critical Threat" : "Standard Vector"}
                       </Badge>
-                      <span className="font-mono text-[8px] text-muted-foreground/40 uppercase">
-                        DECRYPTED: {activeHeroItem.source}
+                      <span className="text-xs text-muted-foreground/60">
+                        Source: {activeHeroItem.source}
                       </span>
                     </div>
                     
-                    <span className="font-mono text-[9px] text-muted-foreground/60 uppercase">
-                      PUBLISHED: {formatTimeAgo(activeHeroItem.publishedAt)}
+                    <span className="text-xs text-muted-foreground font-mono">
+                      {formatTimeAgo(activeHeroItem.publishedAt)}
                     </span>
                   </div>
 
                   {/* Title & Description */}
-                  <div className="space-y-2 mt-4 select-text">
-                    <h3 className="font-mono text-xs font-black uppercase tracking-wide text-white leading-relaxed">
+                  <div className="space-y-3 mt-4 select-text">
+                    <h3 className="text-base font-bold text-foreground leading-snug">
                       {activeHeroItem.title}
                     </h3>
-                    <p className="font-mono text-[10px] text-muted-foreground/60 leading-relaxed border-l border-[#1F1914] pl-3 py-1">
+                    <p className="text-sm text-muted-foreground leading-relaxed border-l-2 border-border pl-4 py-1">
                       {activeHeroItem.description}
                     </p>
                   </div>
                 </div>
 
                 {/* Dossier footer metadata */}
-                <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[#1F1914] pt-4 mt-6">
-                  <div className="font-mono text-[8px] text-muted-foreground/30 uppercase tracking-widest">
+                <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4 mt-6">
+                  <div className="font-mono text-[10px] text-muted-foreground/50 uppercase tracking-wider">
                     ID: {Buffer.from(activeHeroItem.link).toString("hex").substring(0, 16).toUpperCase()}
                   </div>
                   
                   <Button
                     onClick={() => setSelectedIncident(activeHeroItem)}
-                    className="font-mono text-[9px] font-black uppercase tracking-widest rounded-none h-8 px-4 border border-[#1F1914] bg-[#0C0A09] hover:bg-primary hover:text-black hover:border-primary transition-all text-muted-foreground hover:text-[#070605]"
+                    className="text-xs font-semibold px-4.5 h-9 rounded-xl border border-border bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200"
                   >
-                    [ ACCESS_SECURE_PAYLOAD ]
+                    View Details
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground/30 font-mono text-[10px] uppercase">
-                [ NO_DOSSIER_SELECTED ]
+              <div className="flex flex-col items-center justify-center h-full text-muted-foreground/40 text-xs py-10">
+                Select an advisory to inspect
               </div>
             )}
           </div>
@@ -491,158 +496,159 @@ export function CyberNewsHub() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch select-none">
         
         {/* LEFT COLUMN: DIRECTORY LEDGER FEED (2 cols) */}
-        <div className="lg:col-span-2 flex flex-col space-y-4">
-          
-          {/* Console headers */}
-          <div className="border border-[#1F1914] bg-[#15110E] p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#E7E5E4]">
-                [ SYSTEM_THREAT_LEDGER ]
-              </span>
+        <div className="lg:col-span-2">
+          <div className="glass-card rounded-2xl overflow-hidden flex flex-col h-full">
+            {/* Console headers */}
+            <div className="bg-card/45 p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-border">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-foreground">
+                  Threat Advisories
+                </span>
+              </div>
+
+              {/* Filter tags keys */}
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  onClick={() => { setActiveFilter("all"); setShowAll(false); }}
+                  className={cn(
+                    "px-3.5 py-1 text-xs font-semibold border rounded-full transition-all",
+                    activeFilter === "all"
+                      ? "bg-primary border-primary text-primary-foreground"
+                      : "bg-background border-border text-muted-foreground hover:text-foreground hover:border-border/80"
+                  )}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => { setActiveFilter("highlights"); setShowAll(false); }}
+                  className={cn(
+                    "px-3.5 py-1 text-xs font-semibold border rounded-full transition-all",
+                    activeFilter === "highlights"
+                      ? "bg-destructive border-destructive text-destructive-foreground"
+                      : "bg-background border-border text-muted-foreground hover:text-destructive hover:border-destructive/40"
+                  )}
+                >
+                  Critical
+                </button>
+                <button
+                  onClick={() => { setActiveFilter("lockdowns"); setShowAll(false); }}
+                  className={cn(
+                    "px-3.5 py-1 text-xs font-semibold border rounded-full transition-all",
+                    activeFilter === "lockdowns"
+                      ? "bg-warning border-warning text-warning-foreground"
+                      : "bg-background border-border text-muted-foreground hover:text-warning hover:border-warning/40"
+                  )}
+                >
+                  Safeguards
+                </button>
+              </div>
             </div>
 
-            {/* Filter tags keys */}
-            <div className="flex flex-wrap gap-1">
-              <button
-                onClick={() => { setActiveFilter("all"); setShowAll(false); }}
-                className={cn(
-                  "px-2.5 py-1 text-[8.5px] font-mono font-bold uppercase tracking-widest border transition-all rounded-none",
-                  activeFilter === "all"
-                    ? "bg-primary border-primary text-black"
-                    : "bg-[#070605] border-[#1F1914] text-muted-foreground/60 hover:text-foreground hover:border-[#3E3329]"
-                )}
-              >
-                [ ALL ]
-              </button>
-              <button
-                onClick={() => { setActiveFilter("highlights"); setShowAll(false); }}
-                className={cn(
-                  "px-2.5 py-1 text-[8.5px] font-mono font-bold uppercase tracking-widest border transition-all rounded-none",
-                  activeFilter === "highlights"
-                    ? "bg-red-500 border-red-500 text-white"
-                    : "bg-[#070605] border-[#1F1914] text-muted-foreground/60 hover:text-red-400"
-                )}
-              >
-                [ HIGH ]
-              </button>
-              <button
-                onClick={() => { setActiveFilter("lockdowns"); setShowAll(false); }}
-                className={cn(
-                  "px-2.5 py-1 text-[8.5px] font-mono font-bold uppercase tracking-widest border transition-all rounded-none",
-                  activeFilter === "lockdowns"
-                    ? "bg-amber-500 border-amber-500 text-black"
-                    : "bg-[#070605] border-[#1F1914] text-muted-foreground/60 hover:text-amber-400"
-                )}
-              >
-                [ COMPROMISE ]
-              </button>
+            {/* Directory Search console */}
+            <div className="relative border-b border-border">
+              <Search className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground/45" />
+              <input
+                type="text"
+                placeholder="Search target domain or feed source..."
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setShowAll(false); }}
+                className="w-full h-10 pl-10 pr-4 bg-background/25 focus:border-primary/20 text-foreground text-xs placeholder:text-muted-foreground/40 rounded-none outline-none transition-colors border-0"
+              />
             </div>
-          </div>
 
-          {/* Directory Search console */}
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-muted-foreground/30" />
-            <input
-              type="text"
-              placeholder="QUERY TARGET DOMAIN OR FEED SYSTEM..."
-              value={searchQuery}
-              onChange={(e) => { setSearchQuery(e.target.value); setShowAll(false); }}
-              className="w-full h-9 pl-9 pr-4 bg-[#0C0A09] border border-[#1F1914] focus:border-primary/20 text-foreground font-mono text-[9px] uppercase tracking-widest placeholder:text-muted-foreground/20 rounded-none outline-none transition-colors"
-            />
-          </div>
-
-          {/* Table Ledger Directory */}
-          <div className="border border-[#1F1914] bg-[#0C0A09] overflow-hidden select-text">
-            {loading ? (
-              <div className="py-16 text-center">
-                <RefreshCcw className="h-5 w-5 text-primary animate-spin mx-auto mb-2" />
-                <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-widest">INGESTING DATA FEEDS...</p>
-              </div>
-            ) : filteredIncidents.length === 0 ? (
-              <div className="py-16 text-center">
-                <p className="font-mono text-[9px] text-muted-foreground/40 uppercase tracking-widest">[ NO ADVISORIES LOGGED FOR QUERY ]</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto w-full">
-                <table className="w-full text-left font-mono text-[10px] border-collapse">
-                  <thead>
-                    <tr className="border-b border-[#1F1914] bg-[#15110E] text-muted-foreground/50 select-none uppercase tracking-widest text-[8px]">
-                      <th className="p-3 font-bold">STATUS</th>
-                      <th className="p-3 font-bold">SOURCE</th>
-                      <th className="p-3 font-bold">ADVISORY VECTOR VECTOR</th>
-                      <th className="p-3 font-bold text-right">AGE</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#1F1914]/40">
-                    {visibleIncidents.map((incident, idx) => (
-                      <tr 
-                        key={`${incident.link}-${idx}`}
-                        onClick={() => setSelectedIncident(incident)}
-                        className="hover:bg-[#15110E]/60 transition-colors group cursor-pointer"
-                      >
-                        <td className="p-3">
-                          <span className={cn(
-                            "px-1.5 py-0.5 text-[7.5px] font-bold border rounded-none uppercase tracking-wider",
-                            incident.isHighlight 
-                              ? "bg-red-500/10 border-red-500/30 text-red-500" 
-                              : "bg-[#070605] border-[#1F1914] text-muted-foreground/40"
-                          )}>
-                            {incident.isHighlight ? "ALERT" : "NOMINAL"}
-                          </span>
-                        </td>
-                        <td className="p-3 text-primary uppercase font-bold">{incident.source}</td>
-                        <td className="p-3 text-foreground/80 font-bold group-hover:text-primary transition-colors max-w-[220px] sm:max-w-[340px] truncate">
-                          {incident.title}
-                        </td>
-                        <td className="p-3 text-right text-muted-foreground/45 shrink-0 uppercase tracking-wider">
-                          {formatCompactTime(incident.publishedAt)}
-                        </td>
+            {/* Table Ledger Directory */}
+            <div className="bg-card/10 overflow-hidden select-text flex-1">
+              {loading ? (
+                <div className="py-16 text-center">
+                  <RefreshCcw className="h-5 w-5 text-primary animate-spin mx-auto mb-2" />
+                  <p className="text-xs text-muted-foreground">Ingesting data feeds...</p>
+                </div>
+              ) : filteredIncidents.length === 0 ? (
+                <div className="py-16 text-center">
+                  <p className="text-xs text-muted-foreground/60">No advisories logged for query</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto w-full">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-border/50 bg-card/60 text-muted-foreground select-none uppercase tracking-wider text-[10px] font-semibold">
+                        <th className="p-3">Status</th>
+                        <th className="p-3">Source</th>
+                        <th className="p-3">Advisory details</th>
+                        <th className="p-3 text-right">Time</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-border/30">
+                      {visibleIncidents.map((incident, idx) => (
+                        <tr 
+                          key={`${incident.link}-${idx}`}
+                          onClick={() => setSelectedIncident(incident)}
+                          className="hover:bg-card/40 transition-colors group cursor-pointer"
+                        >
+                          <td className="p-3">
+                            <span className={cn(
+                              "px-2 py-0.5 text-[9px] font-bold border rounded-full uppercase tracking-wider",
+                              incident.isHighlight 
+                                ? "bg-destructive/10 border-destructive/20 text-destructive" 
+                                : "bg-muted border-border text-muted-foreground"
+                            )}>
+                              {incident.isHighlight ? "Alert" : "Info"}
+                            </span>
+                          </td>
+                          <td className="p-3 text-primary font-semibold capitalize">{incident.source}</td>
+                          <td className="p-3 text-foreground/80 font-medium group-hover:text-primary transition-colors max-w-[220px] sm:max-w-[340px] truncate">
+                            {incident.title}
+                          </td>
+                          <td className="p-3 text-right text-muted-foreground font-mono">
+                            {formatCompactTime(incident.publishedAt)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Show More toggle button */}
+            {hasMoreItems && !loading && (
+              <button
+                onClick={() => setShowAll(!showAll)}
+                className="w-full py-3 bg-card/40 border-t border-border text-xs font-semibold text-muted-foreground/85 hover:text-primary hover:bg-card/65 transition-all outline-none"
+              >
+                {showAll ? "Collapse Database View" : `Expand Database — Show ${filteredIncidents.length - INITIAL_SHOW_COUNT} More Records`}
+              </button>
             )}
           </div>
-
-          {/* Show More toggle button */}
-          {hasMoreItems && !loading && (
-            <button
-              onClick={() => setShowAll(!showAll)}
-              className="w-full py-2.5 bg-[#0C0A09] border border-[#1F1914] text-[9.5px] font-mono font-bold text-muted-foreground/60 hover:text-primary hover:border-primary/20 uppercase tracking-widest rounded-none transition-all"
-            >
-              {showAll ? "[ COLLAPSE LIST DATABASE ]" : `[ EXPAND LEDGER DATABASE — SHOW ${filteredIncidents.length - INITIAL_SHOW_COUNT} MORE BULLETIN RECORDS ]`}
-            </button>
-          )}
         </div>
 
         {/* RIGHT COLUMN: CORE MONITOR TERMINAL CONSOLE (1 col) */}
-        <div className="lg:col-span-1 flex flex-col space-y-4">
+        <div className="lg:col-span-1 flex flex-col space-y-6">
           
-          <div className="border border-[#1F1914] bg-[#0C0A09] p-4 flex flex-col justify-between select-none relative">
+          <div className="glass-card p-4 rounded-2xl flex flex-col justify-between select-none relative">
             <div className="space-y-4">
-              <div className="flex items-center gap-2 pb-2 border-b border-[#1F1914]">
+              <div className="flex items-center gap-2 pb-2 border-b border-border">
                 <Cpu className="h-3.5 w-3.5 text-primary" />
-                <span className="text-[9px] font-mono font-bold text-muted-foreground/60 uppercase">
-                  SYSTEM DIAGNOSTICS NODE
+                <span className="text-xs font-bold text-foreground">
+                  System Diagnostics
                 </span>
               </div>
               
-              <div className="space-y-3 font-mono text-[9px]">
+              <div className="space-y-3 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground/40">ENGINE_CORE</span>
-                  <span className="text-foreground/80 font-bold">V2.1.4-STABLE</span>
+                  <span className="text-muted-foreground">Engine Core</span>
+                  <span className="text-foreground font-semibold font-mono">v2.1.4-stable</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground/40">FIRESTORE_DB</span>
-                  <span className="text-emerald-500 font-bold uppercase">ONLINE</span>
+                  <span className="text-muted-foreground">Database Sync</span>
+                  <span className="text-success font-semibold uppercase">Active</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground/40">FEED_NODES</span>
-                  <div className="text-right text-[8.5px] text-muted-foreground/60 space-y-0.5">
-                    <p>✓ BLEEPINGCOMPUTER</p>
-                    <p>✓ HACKER NEWS</p>
-                    <p>✓ KREBS ON SECURITY</p>
+                  <span className="text-muted-foreground">Feed Providers</span>
+                  <div className="text-right text-[11px] text-muted-foreground font-medium space-y-0.5">
+                    <p>✓ BleepingComputer</p>
+                    <p>✓ Hacker News</p>
+                    <p>✓ Krebs on Security</p>
                   </div>
                 </div>
               </div>
@@ -650,55 +656,55 @@ export function CyberNewsHub() {
           </div>
 
           {/* Log Console Output terminal */}
-          <div className="flex flex-col justify-between border border-[#1F1914] bg-[#070605] overflow-hidden min-h-[220px] flex-1">
-            <div className="bg-[#15110E] p-3 border-b border-[#1F1914] flex items-center justify-between select-none">
-              <span className="font-mono text-[9px] font-bold text-foreground uppercase tracking-widest">
-                INGESTION_SHELL_CON
+          <div className="glass-card flex flex-col justify-between overflow-hidden rounded-2xl min-h-[220px] flex-1">
+            <div className="bg-card/40 px-4 py-3 border-b border-border flex items-center justify-between select-none">
+              <span className="text-xs font-bold text-foreground">
+                Sync Logs
               </span>
-              <span className="font-mono text-[8px] text-emerald-400 bg-stone-900 border border-[#1F1914] px-1.5 py-0.5 uppercase tracking-wider font-bold">
-                SYS_LOGS
+              <span className="text-[10px] text-success bg-success/10 border border-success/20 px-2 py-0.5 rounded font-bold">
+                Live Feed
               </span>
             </div>
 
             <div
               ref={terminalRef}
-              className="p-3.5 flex-1 bg-[#070605] font-mono text-[9.5px] text-emerald-500 space-y-2 overflow-y-auto max-h-[160px] select-text [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-[#070605] [&::-webkit-scrollbar-thumb]:bg-[#1F1914] hover:[&::-webkit-scrollbar-thumb]:bg-emerald-500/40"
+              className="p-4 flex-1 bg-black/20 font-mono text-[11px] text-success/90 space-y-2 overflow-y-auto max-h-[160px] select-text"
             >
               {terminalLogs.map((log, i) => (
                 <div
                   key={i}
                   className={cn(
-                    "leading-relaxed tracking-wider break-all pl-2.5 border-l border-[#1F1914]",
+                    "leading-relaxed tracking-wider break-all pl-2.5 border-l border-border/40",
                     log.includes("ERROR")
-                      ? "border-red-500 text-red-500"
+                      ? "border-destructive text-destructive font-semibold"
                       : log.includes("SUCCESS") || log.includes("OK")
-                        ? "border-emerald-500 text-emerald-400 font-bold"
-                        : "text-emerald-500/80"
+                        ? "border-success text-success font-semibold"
+                        : "text-success/80"
                   )}
                 >
                   {log}
                 </div>
               ))}
               {syncingScraper && (
-                <div className="text-emerald-400 animate-pulse flex items-center gap-1.5">
+                <div className="text-success animate-pulse flex items-center gap-1.5 font-sans text-xs">
                   <span>⚙</span>
-                  <span>PIPELINE DYNAMIC SCANNING...</span>
+                  <span>Updating threat intelligence databases...</span>
                 </div>
               )}
             </div>
 
-            <div className="p-3 bg-[#15110E] border-t border-[#1F1914]">
+            <div className="p-3 bg-card/40 border-t border-border">
               <Button
                 onClick={triggerScraperSync}
                 disabled={syncingScraper}
                 className={cn(
-                  "w-full font-mono text-[9.5px] font-black tracking-widest uppercase h-9 rounded-none border transition-all duration-300",
+                  "w-full text-xs font-semibold h-10 rounded-xl border transition-all duration-300",
                   syncingScraper
-                    ? "bg-[#0C0A09] border-[#1F1914] text-muted-foreground/30 cursor-not-allowed"
-                    : "bg-[#0C0A09] border-[#1F1914] text-amber-500 hover:bg-amber-500 hover:text-black hover:border-amber-500"
+                    ? "bg-background border-border text-muted-foreground/30 cursor-not-allowed"
+                    : "bg-background border-border text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary"
                 )}
               >
-                {syncingScraper ? "INGESTING_OSINT..." : "[ RUN_AUTOMATIC_SCRAPER_SCAN ]"}
+                {syncingScraper ? "Syncing feeds..." : "Run Feed Scraper"}
               </Button>
             </div>
           </div>
@@ -707,66 +713,66 @@ export function CyberNewsHub() {
 
       {/* ─── 4. DECRYPT ADVISORY MODAL TERMINAL ──────────────────────── */}
       {selectedIncident && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl border border-[#1F1914] bg-[#0C0A09] text-foreground rounded-none overflow-hidden relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-2xl border border-border bg-card text-foreground rounded-2xl overflow-hidden relative shadow-2xl">
             
             {/* Header */}
-            <div className="bg-[#15110E] border-b border-[#1F1914] px-5 py-3 flex items-center justify-between select-none">
+            <div className="bg-card border-b border-border px-5 py-4 flex items-center justify-between select-none">
               <div className="flex items-center gap-2">
-                <Shield className="h-3.5 w-3.5 text-primary" />
-                <span className="text-[9px] font-mono font-black text-primary uppercase tracking-widest">
-                  OSINT_REPORT_DECRYPTOR_V2.0
+                <Shield className="h-4 w-4 text-primary" />
+                <span className="text-sm font-bold text-foreground">
+                  Threat Advisory Details
                 </span>
               </div>
               <button
                 onClick={() => setSelectedIncident(null)}
-                className="text-muted-foreground hover:text-primary transition-colors p-1 border border-[#1F1914] bg-[#070605]"
+                className="text-muted-foreground hover:text-foreground transition-colors p-1.5 border border-border bg-background/50 rounded-xl"
               >
-                <X className="h-3.5 w-3.5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             {/* Content Details */}
-            <div className="p-6 space-y-5 bg-[#070605]">
+            <div className="p-6 space-y-5 bg-card/10">
               {/* Metadata strip */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#0C0A09] p-3 border border-[#1F1914] select-none font-mono text-[8.5px]">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-background/50 p-4 border border-border rounded-xl select-none text-xs">
                 <div>
-                  <span className="block text-muted-foreground/40 uppercase">CLASSIFICATION</span>
+                  <span className="block text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Severity</span>
                   <span className={cn(
-                    "font-bold uppercase",
-                    selectedIncident.isHighlight ? "text-red-400" : "text-amber-500"
+                    "font-bold",
+                    selectedIncident.isHighlight ? "text-destructive" : "text-warning"
                   )}>
-                    {selectedIncident.isHighlight ? "CRITICAL_ALERT" : "STANDARD_VECTOR"}
+                    {selectedIncident.isHighlight ? "Critical" : "Standard"}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-muted-foreground/40 uppercase">FEED SOURCE</span>
-                  <span className="font-bold text-foreground uppercase">{selectedIncident.source}</span>
+                  <span className="block text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Feed Source</span>
+                  <span className="font-bold text-foreground capitalize">{selectedIncident.source}</span>
                 </div>
                 <div>
-                  <span className="block text-muted-foreground/40 uppercase">DATED_STAMP</span>
+                  <span className="block text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Published</span>
                   <span className="font-bold text-foreground">
                     {new Date(selectedIncident.publishedAt).toLocaleDateString()}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-muted-foreground/40 uppercase">INTEGRITY</span>
-                  <span className="font-bold text-emerald-400">{decryptionProgress}% SECURE</span>
+                  <span className="block text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Integrity</span>
+                  <span className="font-bold text-success">{decryptionProgress}% Secure</span>
                 </div>
               </div>
 
               {/* Subject */}
-              <div className="space-y-1.5 border-b border-[#1F1914] pb-3">
-                <span className="text-[8px] font-mono text-muted-foreground/45 uppercase block select-none">SUBJECT</span>
-                <h3 className="text-xs font-mono font-black text-foreground uppercase tracking-wide leading-relaxed">
+              <div className="space-y-1.5 border-b border-border pb-4">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider block select-none">Subject</span>
+                <h3 className="text-sm font-bold text-foreground leading-relaxed">
                   {selectedIncident.title}
                 </h3>
               </div>
 
-              {/* Typewriter details */}
-              <div className="space-y-1.5">
-                <span className="text-[8px] font-mono text-muted-foreground/45 uppercase block select-none">DECRYPTED DATA</span>
-                <div className="bg-[#0C0A09] p-4 border border-[#1F1914] font-mono text-[10.5px] text-muted-foreground/80 leading-relaxed min-h-[100px] max-h-[220px] overflow-y-auto select-text whitespace-pre-wrap [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-[#0C0A09] [&::-webkit-scrollbar-thumb]:bg-[#1F1914] hover:[&::-webkit-scrollbar-thumb]:bg-primary/40">
+              {/* Description Details */}
+              <div className="space-y-2">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider block select-none">Advisory Payload</span>
+                <div className="bg-background/80 p-4 border border-border rounded-xl text-sm text-muted-foreground/90 leading-relaxed min-h-[100px] max-h-[220px] overflow-y-auto select-text whitespace-pre-wrap">
                   {decryptionText}
                 </div>
               </div>
@@ -775,14 +781,14 @@ export function CyberNewsHub() {
               {lockdowns.some((brand) =>
                 selectedIncident.title.toLowerCase().includes(brand.toLowerCase())
               ) && (
-                <div className="bg-red-500/5 border border-red-500/20 p-3.5 flex items-start gap-3">
-                  <ShieldAlert className="h-4.5 w-4.5 text-red-500 shrink-0 mt-0.5" />
+                <div className="bg-destructive/5 border border-destructive/25 p-4 rounded-xl flex items-start gap-3">
+                  <ShieldAlert className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
                   <div>
-                    <span className="block text-[8.5px] font-mono font-black text-red-500 uppercase tracking-widest">
-                      ACTIVE LOCKDOWN PROTOCOL INITIATED
+                    <span className="block text-xs font-bold text-destructive uppercase tracking-wide">
+                      Brand Safeguard Triggered
                     </span>
-                    <p className="text-[9.5px] font-mono text-red-500/70 leading-relaxed mt-0.5">
-                      This incident matches an active monitored brand. Lookalike domains mimicking this brand are automatically subject to immediate reputation penalty in our scanning engines.
+                    <p className="text-xs text-destructive/80 leading-relaxed mt-1">
+                      This advisory matches an actively monitored brand. Lookalike domains mimicking this brand are automatically subject to immediate reputation penalty in our scanning engines.
                     </p>
                   </div>
                 </div>
@@ -790,22 +796,22 @@ export function CyberNewsHub() {
             </div>
 
             {/* Footer */}
-            <div className="bg-[#15110E] border-t border-[#1F1914] px-6 py-4 flex items-center justify-between gap-4 select-none">
+            <div className="bg-card border-t border-border px-6 py-4 flex items-center justify-between gap-4 select-none">
               <Button
                 onClick={() => setSelectedIncident(null)}
                 variant="outline"
-                className="font-mono text-[9px] font-bold tracking-widest uppercase px-4 h-8 border-[#1F1914] text-muted-foreground hover:text-foreground rounded-none bg-[#0C0A09]"
+                className="text-xs font-semibold px-4.5 h-9 border-border text-muted-foreground hover:text-foreground rounded-xl bg-background"
               >
-                [ CLOSE ]
+                Close
               </Button>
 
               <a
                 href={selectedIncident.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-1.5 font-mono text-[9px] font-black tracking-widest uppercase px-4 h-8 bg-[#0C0A09] text-primary hover:bg-primary hover:text-black border border-[#1F1914] hover:border-primary rounded-none transition-all"
+                className="inline-flex items-center justify-center gap-1.5 text-xs font-bold px-4.5 h-9 bg-primary text-primary-foreground hover:bg-primary/95 rounded-xl transition-all"
               >
-                [ ACCESS_SOURCE ] <ExternalLink className="h-3 w-3" />
+                Visit Source <ExternalLink className="h-3 w-3" />
               </a>
             </div>
           </div>

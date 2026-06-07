@@ -16,6 +16,7 @@ yarn-debug.log*
 yarn-error.log*
 # env files
 .env*
+!.env.example
 
 # vercel
 /.vercel/
@@ -40,3 +41,11 @@ yarn-error.log*
 results.json
 results.csv
 results.html
+
+# Python / Backend ignores
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+backend/scamsentry.db

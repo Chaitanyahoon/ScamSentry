@@ -45,52 +45,52 @@ export default function ValidatorPage() {
       <div className="container px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-12">
         
         {/* Header */}
-        <div className="text-left space-y-6">
-          <div className="inline-flex items-center justify-center p-4 bg-primary/10 text-primary rounded-md">
-            <TerminalSquare className="h-8 w-8 text-primary" />
+        <div className="text-left space-y-4">
+          <div className="inline-flex items-center justify-center p-3 bg-primary/10 text-primary rounded-xl">
+            <Shield className="h-7 w-7 text-primary" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-            Zero-Trust URL Scanner
+          <h1 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight">
+            Link Safety Checker
           </h1>
-          <p className="text-lg text-muted-foreground">
-            Execute deterministic malware evaluation modules against suspicious web addresses.
+          <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
+            Verify the safety of any link before you click. Paste a URL below to run heuristic scans, check registrar ages, inspect SSL certificates, and check global threat lists.
           </p>
         </div>
 
         {/* Input Area */}
-        <div className="bg-card border border-border shadow-sm">
-          <div className="bg-card border-b border-border p-4 sm:p-6 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              <LinkIcon className="h-4 w-4" /> Threat Vector Scan
+        <div className="bg-card border border-border shadow-lg rounded-2xl overflow-hidden backdrop-blur-sm bg-card/60">
+          <div className="border-b border-border p-4 sm:p-6 flex items-center justify-between bg-card/40">
+            <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest">
+              <LinkIcon className="h-4 w-4" /> Link Scanner
             </div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-primary/80 bg-primary/10 border border-primary/20 px-3 py-1 rounded-sm uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 border border-primary/20 px-3 py-1 rounded-full uppercase tracking-wider">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-              Live Monitoring
+              System Active
             </div>
           </div>
-          <div className="p-6 sm:p-8 space-y-4 bg-background/50">
-            <label htmlFor="payload" className="text-sm font-semibold mb-1 block">
-              Target URL
+          <div className="p-6 sm:p-8 space-y-4">
+            <label htmlFor="payload" className="text-sm font-semibold text-foreground">
+              Link to scan
             </label>
             <Textarea 
               id="payload" 
-              placeholder="Enter suspicious URL (e.g., https://amazon-secure-login.com)..." 
-              className="min-h-[140px] bg-card border-border font-mono text-base resize-none"
+              placeholder="Paste or type link here (e.g., https://secure-account-verification.com)..." 
+              className="min-h-[140px] bg-background/50 border-border font-mono text-base resize-none rounded-xl focus-visible:ring-primary focus-visible:border-primary placeholder:text-muted-foreground/40"
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
           </div>
-          <div className="p-5 sm:p-6 bg-card border-t border-border flex justify-end">
+          <div className="p-5 sm:p-6 bg-card/40 border-t border-border flex justify-end">
             <Button 
               size="lg" 
-              className="px-8 font-semibold"
+              className="px-8 font-semibold rounded-xl text-primary-foreground bg-primary hover:bg-primary/90 shadow-lg shadow-primary/15 transition-all active:scale-[0.98]"
               onClick={handleAnalyze}
               disabled={isAnalyzing}
             >
               {isAnalyzing ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing...</>
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Scanning URL...</>
               ) : (
-                <>Run Forensics <ArrowRight className="ml-2 h-4 w-4" /></>
+                <>Scan Link <ArrowRight className="ml-2 h-4 w-4" /></>
               )}
             </Button>
           </div>

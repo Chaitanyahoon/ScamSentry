@@ -1,0 +1,160 @@
+"""
+ScamSentry API — Detection Engine Orchestrator
+
+Runs the 4-layer detection pipeline and aggregates results into a
+final risk score (0-100) with per-layer breakdowns.
+
+Score weighting:
+    L1 (Heuristics)   — max 30
+    L2 (DNS/WHOIS)    — max 25
+    L3 (Threat Intel)  — max 30
+    L4 (Ledger)        — max 15
+    Total maximum      — 100
+"""
+
+from __future__ import annotations
+
+import logging
+import time
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.services.l1_heuristics import check_heuristics
+from app.services.l2_dns import check_dns
+from app.services.l3_threat import check_google_safe_browsing
+from app.services.l4_ledger import check_ledger
+
+logger = logging.getLogger(__name__)
+
+
+def _map_risk_level(score: int) -> str:
+    """Map an aggregate 0-100 risk score to a human-readable level."""
+    if score <= 30:
+        return "safe"
+    if score <= 69:
+        return "suspicious"
+    return "dangerous"
+
+
+async def run_engine(url: str, db: AsyncSession | None = None) -> dict:
+    """
+    Execute the full 4-layer scan pipeline on *url*.
+
+    Parameters
+    ----------
+    url : str
+        The target URL to analyse.
+    db : AsyncSession | None
+        Database session for L4 ledger lookups.  May be ``None`` in tests
+        that only exercise L1–L3.
+
+    Returns
+    -------
+    dict
+        {
+            "risk_score": int,
+            "risk_level": str,
+            "layer_results": [ {layer, passed, score_contribution, details}, ... ],
+            "processing_time_ms": int,
+        }
+    """
+    start = time.perf_counter()
+    layer_results: list[dict] = []
+    total_score = 0
+
+    # ── L1 — Heuristics (sync, pure Python) ────────────────────────
+    l1 = check_heuristics(url)
+    total_score += l1["score"]
+    layer_results.append(
+        {
+            "layer": "L1",
+            "passed": l1["passed"],
+            "score_contribution": l1["score"],
+            "details": l1["details"],
+        }
+    )
+
+    # Early exit: if L1 already maxed the overall score
+    if total_score >= 100:
+        elapsed_ms = int((time.perf_counter() - start) * 1000)
+        return _build_result(total_score, layer_results, elapsed_ms)
+
+    # ── L2 — DNS / WHOIS / SSL ─────────────────────────────────────
+    try:
+        l2 = await check_dns(url)
+    except Exception as exc:
+        logger.warning("L2 check failed: %s", exc)
+        l2 = {"score": 0, "passed": True, "details": {"error": str(exc)}}
+
+    total_score += l2["score"]
+    layer_results.append(
+        {
+            "layer": "L2",
+            "passed": l2["passed"],
+            "score_contribution": l2["score"],
+            "details": l2["details"],
+        }
+    )
+
+    if total_score >= 100:
+        elapsed_ms = int((time.perf_counter() - start) * 1000)
+        return _build_result(total_score, layer_results, elapsed_ms)
+
+    # ── L3 — Google Safe Browsing ──────────────────────────────────
+    try:
+        l3 = await check_google_safe_browsing(url)
+    except Exception as exc:
+        logger.warning("L3 check failed: %s", exc)
+        l3 = {"score": 0, "passed": True, "details": {"error": str(exc)}}
+
+    total_score += l3["score"]
+    layer_results.append(
+        {
+            "layer": "L3",
+            "passed": l3["passed"],
+            "score_contribution": l3["score"],
+            "details": l3["details"],
+        }
+    )
+
+    if total_score >= 100:
+        elapsed_ms = int((time.perf_counter() - start) * 1000)
+        return _build_result(total_score, layer_results, elapsed_ms)
+
+    # ── L4 — Internal Ledger ───────────────────────────────────────
+    if db is not None:
+        try:
+            l4 = await check_ledger(url, db)
+        except Exception as exc:
+            logger.warning("L4 check failed: %s", exc)
+            l4 = {"score": 0, "passed": True, "details": {"error": str(exc)}}
+    else:
+        l4 = {"score": 0, "passed": True, "details": {"skipped": True}}
+
+    total_score += l4["score"]
+    layer_results.append(
+        {
+            "layer": "L4",
+            "passed": l4["passed"],
+            "score_contribution": l4["score"],
+            "details": l4["details"],
+        }
+    )
+
+    elapsed_ms = int((time.perf_counter() - start) * 1000)
+    return _build_result(total_score, layer_results, elapsed_ms)
+
+
+def _build_result(
+    total_score: int,
+    layer_results: list[dict],
+    processing_time_ms: int,
+) -> dict:
+    """Assemble the final result dict with capped score."""
+    capped = min(max(total_score, 0), 100)
+    return {
+        "risk_score": capped,
+        "risk_level": _map_risk_level(capped),
+        "layer_results": layer_results,
+        "processing_time_ms": processing_time_ms,
+    }

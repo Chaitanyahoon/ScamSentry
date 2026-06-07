@@ -20,7 +20,7 @@ export function Hero() {
         <div className="mx-auto max-w-3xl">
           {/* Status line */}
           <div className={`mb-6 ${mounted ? "animate-fade-in" : "opacity-0"}`}>
-            <span className="inline-flex items-center gap-2 text-xs text-muted-foreground font-mono">
+            <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
               Engine active — 4 deterministic layers operational
             </span>
@@ -57,16 +57,34 @@ export function Hero() {
             </Link>
 
             <Link href="/report" className="group">
-              <div className="flex items-center justify-center gap-3 h-14 px-8 text-sm border border-destructive/40 text-destructive font-mono font-semibold uppercase tracking-wider hover:bg-destructive/10 transition-colors">
+              <div className="flex items-center justify-center gap-3 h-14 px-8 text-sm border border-destructive/40 text-destructive font-semibold hover:bg-destructive/10 rounded-2xl transition-all">
                 <AlertTriangle className="h-4 w-4" />
                 Report a scam
               </div>
             </Link>
           </div>
 
+          {/* Browser Extension Promotion option */}
+          <div
+            className={`mt-6 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-muted-foreground ${mounted ? "animate-fade-in stagger-4" : "opacity-0"}`}
+          >
+            <div className="flex items-center gap-1.5 bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full text-primary font-mono text-[10px] uppercase tracking-wider">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+              Shield Active
+            </div>
+            <span>Stop threats before they load:</span>
+            <a
+              href="/extension.zip"
+              download="ScamSentry-Extension.zip"
+              className="font-semibold text-foreground hover:text-primary transition-colors flex items-center gap-1 underline underline-offset-4 decoration-primary/40 hover:decoration-primary"
+            >
+              Get ScamSentry Extension (Free) <ArrowRight className="h-3 w-3" />
+            </a>
+          </div>
+
           {/* Social proof — one quiet line */}
           <p
-            className={`mt-8 text-xs text-muted-foreground font-mono ${mounted ? "animate-fade-in stagger-4" : "opacity-0"}`}
+            className={`mt-8 text-xs text-muted-foreground ${mounted ? "animate-fade-in stagger-5" : "opacity-0"}`}
           >
             <Link
               href="/reports"

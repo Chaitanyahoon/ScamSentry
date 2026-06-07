@@ -56,6 +56,7 @@ interface ReportsContextType {
   deleteReport: (id: string) => Promise<void>
   voteHelpful: (id: string) => Promise<void>
   flagReport: (id: string) => Promise<void>
+  resolveReportFlags: (id: string) => Promise<void>
   incrementViews: (id: string) => Promise<void>
   getReportsByLocation: (lat: number, lng: number, radius?: number) => ScamReport[]
   searchReportsByCity: (cityName: string) => ScamReport[]
@@ -365,6 +366,18 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  const resolveReportFlags = useCallback(async (id: string) => {
+    try {
+      const reportRef = doc(db, "scam_reports", id)
+      await updateDoc(reportRef, { flag_count: 0 })
+      setReports((prev) =>
+        prev.map((report) => (report.id === id ? { ...report, flagCount: 0 } : report)),
+      )
+    } catch (error) {
+      console.error("Error resolving report flags:", error)
+    }
+  }, [])
+
   const incrementViews = useCallback(async (id: string) => {
     try {
       const reportRef = doc(db, "scam_reports", id)
@@ -416,6 +429,7 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
     deleteReport,
     voteHelpful,
     flagReport,
+    resolveReportFlags,
     incrementViews,
     getReportsByLocation,
     searchReportsByCity,
