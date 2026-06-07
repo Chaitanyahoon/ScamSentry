@@ -85,24 +85,24 @@ export function LiveThreatTicker() {
   const scrollingItems = [...items, ...items];
 
   return (
-    <div className="w-full bg-[#0C0A09] border-y border-[#1F1914] py-3 overflow-hidden relative group">
+    <div className="w-full bg-muted/20 border-y border-border py-3 overflow-hidden relative group">
       {/* Ticker Header / Label */}
-      <div className="absolute left-0 top-0 bottom-0 z-10 bg-[#0C0A09] border-r border-[#1F1914] flex items-center px-4 shadow-[10px_0_20px_rgba(0,0,0,0.5)]">
+      <div className="absolute left-0 top-0 bottom-0 z-10 bg-card border-r border-border flex items-center px-4 shadow-[10px_0_20px_rgba(0,0,0,0.3)]">
         <div className="flex items-center gap-2">
-          <Activity className="h-3 w-3 text-primary animate-pulse" />
-          <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em] whitespace-nowrap">
-            Live Overwatch Telemetry
+          <Activity className="h-3.5 w-3.5 text-primary animate-pulse" />
+          <span className="text-xs font-semibold text-primary uppercase tracking-wider whitespace-nowrap">
+            Live Threat Feed
           </span>
         </div>
       </div>
-
+ 
       {/* Scrolling Container */}
       <div className="flex whitespace-nowrap animate-marquee group-hover:[animation-play-state:paused] pl-[180px]">
         {scrollingItems.map((item, idx) => (
           <div 
             key={`${item.text}-${idx}`}
             className={cn(
-              "inline-flex items-center gap-4 px-6 border-r border-[#1F1914] last:border-r-0 transition-colors",
+              "inline-flex items-center gap-4 px-6 border-r border-border last:border-r-0 transition-colors",
               item.isHighlight ? "bg-red-500/[0.03]" : ""
             )}
           >
@@ -127,26 +127,26 @@ export function LiveThreatTicker() {
               </span>
             </div>
             <div className={cn(
-              "px-1.5 py-0.5 rounded-[4px] border",
+              "px-2.5 py-0.5 rounded-full border",
               item.isHighlight 
                 ? "bg-red-500/10 border-red-500/30 text-red-500 animate-pulse font-black" 
                 : item.isIncident 
                 ? "bg-amber-500/10 border-amber-500/20 text-amber-500" 
                 : "bg-primary/10 border-primary/20 text-primary"
             )}>
-              <span className="text-[8px] font-mono font-bold uppercase tracking-tighter">
+              <span className="text-[9px] font-mono font-bold uppercase tracking-tighter">
                 {item.isHighlight ? "CRITICAL BULLETIN" : item.source}
               </span>
             </div>
-            <span className="text-[9px] font-mono text-muted-foreground/40 tabular-nums">
+            <span className="text-[10px] font-mono text-muted-foreground/45 tabular-nums">
               {new Date(item.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </span>
           </div>
         ))}
       </div>
-
+ 
       {/* Right Gradient Fade */}
-      <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#0C0A09] to-transparent pointer-events-none z-10" />
+      <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
 
       <style jsx global>{`
         @keyframes marquee {

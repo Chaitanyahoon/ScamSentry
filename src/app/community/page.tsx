@@ -1,110 +1,120 @@
 import Link from "next/link"
-import { Users, MessageSquare, ShieldAlert, ShieldCheck, Terminal, Radio } from "lucide-react"
+import { Users, MessageSquare, ShieldAlert, ShieldCheck, Bell, Radio } from "lucide-react"
 
 export default function CommunityPage() {
   return (
     <div className="min-h-screen bg-background py-16 relative overflow-hidden">
-      {/* Background Cyber Grid */}
-      <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.2]" />
+      {/* Background Grid */}
+      <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.05]" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-5xl text-center">
+        <div className="mx-auto max-w-4xl text-center">
           <div className="mb-12 animate-in fade-in slide-in-from-bottom-8 duration-500">
             <div className="flex items-center justify-center mb-6">
-              <div className="flex h-16 w-16 items-center justify-center border border-primary/50 bg-primary/10 shadow-[0_0_15px_hsla(var(--primary),0.3)]">
-                <Terminal className="h-8 w-8 text-primary drop-shadow-[0_0_8px_currentColor]" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+                <Users className="h-6 w-6" />
               </div>
             </div>
 
-            <h1 className="text-4xl font-extrabold tracking-widest text-foreground sm:text-6xl mb-6 uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
-              COMMUNITY <span className="text-primary drop-shadow-[0_0_10px_hsla(var(--primary),0.5)]">GRID</span>
+            <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl mb-6">
+              Community <span className="text-primary">Network</span>
             </h1>
 
-            <p className="text-sm font-mono tracking-widest uppercase text-muted-foreground mb-8 max-w-3xl mx-auto border-l-2 border-primary pl-4 text-left">
-              WE ARE CONSTRUCTING DECENTRALIZED PROTOCOLS TO CONNECT FREELANCERS, 
-              SHARE EXPLOIT DATA, AND DEFEND THE NETWORK FROM ROGUE ACTORS.
+            <p className="text-base text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+              We are building a collaborative network for freelancers to share security intelligence, 
+              verify contracts, and defend our workspace from fraudulent clients.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16 font-mono text-left animate-in fade-in slide-in-from-bottom-12 duration-700">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16 text-left animate-in fade-in slide-in-from-bottom-12 duration-700">
             {/* Forum */}
-            <div className="glass-card p-6 border-t-2 border-t-primary/50 hover:-translate-y-1 transition-transform">
-              <div className="flex items-center w-12 h-12 border border-primary bg-primary/10 justify-center mb-4 shadow-[0_0_10px_hsla(var(--primary),0.3)]">
-                <MessageSquare className="w-6 h-6 text-primary" />
+            <div className="bg-card border border-border rounded-2xl p-6 hover:-translate-y-1 transition-all duration-300 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center w-11 h-11 rounded-xl border border-primary/20 bg-primary/5 justify-center mb-4">
+                  <MessageSquare className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Discussion Forums</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                  Secure community spaces to swap client reviews, flag suspicious clauses, and audit contracts.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-2 uppercase tracking-widest drop-shadow-[0_0_5px_currentColor] text-primary">COMMUNICATION_CHANNELS</h3>
-              <p className="text-xs text-muted-foreground tracking-widest leading-relaxed mb-4">
-                SECURE FORUMS FOR FREELANCERS TO SWAP INTELLIGENCE AND AUDIT SUSPICIOUS CONTRACTS.
-              </p>
-              <div className="inline-flex items-center px-3 py-1 border border-warning/50 bg-warning/10 text-warning text-[10px] font-bold tracking-widest mt-auto shadow-[0_0_5px_hsla(var(--warning),0.2)]">
-                [ STATUS: IN_DEVELOPMENT ]
+              <div className="inline-flex items-center self-start px-2.5 py-1 rounded-full border border-warning/20 bg-warning/10 text-warning text-xs font-medium">
+                In Development
               </div>
             </div>
 
             {/* Expert Network */}
-            <div className="glass-card p-6 border-t-2 border-t-secondary/50 hover:-translate-y-1 transition-transform">
-              <div className="flex items-center w-12 h-12 border border-secondary bg-secondary/10 justify-center mb-4 shadow-[0_0_10px_hsla(var(--secondary),0.3)]">
-                <Users className="w-6 h-6 text-secondary" />
+            <div className="bg-card border border-border rounded-2xl p-6 hover:-translate-y-1 transition-all duration-300 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center w-11 h-11 rounded-xl border border-secondary/20 bg-secondary/5 justify-center mb-4">
+                  <Users className="w-5 h-5 text-secondary" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Expert Consultation</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                  Direct access to experienced freelancers and legal advisors for assistance with payment disputes.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-2 uppercase tracking-widest drop-shadow-[0_0_5px_currentColor] text-secondary">EXPERT_NODE_NETWORK</h3>
-              <p className="text-xs text-muted-foreground tracking-widest leading-relaxed mb-4">
-                DIRECT ACCESS TO VERIFIED VETERANS AND SECURITY EXPERTS FOR IMMEDIATE THREAT TRIAGE.
-              </p>
-              <div className="inline-flex items-center px-3 py-1 border border-warning/50 bg-warning/10 text-warning text-[10px] font-bold tracking-widest mt-auto shadow-[0_0_5px_hsla(var(--warning),0.2)]">
-                [ STATUS: IN_DEVELOPMENT ]
+              <div className="inline-flex items-center self-start px-2.5 py-1 rounded-full border border-warning/20 bg-warning/10 text-warning text-xs font-medium">
+                In Development
               </div>
             </div>
 
             {/* Safe Companies */}
-            <div className="glass-card p-6 border-t-2 border-t-success/50 hover:-translate-y-1 transition-transform">
-              <div className="flex items-center w-12 h-12 border border-success bg-success/10 justify-center mb-4 shadow-[0_0_10px_hsla(var(--success),0.3)]">
-                <ShieldCheck className="w-6 h-6 text-success" />
+            <div className="bg-card border border-border rounded-2xl p-6 hover:-translate-y-1 transition-all duration-300 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center w-11 h-11 rounded-xl border border-success/20 bg-success/5 justify-center mb-4">
+                  <ShieldCheck className="w-5 h-5 text-success" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Verified Companies</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                  A curated database of vetted organizations with verified prompt payments and positive reviews.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-2 uppercase tracking-widest drop-shadow-[0_0_5px_currentColor] text-success">WHITELISTED_ENTITIES</h3>
-              <p className="text-xs text-muted-foreground tracking-widest leading-relaxed mb-4">
-                COMMUNITY-CURATED LEDGER OF VERIFIED SAFE HARBOR CLIENTS AND ORGS.
-              </p>
               <Link
                 href="/safe-companies/submit"
-                className="inline-flex items-center text-[10px] tracking-widest font-bold text-success hover:text-success/80 border-b border-success/50 hover:border-success pb-0.5 mt-auto transition-colors"
+                className="inline-flex items-center text-sm font-semibold text-success hover:text-success/80 transition-colors self-start"
               >
-                PROPOSE_NEW_NODE {'>'}
+                Propose a Company →
               </Link>
             </div>
 
             {/* Alert System */}
-            <div className="glass-card p-6 border-t-2 border-t-destructive/50 hover:-translate-y-1 transition-transform">
-              <div className="flex items-center w-12 h-12 border border-destructive bg-destructive/10 justify-center mb-4 shadow-[0_0_10px_hsla(var(--destructive),0.3)]">
-                <ShieldAlert className="w-6 h-6 text-destructive" />
+            <div className="bg-card border border-border rounded-2xl p-6 hover:-translate-y-1 transition-all duration-300 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center w-11 h-11 rounded-xl border border-destructive/20 bg-destructive/5 justify-center mb-4">
+                  <ShieldAlert className="w-5 h-5 text-destructive" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Early Warning System</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                  Real-time alerts when scam patterns, bad faith contracts, or fake jobs match your criteria.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-2 uppercase tracking-widest drop-shadow-[0_0_5px_currentColor] text-destructive">EARLY_WARNING_RADAR</h3>
-              <p className="text-xs text-muted-foreground tracking-widest leading-relaxed mb-4">
-                INSTANT ALERTS WHENEVER NEW THREAT SIGNATURES MATCH YOUR SECTOR OR GEO-LOCATION.
-              </p>
-              <div className="inline-flex items-center px-3 py-1 border border-warning/50 bg-warning/10 text-warning text-[10px] font-bold tracking-widest mt-auto shadow-[0_0_5px_hsla(var(--warning),0.2)]">
-                [ STATUS: IN_DEVELOPMENT ]
+              <div className="inline-flex items-center self-start px-2.5 py-1 rounded-full border border-warning/20 bg-warning/10 text-warning text-xs font-medium">
+                In Development
               </div>
             </div>
           </div>
 
-          <div className="border border-border bg-card/50 p-8 glass-card rounded-none max-w-3xl mx-auto shadow-[0_0_20px_hsla(var(--primary),0.1)]">
-            <div className="flex items-center gap-3 justify-center mb-6">
-              <Radio className="h-6 w-6 text-primary animate-pulse" />
-              <h2 className="text-lg font-mono font-bold tracking-widest text-foreground uppercase">
-                ESTABLISH_COMM_LINK
+          <div className="border border-border bg-card/60 p-8 rounded-2xl max-w-2xl mx-auto shadow-lg">
+            <div className="flex items-center gap-3 justify-center mb-4">
+              <Radio className="h-5 w-5 text-primary animate-pulse" />
+              <h2 className="text-lg font-semibold text-foreground">
+                Get Feature Updates
               </h2>
             </div>
-            <p className="text-xs font-mono tracking-widest text-muted-foreground mb-8">
-              INITIALIZE YOUR TERMINAL TO RECEIVE PING UPDATES WHEN NETWORK MODULES COME ONLINE.
+            <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+              Subscribe to receive updates when new community modules and protection tools are launched.
             </p>
-            <div className="flex flex-col sm:flex-row gap-0 max-w-xl mx-auto">
+            <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
               <input
                 type="email"
-                placeholder="ENTER_SECURE_EMAIL..."
-                className="flex-1 px-4 py-3 bg-background border border-border text-foreground tracking-widest text-xs font-mono focus:border-primary focus:ring-1 focus:ring-primary rounded-none placeholder:text-muted-foreground/50"
+                placeholder="Enter your email address..."
+                className="flex-1 px-4 py-2 bg-background border border-border text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/45 placeholder:text-muted-foreground/50"
               />
-              <button className="px-8 py-3 cyber-button text-xs tracking-widest whitespace-nowrap">
-                SUBSCRIBE_TO_PINGS
+              <button className="px-6 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-xl hover:bg-primary/95 transition-colors whitespace-nowrap">
+                Subscribe
               </button>
             </div>
           </div>

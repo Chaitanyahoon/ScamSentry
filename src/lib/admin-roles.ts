@@ -96,11 +96,12 @@ export async function createOrUpdateAdminUser(
       }
     } else {
       // Create new user (default role: user, not admin)
-      // Admins must be promoted by existing admins
+      // Predefined admin@scamsentry.io email automatically gets admin role
+      const isPredefinedAdmin = email.toLowerCase() === 'admin@scamsentry.io'
       const newUser: AdminUser = {
         uid,
         email,
-        role: 'user', // Default to user - admin role must be assigned
+        role: isPredefinedAdmin ? 'admin' : 'user',
         displayName: displayName || email.split('@')[0],
         isActive: true,
         createdAt: serverTimestamp(),

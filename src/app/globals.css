@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,7 +11,11 @@
 
   body {
     @apply bg-background text-foreground min-h-screen w-full selection:bg-primary/20 selection:text-primary;
-    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
   }
 
   *,
@@ -21,64 +27,58 @@
   }
 
   :root {
-    /* ── FORENSIC AMBER ─────────────────────────────────────
-       Inspired by real OSINT/threat-intel tooling (Maltego,
-       Shodan, old FBI workstation terminals). Warm blacks,
-       burnt-amber accents, deep-crimson for threat states.
-       ──────────────────────────────────────────────────── */
-
-    /* Backgrounds */
-    --background:      30 12%  5%;    /* #0C0A07 — warm near-black     */
-    --card:            30  8%  9%;    /* #171410 — dark charcoal-brown  */
-    --card-foreground: 40 60% 88%;
-    --popover:         30  8%  9%;
-    --popover-foreground: 40 60% 88%;
+    /* ── MODERN CYBERSECURITY DARK MODE ── */
+    --background:      224 71% 4%;    /* #030712 — deep slate black */
+    --card:            222 47% 7%;    /* #0b0f19 — modern dark slate card */
+    --card-foreground: 220 14% 96%;   /* off-white */
+    --popover:         222 47% 7%;
+    --popover-foreground: 220 14% 96%;
 
     /* Text */
-    --foreground:         40 30% 88%;  /* #E8DBC8 — warm cream           */
-    --muted:              30  8% 13%;  /* slightly lifted surface        */
-    --muted-foreground:   35 15% 52%;  /* dim amber-grey for secondary   */
+    --foreground:         220 14% 96%;  /* clean off-white */
+    --muted:              220 20% 10%;  /* lifted dark slate */
+    --muted-foreground:   220 9% 65%;   /* soft grey */
 
-    /* Primary — Burnt Amber */
-    --primary:            38 92% 50%;  /* #F59E0B — energetic, distinct  */
-    --primary-foreground: 30 12%  5%;  /* near-black text on amber       */
+    /* Primary — Premium Orange/Amber */
+    --primary:            24 96% 53%;   /* #f97316 — clean, glowing orange */
+    --primary-foreground: 224 71% 4%;   /* deep black text on primary */
 
-    /* Secondary — Aged Bronze */
-    --secondary:            32 70% 38%;  /* #8C5A1A                       */
-    --secondary-foreground: 40 60% 88%;
+    /* Secondary — Indigo/Blue Accent */
+    --secondary:            217 91% 60%;  /* #3b82f6 */
+    --secondary-foreground: 220 14% 96%;
 
-    /* Accent — warm lifted surface */
-    --accent:            40 50% 20%;
-    --accent-foreground: 40 60% 92%;
+    /* Accent */
+    --accent:            220 20% 12%;
+    --accent-foreground: 220 14% 98%;
 
-    /* Threat / Destructive — Deep Crimson */
-    --destructive:            0 72% 45%;  /* #C0292A — serious, not garish */
-    --destructive-foreground: 40 60% 92%;
+    /* Threat / Destructive — Vibrant Crimson */
+    --destructive:            0 84% 60%;  /* warning red */
+    --destructive-foreground: 220 14% 98%;
 
-    /* Success — Muted Olive-green */
-    --success:            90 40% 38%;  /* #4D7A2A */
-    --success-foreground: 40 60% 92%;
+    /* Success — Vibrant Emerald */
+    --success:            142 76% 45%;  /* green */
+    --success-foreground: 220 14% 98%;
 
-    /* Warning — Ochre */
-    --warning:            45 80% 48%;  /* #D4950A */
-    --warning-foreground: 30 12%  5%;
+    /* Warning — Vivid Amber */
+    --warning:            38 92% 50%;
+    --warning-foreground: 224 71% 4%;
 
     /* Borders & Inputs */
-    --border: 35 18% 18%;
-    --input:  35 18% 18%;
-    --ring:   38 92% 50%;
+    --border: 220 19% 16%;             /* #1f2937 */
+    --input:  220 19% 16%;
+    --ring:   24 96% 53%;
 
-    --radius: 0.125rem;
+    --radius: 0.75rem;
 
     /* Gradient stops */
-    --primary-start: 38 92% 50%;
-    --primary-end:   32 70% 38%;
+    --primary-start: 24 96% 53%;
+    --primary-end:   217 91% 60%;
   }
 
   .dark {
-    --background: 30 12%  5%;
-    --foreground: 40 30% 88%;
-    --primary:    38 92% 50%;
+    --background: 224 71% 4%;
+    --foreground: 220 14% 96%;
+    --primary:    24 96% 53%;
   }
 }
 
@@ -100,14 +100,16 @@
 
   /* ── Forensic Cards — solid, no blur/glass ───────────── */
   .glass-card {
-    background: hsl(var(--card));
-    border: 1px solid hsl(var(--border));
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+    background: rgba(11, 15, 25, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
   }
   .glass-card:hover {
-    border-color: hsla(var(--primary), 0.5);
-    box-shadow: 0 4px 28px rgba(0, 0, 0, 0.5), 0 0 0 1px hsla(var(--primary), 0.15);
+    border-color: rgba(249, 115, 22, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(249, 115, 22, 0.08), 0 0 0 1px rgba(249, 115, 22, 0.1);
   }
 
   .glass-strong {
@@ -151,8 +153,9 @@
     color: hsl(var(--primary));
     text-transform: uppercase;
     font-weight: 700;
-    letter-spacing: 0.1em;
-    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.15em;
+    font-family: 'Outfit', sans-serif;
+    border-radius: var(--radius);
     transition: all 0.25s ease;
     overflow: hidden;
   }
@@ -173,11 +176,11 @@
     transform: scaleX(1);
   }
 
-  /* ── Grid Background — warm amber ───────────────────── */
+  /* ── Grid Background ── */
   .bg-grid-cyber {
     background-image:
-      linear-gradient(to right,  hsla(38, 60%, 40%, 0.07) 1px, transparent 1px),
-      linear-gradient(to bottom, hsla(38, 60%, 40%, 0.07) 1px, transparent 1px);
+      linear-gradient(to right,  hsla(24, 96%, 53%, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, hsla(24, 96%, 53%, 0.04) 1px, transparent 1px);
     background-size: 48px 48px;
   }
 }
@@ -218,12 +221,12 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0C0A09;
+  background: #030712;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1F1914;
-  border-radius: 0px;
+  background: #1f2937;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #F59E0B;
+  background: #f97316;
 }

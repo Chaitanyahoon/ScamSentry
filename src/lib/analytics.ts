@@ -60,24 +60,55 @@ export async function getRecentScans(apiKeyId?: string, days: number = 7): Promi
   try {
     const since = new Date();
     since.setDate(since.getDate() - days);
+    const sinceTimestamp = Timestamp.fromDate(since);
 
-    let q = query(
-      collection(db, "scan_events"),
-      where("timestamp", ">=", Timestamp.fromDate(since)),
-      orderBy("timestamp", "desc"),
-      limit(1000),
-    );
+    let fetched: ScanEvent[] = [];
 
     if (apiKeyId) {
-      q = query(q, where("apiKeyId", "==", apiKeyId));
+      // Query only by apiKeyId (single-field query, no composite index required)
+      const q = query(
+        collection(db, "scan_events"),
+        where("apiKeyId", "==", apiKeyId),
+        limit(2000)
+      );
+      const snapshot = await getDocs(q);
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const docTimestamp = data.timestamp;
+        const tsDate = docTimestamp?.toDate ? docTimestamp.toDate() : (docTimestamp ? new Date(docTimestamp) : null);
+        if (tsDate && tsDate >= since) {
+          fetched.push({
+            id: doc.id,
+            ...data,
+            timestamp: tsDate,
+          } as ScanEvent);
+        }
+      });
+      // Sort desc by timestamp
+      fetched.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      fetched = fetched.slice(0, 1000);
+    } else {
+      // Global query by timestamp
+      const q = query(
+        collection(db, "scan_events"),
+        where("timestamp", ">=", sinceTimestamp),
+        orderBy("timestamp", "desc"),
+        limit(1000)
+      );
+      const snapshot = await getDocs(q);
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const docTimestamp = data.timestamp;
+        const tsDate = docTimestamp?.toDate ? docTimestamp.toDate() : (docTimestamp ? new Date(docTimestamp) : new Date());
+        fetched.push({
+          id: doc.id,
+          ...data,
+          timestamp: tsDate,
+        } as ScanEvent);
+      });
     }
 
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      timestamp: doc.data().timestamp.toDate(),
-    } as ScanEvent));
+    return fetched;
   } catch (error) {
     console.error("Failed to fetch recent scans:", error);
     return [];

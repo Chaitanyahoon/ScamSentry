@@ -95,9 +95,9 @@ export default function ReportsPage() {
   const totalVerifications = approvedReports.reduce((acc, curr) => acc + curr.helpfulVotes, 0)
 
   return (
-    <div className="min-h-screen bg-[#0C0A09] py-16 relative overflow-hidden font-mono">
+    <div className="min-h-screen bg-background py-16 relative overflow-hidden">
       {/* Grid Pattern Background */}
-      <div className="fixed inset-0 pointer-events-none z-0 bg-[linear-gradient(rgba(245,158,11,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(245,158,11,0.01)_1px,transparent_1px)] bg-[size:32px_32px] opacity-30" />
+      <div className="fixed inset-0 pointer-events-none z-0 bg-[linear-gradient(rgba(245,158,11,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(245,158,11,0.01)_1px,transparent_1px)] bg-[size:32px_32px] opacity-35" />
       <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[140px] pointer-events-none z-0" />
       <div className="absolute bottom-1/4 left-1/4 w-[600px] h-[600px] bg-red-500/[0.02] rounded-full blur-[160px] pointer-events-none z-0" />
 
@@ -105,35 +105,26 @@ export default function ReportsPage() {
         <div className="mx-auto">
           
           {/* Header section with HUD frame */}
-          <div className="mb-10 relative bg-[#15110E]/60 border border-[#1F1914] p-8 shadow-[0_0_30px_rgba(245,158,11,0.02)] backdrop-blur-md">
-            {/* HUD Corner notches */}
-            <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-primary" />
-            <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-primary" />
-            <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-primary" />
-            <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-primary" />
-
+          <div className="mb-10 relative bg-card/40 border border-border p-8 shadow-xl backdrop-blur-md rounded-2xl">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div>
-                <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 bg-primary/10 border border-primary/20 text-[9px] font-bold text-primary uppercase tracking-[0.25em]">
-                  <TerminalSquare className="h-3.5 w-3.5" />
-                  DATABASE_LEVEL_ACCESS_AUTHENTICATED
+                <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 bg-primary/10 border border-primary/20 text-xs font-semibold text-primary rounded-full">
+                  <ShieldAlert className="h-3.5 w-3.5" />
+                  Verified Threat Database
                 </div>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-widest uppercase mb-3">
-                  COMMUNITY <span className="text-primary">DATABASE</span>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight mb-3">
+                  Community <span className="text-primary">Reports</span>
                 </h1>
-                <p className="text-xs text-muted-foreground/80 uppercase tracking-widest leading-relaxed max-w-3xl border-l border-primary/30 pl-4">
-                  Scan, analyze, and verify decentralized threat telemetry. peer-attested evidence modules secured by cryptographic consensus mechanisms.
+                <p className="text-sm text-muted-foreground/80 leading-relaxed max-w-3xl border-l-2 border-border pl-4">
+                  Scan, analyze, and verify decentralized threat telemetry. Peer-attested evidence modules secured by community consensus mechanisms.
                 </p>
               </div>
 
               {/* Top Level Action */}
               <div className="flex shrink-0">
                 <Link href="/report" className="w-full lg:w-auto">
-                  <Button className="w-full lg:w-auto h-12 bg-primary hover:bg-primary/95 text-black font-bold uppercase tracking-widest rounded-none border border-primary hover:scale-[1.02] active:scale-[0.98] transition-all px-8 shadow-lg shadow-primary/15 relative group overflow-hidden">
-                    <span className="relative z-10 flex items-center gap-2">
-                      <Cpu className="h-4 w-4" /> SUBMIT_NEW_DOSSIER
-                    </span>
-                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-200" />
+                  <Button className="w-full lg:w-auto h-12 bg-primary hover:bg-primary/95 text-primary-foreground font-semibold rounded-xl px-8 shadow-lg shadow-primary/15 transition-all">
+                    <Cpu className="h-4 w-4 mr-2" /> Report a Scam
                   </Button>
                 </Link>
               </div>
@@ -142,130 +133,128 @@ export default function ReportsPage() {
 
           {/* Overwatch Live Stats Panel */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-[#15110E]/60 border border-[#1F1914] p-5 relative overflow-hidden backdrop-blur-sm group hover:border-primary/30 transition-all duration-300">
-              <div className="absolute top-0 left-0 w-1.5 h-full bg-primary" />
-              <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 mb-2">
-                <Database className="h-3 w-3 text-primary/70" />
-                ACTIVE_DOSSIERS
+            <div className="bg-card border border-border p-5 relative overflow-hidden backdrop-blur-sm group hover:border-primary/30 rounded-2xl transition-all duration-300">
+              <div className="absolute left-0 top-3 bottom-3 w-1 bg-primary rounded-r-md" />
+              <div className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+                <Database className="h-3.5 w-3.5 text-primary/70" />
+                Active Reports
               </div>
-              <div className="text-2xl font-black text-foreground tracking-tight">
+              <div className="text-3xl font-bold text-foreground tracking-tight">
                 {totalVerifiedDossiers.toString().padStart(3, '0')}
               </div>
-              <div className="text-[8px] text-muted-foreground/50 uppercase tracking-widest mt-1">Verified Node Telemetry</div>
+              <div className="text-[10px] text-muted-foreground/50 uppercase tracking-wider mt-1">Verified Telemetry</div>
             </div>
 
-            <div className="bg-[#15110E]/60 border border-[#1F1914] p-5 relative overflow-hidden backdrop-blur-sm group hover:border-primary/30 transition-all duration-300">
-              <div className="absolute top-0 left-0 w-1.5 h-full bg-red-500" />
-              <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 mb-2">
-                <AlertTriangle className="h-3 w-3 text-red-500/70" />
-                CRITICAL_THREATS
+            <div className="bg-card border border-border p-5 relative overflow-hidden backdrop-blur-sm group hover:border-primary/30 rounded-2xl transition-all duration-300">
+              <div className="absolute left-0 top-3 bottom-3 w-1 bg-destructive rounded-r-md" />
+              <div className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+                <AlertTriangle className="h-3.5 w-3.5 text-destructive/70" />
+                Critical Threats
               </div>
-              <div className="text-2xl font-black text-red-500 tracking-tight">
+              <div className="text-3xl font-bold text-destructive tracking-tight">
                 {criticalThreatsCount.toString().padStart(3, '0')}
               </div>
-              <div className="text-[8px] text-muted-foreground/50 uppercase tracking-widest mt-1">Immediate Containment Class</div>
+              <div className="text-[10px] text-muted-foreground/50 uppercase tracking-wider mt-1">Immediate Containment</div>
             </div>
 
-            <div className="bg-[#15110E]/60 border border-[#1F1914] p-5 relative overflow-hidden backdrop-blur-sm group hover:border-primary/30 transition-all duration-300">
-              <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-500" />
-              <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 mb-2">
-                <Network className="h-3 w-3 text-emerald-500/70" />
-                CONSENSUS_INDEX
+            <div className="bg-card border border-border p-5 relative overflow-hidden backdrop-blur-sm group hover:border-primary/30 rounded-2xl transition-all duration-300">
+              <div className="absolute left-0 top-3 bottom-3 w-1 bg-success rounded-r-md" />
+              <div className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+                <Network className="h-3.5 w-3.5 text-success/70" />
+                Consensus Index
               </div>
-              <div className="text-2xl font-black text-emerald-500 tracking-tight">
+              <div className="text-3xl font-bold text-success tracking-tight">
                 {averageTrust}%
               </div>
-              <div className="text-[8px] text-muted-foreground/50 uppercase tracking-widest mt-1">Attestation Confidence Rate</div>
+              <div className="text-[10px] text-muted-foreground/50 uppercase tracking-wider mt-1">Attestation Confidence</div>
             </div>
 
-            <div className="bg-[#15110E]/60 border border-[#1F1914] p-5 relative overflow-hidden backdrop-blur-sm group hover:border-primary/30 transition-all duration-300">
-              <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500" />
-              <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 mb-2">
-                <Radio className="h-3 w-3 text-amber-500/70" />
-                PEER_ATTESTATIONS
+            <div className="bg-card border border-border p-5 relative overflow-hidden backdrop-blur-sm group hover:border-primary/30 rounded-2xl transition-all duration-300">
+              <div className="absolute left-0 top-3 bottom-3 w-1 bg-warning rounded-r-md" />
+              <div className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+                <Radio className="h-3.5 w-3.5 text-warning/70" />
+                Peer Verifications
               </div>
-              <div className="text-2xl font-black text-foreground tracking-tight">
+              <div className="text-3xl font-bold text-foreground tracking-tight">
                 {totalVerifications.toLocaleString()}
               </div>
-              <div className="text-[8px] text-muted-foreground/50 uppercase tracking-widest mt-1">Attestation Verification Nodes</div>
+              <div className="text-[10px] text-muted-foreground/50 uppercase tracking-wider mt-1">Attestation Votes</div>
             </div>
           </div>
 
           {/* Search, Filters, and Tabs Console */}
-          <div className="mb-8 space-y-5 bg-[#15110E]/40 border border-[#1F1914] p-6 backdrop-blur-sm">
+          <div className="mb-8 space-y-5 bg-card/25 border border-border p-6 rounded-2xl backdrop-blur-sm">
             <div className="flex flex-col lg:flex-row gap-4">
               {/* Query Scanner Input */}
               <div className="relative flex-1 group">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-[9px] text-primary/70 font-black tracking-[0.25em] select-none">
-                  &gt;_SCAN_QUERY:
-                </span>
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/45" />
                 <Input
-                  placeholder="INPUT TARGET FIELD FOR REALTIME TELEMETRY SCAN..."
+                  placeholder="Search by target domain, company, or location..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-28 h-12 bg-[#0C0A09] border-[#1F1914] text-foreground font-mono text-xs uppercase tracking-widest rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 border-b-2 focus-visible:border-b-primary focus-visible:bg-[#12100E] transition-all placeholder:text-muted-foreground/20"
+                  className="pl-11 h-12 bg-background border-border text-foreground text-sm rounded-xl focus-visible:ring-primary/20 transition-all placeholder:text-muted-foreground/30"
                 />
               </div>
 
               {/* Selector Matrix */}
               <div className="flex flex-wrap sm:flex-nowrap gap-4">
                 <Select value={selectedType} onValueChange={setSelectedType}>
-                  <SelectTrigger className="w-full sm:w-[220px] h-12 bg-[#0C0A09] border-[#1F1914] text-foreground font-mono text-[10px] uppercase tracking-widest rounded-none focus:ring-1 focus:ring-primary/50 transition-colors">
-                    <Filter className="mr-2 h-4.5 w-4.5 text-primary/50 shrink-0" />
-                    <SelectValue placeholder="FILTER_BY_TYPE" />
+                  <SelectTrigger className="w-full sm:w-[220px] h-12 bg-background border-border text-foreground text-xs rounded-xl focus:ring-1 focus:ring-primary/30 transition-colors">
+                    <Filter className="mr-2 h-4 w-4 text-muted-foreground/50 shrink-0" />
+                    <SelectValue placeholder="Filter by type" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#0C0A09] border-[#1F1914] text-foreground font-mono rounded-none">
-                    <SelectItem value="all" className="uppercase tracking-widest text-[9px] focus:bg-primary/20 focus:text-primary">ALL_THREAT_VECTORS</SelectItem>
-                    <SelectItem value="Fake Job Offer" className="uppercase tracking-widest text-[9px] focus:bg-primary/20 focus:text-primary">FAKE_JOB_OFFER</SelectItem>
-                    <SelectItem value="Unpaid Work" className="uppercase tracking-widest text-[9px] focus:bg-primary/20 focus:text-primary">UNPAID_WORK</SelectItem>
-                    <SelectItem value="Portfolio Theft" className="uppercase tracking-widest text-[9px] focus:bg-primary/20 focus:text-primary">PORTFOLIO_THEFT</SelectItem>
-                    <SelectItem value="Ghost Client" className="uppercase tracking-widest text-[9px] focus:bg-primary/20 focus:text-primary">GHOST_CLIENT</SelectItem>
-                    <SelectItem value="Upfront Payment Scam" className="uppercase tracking-widest text-[9px] focus:bg-primary/20 focus:text-primary">UPFRONT_PAYMENT</SelectItem>
-                    <SelectItem value="Identity Theft" className="uppercase tracking-widest text-[9px] focus:bg-primary/20 focus:text-primary">IDENTITY_THEFT</SelectItem>
-                    <SelectItem value="Phishing Attempt" className="uppercase tracking-widest text-[9px] focus:bg-primary/20 focus:text-primary">PHISHING_ATTEMPT</SelectItem>
-                    <SelectItem value="Other" className="uppercase tracking-widest text-[9px] focus:bg-primary/20 focus:text-primary">UNKNOWN_VECTOR</SelectItem>
+                  <SelectContent className="bg-card border-border text-foreground rounded-xl">
+                    <SelectItem value="all" className="text-xs focus:bg-primary/20 focus:text-primary">All Threats</SelectItem>
+                    <SelectItem value="Fake Job Offer" className="text-xs focus:bg-primary/20 focus:text-primary">Fake Job Offer</SelectItem>
+                    <SelectItem value="Unpaid Work" className="text-xs focus:bg-primary/20 focus:text-primary">Unpaid Work</SelectItem>
+                    <SelectItem value="Portfolio Theft" className="text-xs focus:bg-primary/20 focus:text-primary">Portfolio Theft</SelectItem>
+                    <SelectItem value="Ghost Client" className="text-xs focus:bg-primary/20 focus:text-primary">Ghost Client</SelectItem>
+                    <SelectItem value="Upfront Payment Scam" className="text-xs focus:bg-primary/20 focus:text-primary">Upfront Payment</SelectItem>
+                    <SelectItem value="Identity Theft" className="text-xs focus:bg-primary/20 focus:text-primary">Identity Theft</SelectItem>
+                    <SelectItem value="Phishing Attempt" className="text-xs focus:bg-primary/20 focus:text-primary">Phishing Attempt</SelectItem>
+                    <SelectItem value="Other" className="text-xs focus:bg-primary/20 focus:text-primary">Other Vectors</SelectItem>
                   </SelectContent>
                 </Select>
 
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-full sm:w-[220px] h-12 bg-[#0C0A09] border-[#1F1914] text-foreground font-mono text-[10px] uppercase tracking-widest rounded-none focus:ring-1 focus:ring-primary/50 transition-colors">
-                    <SelectValue placeholder="SORT_ORDER" />
+                  <SelectTrigger className="w-full sm:w-[220px] h-12 bg-background border-border text-foreground text-xs rounded-xl focus:ring-1 focus:ring-primary/30 transition-colors">
+                    <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#0C0A09] border-[#1F1914] text-foreground font-mono rounded-none">
-                    <SelectItem value="recent" className="uppercase tracking-widest text-[9px] focus:bg-primary/20 focus:text-primary">MOST_RECENT</SelectItem>
-                    <SelectItem value="helpful" className="uppercase tracking-widest text-[9px] focus:bg-primary/20 focus:text-primary">HIGHEST_CONSENSUS</SelectItem>
-                    <SelectItem value="trust" className="uppercase tracking-widest text-[9px] focus:bg-primary/20 focus:text-primary">TRUST_SCORE</SelectItem>
-                    <SelectItem value="views" className="uppercase tracking-widest text-[9px] focus:bg-primary/20 focus:text-primary">MOST_VIEWED</SelectItem>
+                  <SelectContent className="bg-card border-border text-foreground rounded-xl">
+                    <SelectItem value="recent" className="text-xs focus:bg-primary/20 focus:text-primary">Most Recent</SelectItem>
+                    <SelectItem value="helpful" className="text-xs focus:bg-primary/20 focus:text-primary">Highest Consensus</SelectItem>
+                    <SelectItem value="trust" className="text-xs focus:bg-primary/20 focus:text-primary">Trust Score</SelectItem>
+                    <SelectItem value="views" className="text-xs focus:bg-primary/20 focus:text-primary">Most Viewed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             {/* Custom Tab selectors */}
-            <div className="flex flex-wrap border-b border-[#1F1914] gap-px">
+            <div className="flex flex-wrap border-b border-border gap-2 pb-px">
               <button
                 onClick={() => setActiveTab("all")}
-                className={`px-6 py-3 font-mono text-[9px] uppercase tracking-widest font-black transition-all border-b-2 ${
-                  activeTab === "all" ? "border-primary text-primary bg-primary/5" : "border-transparent text-muted-foreground hover:text-foreground hover:bg-[#15110E]"
+                className={`px-5 py-3 text-xs font-semibold transition-all border-b-2 ${
+                  activeTab === "all" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
-                GLOBAL_STREAM [{approvedReports.length}]
+                Global Stream ({approvedReports.length})
               </button>
               <button
                 onClick={() => setActiveTab("high-risk")}
-                className={`px-6 py-3 font-mono text-[9px] uppercase tracking-widest font-black transition-all border-b-2 ${
-                  activeTab === "high-risk" ? "border-red-500 text-red-500 bg-red-500/5" : "border-transparent text-muted-foreground hover:text-red-400 hover:bg-[#15110E]"
+                className={`px-5 py-3 text-xs font-semibold transition-all border-b-2 ${
+                  activeTab === "high-risk" ? "border-destructive text-destructive" : "border-transparent text-muted-foreground hover:text-destructive"
                 }`}
               >
-                CRITICAL_THREATS [{approvedReports.filter((r) => r.riskLevel === "high").length}]
+                Critical Threats ({approvedReports.filter((r) => r.riskLevel === "high").length})
               </button>
               <button
                 onClick={() => setActiveTab("recent")}
-                className={`px-6 py-3 font-mono text-[9px] uppercase tracking-widest font-black transition-all border-b-2 ${
-                  activeTab === "recent" ? "border-primary text-primary bg-primary/5" : "border-transparent text-muted-foreground hover:text-foreground hover:bg-[#15110E]"
+                className={`px-5 py-3 text-xs font-semibold transition-all border-b-2 ${
+                  activeTab === "recent" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
-                T-MINUS_24H [{approvedReports.filter((r) => new Date(r.createdAt).getTime() > Date.now() - 24 * 60 * 60 * 1000).length}]
+                Past 24 Hours ({approvedReports.filter((r) => new Date(r.createdAt).getTime() > Date.now() - 24 * 60 * 60 * 1000).length})
               </button>
             </div>
           </div>
@@ -275,37 +264,31 @@ export default function ReportsPage() {
             {sortedReports.map((report) => (
               <div 
                 key={report.id} 
-                className="group flex flex-col bg-[#15110E]/65 border border-[#1F1914] hover:border-primary/40 hover:shadow-[0_0_20px_rgba(245,158,11,0.03)] transition-all duration-300 relative rounded-sm"
+                className="group flex flex-col bg-card border border-border hover:border-primary/40 hover:shadow-lg transition-all duration-300 relative rounded-2xl overflow-hidden"
               >
-                {/* HUD Card Corner Accents */}
-                <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-primary/40 group-hover:border-primary transition-colors pointer-events-none" />
-                <div className="absolute top-0 right-0 w-1.5 h-1.5 border-t border-r border-primary/40 group-hover:border-primary transition-colors pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-1.5 h-1.5 border-b border-l border-primary/40 group-hover:border-primary transition-colors pointer-events-none" />
-                <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-primary/40 group-hover:border-primary transition-colors pointer-events-none" />
-
                 {/* Left accent vertical indicator bar */}
-                <div className={`absolute left-0 top-3 bottom-3 w-1 transition-all ${
-                  report.riskLevel === 'high' ? 'bg-red-500/80 group-hover:bg-red-500' : 'bg-primary/20 group-hover:bg-primary'
+                <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r-md transition-all ${
+                  report.riskLevel === 'high' ? 'bg-destructive/80 group-hover:bg-destructive' : 'bg-primary/20 group-hover:bg-primary'
                 }`} />
 
                 {/* Card Header Panel */}
-                <div className="pl-6 pr-4 py-4 border-b border-[#1F1914]/80 flex justify-between items-center gap-4 select-none">
+                <div className="pl-6 pr-4 py-4 border-b border-border/60 flex justify-between items-center gap-4 select-none">
                   <div className="flex items-center gap-2">
                     <span className={`h-1.5 w-1.5 rounded-full animate-pulse ${
-                      report.riskLevel === 'high' ? 'bg-red-500' : 'bg-primary'
+                      report.riskLevel === 'high' ? 'bg-destructive' : 'bg-primary'
                     }`} />
-                    <span className="text-[8px] font-bold text-muted-foreground/70 uppercase tracking-[0.25em]">
-                      DOSSIER_ID: {report.id.substring(0, 10).toUpperCase()}
+                    <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider font-mono">
+                      Report ID: {report.id.substring(0, 10).toUpperCase()}
                     </span>
                   </div>
                   
                   {/* Status Badge */}
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 border text-[8.5px] font-bold tracking-widest uppercase ${
+                  <span className={cn("inline-flex items-center gap-1 px-2.5 py-0.5 border text-[10px] font-semibold rounded-full",
                     report.riskLevel === 'high' 
-                      ? 'border-red-500/40 bg-red-500/10 text-red-500' 
+                      ? 'border-destructive/20 bg-destructive/10 text-destructive' 
                       : 'border-primary/20 bg-primary/5 text-primary'
-                  }`}>
-                    {report.riskLevel === 'high' ? '[ CRITICAL_RISK ]' : `[ ${report.riskLevel.toUpperCase()}_RISK ]`}
+                  )}>
+                    {report.riskLevel === 'high' ? 'Critical Risk' : `${report.riskLevel} Risk`}
                   </span>
                 </div>
 
@@ -313,67 +296,67 @@ export default function ReportsPage() {
                 <div className="p-6 flex-1 flex flex-col justify-between pl-8">
                   <div>
                     {/* Title */}
-                    <Link href={`/reports/${report.id}`} className="hover:text-primary transition-colors inline-block w-full mb-3 group-hover:translate-x-0.5 transition-transform duration-200">
-                      <h2 className="text-sm font-black text-foreground uppercase tracking-wider leading-snug line-clamp-1 border-b border-transparent group-hover:border-primary/20 pb-0.5">
+                    <Link href={`/reports/${report.id}`} className="hover:text-primary transition-colors inline-block w-full mb-3">
+                      <h2 className="text-sm font-bold text-foreground capitalize tracking-wide leading-snug line-clamp-1">
                         {report.title}
                       </h2>
                     </Link>
 
                     {/* Description Snippet */}
-                    <p className="text-[11px] text-muted-foreground/80 font-mono leading-relaxed line-clamp-3 mb-6 border-l border-[#1F1914] pl-3 whitespace-pre-wrap">
+                    <p className="text-xs text-muted-foreground/90 leading-relaxed line-clamp-3 mb-6 border-l-2 border-border pl-3 whitespace-pre-wrap">
                       {report.description}
                     </p>
                   </div>
 
                   {/* High Tech Mini Data Grid */}
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3 text-[9px] text-muted-foreground font-mono uppercase tracking-widest select-none bg-[#0C0A09]/60 p-3 border border-[#1F1914]">
+                    <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground p-3 border border-border rounded-xl bg-background/50">
                       <div className="flex items-center gap-1.5 truncate">
-                        <MapPin className="h-3 w-3 text-primary/70 shrink-0" />
-                        <span className="text-foreground truncate">{report.company || "OSINT"} ({report.location || "GLOBAL"})</span>
+                        <Building className="h-3.5 w-3.5 text-primary/70 shrink-0" />
+                        <span className="text-foreground/80 truncate font-semibold">{report.company || "General"}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <Clock className="h-3 w-3 text-primary/70 shrink-0" />
-                        <span className="text-foreground">T-{new Date(report.createdAt).toISOString().split('T')[0]}</span>
+                        <Clock className="h-3.5 w-3.5 text-primary/70 shrink-0" />
+                        <span className="text-foreground/80">{new Date(report.createdAt).toLocaleDateString()}</span>
                       </div>
                       <div className="flex items-center gap-1.5 truncate">
-                        <ShieldAlert className="h-3 w-3 text-primary/70 shrink-0" />
-                        <span className="text-foreground truncate">{report.scamType}</span>
+                        <ShieldAlert className="h-3.5 w-3.5 text-primary/70 shrink-0" />
+                        <span className="text-foreground/80 truncate">{report.scamType}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <Eye className="h-3 w-3 text-primary/70 shrink-0" />
-                        <span className="text-foreground">{report.views} READS</span>
+                        <Eye className="h-3.5 w-3.5 text-primary/70 shrink-0" />
+                        <span className="text-foreground/80 font-mono">{report.views} Reads</span>
                       </div>
                     </div>
 
                     {/* Actions Panel inside Card */}
-                    <div className="flex items-center justify-between gap-3 border-t border-[#1F1914] pt-4 select-none">
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 select-none">
                       <div className="flex items-center gap-2">
                         <Button
                           variant="outline"
-                          className="h-8 text-[9px] font-bold uppercase tracking-widest rounded-none border-[#1F1914] hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:text-emerald-500 transition-all disabled:opacity-50"
+                          className="h-8 text-[10px] font-bold uppercase tracking-widest rounded-xl border-border hover:bg-success/15 hover:border-success/35 hover:text-success transition-all"
                           onClick={() => handleHelpfulVote(report.id)}
                           disabled={votedReports.has(report.id)}
                         >
                           <ThumbsUp className="h-3 w-3 mr-1.5" />
-                          {votedReports.has(report.id) ? "VERIFIED" : "VERIFY"} [{report.helpfulVotes}]
+                          {votedReports.has(report.id) ? "Verified" : "Verify"} ({report.helpfulVotes})
                         </Button>
                         
                         <Button
                           variant="ghost"
-                          className="h-8 text-[8.5px] font-bold uppercase tracking-widest text-muted-foreground/40 hover:text-red-500 hover:bg-red-500/10 rounded-none transition-all"
+                          className="h-8 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all"
                           onClick={() => handleFlag(report.id)}
                           disabled={flaggedReportsLocal.has(report.id)}
                         >
-                          FLAG
+                          Flag
                         </Button>
                       </div>
 
                       <Link href={`/reports/${report.id}`}>
                         <Button 
-                          className="h-8 text-[9px] font-bold uppercase tracking-widest rounded-none border border-primary/50 text-primary bg-primary/5 hover:bg-primary hover:text-black transition-all"
+                          className="h-8 text-[10px] font-bold uppercase tracking-widest rounded-xl border border-primary/30 text-primary bg-primary/5 hover:bg-primary hover:text-primary-foreground transition-all"
                         >
-                          DECRYPT_DOSSIER &gt;&gt;
+                          Read dossier
                         </Button>
                       </Link>
                     </div>
@@ -386,13 +369,13 @@ export default function ReportsPage() {
 
           {/* Empty query result matrix fall back */}
           {sortedReports.length === 0 && (
-            <div className="border border-[#1F1914] p-16 text-center bg-[#15110E]/60 relative overflow-hidden backdrop-blur-sm rounded-sm">
-              <TerminalSquare className="h-12 w-12 text-muted-foreground/30 mx-auto mb-6 animate-pulse" />
-              <h3 className="text-sm font-mono font-bold uppercase tracking-widest text-foreground mb-2">
-                [ ERROR_404: NO_TELEMETRY_FOUND ]
+            <div className="border border-border p-16 text-center bg-card/40 rounded-2xl backdrop-blur-sm">
+              <ShieldAlert className="h-12 w-12 text-muted-foreground/45 mx-auto mb-4 animate-pulse" />
+              <h3 className="text-sm font-bold uppercase tracking-widest text-foreground mb-2">
+                No telemetry found
               </h3>
-              <p className="text-xs font-mono text-muted-foreground/70 uppercase tracking-widest max-w-md mx-auto leading-relaxed">
-                The current matrix query yielded zero matching logs. Adjust query search inputs or category filter options.
+              <p className="text-xs text-muted-foreground/70 uppercase tracking-widest max-w-md mx-auto leading-relaxed">
+                The current query yielded zero matching logs. Adjust query search inputs or category filter options.
               </p>
               <Button
                 variant="outline"
@@ -402,9 +385,9 @@ export default function ReportsPage() {
                   setSelectedIndustry("all")
                   setSortBy("recent")
                 }}
-                className="mt-8 rounded-none border-primary/50 text-primary hover:bg-primary hover:text-black font-mono text-[9px] font-bold uppercase tracking-widest h-10 px-8 transition-all"
+                className="mt-6 rounded-xl border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground text-xs font-bold px-8 transition-all"
               >
-                RESET_QUERY_MATRIX
+                Reset Filters
               </Button>
             </div>
           )}

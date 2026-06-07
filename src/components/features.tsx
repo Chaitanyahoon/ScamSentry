@@ -50,7 +50,7 @@ export function Features() {
   ];
 
   return (
-    <section className="relative py-28 sm:py-36 bg-[#0C0A09] border-b border-[#1F1914] overflow-hidden">
+    <section className="relative py-28 sm:py-36 bg-background border-b border-border overflow-hidden">
       {/* Dynamic Background Elements */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/3 rounded-full blur-[100px] pointer-events-none" />
@@ -79,9 +79,9 @@ export function Features() {
               <div
                 key={item.step}
                 className={cn(
-                  "group relative p-6 sm:p-8 rounded-2xl border border-[#1F1914] bg-[#12100D] transition-all duration-300 hover:border-primary/30 hover:bg-[#15110E] hover:translate-x-1",
+                  "glass-card group relative p-6 sm:p-8 rounded-2xl transition-all duration-300 hover:translate-x-1",
                   mounted ? "animate-fade-in" : "opacity-0",
-                  item.active && "border-primary/20 bg-primary/[0.02]"
+                  item.active && "border-primary/35 bg-primary/[0.03] shadow-[0_0_15px_rgba(249,115,22,0.08)]"
                 )}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
@@ -89,14 +89,14 @@ export function Features() {
                   {/* Layer Marker */}
                   <div className="flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-4 shrink-0 sm:w-24">
                     <span className={cn(
-                      "text-xs font-mono font-bold tracking-widest",
+                       "text-xs font-mono font-bold tracking-widest",
                       item.active ? "text-primary" : "text-muted-foreground/50"
                     )}>
                       {item.step}
                     </span>
                     <div className={cn(
                       "px-2 py-0.5 rounded text-[8px] font-mono uppercase tracking-tighter border",
-                      item.active ? "bg-primary/10 border-primary/30 text-primary" : "border-[#1F1914] text-muted-foreground/30"
+                      item.active ? "bg-primary/10 border-primary/30 text-primary" : "border-border text-muted-foreground/30"
                     )}>
                       {item.tag}
                     </div>

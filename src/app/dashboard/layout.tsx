@@ -42,8 +42,8 @@ export default function DashboardLayout({
           {/* Logo */}
           <div className="p-6 border-b border-[#1F1914]">
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="bg-primary/20 p-2 rounded border border-primary/30 group-hover:border-primary/60 transition-colors">
-                <Shield className="h-6 w-6 text-primary" />
+              <div className="bg-primary/20 p-1 rounded border border-primary/30 group-hover:border-primary/60 transition-colors w-10 h-10 flex items-center justify-center">
+                <img src="/logo-icon.png" alt="ScamSentry" className="h-7 w-7 object-contain" />
               </div>
               <span className="font-mono font-bold text-lg tracking-tighter text-foreground">
                 SCAM<span className="text-primary">SENTRY</span>

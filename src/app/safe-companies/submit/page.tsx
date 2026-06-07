@@ -3,7 +3,8 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Building, Send, Loader2, Tag, Terminal } from "lucide-react"
+import { Building, Send, Loader2, Tag, ShieldCheck, ArrowLeft } from "lucide-react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -60,8 +61,8 @@ export default function SubmitSafeCompanyPage() {
 
     if (Number.parseInt(userCaptchaInput) !== captchaAnswer) {
       toast({
-        title: "SYS_ERR: CAPTCHA_MISMATCH",
-        description: "HANDSHAKE FAILED. INVALID MATHEMATICAL PROOF.",
+        title: "Verification Failed",
+        description: "Please solve the arithmetic check correctly to submit.",
         variant: "destructive",
       })
       generateCaptcha() 
@@ -71,8 +72,8 @@ export default function SubmitSafeCompanyPage() {
 
     if (!formData.name || !formData.industry || !formData.description) {
       toast({
-        title: "SYS_ERR: MISSING_PARAMETERS",
-        description: "REQUIRED METADATA MISSING FROM PAYLOAD.",
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
         variant: "destructive",
       })
       setIsSubmitting(false)
@@ -92,8 +93,8 @@ export default function SubmitSafeCompanyPage() {
       })
 
       toast({
-        title: "SUCCESS: PAYLOAD_RECEIVED",
-        description: "NODE DATA SUBMITTED TO QUARANTINE FOR ADMIN REVIEW.",
+        title: "Submission Received",
+        description: "The company has been submitted and is awaiting administrator review.",
       })
 
       setFormData({
@@ -109,8 +110,8 @@ export default function SubmitSafeCompanyPage() {
     } catch (error) {
       console.error("Unexpected error during submission:", error)
       toast({
-        title: "SYS_ERR: KERNEL_PANIC",
-        description: "UNABLE TO WRITE TO MAINFRAME DB.",
+        title: "Submission Error",
+        description: "Unable to save your submission. Please try again later.",
         variant: "destructive",
       })
     } finally {
@@ -124,150 +125,169 @@ export default function SubmitSafeCompanyPage() {
 
   return (
     <div className="min-h-screen bg-background py-16 relative overflow-hidden">
-      <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.2]" />
+      {/* Soft Decorative Background */}
+      <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.05]" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-success/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-2xl">
+          {/* Back button */}
+          <Link 
+            href="/safe-companies" 
+            className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground mb-8 transition-colors gap-1.5"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Back to Safe Companies
+          </Link>
+
           <div className="text-center mb-10">
-            <div className="flex items-center justify-center mb-6">
-              <div className="flex h-16 w-16 items-center justify-center border border-success/50 bg-success/10 shadow-[0_0_15px_hsla(var(--success),0.3)]">
-                <Building className="h-8 w-8 text-success drop-shadow-[0_0_8px_currentColor]" />
+            <div className="flex items-center justify-center mb-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-success/20 bg-success/10 text-success">
+                <Building className="h-6 w-6" />
               </div>
             </div>
-            <h1 className="text-3xl font-extrabold tracking-widest uppercase text-foreground sm:text-4xl drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
-              PROPOSE <span className="text-success drop-shadow-[0_0_10px_hsla(var(--success),0.5)]">WHITELIST_NODE</span>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              Propose a <span className="text-success">Safe Company</span>
             </h1>
-            <p className="mt-4 text-xs font-mono tracking-widest uppercase text-muted-foreground">
-              SUBMIT A LEGITIMATE ORGANIZATION FOR PEER-REVIEW INTO THE SYSTEM LEDGER.
+            <p className="mt-3 text-sm text-muted-foreground max-w-md mx-auto">
+              Recommend a trustworthy company or client with a track record of fair practices and reliable payments.
             </p>
           </div>
 
-          <div className="glass-strong mb-10 overflow-hidden rounded-none shadow-[0_0_20px_hsla(var(--border),0.5)] border-t-2 border-t-success">
-            <div className="bg-card/80 border-b border-border p-4">
-              <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground tracking-widest uppercase font-mono">
-                <Terminal className="h-4 w-4 text-success" /> NEW_NODE_REGISTRATION
-              </div>
+          <div className="bg-card border border-border rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div className="border-b border-border bg-muted/30 px-6 py-4">
+              <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <ShieldCheck className="h-4.5 w-4.5 text-success" /> Company Registration Details
+              </h2>
             </div>
             
-            <div className="p-6 bg-background/50">
-              <form onSubmit={handleSubmit} className="space-y-6 font-mono">
-                <div>
-                  <Label htmlFor="name" className="text-xs font-bold tracking-widest uppercase text-foreground mb-2 block">
-                    TARGET_ORG_NAME <span className="text-success">*</span>
+            <div className="p-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-xs font-semibold text-foreground">
+                    Company Name <span className="text-success">*</span>
                   </Label>
                   <Input
                     id="name"
-                    placeholder="ENTER DESIGNATION..."
+                    placeholder="e.g. Acme Corporation"
                     value={formData.name}
                     onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                     required
                     disabled={isSubmitting}
-                    className="bg-card border-border rounded-none tracking-widest text-xs h-12 focus-visible:ring-success focus-visible:border-success"
+                    className="bg-background border-border rounded-xl h-11 focus-visible:ring-success/50 focus-visible:border-success"
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="industry" className="text-xs font-bold tracking-widest uppercase text-foreground mb-2 block">
-                    SECTOR_CLASSIFICATION <span className="text-success">*</span>
+                <div className="space-y-2">
+                  <Label htmlFor="industry" className="text-xs font-semibold text-foreground">
+                    Industry / Sector <span className="text-success">*</span>
                   </Label>
                   <Input
                     id="industry"
-                    placeholder="E.G. DEVELOPMENT, DESIGN, MARKETING..."
+                    placeholder="e.g. Software Development, Marketing, Retail"
                     value={formData.industry}
                     onChange={(e) => setFormData((prev) => ({ ...prev, industry: e.target.value }))}
                     required
                     disabled={isSubmitting}
-                    className="bg-card border-border rounded-none tracking-widest text-xs h-12 focus-visible:ring-success focus-visible:border-success"
+                    className="bg-background border-border rounded-xl h-11 focus-visible:ring-success/50 focus-visible:border-success"
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="website" className="text-xs font-bold tracking-widest uppercase text-foreground mb-2 block">
-                    ROOT_DOMAIN_URL <span className="text-muted-foreground font-normal">(OPTIONAL)</span>
+                <div className="space-y-2">
+                  <Label htmlFor="website" className="text-xs font-semibold text-foreground">
+                    Website URL <span className="text-muted-foreground font-normal">(Optional)</span>
                   </Label>
                   <Input
                     id="website"
                     type="url"
-                    placeholder="https://..."
+                    placeholder="https://example.com"
                     value={formData.website}
                     onChange={(e) => setFormData((prev) => ({ ...prev, website: e.target.value }))}
                     disabled={isSubmitting}
-                    className="bg-card border-border rounded-none tracking-widest text-xs h-12 focus-visible:ring-success focus-visible:border-success"
+                    className="bg-background border-border rounded-xl h-11 focus-visible:ring-success/50 focus-visible:border-success"
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="description" className="text-xs font-bold tracking-widest uppercase text-foreground mb-2 block">
-                    TRUST_HEURISTIC_EVIDENCE <span className="text-success">*</span>
+                <div className="space-y-2">
+                  <Label htmlFor="description" className="text-xs font-semibold text-foreground">
+                    Why is this company safe? <span className="text-success">*</span>
                   </Label>
                   <Textarea
                     id="description"
-                    placeholder="PROVIDE LOGICAL PROOF FOR TRUST STATUS..."
+                    placeholder="Describe their payment reliability, communication style, or other details showing they are trustworthy."
                     value={formData.description}
                     onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                    rows={5}
+                    rows={4}
                     required
                     disabled={isSubmitting}
-                    className="bg-card border-border rounded-none tracking-widest text-xs focus-visible:ring-success focus-visible:border-success resize-y"
+                    className="bg-background border-border rounded-xl focus-visible:ring-success/50 focus-visible:border-success resize-y py-3"
                   />
                 </div>
 
-                <div>
-                  <Label className="flex items-center mb-3 text-xs font-bold tracking-widest uppercase text-foreground">
-                    <Tag className="mr-2 h-4 w-4 text-success" />
-                    SELECT_TAG_VECTORS
+                <div className="space-y-3">
+                  <Label className="flex items-center text-xs font-semibold text-foreground">
+                    <Tag className="mr-1.5 h-4 w-4 text-success" />
+                    Select Relevant Tags
                   </Label>
                   <div className="flex flex-wrap gap-2">
-                    {commonTags.map((tag) => (
-                      <Badge
-                        key={tag}
-                        variant={selectedTags.includes(tag) ? "default" : "outline"}
-                        className={`cursor-pointer rounded-none border text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 transition-all ${
-                          selectedTags.includes(tag) 
-                            ? "bg-success/20 text-success border-success shadow-[0_0_5px_hsla(var(--success),0.5)]" 
-                            : "bg-card border-border text-muted-foreground hover:border-success/50 hover:bg-success/10"
-                        }`}
-                        onClick={() => !isSubmitting && toggleTag(tag)}
-                      >
-                        #{tag}
-                      </Badge>
-                    ))}
+                    {commonTags.map((tag) => {
+                      const isSelected = selectedTags.includes(tag)
+                      return (
+                        <Badge
+                          key={tag}
+                          variant={isSelected ? "default" : "outline"}
+                          className={`cursor-pointer rounded-full border text-[11px] font-medium px-3 py-1 transition-all ${
+                            isSelected 
+                              ? "bg-success/10 text-success border-success/45 hover:bg-success/20" 
+                              : "bg-background border-border text-muted-foreground hover:border-success/30 hover:bg-success/5"
+                          }`}
+                          onClick={() => !isSubmitting && toggleTag(tag)}
+                        >
+                          {tag.replace("-", " ")}
+                        </Badge>
+                      )
+                    })}
                   </div>
                 </div>
 
-                <div className="bg-success/5 border border-success/30 p-4 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-1 h-full bg-success"></div>
-                  <Label htmlFor="captcha" className="text-xs font-bold tracking-widest uppercase text-success mb-3 block drop-shadow-[0_0_5px_currentColor]">
-                    ANTI_BOT_PROTCOL: SOLVE [ {captchaQuestion} ] <span className="text-foreground">*</span>
+                <div className="bg-success/5 border border-success/10 rounded-xl p-4 space-y-3">
+                  <Label htmlFor="captcha" className="text-xs font-semibold text-success block">
+                    Security Verification: Solve the problem <span className="text-foreground">*</span>
                   </Label>
-                  <Input
-                    id="captcha"
-                    type="number"
-                    placeholder="EVALUATE..."
-                    value={userCaptchaInput}
-                    onChange={(e) => setUserCaptchaInput(e.target.value)}
-                    required
-                    disabled={isSubmitting}
-                    className="bg-black/50 border-success/50 text-success rounded-none tracking-widest font-bold text-lg h-12 focus-visible:ring-success focus-visible:border-success w-full sm:w-1/3"
-                  />
+                  <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                    <div className="bg-background border border-border px-4 py-2.5 rounded-xl text-foreground font-mono font-semibold text-sm">
+                      {captchaQuestion}
+                    </div>
+                    <Input
+                      id="captcha"
+                      type="number"
+                      placeholder="Answer"
+                      value={userCaptchaInput}
+                      onChange={(e) => setUserCaptchaInput(e.target.value)}
+                      required
+                      disabled={isSubmitting}
+                      className="bg-background border-border rounded-xl text-center font-bold text-sm h-10 w-full sm:w-28 focus-visible:ring-success/50 focus-visible:border-success"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex justify-end pt-4 border-t border-border">
                   <Button 
                     type="submit" 
                     size="lg" 
-                    className="w-full sm:w-auto rounded-none font-bold uppercase tracking-widest bg-success text-black hover:bg-success/80 border border-transparent hover:border-success hover:shadow-[0_0_15px_hsla(var(--success),0.5)] transition-all h-12" 
+                    className="w-full sm:w-auto rounded-xl font-medium bg-success text-white hover:bg-success/90 h-11 px-6 shadow-md shadow-success/10 transition-all" 
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        UPLOADING...
+                        Submitting...
                       </>
                     ) : (
                       <>
                         <Send className="mr-2 h-4 w-4" />
-                        TRANSMIT_PAYLOAD
+                        Submit Company
                       </>
                     )}
                   </Button>
@@ -276,24 +296,24 @@ export default function SubmitSafeCompanyPage() {
             </div>
           </div>
 
-          <div className="glass-card bg-card/50 border border-border p-6 shadow-[0_0_15px_rgba(0,0,0,0.5)]">
-            <h3 className="text-sm font-bold text-foreground mb-4 uppercase tracking-widest border-b border-border pb-2 flex items-center gap-2">
-              <Terminal className="h-4 w-4 text-muted-foreground" /> SYSTEM_GUIDELINES
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+            <h3 className="text-xs font-semibold text-foreground mb-4 uppercase tracking-wider flex items-center gap-2">
+              Submission Guidelines
             </h3>
-            <div className="space-y-3 text-[10px] font-mono tracking-widest text-muted-foreground leading-relaxed">
-              <p className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">{'>'}</span> 
-                <strong>PRECISE_DATA:</strong> ONLY UPLOAD VERIFIABLE METADATA REGARDING ORG STRUCTURE.
-              </p>
-              <p className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">{'>'}</span> 
-                <strong>NO_SELF_PROMOTION:</strong> CONFLICTS OF INTEREST WILL TRIGGER AUTO-DELETION PROTOCOLS.
-              </p>
-              <p className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">{'>'}</span> 
-                <strong>MODERATOR_OVERSIGHT:</strong> ALL UPLOADS MUST CLEAR HUMAN SYS-ADMIN AUDITING BEFORE LEDGER INCLUSION.
-              </p>
-            </div>
+            <ul className="space-y-2.5 text-xs text-muted-foreground">
+              <li className="flex items-start gap-2">
+                <span className="text-success font-bold">•</span> 
+                <strong>Accurate Information:</strong> Only submit verified and real company details and website URLs.
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-success font-bold">•</span> 
+                <strong>No Self-Promotion:</strong> Submissions created to artificially boost your own rating will be removed.
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-success font-bold">•</span> 
+                <strong>Moderator Oversight:</strong> Submissions must pass administrative audit before appearing on the public ledger.
+              </li>
+            </ul>
           </div>
         </div>
       </div>
