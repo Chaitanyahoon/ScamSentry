@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ScamSentry Shield Configuration</title>
+  <style>
+    :root {
+      --primary: #FFBF00;
+      --bg: #0C0A09;
+      --card: #120F0D;
+      --text: #F5F5F4;
+      --muted: #A8A29E;
+      --border: #1F1914;
+      --red: #FF4D4D;
+      --success: #10B981;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      width: 480px;
+      padding: 30px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 1px 1px var(--border);
+      position: relative;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 25px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-box {
+      background-color: rgba(255, 191, 0, 0.1);
+      border: 1px solid rgba(255, 191, 0, 0.3);
+      padding: 8px;
+      border-radius: 6px;
+    }
+
+    .logo-icon {
+      width: 20px;
+      height: 20px;
+      background-color: var(--primary);
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    }
+
+    h1 {
+      font-size: 14px;
+      font-family: monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      margin: 0;
+      color: var(--primary);
+    }
+
+    .subtitle {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 4px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 10px;
+      font-family: monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      font-family: monospace;
+      font-size: 11px;
+      border-radius: 6px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(255, 191, 0, 0.1);
+    }
+
+    .help-text {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .btn-group {
+      margin-top: 30px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      font-family: monospace;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--bg);
+      border: none;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 0 15px rgba(255, 191, 0, 0.25);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      color: var(--text);
+      border-color: var(--muted);
+    }
+
+    .status-msg {
+      margin-top: 15px;
+      padding: 10px 14px;
+      font-size: 11px;
+      border-radius: 6px;
+      display: none;
+      font-family: monospace;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .status-msg.success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--success);
+      display: block;
+    }
+
+    .status-msg.error {
+      background: rgba(255, 77, 77, 0.1);
+      border: 1px solid rgba(255, 77, 77, 0.3);
+      color: var(--red);
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo-box">
+        <div class="logo-icon"></div>
+      </div>
+      <div>
+        <h1>ScamSentry Configuration</h1>
+        <div class="subtitle">System Parameters protocols</div>
+      </div>
+    </header>
+
+    <div class="form-group">
+      <label for="api-url">API Base URL</label>
+      <input type="text" id="api-url" placeholder="https://your-domain.vercel.app/api/v1">
+      <div class="help-text">
+        The base endpoint pointing to your Vercel Next.js api routes proxy.
+        Default: <code>https://scamsentry.vercel.app/api/v1</code>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="dashboard-url">Dashboard URL</label>
+      <input type="text" id="dashboard-url" placeholder="https://your-domain.vercel.app/dashboard">
+      <div class="help-text">
+        The target URL opened when clicking "Open Forensic Dashboard".
+        Default: <code>https://scamsentry.vercel.app/dashboard</code>
+      </div>
+    </div>
+
+    <div id="status" class="status-msg"></div>
+
+    <div class="btn-group">
+      <button class="btn btn-secondary" id="reset-btn">Reset Defaults</button>
+      <button class="btn btn-primary" id="save-btn">Save Settings</button>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

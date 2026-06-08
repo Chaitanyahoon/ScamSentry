@@ -5,7 +5,7 @@
  * Implements local caching to reduce API load and improve latency.
  */
 
-const API_BASE_URL = 'https://scamsentry.vercel.app/api/v1';
+const DEFAULT_API_URL = 'https://scamsentry.vercel.app/api/v1';
 const CACHE_TTL = 3600 * 1000; // 1 hour
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -17,6 +17,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 async function handleUrlCheck(url) {
   try {
+    // Retrieve dynamic API Base URL
+    const settings = await chrome.storage.local.get('api_base_url');
+    const apiBaseUrl = settings.api_base_url || DEFAULT_API_URL;
+
     // 1. Check local cache
     const cacheKey = `ss_cache_${btoa(url).substring(0, 32)}`;
     const cached = await chrome.storage.local.get(cacheKey);
@@ -37,7 +41,7 @@ async function handleUrlCheck(url) {
       domain = url; // Fallback
     }
 
-    const response = await fetch(`${API_BASE_URL}/verify?domain=${encodeURIComponent(domain)}`, {
+    const response = await fetch(`${apiBaseUrl}/verify?domain=${encodeURIComponent(domain)}`, {
       headers: {
         'x-api-key': 'ss_ext_public_v1'
       }
@@ -48,7 +52,7 @@ async function handleUrlCheck(url) {
     if (!response.ok) {
         // Fallback: Perform a POST validate query
         console.log(`[ScamSentry] Fallback triggered to validate URL: ${url}`);
-        const fallbackResponse = await fetch(`${API_BASE_URL}/validate`, {
+        const fallbackResponse = await fetch(`${apiBaseUrl}/validate`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
