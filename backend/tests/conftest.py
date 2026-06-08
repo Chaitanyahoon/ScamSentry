@@ -63,7 +63,8 @@ def override_db(db):
 async def mock_redis():
     """Mock Redis client using fakeredis."""
     # Use FakeAsyncRedis to support async await connection/calls in app code.
-    fake_client = fakeredis.FakeAsyncRedis(decode_responses=True)
+    # Set protocol=2 to prevent the redis client from attempting RESP3 HELLO handshakes.
+    fake_client = fakeredis.FakeAsyncRedis(decode_responses=True, protocol=2)
 
     with patch("redis.asyncio.from_url", return_value=fake_client), \
          patch("app.services.cache._client", fake_client), \
