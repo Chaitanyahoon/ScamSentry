@@ -62,6 +62,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 4. Action handlers
   dashboardBtn.addEventListener('click', () => {
-    chrome.tabs.create({ url: 'https://scamsentry.vercel.app/dashboard' });
+    chrome.storage.local.get('dashboard_url', (settings) => {
+      const targetUrl = settings.dashboard_url || 'https://scamsentry.vercel.app/dashboard';
+      chrome.tabs.create({ url: targetUrl });
+    });
   });
 });
