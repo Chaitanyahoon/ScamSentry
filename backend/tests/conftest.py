@@ -59,8 +59,8 @@ def override_db(db):
     app.dependency_overrides.pop(get_db, None)
 
 
-@pytest.fixture(autouse=True)
-def mock_redis():
+@pytest_asyncio.fixture(autouse=True)
+async def mock_redis():
     """Mock Redis client using fakeredis."""
     # Use FakeAsyncRedis to support async await connection/calls in app code.
     fake_client = fakeredis.FakeAsyncRedis(decode_responses=True)
@@ -69,6 +69,8 @@ def mock_redis():
          patch("app.services.cache._client", fake_client), \
          patch("app.middleware.rate_limit.RateLimitMiddleware._get_redis", return_value=fake_client):
         yield fake_client
+        await fake_client.aclose()
+
 
 
 @pytest_asyncio.fixture
