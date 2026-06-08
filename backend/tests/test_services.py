@@ -270,6 +270,7 @@ def test_assemble_db_url() -> None:
     res4 = Settings.assemble_db_url("sqlite:///:memory:")
     assert res4 == "sqlite:///:memory:"
 
-# CI trigger comment
+# CI trigger comment 2
+
 
 
