@@ -50,17 +50,62 @@ export function ForensicGlobe({ reports: propReports }: ForensicGlobeProps) {
   // Generate Arcs for "Attack Vectors"
   const arcs = useMemo(() => {
     const attackSources = [
-      { lat: 55.7558, lng: 37.6173, name: "Eastern Node" }, // Moscow
-      { lat: 39.9042, lng: 116.4074, name: "Asian Hub" }, // Beijing
-      { lat: 19.0760, lng: 72.8777, name: "South Asian Vector" }, // Mumbai
-      { lat: -23.5505, lng: -46.6333, name: "LatAm Proxy" }, // Sao Paulo
-      { lat: 51.5074, lng: -0.1278, name: "Euro Gateway" }, // London
+      { lat: 55.7558, lng: 37.6173, name: "Eastern Node (Moscow)" },
+      { lat: 39.9042, lng: 116.4074, name: "Asian Hub (Beijing)" },
+      { lat: 19.0760, lng: 72.8777, name: "South Asian Vector (Mumbai)" },
+      { lat: -23.5505, lng: -46.6333, name: "LatAm Proxy (Sao Paulo)" },
+      { lat: 51.5074, lng: -0.1278, name: "Euro Gateway (London)" },
+      { lat: 34.0522, lng: -118.2437, name: "West Coast Relay (Los Angeles)" },
     ]
 
-    return scans.slice(0, 20).map((scan, idx) => {
+    const targetNodes = [
+      { lat: 37.7749, lng: -122.4194, name: "San Francisco Node" },
+      { lat: 51.5074, lng: -0.1278, name: "London Node" },
+      { lat: 35.6762, lng: 139.6503, name: "Tokyo Node" },
+      { lat: -33.8688, lng: 151.2093, name: "Sydney Node" },
+      { lat: 1.3521, lng: 103.8198, name: "Singapore Node" },
+      { lat: 52.5200, lng: 13.4050, name: "Berlin Node" },
+      { lat: 28.6139, lng: 77.2090, name: "New Delhi Node" },
+      { lat: -23.5505, lng: -46.6333, name: "Sao Paulo Node" },
+      { lat: 30.0444, lng: 31.2357, name: "Cairo Node" },
+      { lat: -26.2041, lng: 28.0473, name: "Johannesburg Node" },
+      { lat: 45.4215, lng: -75.6972, name: "Ottawa Node" },
+      { lat: 35.9078, lng: 127.7669, name: "Seoul Node" }
+    ]
+
+    const getDeterministicTarget = (url: string) => {
+      // 1. Try to find a matching report first
+      const normalizedUrl = url.toLowerCase()
+      const matchingReport = reports.find(r => 
+        r.lat && r.lng && 
+        (normalizedUrl.includes(r.company.toLowerCase()) || 
+         r.title.toLowerCase().includes(normalizedUrl) || 
+         (r.description && r.description.toLowerCase().includes(normalizedUrl)))
+      )
+      if (matchingReport && matchingReport.lat && matchingReport.lng) {
+        return { 
+          lat: matchingReport.lat, 
+          lng: matchingReport.lng, 
+          name: `${matchingReport.city || "Target Node"} (Verified Intel)` 
+        }
+      }
+
+      // 2. Fall back to deterministic hashing of the URL
+      let hash = 0
+      for (let i = 0; i < url.length; i++) {
+        hash = url.charCodeAt(i) + ((hash << 5) - hash)
+      }
+      const idx = Math.abs(hash) % targetNodes.length
+      return targetNodes[idx]
+    }
+
+    return scans.slice(0, 30).map((scan, idx) => {
       const source = attackSources[idx % attackSources.length]
-      const targetLat = 39.8283 + (Math.random() - 0.5) * 20
-      const targetLng = -98.5795 + (Math.random() - 0.5) * 40
+      const target = getDeterministicTarget(scan.url)
+
+      // Add a tiny random jitter to make duplicate urls distinct
+      const targetLat = target.lat + (Math.random() - 0.5) * 1.5
+      const targetLng = target.lng + (Math.random() - 0.5) * 1.5
 
       return {
         startLat: source.lat,
@@ -68,10 +113,10 @@ export function ForensicGlobe({ reports: propReports }: ForensicGlobeProps) {
         endLat: targetLat,
         endLng: targetLng,
         color: scan.riskLevel === "Critical Threat" ? "#FF4D4D" : "#FFBF00",
-        name: `Threat Vector: ${scan.url}`
+        name: `Scan Target: ${scan.url} -> ${target.name}`
       }
     })
-  }, [scans])
+  }, [scans, reports])
 
   // Points for "Forensic Intel"
   const points = useMemo(() => {

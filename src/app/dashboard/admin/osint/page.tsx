@@ -45,11 +45,18 @@ export default function OSINTPage() {
 
   const fetchThreats = async () => {
     try {
-      const response = await fetch('/api/admin/sync/osint', { method: 'GET' });
-      // Note: We need a GET route to fetch threats. I'll implement it or use a default mock for UI design.
-      // For now, I'll mock the data if the API is restricted to POST.
-      setLoading(false);
+      const token = sessionStorage.getItem("admin_token");
+      const response = await fetch("/api/admin/sync/osint", {
+        method: "GET",
+        headers: token ? { "Authorization": `Bearer ${token}` } : {},
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setThreats(data || []);
+      }
     } catch (e) {
+      console.error("Failed to fetch threats:", e);
+    } finally {
       setLoading(false);
     }
   };
