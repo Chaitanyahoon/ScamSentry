@@ -48,4 +48,14 @@ jobs:
           API_SECRET_KEY: "test-admin-secret-key-12345"
           ENVIRONMENT: "development"
         run: |
-          pytest tests/ --ignore=tests/manual -v --asyncio-mode=auto
+          pytest tests/ --ignore=tests/manual -v --asyncio-mode=auto > test_failures.log 2>&1 || (cat test_failures.log && exit 1)
+
+      - name: Commit and Push Failures
+        if: failure()
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add test_failures.log
+          git commit -m "chore: upload test failure log [skip ci]" || exit 0
+          git push origin main
+
