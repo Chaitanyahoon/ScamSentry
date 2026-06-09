@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 interface LogoProps extends React.ImgHTMLAttributes<HTMLImageElement> {}
 
@@ -14,6 +14,5 @@ export function Logo({ className, ...props }: LogoProps) {
       className={cn("object-contain", className)}
       {...props}
     />
-  )
+  );
 }
-

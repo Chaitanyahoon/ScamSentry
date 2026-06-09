@@ -12,10 +12,12 @@ async def test_engine_all_safe() -> None:
     mock_l3 = {"score": 0, "passed": True, "details": {}}
     mock_l4 = {"score": 0, "passed": True, "details": {}}
 
-    with patch("app.services.engine.check_heuristics", return_value=mock_l1), \
-         patch("app.services.engine.check_dns", return_value=mock_l2), \
-         patch("app.services.engine.check_google_safe_browsing", return_value=mock_l3), \
-         patch("app.services.engine.check_ledger", return_value=mock_l4):
+    with (
+        patch("app.services.engine.check_heuristics", return_value=mock_l1),
+        patch("app.services.engine.check_dns", return_value=mock_l2),
+        patch("app.services.engine.check_google_safe_browsing", return_value=mock_l3),
+        patch("app.services.engine.check_ledger", return_value=mock_l4),
+    ):
         res = await run_engine("https://safe-url.com")
         assert res["risk_score"] == 0
         assert res["risk_level"] == "safe"
@@ -30,10 +32,12 @@ async def test_engine_suspicious_mapping() -> None:
     mock_l3 = {"score": 0, "passed": True, "details": {}}
     mock_l4 = {"score": 0, "passed": True, "details": {}}
 
-    with patch("app.services.engine.check_heuristics", return_value=mock_l1), \
-         patch("app.services.engine.check_dns", return_value=mock_l2), \
-         patch("app.services.engine.check_google_safe_browsing", return_value=mock_l3), \
-         patch("app.services.engine.check_ledger", return_value=mock_l4):
+    with (
+        patch("app.services.engine.check_heuristics", return_value=mock_l1),
+        patch("app.services.engine.check_dns", return_value=mock_l2),
+        patch("app.services.engine.check_google_safe_browsing", return_value=mock_l3),
+        patch("app.services.engine.check_ledger", return_value=mock_l4),
+    ):
         res = await run_engine("https://suspicious-url.com")
         assert res["risk_score"] == 45
         assert res["risk_level"] == "suspicious"
@@ -47,10 +51,12 @@ async def test_engine_dangerous_mapping() -> None:
     mock_l3 = {"score": 30, "passed": False, "details": {}}
     mock_l4 = {"score": 0, "passed": True, "details": {}}
 
-    with patch("app.services.engine.check_heuristics", return_value=mock_l1), \
-         patch("app.services.engine.check_dns", return_value=mock_l2), \
-         patch("app.services.engine.check_google_safe_browsing", return_value=mock_l3), \
-         patch("app.services.engine.check_ledger", return_value=mock_l4):
+    with (
+        patch("app.services.engine.check_heuristics", return_value=mock_l1),
+        patch("app.services.engine.check_dns", return_value=mock_l2),
+        patch("app.services.engine.check_google_safe_browsing", return_value=mock_l3),
+        patch("app.services.engine.check_ledger", return_value=mock_l4),
+    ):
         res = await run_engine("https://dangerous-url.com")
         assert res["risk_score"] == 75
         assert res["risk_level"] == "dangerous"
@@ -64,8 +70,10 @@ async def test_engine_early_exit_l1() -> None:
     # Let's mock L1 score = 100 (say a malformed check returned a huge score or something)
     mock_l1_huge = {"score": 100, "passed": False, "details": {}}
 
-    with patch("app.services.engine.check_heuristics", return_value=mock_l1_huge), \
-         patch("app.services.engine.check_dns") as mock_dns:
+    with (
+        patch("app.services.engine.check_heuristics", return_value=mock_l1_huge),
+        patch("app.services.engine.check_dns") as mock_dns,
+    ):
         res = await run_engine("https://early-exit-url.com")
         assert res["risk_score"] == 100
         # Check that check_dns (L2) was NEVER called because of early exit after L1

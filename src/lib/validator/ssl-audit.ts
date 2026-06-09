@@ -10,7 +10,9 @@ export interface SslCertInfo {
  * Connects to port 443 of the target domain and extracts peer certificate metrics
  * entirely locally and offline, with a strict 3.5-second timeout safeguard.
  */
-export function getCertificateInfo(domain: string): Promise<SslCertInfo | null> {
+export function getCertificateInfo(
+  domain: string,
+): Promise<SslCertInfo | null> {
   return new Promise((resolve) => {
     // Sanitize domain to remove standard protocols/paths if passed
     let host = domain.trim().toLowerCase();
@@ -46,7 +48,8 @@ export function getCertificateInfo(domain: string): Promise<SslCertInfo | null> 
         if (cert && cert.valid_from) {
           const validFrom = new Date(cert.valid_from);
           const validTo = new Date(cert.valid_to);
-          const ageInDays = (Date.now() - validFrom.getTime()) / (1000 * 60 * 60 * 24);
+          const ageInDays =
+            (Date.now() - validFrom.getTime()) / (1000 * 60 * 60 * 24);
           resolve({
             validFrom,
             validTo,
@@ -55,7 +58,7 @@ export function getCertificateInfo(domain: string): Promise<SslCertInfo | null> 
         } else {
           resolve(null);
         }
-      }
+      },
     );
 
     socket.on("error", () => {

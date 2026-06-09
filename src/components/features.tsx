@@ -45,7 +45,7 @@ export function Features() {
       tag: "AI Intent Detection",
       detail:
         "Uses Gemini-1.5 AI to analyze the semantic intent and visual structure of the page, identifying high-fidelity psychological triggers in milliseconds.",
-      active: true
+      active: true,
     },
   ];
 
@@ -58,7 +58,12 @@ export function Features() {
       <div className="container relative px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className={cn("mb-20 space-y-4", mounted ? "animate-fade-in" : "opacity-0")}>
+          <div
+            className={cn(
+              "mb-20 space-y-4",
+              mounted ? "animate-fade-in" : "opacity-0",
+            )}
+          >
             <div className="flex items-center gap-3">
               <span className="h-px w-8 bg-primary/50" />
               <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.3em]">
@@ -66,10 +71,13 @@ export function Features() {
               </span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight leading-none">
-              The Five Layers of <span className="text-primary italic">ScamSentry.</span>
+              The Five Layers of{" "}
+              <span className="text-primary italic">ScamSentry.</span>
             </h2>
             <p className="text-sm text-muted-foreground max-w-xl leading-relaxed">
-              Our forensic engine doesn't just scan; it dissects. From deterministic heuristics to neural intent detection, every URL passes through a gauntlet of verification.
+              Our forensic engine doesn't just scan; it dissects. From
+              deterministic heuristics to neural intent detection, every URL
+              passes through a gauntlet of verification.
             </p>
           </div>
 
@@ -81,23 +89,32 @@ export function Features() {
                 className={cn(
                   "glass-card group relative p-6 sm:p-8 rounded-2xl transition-all duration-300 hover:translate-x-1",
                   mounted ? "animate-fade-in" : "opacity-0",
-                  item.active && "border-primary/35 bg-primary/[0.03] shadow-[0_0_15px_rgba(249,115,22,0.08)]"
+                  item.active &&
+                    "border-primary/35 bg-primary/[0.03] shadow-[0_0_15px_rgba(249,115,22,0.08)]",
                 )}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="flex flex-col sm:flex-row gap-6">
                   {/* Layer Marker */}
                   <div className="flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-4 shrink-0 sm:w-24">
-                    <span className={cn(
-                       "text-xs font-mono font-bold tracking-widest",
-                      item.active ? "text-primary" : "text-muted-foreground/50"
-                    )}>
+                    <span
+                      className={cn(
+                        "text-xs font-mono font-bold tracking-widest",
+                        item.active
+                          ? "text-primary"
+                          : "text-muted-foreground/50",
+                      )}
+                    >
                       {item.step}
                     </span>
-                    <div className={cn(
-                      "px-2 py-0.5 rounded text-[8px] font-mono uppercase tracking-tighter border",
-                      item.active ? "bg-primary/10 border-primary/30 text-primary" : "border-border text-muted-foreground/30"
-                    )}>
+                    <div
+                      className={cn(
+                        "px-2 py-0.5 rounded text-[8px] font-mono uppercase tracking-tighter border",
+                        item.active
+                          ? "bg-primary/10 border-primary/30 text-primary"
+                          : "border-border text-muted-foreground/30",
+                      )}
+                    >
                       {item.tag}
                     </div>
                   </div>

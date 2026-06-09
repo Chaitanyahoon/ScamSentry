@@ -1,34 +1,34 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/contexts/auth-context"
-import AdminDashboardClient from "@/components/admin-dashboard-client"
-import { Loader2, AlertTriangle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
+import AdminDashboardClient from "@/components/admin-dashboard-client";
+import { Loader2, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AdminPage() {
-  const { user, loading, role, isAdmin } = useAuth()
-  const router = useRouter()
+  const { user, loading, role, isAdmin } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push("/login")
+      router.push("/login");
     }
-  }, [user, loading, router])
+  }, [user, loading, router]);
 
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
       </div>
-    )
+    );
   }
 
   // User not authenticated
   if (!user) {
-    return null // Will redirect via useEffect
+    return null; // Will redirect via useEffect
   }
 
   // User authenticated but does NOT have admin role
@@ -44,27 +44,31 @@ export default function AdminPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-foreground">
-              Your account ({user.email}) does not have administrator privileges.
+              Your account ({user.email}) does not have administrator
+              privileges.
             </p>
             <p className="text-sm text-muted-foreground font-mono">
-              Current Role: <span className="text-yellow-600 font-bold uppercase">{role}</span>
+              Current Role:{" "}
+              <span className="text-yellow-600 font-bold uppercase">
+                {role}
+              </span>
             </p>
             <p className="text-sm text-foreground">
               Please contact your system administrator to request admin access.
             </p>
             <div className="pt-2 space-y-2">
-              <Button 
+              <Button
                 onClick={() => router.push("/")}
                 variant="outline"
                 className="w-full"
               >
                 Go Back Home
               </Button>
-              <Button 
+              <Button
                 onClick={async () => {
-                  const { useAuth } = await import('@/contexts/auth-context')
+                  const { useAuth } = await import("@/contexts/auth-context");
                   // Will be handled by logout button
-                  window.location.href = "/login?logout=true"
+                  window.location.href = "/login?logout=true";
                 }}
                 variant="destructive"
                 className="w-full"
@@ -75,9 +79,9 @@ export default function AdminPage() {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   // User is authenticated AND is admin
-  return <AdminDashboardClient />
+  return <AdminDashboardClient />;
 }

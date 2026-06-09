@@ -66,12 +66,16 @@ async def mock_redis():
     # Set protocol=2 to prevent the redis client from attempting RESP3 HELLO handshakes.
     fake_client = fakeredis.FakeAsyncRedis(decode_responses=True, protocol=2)
 
-    with patch("redis.asyncio.from_url", return_value=fake_client), \
-         patch("app.services.cache._client", fake_client), \
-         patch("app.middleware.rate_limit.RateLimitMiddleware._get_redis", return_value=fake_client):
+    with (
+        patch("redis.asyncio.from_url", return_value=fake_client),
+        patch("app.services.cache._client", fake_client),
+        patch(
+            "app.middleware.rate_limit.RateLimitMiddleware._get_redis",
+            return_value=fake_client,
+        ),
+    ):
         yield fake_client
         await fake_client.aclose()
-
 
 
 @pytest_asyncio.fixture

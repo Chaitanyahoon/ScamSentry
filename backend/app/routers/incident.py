@@ -96,7 +96,9 @@ async def trigger_scrape_incidents(
                 "message": "Cybersecurity advisory scraping job completed synchronously.",
             }
         except Exception as exc:
-            logger.error("Error in synchronous advisory scraping task: %s", exc, exc_info=True)
+            logger.error(
+                "Error in synchronous advisory scraping task: %s", exc, exc_info=True
+            )
             raise HTTPException(status_code=500, detail=f"Scraper failed: {str(exc)}")
 
     # Define the worker task that will run in background thread pool using its own session

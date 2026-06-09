@@ -15,7 +15,7 @@ import {
   ArrowUpRight,
   Shield,
   CheckCircle2,
-  ListFilter
+  ListFilter,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -68,7 +68,7 @@ const MONITORED_BRANDS = [
   "twitter",
   "whatsapp",
   "telegram",
-  "discord"
+  "discord",
 ];
 
 function formatTimeAgo(dateString: string): string {
@@ -86,7 +86,10 @@ function formatTimeAgo(dateString: string): string {
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays === 1) return "Yesterday";
     if (diffDays < 7) return `${diffDays}d ago`;
-    return new Date(dateString).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    return new Date(dateString).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
   } catch {
     return "Live";
   }
@@ -115,17 +118,22 @@ export function CyberNewsHub() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<"all" | "highlights" | "lockdowns">("all");
+  const [activeFilter, setActiveFilter] = useState<
+    "all" | "highlights" | "lockdowns"
+  >("all");
   const [showAll, setShowAll] = useState(false);
-  
+
   // Hero Selected Index
   const [activeHeroIndex, setActiveHeroIndex] = useState(0);
   const [isCarouselHovered, setIsCarouselHovered] = useState(false);
   const [isTickerHovered, setIsTickerHovered] = useState(false);
-  const autoAdvanceTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const autoAdvanceTimerRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
 
   // Decrypt Modal state
-  const [selectedIncident, setSelectedIncident] = useState<IncidentAlert | null>(null);
+  const [selectedIncident, setSelectedIncident] =
+    useState<IncidentAlert | null>(null);
   const [decryptionProgress, setDecryptionProgress] = useState(0);
   const [decryptionText, setDecryptionText] = useState("");
 
@@ -155,7 +163,7 @@ export function CyberNewsHub() {
         const decoded = (data.incidents || []).map((i: any) => ({
           ...i,
           title: decodeHtmlEntities(i.title),
-          description: decodeHtmlEntities(i.description)
+          description: decodeHtmlEntities(i.description),
         }));
         setIncidents(decoded);
         setLockdowns(data.lockdowns || []);
@@ -181,7 +189,10 @@ export function CyberNewsHub() {
     if (highlights.length >= 5) return highlights.slice(0, 5);
     const remaining = incidents
       .filter((i) => !i.isHighlight)
-      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+      .sort(
+        (a, b) =>
+          new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+      );
     return [...highlights, ...remaining].slice(0, 5);
   }, [incidents]);
 
@@ -192,12 +203,14 @@ export function CyberNewsHub() {
 
   useEffect(() => {
     if (heroItems.length === 0 || isCarouselHovered) {
-      if (autoAdvanceTimerRef.current) clearInterval(autoAdvanceTimerRef.current);
+      if (autoAdvanceTimerRef.current)
+        clearInterval(autoAdvanceTimerRef.current);
       return;
     }
     autoAdvanceTimerRef.current = setInterval(advanceHero, 6000);
     return () => {
-      if (autoAdvanceTimerRef.current) clearInterval(autoAdvanceTimerRef.current);
+      if (autoAdvanceTimerRef.current)
+        clearInterval(autoAdvanceTimerRef.current);
     };
   }, [heroItems.length, isCarouselHovered, advanceHero]);
 
@@ -216,7 +229,7 @@ export function CyberNewsHub() {
     // Reveal text in chunks very quickly to prevent lag
     let currentLen = 0;
     const stepSize = Math.max(5, Math.floor(fullText.length / 10)); // Complete in ~10 ticks
-    
+
     const timer = setInterval(() => {
       currentLen += stepSize;
       if (currentLen >= fullText.length) {
@@ -242,7 +255,7 @@ export function CyberNewsHub() {
       ">> SCRAPING FEEDS: BLEEPINGCOMPUTER / HACKER_NEWS / KREBS...",
       ">> COMPARING BRAND KEYWORDS...",
       ">> SYNCING METADATA SCHEMA ARCHIVES...",
-      ">> INGESTION CYCLE COMPLETED SUCCESSFULLY."
+      ">> INGESTION CYCLE COMPLETED SUCCESSFULLY.",
     ];
 
     setTerminalLogs((prev) => [
@@ -279,13 +292,15 @@ export function CyberNewsHub() {
         scraperPromise.then((data) => {
           if (data && data.success) {
             fetchData(true).then(() => {
-              const processedCount = data.processed ?? data.processed_count ?? "0";
-              const lockdownsCount = data.lockdownsTriggered ?? data.lockdowns_triggered ?? "0";
+              const processedCount =
+                data.processed ?? data.processed_count ?? "0";
+              const lockdownsCount =
+                data.lockdownsTriggered ?? data.lockdowns_triggered ?? "0";
               setTerminalLogs((prev) => [
                 ...prev,
                 `[OSINT] SCRAPE SUCCESS. TOTAL INGESTED: ${processedCount}`,
                 `[OSINT] LOCKDOWNS CREATED: ${lockdownsCount}`,
-                `[${new Date().toLocaleTimeString()}] SYSTEM READY.`
+                `[${new Date().toLocaleTimeString()}] SYSTEM READY.`,
               ]);
               setSyncingScraper(false);
             });
@@ -302,7 +317,9 @@ export function CyberNewsHub() {
     return incidents.filter((incident) => {
       const matchSearch =
         incident.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        incident.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        incident.description
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
         incident.source.toLowerCase().includes(searchQuery.toLowerCase());
 
       if (!matchSearch) return false;
@@ -314,7 +331,7 @@ export function CyberNewsHub() {
         return lockdowns.some(
           (brand) =>
             incident.title.toLowerCase().includes(brand.toLowerCase()) ||
-            incident.description.toLowerCase().includes(brand.toLowerCase())
+            incident.description.toLowerCase().includes(brand.toLowerCase()),
         );
       }
       return true;
@@ -334,9 +351,8 @@ export function CyberNewsHub() {
 
   return (
     <div className="space-y-6">
-      
       {/* ─── 1. HORIZONTAL BRAND STATUS TICKER MARQUEE ───────────────── */}
-      <div 
+      <div
         className="w-full glass-card py-3 overflow-hidden flex items-center relative select-none rounded-2xl"
         onMouseEnter={() => setIsTickerHovered(true)}
         onMouseLeave={() => setIsTickerHovered(false)}
@@ -345,26 +361,32 @@ export function CyberNewsHub() {
           <Activity className="h-3.5 w-3.5 text-primary shrink-0" />
           <span>Brand Safeguards:</span>
         </div>
-        
+
         {/* Ticker Content */}
-        <div 
+        <div
           className="flex gap-8 px-4 whitespace-nowrap animate-[marquee_50s_linear_infinite] pl-[150px]"
-          style={{ animationPlayState: isTickerHovered ? 'paused' : 'running' }}
+          style={{ animationPlayState: isTickerHovered ? "paused" : "running" }}
         >
           {MONITORED_BRANDS.map((brand) => {
-            const isLocked = lockdowns.some(l => l.toLowerCase() === brand.toLowerCase());
+            const isLocked = lockdowns.some(
+              (l) => l.toLowerCase() === brand.toLowerCase(),
+            );
             return (
-              <div 
+              <div
                 key={brand}
                 className="inline-flex items-center gap-2 text-xs"
               >
-                <span className="text-foreground/80 font-medium capitalize">{brand}</span>
-                <span className={cn(
-                  "px-2.5 py-0.5 text-[10px] font-semibold border rounded-full",
-                  isLocked 
-                    ? "bg-destructive/15 border-destructive/25 text-destructive" 
-                    : "bg-success/15 border-success/25 text-success"
-                )}>
+                <span className="text-foreground/80 font-medium capitalize">
+                  {brand}
+                </span>
+                <span
+                  className={cn(
+                    "px-2.5 py-0.5 text-[10px] font-semibold border rounded-full",
+                    isLocked
+                      ? "bg-destructive/15 border-destructive/25 text-destructive"
+                      : "bg-success/15 border-success/25 text-success",
+                  )}
+                >
                   {isLocked ? "Threat Alert" : "Protected"}
                 </span>
               </div>
@@ -375,7 +397,7 @@ export function CyberNewsHub() {
 
       {/* ─── 2. TACTICAL RADAR EVENTS LOGS & INSPECTOR PANEL ──────────── */}
       {!loading && heroItems.length > 0 && (
-        <div 
+        <div
           className="grid grid-cols-1 lg:grid-cols-3 glass-card rounded-2xl overflow-hidden"
           onMouseEnter={() => setIsCarouselHovered(true)}
           onMouseLeave={() => setIsCarouselHovered(false)}
@@ -400,29 +422,37 @@ export function CyberNewsHub() {
                     onClick={() => setActiveHeroIndex(idx)}
                     className={cn(
                       "p-4 cursor-pointer transition-colors relative flex flex-col gap-2 border-b border-border/40 last:border-b-0",
-                      isActive 
-                        ? "bg-card/75 text-foreground" 
-                        : "text-muted-foreground/70 hover:text-foreground hover:bg-card/30"
+                      isActive
+                        ? "bg-card/75 text-foreground"
+                        : "text-muted-foreground/70 hover:text-foreground hover:bg-card/30",
                     )}
                   >
                     {/* Active highlight side line */}
                     {isActive && (
-                      <div className={cn(
-                        "absolute left-0 top-0 bottom-0 w-1",
-                        item.isHighlight ? "bg-destructive" : "bg-primary"
-                      )} />
+                      <div
+                        className={cn(
+                          "absolute left-0 top-0 bottom-0 w-1",
+                          item.isHighlight ? "bg-destructive" : "bg-primary",
+                        )}
+                      />
                     )}
 
                     <div className="flex items-center justify-between text-xs">
-                      <span className={cn(
-                        "font-semibold uppercase tracking-wider text-[10px]",
-                        isActive ? "text-primary" : "text-muted-foreground/50"
-                      )}>
+                      <span
+                        className={cn(
+                          "font-semibold uppercase tracking-wider text-[10px]",
+                          isActive
+                            ? "text-primary"
+                            : "text-muted-foreground/50",
+                        )}
+                      >
                         {item.source}
                       </span>
-                      <span className="text-[10px] text-muted-foreground font-mono">T-{formatCompactTime(item.publishedAt)}</span>
+                      <span className="text-[10px] text-muted-foreground font-mono">
+                        T-{formatCompactTime(item.publishedAt)}
+                      </span>
                     </div>
-                    
+
                     <p className="text-xs font-medium leading-normal line-clamp-2">
                       {item.title}
                     </p>
@@ -440,19 +470,23 @@ export function CyberNewsHub() {
                   {/* Header labels */}
                   <div className="flex flex-wrap gap-2.5 items-center justify-between border-b border-border pb-4">
                     <div className="flex items-center gap-2">
-                      <Badge className={cn(
-                        "rounded-full text-[10px] font-semibold px-2.5 py-0.5 border",
-                        activeHeroItem.isHighlight 
-                          ? "bg-destructive/15 border-destructive/25 text-destructive"
-                          : "bg-primary/10 border-primary/20 text-primary"
-                      )}>
-                        {activeHeroItem.isHighlight ? "Critical Threat" : "Standard Vector"}
+                      <Badge
+                        className={cn(
+                          "rounded-full text-[10px] font-semibold px-2.5 py-0.5 border",
+                          activeHeroItem.isHighlight
+                            ? "bg-destructive/15 border-destructive/25 text-destructive"
+                            : "bg-primary/10 border-primary/20 text-primary",
+                        )}
+                      >
+                        {activeHeroItem.isHighlight
+                          ? "Critical Threat"
+                          : "Standard Vector"}
                       </Badge>
                       <span className="text-xs text-muted-foreground/60">
                         Source: {activeHeroItem.source}
                       </span>
                     </div>
-                    
+
                     <span className="text-xs text-muted-foreground font-mono">
                       {formatTimeAgo(activeHeroItem.publishedAt)}
                     </span>
@@ -472,9 +506,13 @@ export function CyberNewsHub() {
                 {/* Dossier footer metadata */}
                 <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4 mt-6">
                   <div className="font-mono text-[10px] text-muted-foreground/50 uppercase tracking-wider">
-                    ID: {Buffer.from(activeHeroItem.link).toString("hex").substring(0, 16).toUpperCase()}
+                    ID:{" "}
+                    {Buffer.from(activeHeroItem.link)
+                      .toString("hex")
+                      .substring(0, 16)
+                      .toUpperCase()}
                   </div>
-                  
+
                   <Button
                     onClick={() => setSelectedIncident(activeHeroItem)}
                     className="text-xs font-semibold px-4.5 h-9 rounded-xl border border-border bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200"
@@ -494,7 +532,6 @@ export function CyberNewsHub() {
 
       {/* ─── 3. OPERATIONS DIRECTORY LEDGER & TERMINAL SPLIT ────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch select-none">
-        
         {/* LEFT COLUMN: DIRECTORY LEDGER FEED (2 cols) */}
         <div className="lg:col-span-2">
           <div className="glass-card rounded-2xl overflow-hidden flex flex-col h-full">
@@ -509,34 +546,43 @@ export function CyberNewsHub() {
               {/* Filter tags keys */}
               <div className="flex flex-wrap gap-1.5">
                 <button
-                  onClick={() => { setActiveFilter("all"); setShowAll(false); }}
+                  onClick={() => {
+                    setActiveFilter("all");
+                    setShowAll(false);
+                  }}
                   className={cn(
                     "px-3.5 py-1 text-xs font-semibold border rounded-full transition-all",
                     activeFilter === "all"
                       ? "bg-primary border-primary text-primary-foreground"
-                      : "bg-background border-border text-muted-foreground hover:text-foreground hover:border-border/80"
+                      : "bg-background border-border text-muted-foreground hover:text-foreground hover:border-border/80",
                   )}
                 >
                   All
                 </button>
                 <button
-                  onClick={() => { setActiveFilter("highlights"); setShowAll(false); }}
+                  onClick={() => {
+                    setActiveFilter("highlights");
+                    setShowAll(false);
+                  }}
                   className={cn(
                     "px-3.5 py-1 text-xs font-semibold border rounded-full transition-all",
                     activeFilter === "highlights"
                       ? "bg-destructive border-destructive text-destructive-foreground"
-                      : "bg-background border-border text-muted-foreground hover:text-destructive hover:border-destructive/40"
+                      : "bg-background border-border text-muted-foreground hover:text-destructive hover:border-destructive/40",
                   )}
                 >
                   Critical
                 </button>
                 <button
-                  onClick={() => { setActiveFilter("lockdowns"); setShowAll(false); }}
+                  onClick={() => {
+                    setActiveFilter("lockdowns");
+                    setShowAll(false);
+                  }}
                   className={cn(
                     "px-3.5 py-1 text-xs font-semibold border rounded-full transition-all",
                     activeFilter === "lockdowns"
                       ? "bg-warning border-warning text-warning-foreground"
-                      : "bg-background border-border text-muted-foreground hover:text-warning hover:border-warning/40"
+                      : "bg-background border-border text-muted-foreground hover:text-warning hover:border-warning/40",
                   )}
                 >
                   Safeguards
@@ -551,7 +597,10 @@ export function CyberNewsHub() {
                 type="text"
                 placeholder="Search target domain or feed source..."
                 value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); setShowAll(false); }}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowAll(false);
+                }}
                 className="w-full h-10 pl-10 pr-4 bg-background/25 focus:border-primary/20 text-foreground text-xs placeholder:text-muted-foreground/40 rounded-none outline-none transition-colors border-0"
               />
             </div>
@@ -561,11 +610,15 @@ export function CyberNewsHub() {
               {loading ? (
                 <div className="py-16 text-center">
                   <RefreshCcw className="h-5 w-5 text-primary animate-spin mx-auto mb-2" />
-                  <p className="text-xs text-muted-foreground">Ingesting data feeds...</p>
+                  <p className="text-xs text-muted-foreground">
+                    Ingesting data feeds...
+                  </p>
                 </div>
               ) : filteredIncidents.length === 0 ? (
                 <div className="py-16 text-center">
-                  <p className="text-xs text-muted-foreground/60">No advisories logged for query</p>
+                  <p className="text-xs text-muted-foreground/60">
+                    No advisories logged for query
+                  </p>
                 </div>
               ) : (
                 <div className="overflow-x-auto w-full">
@@ -580,22 +633,26 @@ export function CyberNewsHub() {
                     </thead>
                     <tbody className="divide-y divide-border/30">
                       {visibleIncidents.map((incident, idx) => (
-                        <tr 
+                        <tr
                           key={`${incident.link}-${idx}`}
                           onClick={() => setSelectedIncident(incident)}
                           className="hover:bg-card/40 transition-colors group cursor-pointer"
                         >
                           <td className="p-3">
-                            <span className={cn(
-                              "px-2 py-0.5 text-[9px] font-bold border rounded-full uppercase tracking-wider",
-                              incident.isHighlight 
-                                ? "bg-destructive/10 border-destructive/20 text-destructive" 
-                                : "bg-muted border-border text-muted-foreground"
-                            )}>
+                            <span
+                              className={cn(
+                                "px-2 py-0.5 text-[9px] font-bold border rounded-full uppercase tracking-wider",
+                                incident.isHighlight
+                                  ? "bg-destructive/10 border-destructive/20 text-destructive"
+                                  : "bg-muted border-border text-muted-foreground",
+                              )}
+                            >
                               {incident.isHighlight ? "Alert" : "Info"}
                             </span>
                           </td>
-                          <td className="p-3 text-primary font-semibold capitalize">{incident.source}</td>
+                          <td className="p-3 text-primary font-semibold capitalize">
+                            {incident.source}
+                          </td>
                           <td className="p-3 text-foreground/80 font-medium group-hover:text-primary transition-colors max-w-[220px] sm:max-w-[340px] truncate">
                             {incident.title}
                           </td>
@@ -616,7 +673,9 @@ export function CyberNewsHub() {
                 onClick={() => setShowAll(!showAll)}
                 className="w-full py-3 bg-card/40 border-t border-border text-xs font-semibold text-muted-foreground/85 hover:text-primary hover:bg-card/65 transition-all outline-none"
               >
-                {showAll ? "Collapse Database View" : `Expand Database — Show ${filteredIncidents.length - INITIAL_SHOW_COUNT} More Records`}
+                {showAll
+                  ? "Collapse Database View"
+                  : `Expand Database — Show ${filteredIncidents.length - INITIAL_SHOW_COUNT} More Records`}
               </button>
             )}
           </div>
@@ -624,7 +683,6 @@ export function CyberNewsHub() {
 
         {/* RIGHT COLUMN: CORE MONITOR TERMINAL CONSOLE (1 col) */}
         <div className="lg:col-span-1 flex flex-col space-y-6">
-          
           <div className="glass-card p-4 rounded-2xl flex flex-col justify-between select-none relative">
             <div className="space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b border-border">
@@ -633,15 +691,19 @@ export function CyberNewsHub() {
                   System Diagnostics
                 </span>
               </div>
-              
+
               <div className="space-y-3 text-xs">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Engine Core</span>
-                  <span className="text-foreground font-semibold font-mono">v2.1.4-stable</span>
+                  <span className="text-foreground font-semibold font-mono">
+                    v2.1.4-stable
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Database Sync</span>
-                  <span className="text-success font-semibold uppercase">Active</span>
+                  <span className="text-success font-semibold uppercase">
+                    Active
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Feed Providers</span>
@@ -679,7 +741,7 @@ export function CyberNewsHub() {
                       ? "border-destructive text-destructive font-semibold"
                       : log.includes("SUCCESS") || log.includes("OK")
                         ? "border-success text-success font-semibold"
-                        : "text-success/80"
+                        : "text-success/80",
                   )}
                 >
                   {log}
@@ -701,7 +763,7 @@ export function CyberNewsHub() {
                   "w-full text-xs font-semibold h-10 rounded-xl border transition-all duration-300",
                   syncingScraper
                     ? "bg-background border-border text-muted-foreground/30 cursor-not-allowed"
-                    : "bg-background border-border text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary"
+                    : "bg-background border-border text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary",
                 )}
               >
                 {syncingScraper ? "Syncing feeds..." : "Run Feed Scraper"}
@@ -715,7 +777,6 @@ export function CyberNewsHub() {
       {selectedIncident && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 animate-in fade-in duration-200">
           <div className="w-full max-w-2xl border border-border bg-card text-foreground rounded-2xl overflow-hidden relative shadow-2xl">
-            
             {/* Header */}
             <div className="bg-card border-b border-border px-5 py-4 flex items-center justify-between select-none">
               <div className="flex items-center gap-2">
@@ -737,33 +798,53 @@ export function CyberNewsHub() {
               {/* Metadata strip */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-background/50 p-4 border border-border rounded-xl select-none text-xs">
                 <div>
-                  <span className="block text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Severity</span>
-                  <span className={cn(
-                    "font-bold",
-                    selectedIncident.isHighlight ? "text-destructive" : "text-warning"
-                  )}>
+                  <span className="block text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
+                    Severity
+                  </span>
+                  <span
+                    className={cn(
+                      "font-bold",
+                      selectedIncident.isHighlight
+                        ? "text-destructive"
+                        : "text-warning",
+                    )}
+                  >
                     {selectedIncident.isHighlight ? "Critical" : "Standard"}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Feed Source</span>
-                  <span className="font-bold text-foreground capitalize">{selectedIncident.source}</span>
-                </div>
-                <div>
-                  <span className="block text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Published</span>
-                  <span className="font-bold text-foreground">
-                    {new Date(selectedIncident.publishedAt).toLocaleDateString()}
+                  <span className="block text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
+                    Feed Source
+                  </span>
+                  <span className="font-bold text-foreground capitalize">
+                    {selectedIncident.source}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Integrity</span>
-                  <span className="font-bold text-success">{decryptionProgress}% Secure</span>
+                  <span className="block text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
+                    Published
+                  </span>
+                  <span className="font-bold text-foreground">
+                    {new Date(
+                      selectedIncident.publishedAt,
+                    ).toLocaleDateString()}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
+                    Integrity
+                  </span>
+                  <span className="font-bold text-success">
+                    {decryptionProgress}% Secure
+                  </span>
                 </div>
               </div>
 
               {/* Subject */}
               <div className="space-y-1.5 border-b border-border pb-4">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider block select-none">Subject</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider block select-none">
+                  Subject
+                </span>
                 <h3 className="text-sm font-bold text-foreground leading-relaxed">
                   {selectedIncident.title}
                 </h3>
@@ -771,7 +852,9 @@ export function CyberNewsHub() {
 
               {/* Description Details */}
               <div className="space-y-2">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider block select-none">Advisory Payload</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider block select-none">
+                  Advisory Payload
+                </span>
                 <div className="bg-background/80 p-4 border border-border rounded-xl text-sm text-muted-foreground/90 leading-relaxed min-h-[100px] max-h-[220px] overflow-y-auto select-text whitespace-pre-wrap">
                   {decryptionText}
                 </div>
@@ -779,7 +862,9 @@ export function CyberNewsHub() {
 
               {/* Active lockdown warning panel */}
               {lockdowns.some((brand) =>
-                selectedIncident.title.toLowerCase().includes(brand.toLowerCase())
+                selectedIncident.title
+                  .toLowerCase()
+                  .includes(brand.toLowerCase()),
               ) && (
                 <div className="bg-destructive/5 border border-destructive/25 p-4 rounded-xl flex items-start gap-3">
                   <ShieldAlert className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
@@ -788,7 +873,10 @@ export function CyberNewsHub() {
                       Brand Safeguard Triggered
                     </span>
                     <p className="text-xs text-destructive/80 leading-relaxed mt-1">
-                      This advisory matches an actively monitored brand. Lookalike domains mimicking this brand are automatically subject to immediate reputation penalty in our scanning engines.
+                      This advisory matches an actively monitored brand.
+                      Lookalike domains mimicking this brand are automatically
+                      subject to immediate reputation penalty in our scanning
+                      engines.
                     </p>
                   </div>
                 </div>

@@ -1,111 +1,156 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Search, Filter, Clock, MapPin, ThumbsUp, Flag, ShieldAlert, TerminalSquare, AlertTriangle, Cpu, Radio, Network, Database, Eye, Building, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useReports } from "@/contexts/reports-context"
-import { useToast } from "@/hooks/use-toast"
-import Link from "next/link"
-import { cn } from "@/lib/utils"
+import { useState } from "react";
+import {
+  Search,
+  Filter,
+  Clock,
+  MapPin,
+  ThumbsUp,
+  Flag,
+  ShieldAlert,
+  TerminalSquare,
+  AlertTriangle,
+  Cpu,
+  Radio,
+  Network,
+  Database,
+  Eye,
+  Building,
+  Loader2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useReports } from "@/contexts/reports-context";
+import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function ReportsPage() {
-  const { reports, voteHelpful, flagReport, isLoadingReports } = useReports()
-  const { toast } = useToast()
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedType, setSelectedType] = useState("all")
-  const [selectedIndustry, setSelectedIndustry] = useState("all")
-  const [sortBy, setSortBy] = useState("recent")
-  const [activeTab, setActiveTab] = useState("all")
+  const { reports, voteHelpful, flagReport, isLoadingReports } = useReports();
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedType, setSelectedType] = useState("all");
+  const [selectedIndustry, setSelectedIndustry] = useState("all");
+  const [sortBy, setSortBy] = useState("recent");
+  const [activeTab, setActiveTab] = useState("all");
 
-  const [votedReports, setVotedReports] = useState<Set<string>>(new Set())
-  const [flaggedReportsLocal, setFlaggedReportsLocal] = useState<Set<string>>(new Set())
+  const [votedReports, setVotedReports] = useState<Set<string>>(new Set());
+  const [flaggedReportsLocal, setFlaggedReportsLocal] = useState<Set<string>>(
+    new Set(),
+  );
 
-  const approvedReports = reports.filter((report) => report.status === "approved")
+  const approvedReports = reports.filter(
+    (report) => report.status === "approved",
+  );
 
-  const latestReportTime = approvedReports.length > 0
-    ? Math.max(...approvedReports.map((r) => {
-        const t = new Date(r.createdAt).getTime();
-        return isNaN(t) ? 0 : t;
-      }))
-    : Date.now()
+  const latestReportTime =
+    approvedReports.length > 0
+      ? Math.max(
+          ...approvedReports.map((r) => {
+            const t = new Date(r.createdAt).getTime();
+            return isNaN(t) ? 0 : t;
+          }),
+        )
+      : Date.now();
 
-  const referenceTime = latestReportTime > 0 ? latestReportTime : Date.now()
+  const referenceTime = latestReportTime > 0 ? latestReportTime : Date.now();
 
   const filteredReports = approvedReports.filter((report) => {
     const matchesSearch =
       report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       report.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      report.location.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesType = selectedType === "all" || report.scamType === selectedType
-    const matchesIndustry = selectedIndustry === "all" || report.industry === selectedIndustry
+      report.location.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType =
+      selectedType === "all" || report.scamType === selectedType;
+    const matchesIndustry =
+      selectedIndustry === "all" || report.industry === selectedIndustry;
     const matchesTab =
       activeTab === "all" ||
       (activeTab === "high-risk" && report.riskLevel === "high") ||
-      (activeTab === "recent" && new Date(report.createdAt).getTime() > referenceTime - 24 * 60 * 60 * 1000)
+      (activeTab === "recent" &&
+        new Date(report.createdAt).getTime() >
+          referenceTime - 24 * 60 * 60 * 1000);
 
-    return matchesSearch && matchesType && matchesIndustry && matchesTab
-  })
+    return matchesSearch && matchesType && matchesIndustry && matchesTab;
+  });
 
   const sortedReports = [...filteredReports].sort((a, b) => {
     switch (sortBy) {
       case "helpful":
-        return b.helpfulVotes - a.helpfulVotes
+        return b.helpfulVotes - a.helpfulVotes;
       case "trust":
-        return b.trustScore - a.trustScore
+        return b.trustScore - a.trustScore;
       case "views":
-        return b.views - a.views
+        return b.views - a.views;
       default:
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
     }
-  })
+  });
 
   const handleHelpfulVote = (reportId: string) => {
     if (!votedReports.has(reportId)) {
-      voteHelpful(reportId)
-      setVotedReports((prev) => new Set(prev).add(reportId))
+      voteHelpful(reportId);
+      setVotedReports((prev) => new Set(prev).add(reportId));
       toast({
         title: "TELEMETRY LOGGED",
         description: "Peer verification added to the consensus matrix.",
-      })
+      });
     } else {
       toast({
         title: "DUPLICATE ENTRY",
         description: "You have already verified this node.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleFlag = (reportId: string) => {
     if (!flaggedReportsLocal.has(reportId)) {
-      flagReport(reportId)
-      setFlaggedReportsLocal((prev) => new Set(prev).add(reportId))
+      flagReport(reportId);
+      setFlaggedReportsLocal((prev) => new Set(prev).add(reportId));
       toast({
         title: "NODE FLAGGED",
         description: "Alert dispatched to moderator protocols.",
-      })
+      });
     } else {
       toast({
         title: "DUPLICATE ENTRY",
         description: "Node already flagged for review.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   // Calculate high-tech metrics
-  const totalVerifiedDossiers = approvedReports.length
-  const criticalThreatsCount = approvedReports.filter((r) => r.riskLevel === "high").length
-  
+  const totalVerifiedDossiers = approvedReports.length;
+  const criticalThreatsCount = approvedReports.filter(
+    (r) => r.riskLevel === "high",
+  ).length;
+
   // Calculate average trust score
-  const averageTrust = approvedReports.length > 0 
-    ? Math.round(approvedReports.reduce((acc, curr) => acc + curr.trustScore, 0) / approvedReports.length)
-    : 100
+  const averageTrust =
+    approvedReports.length > 0
+      ? Math.round(
+          approvedReports.reduce((acc, curr) => acc + curr.trustScore, 0) /
+            approvedReports.length,
+        )
+      : 100;
 
   // Calculate total consensus interactions
-  const totalVerifications = approvedReports.reduce((acc, curr) => acc + curr.helpfulVotes, 0)
+  const totalVerifications = approvedReports.reduce(
+    (acc, curr) => acc + curr.helpfulVotes,
+    0,
+  );
 
   return (
     <div className="min-h-screen bg-[#070605] py-16 relative overflow-hidden">
@@ -116,7 +161,6 @@ export default function ReportsPage() {
 
       <div className="container relative z-10 px-4 sm:px-6 lg:px-8 max-w-[1300px]">
         <div className="mx-auto">
-          
           {/* Header section with HUD frame */}
           <div className="mb-10 relative bg-card/65 border border-white/5 p-8 shadow-2xl backdrop-blur-xl rounded-2xl overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 [clip-path:polygon(100%_0,0_0,100%_100%)] opacity-20 pointer-events-none" />
@@ -127,10 +171,13 @@ export default function ReportsPage() {
                   Verified Threat Database
                 </div>
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight mb-3">
-                  Community <span className="text-primary gradient-text">Reports</span>
+                  Community{" "}
+                  <span className="text-primary gradient-text">Reports</span>
                 </h1>
                 <p className="text-sm text-muted-foreground/80 leading-relaxed max-w-3xl border-l-2 border-primary/50 pl-4 py-0.5">
-                  Scan, analyze, and verify decentralized threat telemetry. Peer-attested evidence modules secured by community consensus mechanisms.
+                  Scan, analyze, and verify decentralized threat telemetry.
+                  Peer-attested evidence modules secured by community consensus
+                  mechanisms.
                 </p>
               </div>
 
@@ -161,9 +208,11 @@ export default function ReportsPage() {
                   Active Reports
                 </div>
                 <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/70 tracking-tight font-mono mb-2">
-                  {totalVerifiedDossiers.toString().padStart(3, '0')}
+                  {totalVerifiedDossiers.toString().padStart(3, "0")}
                 </div>
-                <div className="text-[9px] text-muted-foreground/50 uppercase tracking-widest font-mono">Verified Telemetry</div>
+                <div className="text-[9px] text-muted-foreground/50 uppercase tracking-widest font-mono">
+                  Verified Telemetry
+                </div>
               </div>
             </div>
 
@@ -181,9 +230,11 @@ export default function ReportsPage() {
                   Critical Threats
                 </div>
                 <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-destructive to-red-400 tracking-tight font-mono mb-2">
-                  {criticalThreatsCount.toString().padStart(3, '0')}
+                  {criticalThreatsCount.toString().padStart(3, "0")}
                 </div>
-                <div className="text-[9px] text-muted-foreground/50 uppercase tracking-widest font-mono">Immediate Containment</div>
+                <div className="text-[9px] text-muted-foreground/50 uppercase tracking-widest font-mono">
+                  Immediate Containment
+                </div>
               </div>
             </div>
 
@@ -203,7 +254,9 @@ export default function ReportsPage() {
                 <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500 tracking-tight font-mono mb-2">
                   {averageTrust}%
                 </div>
-                <div className="text-[9px] text-muted-foreground/50 uppercase tracking-widest font-mono">Attestation Confidence</div>
+                <div className="text-[9px] text-muted-foreground/50 uppercase tracking-widest font-mono">
+                  Attestation Confidence
+                </div>
               </div>
             </div>
 
@@ -223,7 +276,9 @@ export default function ReportsPage() {
                 <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/70 tracking-tight font-mono mb-2">
                   {totalVerifications.toLocaleString()}
                 </div>
-                <div className="text-[9px] text-muted-foreground/40 uppercase tracking-widest font-mono">Attestation Votes</div>
+                <div className="text-[9px] text-muted-foreground/40 uppercase tracking-widest font-mono">
+                  Attestation Votes
+                </div>
               </div>
             </div>
           </div>
@@ -250,16 +305,66 @@ export default function ReportsPage() {
                     <SelectValue placeholder="Filter by type" />
                   </SelectTrigger>
                   <SelectContent className="bg-card border-white/5 text-foreground rounded-xl">
-                    <SelectItem value="all" className="text-xs focus:bg-primary/20 focus:text-primary">All Threats</SelectItem>
-                    <SelectItem value="Fake Job Offer" className="text-xs focus:bg-primary/20 focus:text-primary">Fake Job Offer</SelectItem>
-                    <SelectItem value="Unpaid Work" className="text-xs focus:bg-primary/20 focus:text-primary">Unpaid Work</SelectItem>
-                    <SelectItem value="Portfolio Theft" className="text-xs focus:bg-primary/20 focus:text-primary">Portfolio Theft</SelectItem>
-                    <SelectItem value="Ghost Client" className="text-xs focus:bg-primary/20 focus:text-primary">Ghost Client</SelectItem>
-                    <SelectItem value="Upfront Payment Scam" className="text-xs focus:bg-primary/20 focus:text-primary">Upfront Payment</SelectItem>
-                    <SelectItem value="Identity Theft" className="text-xs focus:bg-primary/20 focus:text-primary">Identity Theft</SelectItem>
-                    <SelectItem value="Phishing Attempt" className="text-xs focus:bg-primary/20 focus:text-primary">Phishing Attempt</SelectItem>
-                    <SelectItem value="Cybersecurity Advisory" className="text-xs focus:bg-primary/20 focus:text-primary">Cybersecurity Advisory</SelectItem>
-                    <SelectItem value="Other" className="text-xs focus:bg-primary/20 focus:text-primary">Other Vectors</SelectItem>
+                    <SelectItem
+                      value="all"
+                      className="text-xs focus:bg-primary/20 focus:text-primary"
+                    >
+                      All Threats
+                    </SelectItem>
+                    <SelectItem
+                      value="Fake Job Offer"
+                      className="text-xs focus:bg-primary/20 focus:text-primary"
+                    >
+                      Fake Job Offer
+                    </SelectItem>
+                    <SelectItem
+                      value="Unpaid Work"
+                      className="text-xs focus:bg-primary/20 focus:text-primary"
+                    >
+                      Unpaid Work
+                    </SelectItem>
+                    <SelectItem
+                      value="Portfolio Theft"
+                      className="text-xs focus:bg-primary/20 focus:text-primary"
+                    >
+                      Portfolio Theft
+                    </SelectItem>
+                    <SelectItem
+                      value="Ghost Client"
+                      className="text-xs focus:bg-primary/20 focus:text-primary"
+                    >
+                      Ghost Client
+                    </SelectItem>
+                    <SelectItem
+                      value="Upfront Payment Scam"
+                      className="text-xs focus:bg-primary/20 focus:text-primary"
+                    >
+                      Upfront Payment
+                    </SelectItem>
+                    <SelectItem
+                      value="Identity Theft"
+                      className="text-xs focus:bg-primary/20 focus:text-primary"
+                    >
+                      Identity Theft
+                    </SelectItem>
+                    <SelectItem
+                      value="Phishing Attempt"
+                      className="text-xs focus:bg-primary/20 focus:text-primary"
+                    >
+                      Phishing Attempt
+                    </SelectItem>
+                    <SelectItem
+                      value="Cybersecurity Advisory"
+                      className="text-xs focus:bg-primary/20 focus:text-primary"
+                    >
+                      Cybersecurity Advisory
+                    </SelectItem>
+                    <SelectItem
+                      value="Other"
+                      className="text-xs focus:bg-primary/20 focus:text-primary"
+                    >
+                      Other Vectors
+                    </SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -268,10 +373,30 @@ export default function ReportsPage() {
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent className="bg-card border-white/5 text-foreground rounded-xl">
-                    <SelectItem value="recent" className="text-xs focus:bg-primary/20 focus:text-primary">Most Recent</SelectItem>
-                    <SelectItem value="helpful" className="text-xs focus:bg-primary/20 focus:text-primary">Highest Consensus</SelectItem>
-                    <SelectItem value="trust" className="text-xs focus:bg-primary/20 focus:text-primary">Trust Score</SelectItem>
-                    <SelectItem value="views" className="text-xs focus:bg-primary/20 focus:text-primary">Most Viewed</SelectItem>
+                    <SelectItem
+                      value="recent"
+                      className="text-xs focus:bg-primary/20 focus:text-primary"
+                    >
+                      Most Recent
+                    </SelectItem>
+                    <SelectItem
+                      value="helpful"
+                      className="text-xs focus:bg-primary/20 focus:text-primary"
+                    >
+                      Highest Consensus
+                    </SelectItem>
+                    <SelectItem
+                      value="trust"
+                      className="text-xs focus:bg-primary/20 focus:text-primary"
+                    >
+                      Trust Score
+                    </SelectItem>
+                    <SelectItem
+                      value="views"
+                      className="text-xs focus:bg-primary/20 focus:text-primary"
+                    >
+                      Most Viewed
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -282,7 +407,9 @@ export default function ReportsPage() {
               <button
                 onClick={() => setActiveTab("all")}
                 className={`px-5 py-3 text-xs font-semibold transition-all border-b-2 ${
-                  activeTab === "all" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+                  activeTab === "all"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
                 Global Stream ({approvedReports.length})
@@ -290,18 +417,31 @@ export default function ReportsPage() {
               <button
                 onClick={() => setActiveTab("high-risk")}
                 className={`px-5 py-3 text-xs font-semibold transition-all border-b-2 ${
-                  activeTab === "high-risk" ? "border-destructive text-destructive" : "border-transparent text-muted-foreground hover:text-destructive"
+                  activeTab === "high-risk"
+                    ? "border-destructive text-destructive"
+                    : "border-transparent text-muted-foreground hover:text-destructive"
                 }`}
               >
-                Critical Threats ({approvedReports.filter((r) => r.riskLevel === "high").length})
+                Critical Threats (
+                {approvedReports.filter((r) => r.riskLevel === "high").length})
               </button>
               <button
                 onClick={() => setActiveTab("recent")}
                 className={`px-5 py-3 text-xs font-semibold transition-all border-b-2 ${
-                  activeTab === "recent" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+                  activeTab === "recent"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
-                Past 24 Hours ({approvedReports.filter((r) => new Date(r.createdAt).getTime() > referenceTime - 24 * 60 * 60 * 1000).length})
+                Past 24 Hours (
+                {
+                  approvedReports.filter(
+                    (r) =>
+                      new Date(r.createdAt).getTime() >
+                      referenceTime - 24 * 60 * 60 * 1000,
+                  ).length
+                }
+                )
               </button>
             </div>
           </div>
@@ -321,15 +461,16 @@ export default function ReportsPage() {
                 No telemetry found
               </h3>
               <p className="text-xs text-muted-foreground/60 uppercase tracking-widest max-w-md mx-auto leading-relaxed">
-                The current query yielded zero matching logs. Adjust query search inputs or category filter options.
+                The current query yielded zero matching logs. Adjust query
+                search inputs or category filter options.
               </p>
               <Button
                 variant="outline"
                 onClick={() => {
-                  setSearchTerm("")
-                  setSelectedType("all")
-                  setSelectedIndustry("all")
-                  setSortBy("recent")
+                  setSearchTerm("");
+                  setSelectedType("all");
+                  setSelectedIndustry("all");
+                  setSortBy("recent");
                 }}
                 className="mt-6 rounded-xl border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground text-xs font-bold px-8 transition-all"
               >
@@ -339,46 +480,57 @@ export default function ReportsPage() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {sortedReports.map((report) => (
-                <div 
-                  key={report.id} 
+                <div
+                  key={report.id}
                   className="group flex flex-col bg-gradient-to-br from-[#0b0f19]/90 to-[#05070c]/95 border border-white/[0.04] hover:border-primary/35 hover:shadow-[0_0_35px_rgba(249,115,22,0.05)] hover:-translate-y-1 transition-all duration-500 relative rounded-2xl overflow-hidden shadow-2xl animate-fade-in"
                 >
                   {/* Sweep gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.005] to-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                   {/* Cyber grid pattern inside card */}
                   <div className="absolute inset-0 bg-grid-cyber opacity-[0.02] group-hover:opacity-[0.06] transition-opacity duration-500 pointer-events-none" />
-                  
+
                   {/* Corner accents */}
                   <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-white/5 group-hover:border-primary/30 transition-colors duration-300" />
                   <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-white/5 group-hover:border-primary/30 transition-colors duration-300" />
 
                   {/* Left accent vertical indicator bar - spans full height */}
-                  <div className={cn(
-                    "absolute left-0 top-0 bottom-0 w-1 transition-all duration-500",
-                    report.riskLevel === 'high' 
-                      ? 'bg-destructive shadow-[0_0_12px_rgba(239,68,68,0.55)] group-hover:scale-y-[1.02]' 
-                      : 'bg-primary/50 group-hover:bg-primary shadow-[0_0_12px_rgba(249,115,22,0.35)] group-hover:scale-y-[1.02]'
-                  )} />
+                  <div
+                    className={cn(
+                      "absolute left-0 top-0 bottom-0 w-1 transition-all duration-500",
+                      report.riskLevel === "high"
+                        ? "bg-destructive shadow-[0_0_12px_rgba(239,68,68,0.55)] group-hover:scale-y-[1.02]"
+                        : "bg-primary/50 group-hover:bg-primary shadow-[0_0_12px_rgba(249,115,22,0.35)] group-hover:scale-y-[1.02]",
+                    )}
+                  />
 
                   {/* Card Header Panel */}
                   <div className="px-6 py-4 border-b border-white/[0.04] bg-white/[0.01] flex justify-between items-center gap-4 select-none relative z-10">
                     <div className="flex items-center gap-2">
-                      <span className={cn(
-                        "h-1.5 w-1.5 rounded-full animate-pulse",
-                        report.riskLevel === 'high' ? 'bg-destructive shadow-[0_0_6px_rgba(239,68,68,0.8)]' : 'bg-primary shadow-[0_0_6px_rgba(249,115,22,0.8)]'
-                      )} />
+                      <span
+                        className={cn(
+                          "h-1.5 w-1.5 rounded-full animate-pulse",
+                          report.riskLevel === "high"
+                            ? "bg-destructive shadow-[0_0_6px_rgba(239,68,68,0.8)]"
+                            : "bg-primary shadow-[0_0_6px_rgba(249,115,22,0.8)]",
+                        )}
+                      />
                       <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest font-mono">
                         Report ID: {report.id.substring(0, 10).toUpperCase()}
                       </span>
                     </div>
-                    
+
                     {/* Status Badge */}
-                    <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 border text-[10px] font-bold uppercase tracking-wider rounded-full backdrop-blur-md transition-all duration-300",
-                      report.riskLevel === 'high' 
-                        ? 'border-destructive/20 bg-destructive/10 text-destructive group-hover:border-destructive/40' 
-                        : 'border-primary/20 bg-primary/5 text-primary group-hover:border-primary/45'
-                    )}>
-                      {report.riskLevel === 'high' ? 'Critical Risk' : `${report.riskLevel} Risk`}
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-3 py-1 border text-[10px] font-bold uppercase tracking-wider rounded-full backdrop-blur-md transition-all duration-300",
+                        report.riskLevel === "high"
+                          ? "border-destructive/20 bg-destructive/10 text-destructive group-hover:border-destructive/40"
+                          : "border-primary/20 bg-primary/5 text-primary group-hover:border-primary/45",
+                      )}
+                    >
+                      {report.riskLevel === "high"
+                        ? "Critical Risk"
+                        : `${report.riskLevel} Risk`}
                     </span>
                   </div>
 
@@ -386,7 +538,10 @@ export default function ReportsPage() {
                   <div className="p-6 flex-1 flex flex-col justify-between relative z-10">
                     <div className="space-y-3">
                       {/* Title */}
-                      <Link href={`/reports/${report.id}`} className="hover:text-primary transition-colors inline-block w-full">
+                      <Link
+                        href={`/reports/${report.id}`}
+                        className="hover:text-primary transition-colors inline-block w-full"
+                      >
                         <h2 className="text-base font-extrabold text-foreground capitalize tracking-wide leading-snug line-clamp-1 group-hover:text-primary transition-colors duration-300">
                           {report.title}
                         </h2>
@@ -403,19 +558,27 @@ export default function ReportsPage() {
                       <div className="flex flex-wrap gap-2 text-[10px] font-medium text-muted-foreground/85 select-none font-mono">
                         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#090b11] border border-white/[0.04] hover:border-primary/25 rounded-lg shrink-0 transition-all duration-300">
                           <Building className="h-3 w-3 text-primary/70" />
-                          <span className="truncate max-w-[120px] text-foreground/80">{report.company || "General"}</span>
+                          <span className="truncate max-w-[120px] text-foreground/80">
+                            {report.company || "General"}
+                          </span>
                         </span>
                         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#090b11] border border-white/[0.04] hover:border-primary/25 rounded-lg shrink-0 transition-all duration-300">
                           <Clock className="h-3 w-3 text-primary/70" />
-                          <span className="text-foreground/80">{new Date(report.createdAt).toLocaleDateString()}</span>
+                          <span className="text-foreground/80">
+                            {new Date(report.createdAt).toLocaleDateString()}
+                          </span>
                         </span>
                         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#090b11] border border-white/[0.04] hover:border-primary/25 rounded-lg shrink-0 transition-all duration-300">
                           <ShieldAlert className="h-3 w-3 text-primary/70" />
-                          <span className="truncate max-w-[120px] text-foreground/80">{report.scamType}</span>
+                          <span className="truncate max-w-[120px] text-foreground/80">
+                            {report.scamType}
+                          </span>
                         </span>
                         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#090b11] border border-white/[0.04] hover:border-primary/25 rounded-lg shrink-0 transition-all duration-300">
                           <Eye className="h-3 w-3 text-primary/70" />
-                          <span className="text-foreground/80">{report.views} Reads</span>
+                          <span className="text-foreground/80">
+                            {report.views} Reads
+                          </span>
                         </span>
                       </div>
 
@@ -430,9 +593,12 @@ export default function ReportsPage() {
                             disabled={votedReports.has(report.id)}
                           >
                             <ThumbsUp className="h-3.5 w-3.5 mr-1.5" />
-                            {votedReports.has(report.id) ? "Verified" : "Verify"} ({report.helpfulVotes})
+                            {votedReports.has(report.id)
+                              ? "Verified"
+                              : "Verify"}{" "}
+                            ({report.helpfulVotes})
                           </Button>
-                          
+
                           <Button
                             variant="ghost"
                             size="sm"
@@ -445,15 +611,12 @@ export default function ReportsPage() {
                         </div>
 
                         <Link href={`/reports/${report.id}`}>
-                          <Button 
-                            className="h-8 text-[10px] font-bold uppercase tracking-wider rounded-xl border border-primary/25 text-primary bg-primary/5 hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_15px_rgba(249,115,22,0.2)] transition-all duration-300 shadow-md shadow-primary/5"
-                          >
+                          <Button className="h-8 text-[10px] font-bold uppercase tracking-wider rounded-xl border border-primary/25 text-primary bg-primary/5 hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_15px_rgba(249,115,22,0.2)] transition-all duration-300 shadow-md shadow-primary/5">
                             Read dossier
                           </Button>
                         </Link>
                       </div>
                     </div>
-
                   </div>
                 </div>
               ))}
@@ -462,5 +625,5 @@ export default function ReportsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

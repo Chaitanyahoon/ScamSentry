@@ -2,16 +2,16 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  Database, 
-  RefreshCcw, 
-  ShieldAlert, 
-  Globe, 
-  CheckCircle2, 
+import {
+  Database,
+  RefreshCcw,
+  ShieldAlert,
+  Globe,
+  CheckCircle2,
   AlertTriangle,
   ExternalLink,
   Search,
-  Timer
+  Timer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,7 @@ interface OSINTThreat {
   type: string;
   firstSeen: string;
   lastSync: string;
-  status: 'active' | 'expired';
+  status: "active" | "expired";
 }
 
 interface SyncStats {
@@ -48,7 +48,7 @@ export default function OSINTPage() {
       const token = sessionStorage.getItem("admin_token");
       const response = await fetch("/api/admin/sync/osint", {
         method: "GET",
-        headers: token ? { "Authorization": `Bearer ${token}` } : {},
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (response.ok) {
         const data = await response.json();
@@ -65,11 +65,11 @@ export default function OSINTPage() {
     setSyncing(true);
     setSyncResult(null);
     try {
-      const response = await fetch('/api/admin/sync/osint', { 
-        method: 'POST',
+      const response = await fetch("/api/admin/sync/osint", {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}` // Placeholder for auth logic
-        }
+          Authorization: `Bearer ${sessionStorage.getItem("admin_token")}`, // Placeholder for auth logic
+        },
       });
       const data = await response.json();
       if (data.success) {
@@ -97,8 +97,8 @@ export default function OSINTPage() {
             Global threat feed synchronization and blocklist forensics.
           </p>
         </div>
-        
-        <Button 
+
+        <Button
           onClick={handleSync}
           disabled={syncing}
           className="bg-primary hover:bg-primary/90 text-background font-bold tracking-tight shadow-[0_0_20px_rgba(255,191,0,0.2)]"
@@ -117,38 +117,50 @@ export default function OSINTPage() {
         <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-4 animate-in slide-in-from-top-4 duration-500">
           <CheckCircle2 className="h-5 w-5 text-emerald-500" />
           <div className="flex-1 text-sm text-emerald-200">
-            <span className="font-bold">Intelligence Sync Complete:</span> Processed {syncResult.processed} domains, identified <span className="text-emerald-400 font-mono">{syncResult.added} new threats</span>.
+            <span className="font-bold">Intelligence Sync Complete:</span>{" "}
+            Processed {syncResult.processed} domains, identified{" "}
+            <span className="text-emerald-400 font-mono">
+              {syncResult.added} new threats
+            </span>
+            .
           </div>
-          <Button variant="ghost" size="sm" onClick={() => setSyncResult(null)} className="text-emerald-500 hover:text-emerald-400">Dismiss</Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSyncResult(null)}
+            className="text-emerald-500 hover:text-emerald-400"
+          >
+            Dismiss
+          </Button>
         </div>
       )}
 
       {/* Hero Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard 
-          label="Active Threats" 
-          value="42,891" 
+        <StatsCard
+          label="Active Threats"
+          value="42,891"
           sub="Global Blocklist Total"
           icon={ShieldAlert}
           color="text-primary"
         />
-        <StatsCard 
-          label="Live Feeds" 
-          value="2" 
+        <StatsCard
+          label="Live Feeds"
+          value="2"
           sub="PhishTank, OpenPhish"
           icon={Globe}
           color="text-primary"
         />
-        <StatsCard 
-          label="Deduplication" 
-          value="98.4%" 
+        <StatsCard
+          label="Deduplication"
+          value="98.4%"
           sub="Efficiency Rate"
           icon={CheckCircle2}
           color="text-emerald-500"
         />
-        <StatsCard 
-          label="Last Sync" 
-          value="14m ago" 
+        <StatsCard
+          label="Last Sync"
+          value="14m ago"
           sub="Automatic Update"
           icon={Timer}
           color="text-muted-foreground"
@@ -183,16 +195,22 @@ export default function OSINTPage() {
             <tbody className="divide-y divide-[#1F1914]">
               {threats.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground font-mono text-xs">
+                  <td
+                    colSpan={6}
+                    className="px-6 py-12 text-center text-muted-foreground font-mono text-xs"
+                  >
                     No threats detected in the current OSINT cycle.
                   </td>
                 </tr>
               )}
               {threats.map((threat, i) => (
-                <tr key={i} className="hover:bg-[#15110E]/50 transition-colors group">
+                <tr
+                  key={i}
+                  className="hover:bg-[#15110E]/50 transition-colors group"
+                >
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                      <Link 
+                      <Link
                         href={`/dashboard/admin/dossier/${threat.domain.replace(/\./g, "_")}`}
                         className="font-mono text-foreground font-medium hover:text-primary transition-colors cursor-pointer"
                       >
@@ -208,19 +226,29 @@ export default function OSINTPage() {
                       {threat.source}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-muted-foreground font-mono text-xs italic">{threat.type || "unknown-vector"}</td>
+                  <td className="px-6 py-4 text-muted-foreground font-mono text-xs italic">
+                    {threat.type || "unknown-vector"}
+                  </td>
                   <td className="px-6 py-4 text-muted-foreground font-mono text-xs">
                     {new Date(threat.firstSeen).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                      <span className="text-red-400 font-bold text-[10px] uppercase">Active Threat</span>
+                      <span className="text-red-400 font-bold text-[10px] uppercase">
+                        Active Threat
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <Link href={`/dashboard/admin/dossier/${threat.domain.replace(/\./g, "_")}`}>
-                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-all">
+                    <Link
+                      href={`/dashboard/admin/dossier/${threat.domain.replace(/\./g, "_")}`}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-all"
+                      >
                         <ExternalLink className="h-4 w-4" />
                       </Button>
                     </Link>
@@ -245,8 +273,12 @@ function StatsCard({ label, value, sub, icon: Icon, color }: any) {
         <Icon className={cn("h-4 w-4", color)} />
       </div>
       <div>
-        <h4 className="text-2xl font-bold text-foreground font-mono">{value}</h4>
-        <p className="text-[10px] text-muted-foreground uppercase tracking-tight">{sub}</p>
+        <h4 className="text-2xl font-bold text-foreground font-mono">
+          {value}
+        </h4>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-tight">
+          {sub}
+        </p>
       </div>
     </div>
   );

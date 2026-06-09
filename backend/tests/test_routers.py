@@ -7,6 +7,7 @@ from app.models.ledger import LedgerEntry
 
 # ── Health Endpoint Tests ─────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_health_check(client) -> None:
     response = await client.get("/health")
@@ -18,6 +19,7 @@ async def test_health_check(client) -> None:
 
 
 # ── Scan Router Tests ─────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_create_scan_success(client, db) -> None:
@@ -48,8 +50,10 @@ async def test_create_scan_success(client, db) -> None:
 
         # Verify database persistence
         import uuid
+
         scan_id_uuid = uuid.UUID(data["scan_id"])
         from sqlalchemy import select
+
         stmt = select(Scan).where(Scan.id == scan_id_uuid)
         res = await db.execute(stmt)
         scan = res.scalar_one_or_none()
@@ -71,6 +75,7 @@ async def test_create_scan_invalid_url(client) -> None:
 @pytest.mark.asyncio
 async def test_get_scan_not_found(client) -> None:
     import uuid
+
     random_uuid = uuid.uuid4()
     response = await client.get(f"/api/v1/scan/{random_uuid}")
     assert response.status_code == 404
@@ -78,6 +83,7 @@ async def test_get_scan_not_found(client) -> None:
 
 
 # ── Report Router Tests ───────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_report_summary(client, db) -> None:
@@ -156,6 +162,7 @@ async def test_report_hotspots(client, db) -> None:
 
 # ── Admin Router & Authentication Tests ───────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_create_ledger_entry_no_auth(client) -> None:
     payload = {
@@ -197,6 +204,7 @@ async def test_create_ledger_entry_success(client, db) -> None:
 
     # Check database persistence
     from sqlalchemy import select
+
     stmt = select(LedgerEntry).where(LedgerEntry.domain == "hacker-success.com")
     res = await db.execute(stmt)
     entry = res.scalar_one_or_none()
@@ -208,6 +216,7 @@ async def test_create_ledger_entry_success(client, db) -> None:
 @pytest.mark.asyncio
 async def test_sync_osint_success(client, db) -> None:
     import uuid
+
     # Mock URLhaus response payload
     mock_urlhaus_payload = {
         "query_status": "ok",
@@ -233,8 +242,8 @@ async def test_sync_osint_success(client, db) -> None:
                 "url": "https://offline-example.com/login",
                 "url_status": "offline",  # should be filtered out
                 "threat": "phishing",
-            }
-        ]
+            },
+        ],
     }
 
     # Pre-populate already-existing-domain.com in the database to test deduplication
@@ -254,24 +263,33 @@ async def test_sync_osint_success(client, db) -> None:
         def __init__(self, json_data, status_code=200):
             self._json_data = json_data
             self.status_code = status_code
-            
+
         def json(self):
             return self._json_data
 
     headers = {"X-Admin-Key": "test-admin-secret-key-12345"}
-    
-    with patch("httpx.AsyncClient.get", return_value=MockResponse(mock_urlhaus_payload)):
+
+    with patch(
+        "httpx.AsyncClient.get", return_value=MockResponse(mock_urlhaus_payload)
+    ):
         response = await client.post("/api/v1/admin/sync-osint", headers=headers)
-        
+
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is True
-        assert data["processed"] == 2  # online ones: urlhaus-threat-example.com and already-existing-domain.com
-        assert data["inserted"] == 1   # only urlhaus-threat-example.com is inserted (already-existing-domain.com is skipped)
-        
+        assert (
+            data["processed"] == 2
+        )  # online ones: urlhaus-threat-example.com and already-existing-domain.com
+        assert (
+            data["inserted"] == 1
+        )  # only urlhaus-threat-example.com is inserted (already-existing-domain.com is skipped)
+
         # Verify persistence of the newly synchronized domain
         from sqlalchemy import select
-        stmt = select(LedgerEntry).where(LedgerEntry.domain == "urlhaus-threat-example.com")
+
+        stmt = select(LedgerEntry).where(
+            LedgerEntry.domain == "urlhaus-threat-example.com"
+        )
         res = await db.execute(stmt)
         entry = res.scalar_one_or_none()
         assert entry is not None
@@ -281,6 +299,7 @@ async def test_sync_osint_success(client, db) -> None:
 
 
 # ── Advisory & Lockdown Incident Tests ─────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_incidents(client, db) -> None:
@@ -351,7 +370,10 @@ async def test_get_brand_lockdowns(client, db) -> None:
 async def test_trigger_scrape_incidents_success(client) -> None:
     headers = {"X-Admin-Key": "test-admin-secret-key-12345"}
     # Mock the scrape_cyber_incidents service call to avoid making network requests
-    with patch("app.routers.incident.scrape_cyber_incidents", return_value={"processed": 5, "lockdowns_triggered": 1}):
+    with patch(
+        "app.routers.incident.scrape_cyber_incidents",
+        return_value={"processed": 5, "lockdowns_triggered": 1},
+    ):
         response = await client.post("/api/v1/admin/scrape-incidents", headers=headers)
         assert response.status_code == 200
         data = response.json()

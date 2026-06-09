@@ -1,42 +1,55 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { Clock, MapPin, ThumbsUp, Flag, TerminalSquare, ArrowRight, ShieldAlert } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { useReports } from "@/contexts/reports-context"
-import { useToast } from "@/hooks/use-toast"
-import { cn } from "@/lib/utils"
+import Link from "next/link";
+import {
+  Clock,
+  MapPin,
+  ThumbsUp,
+  Flag,
+  TerminalSquare,
+  ArrowRight,
+  ShieldAlert,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useReports } from "@/contexts/reports-context";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 export function RecentReports() {
-  const { reports, voteHelpful } = useReports()
-  const { toast } = useToast()
+  const { reports, voteHelpful } = useReports();
+  const { toast } = useToast();
 
   // Get the 4 most recent approved reports
   const recentReports = reports
     .filter((report) => report.status === "approved")
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 4)
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+    .slice(0, 4);
 
   const handleHelpfulVote = (reportId: string) => {
-    voteHelpful(reportId)
+    voteHelpful(reportId);
     toast({
       title: "Vote Recorded",
       description: "Thank you for verifying this report.",
-    })
-  }
+    });
+  };
 
   const getTimeAgo = (dateString: string) => {
-    const now = new Date()
-    const reportDate = new Date(dateString)
-    const diffInHours = Math.floor((now.getTime() - reportDate.getTime()) / (1000 * 60 * 60))
+    const now = new Date();
+    const reportDate = new Date(dateString);
+    const diffInHours = Math.floor(
+      (now.getTime() - reportDate.getTime()) / (1000 * 60 * 60),
+    );
 
-    if (diffInHours < 1) return "< 1H"
-    if (diffInHours < 24) return `${diffInHours}H`
+    if (diffInHours < 1) return "< 1H";
+    if (diffInHours < 24) return `${diffInHours}H`;
 
-    const diffInDays = Math.floor(diffInHours / 24)
-    return `${diffInDays}D`
-  }
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays}D`;
+  };
 
   return (
     <section className="py-24 bg-background border-y border-border relative overflow-hidden">
@@ -75,9 +88,11 @@ export function RecentReports() {
                 </p>
               </div>
             )}
-            
+
             {recentReports.map((report) => {
-              const isOsint = report.tags?.includes("osint") || report.title.startsWith("OSINT:");
+              const isOsint =
+                report.tags?.includes("osint") ||
+                report.title.startsWith("OSINT:");
               return (
                 <div
                   key={report.id}
@@ -85,7 +100,7 @@ export function RecentReports() {
                     "glass-card flex flex-col justify-between transition-all duration-300 ease-out group relative rounded-2xl hover:-translate-y-1",
                     isOsint
                       ? "border-primary/20 hover:border-primary/40 hover:shadow-primary/10"
-                      : "hover:border-primary/25 hover:shadow-primary/5"
+                      : "hover:border-primary/25 hover:shadow-primary/5",
                   )}
                 >
                   <div className="p-6 sm:p-8 flex-1">
@@ -103,13 +118,21 @@ export function RecentReports() {
                           variant="outline"
                           className={cn(
                             "rounded-full text-[10px] font-bold tracking-wider uppercase px-3 py-0.5 border cursor-default",
-                            report.riskLevel === "high" ? "bg-red-500/10 text-red-500 border-red-500/30" :
-                            report.riskLevel === "medium" ? "bg-warning/10 text-warning border-warning/30" :
-                            "bg-secondary/10 text-secondary border-secondary/30"
+                            report.riskLevel === "high"
+                              ? "bg-red-500/10 text-red-500 border-red-500/30"
+                              : report.riskLevel === "medium"
+                                ? "bg-warning/10 text-warning border-warning/30"
+                                : "bg-secondary/10 text-secondary border-secondary/30",
                           )}
                         >
-                          {report.riskLevel === 'high' && <ShieldAlert className="w-3.5 h-3.5 mr-1.5 inline text-red-500" />}
-                          {report.riskLevel === 'high' ? 'High Risk' : report.riskLevel === 'medium' ? 'Medium Risk' : 'Low Risk'}
+                          {report.riskLevel === "high" && (
+                            <ShieldAlert className="w-3.5 h-3.5 mr-1.5 inline text-red-500" />
+                          )}
+                          {report.riskLevel === "high"
+                            ? "High Risk"
+                            : report.riskLevel === "medium"
+                              ? "Medium Risk"
+                              : "Low Risk"}
                         </Badge>
                       )}
                       <span className="text-xs text-muted-foreground/60 flex items-center gap-1.5 tracking-wider">
@@ -120,7 +143,9 @@ export function RecentReports() {
 
                     <Link href={`/reports/${report.id}`} className="block mb-4">
                       <h3 className="text-lg font-bold text-foreground line-clamp-2 tracking-tight group-hover:text-primary transition-colors">
-                        {isOsint ? report.title.replace(/^OSINT:\s*/i, "") : report.title}
+                        {isOsint
+                          ? report.title.replace(/^OSINT:\s*/i, "")
+                          : report.title}
                       </h3>
                     </Link>
 
@@ -131,7 +156,9 @@ export function RecentReports() {
                     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                       <div className="flex items-center bg-muted/40 px-3 py-1 rounded-full border border-border">
                         <MapPin className="h-3.5 w-3.5 mr-1.5 text-primary" />
-                        <span className="truncate max-w-[150px] font-medium">{report.location || "Global"}</span>
+                        <span className="truncate max-w-[150px] font-medium">
+                          {report.location || "Global"}
+                        </span>
                       </div>
                       <div className="flex items-center bg-muted/40 px-3 py-1 rounded-full border border-border">
                         <Flag className="h-3.5 w-3.5 mr-1.5 text-primary" />
@@ -148,11 +175,17 @@ export function RecentReports() {
                       onClick={() => handleHelpfulVote(report.id)}
                     >
                       <ThumbsUp className="h-3.5 w-3.5 mr-2" />
-                      {report.helpfulVotes > 0 ? `Verified (${report.helpfulVotes})` : "Verify Report"}
+                      {report.helpfulVotes > 0
+                        ? `Verified (${report.helpfulVotes})`
+                        : "Verify Report"}
                     </Button>
 
-                    <Link href={`/reports/${report.id}`} className="text-xs font-bold text-primary hover:text-primary/80 transition-colors flex items-center group/link">
-                      Read Report <ArrowRight className="ml-1 h-3.5 w-3.5 group-hover/link:translate-x-1 transition-transform" />
+                    <Link
+                      href={`/reports/${report.id}`}
+                      className="text-xs font-bold text-primary hover:text-primary/80 transition-colors flex items-center group/link"
+                    >
+                      Read Report{" "}
+                      <ArrowRight className="ml-1 h-3.5 w-3.5 group-hover/link:translate-x-1 transition-transform" />
                     </Link>
                   </div>
                 </div>
@@ -162,5 +195,5 @@ export function RecentReports() {
         </div>
       </div>
     </section>
-  )
+  );
 }

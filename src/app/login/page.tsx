@@ -1,281 +1,323 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { auth } from "@/lib/firebase"
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Loader2, Terminal, AlertTriangle, Lock, User, KeyRound, Radio } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { ADMIN_CONFIG } from "@/lib/admin-config"
-import { recordFailedLoginAttempt, getAdminUser } from "@/lib/admin-roles"
-import { logAuditAction } from "@/lib/audit-logger"
-import { cn } from "@/lib/utils"
+import type React from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { auth } from "@/lib/firebase";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Loader2,
+  Terminal,
+  AlertTriangle,
+  Lock,
+  User,
+  KeyRound,
+  Radio,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { ADMIN_CONFIG } from "@/lib/admin-config";
+import { recordFailedLoginAttempt, getAdminUser } from "@/lib/admin-roles";
+import { logAuditAction } from "@/lib/audit-logger";
+import { cn } from "@/lib/utils";
 
 export default function LoginPage() {
-  const router = useRouter()
-  const { toast } = useToast()
+  const router = useRouter();
+  const { toast } = useToast();
 
-  const [mode, setMode] = useState<"login" | "register">("login")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [lockoutTimeRemaining, setLockoutTimeRemaining] = useState<number | null>(null)
+  const [mode, setMode] = useState<"login" | "register">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [lockoutTimeRemaining, setLockoutTimeRemaining] = useState<
+    number | null
+  >(null);
 
   // Check if email is locked out
   useEffect(() => {
-    if (!lockoutTimeRemaining) return
+    if (!lockoutTimeRemaining) return;
 
     const interval = setInterval(() => {
-      const now = Date.now()
-      const remaining = lockoutTimeRemaining - now
+      const now = Date.now();
+      const remaining = lockoutTimeRemaining - now;
 
       if (remaining <= 0) {
-        setLockoutTimeRemaining(null)
-        clearInterval(interval)
+        setLockoutTimeRemaining(null);
+        clearInterval(interval);
       } else {
-        setLockoutTimeRemaining(lockoutTimeRemaining)
+        setLockoutTimeRemaining(lockoutTimeRemaining);
       }
-    }, 1000)
+    }, 1000);
 
-    return () => clearInterval(interval)
-  }, [lockoutTimeRemaining])
+    return () => clearInterval(interval);
+  }, [lockoutTimeRemaining]);
 
   const handleLogin = async () => {
     try {
       // Validate email domain if enabled
-      if (ADMIN_CONFIG.ENABLE_EMAIL_DOMAIN_CHECK && !ADMIN_CONFIG.isEmailDomainAllowed(email)) {
-        const domain = ADMIN_CONFIG.getEmailDomain(email)
-        throw new Error(`Email domain '${domain}' is not authorized for portal access.`)
+      if (
+        ADMIN_CONFIG.ENABLE_EMAIL_DOMAIN_CHECK &&
+        !ADMIN_CONFIG.isEmailDomainAllowed(email)
+      ) {
+        const domain = ADMIN_CONFIG.getEmailDomain(email);
+        throw new Error(
+          `Email domain '${domain}' is not authorized for portal access.`,
+        );
       }
 
       // Attempt Firebase authentication
-      const userCredential = await signInWithEmailAndPassword(auth, email, password)
-      const user = userCredential.user
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+      const user = userCredential.user;
 
       // Check user role
-      const adminUser = await getAdminUser(user.uid)
+      const adminUser = await getAdminUser(user.uid);
 
       if (!adminUser) {
-        console.log('[AUTH] First login - initializing developer/user profile')
+        console.log("[AUTH] First login - initializing developer/user profile");
       } else if (!adminUser.isActive) {
         await logAuditAction({
           userId: user.uid,
-          userEmail: user.email || '',
-          action: 'ADMIN_LOGIN',
-          resourceType: 'auth',
+          userEmail: user.email || "",
+          action: "ADMIN_LOGIN",
+          resourceType: "auth",
           resourceId: user.uid,
-          details: { reason: 'Account inactive' },
-          status: 'failure',
-          errorMessage: 'Account has been deactivated',
-        })
+          details: { reason: "Account inactive" },
+          status: "failure",
+          errorMessage: "Account has been deactivated",
+        });
 
-        await auth.signOut()
-        throw new Error('Your account has been deactivated. Contact administrator.')
+        await auth.signOut();
+        throw new Error(
+          "Your account has been deactivated. Contact administrator.",
+        );
       }
 
       if (ADMIN_CONFIG.ENABLE_AUDIT_LOG) {
         await logAuditAction({
           userId: user.uid,
-          userEmail: user.email || '',
-          action: 'ADMIN_LOGIN',
-          resourceType: 'auth',
+          userEmail: user.email || "",
+          action: "ADMIN_LOGIN",
+          resourceType: "auth",
           resourceId: user.uid,
           details: {
             emailVerified: user.emailVerified,
-            role: adminUser?.role || 'user',
+            role: adminUser?.role || "user",
           },
-          status: 'success',
-        })
+          status: "success",
+        });
       }
 
       toast({
         title: "ACCESS_GRANTED",
         description: "SECURITY HANDSHAKE COMPLETED. LOADING CONSOLE...",
-      })
+      });
 
-      const role = adminUser?.role || 'user'
-      if (role === 'admin') {
-        router.push("/admin")
+      const role = adminUser?.role || "user";
+      if (role === "admin") {
+        router.push("/admin");
       } else {
-        router.push("/dashboard")
+        router.push("/dashboard");
       }
-      router.refresh()
+      router.refresh();
     } catch (error: any) {
-      console.error("Login error:", error)
+      console.error("Login error:", error);
 
       // Record failed login attempt
       try {
-        const isInvalidCredential = 
-          error.code === "auth/invalid-credential" || 
-          error.code === "auth/user-not-found" || 
-          error.code === "auth/wrong-password"
+        const isInvalidCredential =
+          error.code === "auth/invalid-credential" ||
+          error.code === "auth/user-not-found" ||
+          error.code === "auth/wrong-password";
 
         if (isInvalidCredential) {
-          await recordFailedLoginAttempt('unknown-' + Date.now(), email)
+          await recordFailedLoginAttempt("unknown-" + Date.now(), email);
         }
 
         if (ADMIN_CONFIG.ENABLE_AUDIT_LOG) {
           await logAuditAction({
-            userId: 'unknown',
+            userId: "unknown",
             userEmail: email,
-            action: 'ADMIN_LOGIN',
-            resourceType: 'auth',
+            action: "ADMIN_LOGIN",
+            resourceType: "auth",
             resourceId: email,
             details: { errorCode: error.code },
-            status: 'failure',
+            status: "failure",
             errorMessage: error.message,
-          })
+          });
         }
       } catch (auditError) {
-        console.error('Failed to log audit action:', auditError)
+        console.error("Failed to log audit action:", auditError);
       }
 
-      let errorMessage = "UNKNOWN_ERROR_DURING_HANDSHAKE"
-      let errorTitle = "SYS_ERR: AUTH_FAILED"
+      let errorMessage = "UNKNOWN_ERROR_DURING_HANDSHAKE";
+      let errorTitle = "SYS_ERR: AUTH_FAILED";
 
-      if (error.code === "auth/invalid-credential" || error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
-        errorTitle = "SYS_ERR: INVALID_CREDENTIALS"
-        errorMessage = "AUTH PAYLOAD REJECTED BY ACCESS CONTROL FIREWALL."
+      if (
+        error.code === "auth/invalid-credential" ||
+        error.code === "auth/user-not-found" ||
+        error.code === "auth/wrong-password"
+      ) {
+        errorTitle = "SYS_ERR: INVALID_CREDENTIALS";
+        errorMessage = "AUTH PAYLOAD REJECTED BY ACCESS CONTROL FIREWALL.";
       } else if (error.message?.includes("not authorized")) {
-        errorTitle = "SYS_ERR: DOMAIN_REJECTED"
-        errorMessage = error.message
+        errorTitle = "SYS_ERR: DOMAIN_REJECTED";
+        errorMessage = error.message;
       } else if (error.message) {
-        errorMessage = error.message
+        errorMessage = error.message;
       }
 
       toast({
         title: errorTitle,
         description: errorMessage,
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleRegister = async () => {
     try {
       // Validate email domain if enabled
-      if (ADMIN_CONFIG.ENABLE_EMAIL_DOMAIN_CHECK && !ADMIN_CONFIG.isEmailDomainAllowed(email)) {
-        const domain = ADMIN_CONFIG.getEmailDomain(email)
-        throw new Error(`Email domain '${domain}' is not authorized for registration.`)
+      if (
+        ADMIN_CONFIG.ENABLE_EMAIL_DOMAIN_CHECK &&
+        !ADMIN_CONFIG.isEmailDomainAllowed(email)
+      ) {
+        const domain = ADMIN_CONFIG.getEmailDomain(email);
+        throw new Error(
+          `Email domain '${domain}' is not authorized for registration.`,
+        );
       }
 
       // Call Firebase createUserWithEmailAndPassword
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-      const user = userCredential.user
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+      const user = userCredential.user;
 
       if (ADMIN_CONFIG.ENABLE_AUDIT_LOG) {
         await logAuditAction({
           userId: user.uid,
-          userEmail: user.email || '',
-          action: 'ADMIN_REGISTER',
-          resourceType: 'auth',
+          userEmail: user.email || "",
+          action: "ADMIN_REGISTER",
+          resourceType: "auth",
           resourceId: user.uid,
           details: {
             emailVerified: user.emailVerified,
           },
-          status: 'success',
-        })
+          status: "success",
+        });
       }
 
       toast({
         title: "ACCOUNT_CREATED",
         description: "DEVELOPER NODE PROVISIONED. ESTABLISHING PROFILE...",
-      })
+      });
 
-      router.push("/dashboard")
-      router.refresh()
+      router.push("/dashboard");
+      router.refresh();
     } catch (error: any) {
-      console.error("Registration error:", error)
-      let errorMessage = "UNKNOWN_ERROR_DURING_PROVISIONING"
-      let errorTitle = "SYS_ERR: PROVISION_FAILED"
+      console.error("Registration error:", error);
+      let errorMessage = "UNKNOWN_ERROR_DURING_PROVISIONING";
+      let errorTitle = "SYS_ERR: PROVISION_FAILED";
 
       if (error.code === "auth/email-already-in-use") {
-        errorTitle = "SYS_ERR: EMAIL_TAKEN"
-        errorMessage = "THIS NETWORK ID IS ALREADY REGISTERED."
+        errorTitle = "SYS_ERR: EMAIL_TAKEN";
+        errorMessage = "THIS NETWORK ID IS ALREADY REGISTERED.";
       } else if (error.code === "auth/weak-password") {
-        errorTitle = "SYS_ERR: WEAK_PASSKEY"
-        errorMessage = "PASSKEY STRENGTH UNACCEPTABLE (MUST BE AT LEAST 6 CHARACTERS)."
+        errorTitle = "SYS_ERR: WEAK_PASSKEY";
+        errorMessage =
+          "PASSKEY STRENGTH UNACCEPTABLE (MUST BE AT LEAST 6 CHARACTERS).";
       } else if (error.message) {
-        errorMessage = error.message
+        errorMessage = error.message;
       }
 
       toast({
         title: errorTitle,
         description: errorMessage,
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleGoogleSignIn = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const provider = new GoogleAuthProvider()
-      const userCredential = await signInWithPopup(auth, provider)
-      const user = userCredential.user
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      const user = userCredential.user;
 
-      const adminUser = await getAdminUser(user.uid)
+      const adminUser = await getAdminUser(user.uid);
 
       if (ADMIN_CONFIG.ENABLE_AUDIT_LOG) {
         await logAuditAction({
           userId: user.uid,
-          userEmail: user.email || '',
-          action: 'ADMIN_LOGIN',
-          resourceType: 'auth',
+          userEmail: user.email || "",
+          action: "ADMIN_LOGIN",
+          resourceType: "auth",
           resourceId: user.uid,
           details: {
-            method: 'google',
-            role: adminUser?.role || 'user',
+            method: "google",
+            role: adminUser?.role || "user",
           },
-          status: 'success',
-        })
+          status: "success",
+        });
       }
 
       toast({
         title: "ACCESS_GRANTED",
         description: "SECURITY HANDSHAKE COMPLETED. LOADING CONSOLE...",
-      })
+      });
 
-      const role = adminUser?.role || 'user'
-      if (role === 'admin') {
-        router.push("/admin")
+      const role = adminUser?.role || "user";
+      if (role === "admin") {
+        router.push("/admin");
       } else {
-        router.push("/dashboard")
+        router.push("/dashboard");
       }
-      router.refresh()
+      router.refresh();
     } catch (error: any) {
-      console.error("Google sign in error:", error)
+      console.error("Google sign in error:", error);
       toast({
         title: "SYS_ERR: GOOGLE_AUTH_FAILED",
         description: error.message || "Failed to authenticate with Google.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     if (mode === "login") {
-      await handleLogin()
+      await handleLogin();
     } else {
-      await handleRegister()
+      await handleRegister();
     }
 
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#050403] py-16 relative overflow-hidden select-none">
       {/* Laser Scanline Style Injection */}
-      <style dangerouslySetInnerHTML={{__html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @keyframes scanline {
           0% { transform: translateY(-10vh); }
           100% { transform: translateY(110vh); }
@@ -283,11 +325,13 @@ export default function LoginPage() {
         .animate-scanline {
           animation: scanline 8s linear infinite;
         }
-      `}} />
+      `,
+        }}
+      />
 
       {/* Futuristic Background Layout */}
       <div className="fixed inset-0 pointer-events-none z-0 bg-grid-cyber opacity-35" />
-      
+
       {/* Moving Laser Scanline */}
       <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent shadow-[0_0_12px_rgba(249,115,22,0.45)] animate-scanline pointer-events-none z-0" />
 
@@ -302,20 +346,21 @@ export default function LoginPage() {
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.015] to-white/[0.04] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
           {/* Cyber grid pattern inside card */}
           <div className="absolute inset-0 bg-grid-cyber opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-500 pointer-events-none" />
-          
+
           {/* Floating Sci-fi Corner Brackets */}
           <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-primary/30 group-hover:border-primary transition-all duration-500" />
           <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-primary/30 group-hover:border-primary transition-all duration-500" />
           <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-primary/30 group-hover:border-primary transition-all duration-500" />
           <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-primary/30 group-hover:border-primary transition-all duration-500" />
-          
+
           {/* Radial Top Light Glow */}
           <div className="absolute -top-16 -right-16 w-32 h-32 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/15 transition-all duration-500 pointer-events-none" />
 
           {/* Terminal Title Bar */}
           <div className="flex items-center justify-between border-b border-white/[0.05] pb-5 mb-8 select-none font-mono">
             <div className="flex items-center gap-2 text-[10px] font-bold text-primary tracking-[0.25rem] uppercase">
-              <Terminal className="h-4 w-4 text-primary animate-pulse" /> SECURE_GATEWAY_v4.5
+              <Terminal className="h-4 w-4 text-primary animate-pulse" />{" "}
+              SECURE_GATEWAY_v4.5
             </div>
             <div className="flex gap-1.5">
               <div className="w-2 h-2 rounded-full bg-red-500/20 group-hover:bg-red-500/60 transition-colors" />
@@ -330,7 +375,11 @@ export default function LoginPage() {
               <div className="relative group">
                 <div className="absolute -inset-4 bg-primary/20 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity pointer-events-none" />
                 <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-[#06080e]/90 shadow-[0_0_25px_rgba(249,115,22,0.15)] group-hover:shadow-[0_0_35px_rgba(249,115,22,0.3)] transition-all p-2 duration-500">
-                  <img src="/logo-icon.png" alt="ScamSentry Shield" className="h-10 w-10 object-contain drop-shadow-[0_0_12px_rgba(249,115,22,0.5)]" />
+                  <img
+                    src="/logo-icon.png"
+                    alt="ScamSentry Shield"
+                    className="h-10 w-10 object-contain drop-shadow-[0_0_12px_rgba(249,115,22,0.5)]"
+                  />
                 </div>
               </div>
             </div>
@@ -355,10 +404,12 @@ export default function LoginPage() {
                 "flex-1 py-2.5 rounded-lg text-center transition-all relative font-extrabold flex items-center justify-center gap-1.5",
                 mode === "login"
                   ? "text-primary bg-primary/10 border border-primary/20 shadow-[0_0_12px_rgba(249,115,22,0.15)]"
-                  : "text-muted-foreground/45 hover:text-muted-foreground/80"
+                  : "text-muted-foreground/45 hover:text-muted-foreground/80",
               )}
             >
-              <Radio className={cn("h-3 w-3", mode === "login" && "animate-pulse")} />
+              <Radio
+                className={cn("h-3 w-3", mode === "login" && "animate-pulse")}
+              />
               [ AUTHORIZE SESSION ]
             </button>
             <button
@@ -368,10 +419,15 @@ export default function LoginPage() {
                 "flex-1 py-2.5 rounded-lg text-center transition-all relative font-extrabold flex items-center justify-center gap-1.5",
                 mode === "register"
                   ? "text-primary bg-primary/10 border border-primary/20 shadow-[0_0_12px_rgba(249,115,22,0.15)]"
-                  : "text-muted-foreground/45 hover:text-muted-foreground/80"
+                  : "text-muted-foreground/45 hover:text-muted-foreground/80",
               )}
             >
-              <Terminal className={cn("h-3 w-3", mode === "register" && "animate-pulse")} />
+              <Terminal
+                className={cn(
+                  "h-3 w-3",
+                  mode === "register" && "animate-pulse",
+                )}
+              />
               [ PROVISION NODE ]
             </button>
           </div>
@@ -379,9 +435,14 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Identity Input */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-[10px] font-bold tracking-[0.2em] uppercase text-muted-foreground/75 mb-1.5 block font-mono flex items-center gap-1.5 select-none">
+              <Label
+                htmlFor="email"
+                className="text-[10px] font-bold tracking-[0.2em] uppercase text-muted-foreground/75 mb-1.5 block font-mono flex items-center gap-1.5 select-none"
+              >
                 <span className="h-1 w-1 bg-primary rounded-full animate-ping" />
-                {mode === "login" ? "IDENTITY PROTOCOL (EMAIL)" : "PROVISION NEW EMAIL LINK"}
+                {mode === "login"
+                  ? "IDENTITY PROTOCOL (EMAIL)"
+                  : "PROVISION NEW EMAIL LINK"}
               </Label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
@@ -390,7 +451,11 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder={mode === "login" ? "developer@scamsentry.io" : "new-dev@scamsentry.io"}
+                  placeholder={
+                    mode === "login"
+                      ? "developer@scamsentry.io"
+                      : "new-dev@scamsentry.io"
+                  }
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -402,7 +467,10 @@ export default function LoginPage() {
 
             {/* Passkey Input */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-[10px] font-bold tracking-[0.2em] uppercase text-muted-foreground/75 mb-1.5 block font-mono flex items-center gap-1.5 select-none">
+              <Label
+                htmlFor="password"
+                className="text-[10px] font-bold tracking-[0.2em] uppercase text-muted-foreground/75 mb-1.5 block font-mono flex items-center gap-1.5 select-none"
+              >
                 <span className="h-1 w-1 bg-primary rounded-full animate-ping" />
                 {mode === "login" ? "SECURITY PASSKEY" : "NEW SECURITY PASSKEY"}
               </Label>
@@ -425,18 +493,22 @@ export default function LoginPage() {
 
             {/* Submit Action */}
             <div className="pt-2">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-orange-600 hover:from-primary/95 hover:to-orange-500 text-primary-foreground transition-all duration-300 font-extrabold tracking-[0.2em] uppercase text-[10px] shadow-[0_0_20px_rgba(249,115,22,0.2)] hover:shadow-[0_0_30px_rgba(249,115,22,0.4)] active:scale-[0.98] flex items-center justify-center gap-2"
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    {mode === "login" ? "ESTABLISHING LINK..." : "PROVISIONING..."}
+                    {mode === "login"
+                      ? "ESTABLISHING LINK..."
+                      : "PROVISIONING..."}
                   </div>
+                ) : mode === "login" ? (
+                  "INITIALIZE SESSION"
                 ) : (
-                  mode === "login" ? "INITIALIZE SESSION" : "CREATE DEV NODE"
+                  "CREATE DEV NODE"
                 )}
               </Button>
             </div>
@@ -448,7 +520,9 @@ export default function LoginPage() {
               <div className="w-full border-t border-white/[0.06]"></div>
             </div>
             <div className="relative flex justify-center text-[8px] uppercase font-mono tracking-widest">
-              <span className="bg-[#0b0e18] px-3 text-muted-foreground/35">OR INTEGRATED AUTH PROTOCOL</span>
+              <span className="bg-[#0b0e18] px-3 text-muted-foreground/35">
+                OR INTEGRATED AUTH PROTOCOL
+              </span>
             </div>
           </div>
 
@@ -459,7 +533,10 @@ export default function LoginPage() {
             disabled={isLoading}
             className="w-full h-12 rounded-xl border border-white/[0.08] bg-white/[0.01] hover:bg-white/[0.04] hover:text-foreground hover:border-white/[0.15] text-muted-foreground/80 transition-all duration-300 font-bold tracking-[0.1em] text-xs flex items-center justify-center gap-2.5 active:scale-[0.98] shadow-md shadow-black/20"
           >
-            <svg className="h-4 w-4 mr-1 text-primary shrink-0" viewBox="0 0 24 24">
+            <svg
+              className="h-4 w-4 mr-1 text-primary shrink-0"
+              viewBox="0 0 24 24"
+            >
               <path
                 fill="currentColor"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -479,14 +556,15 @@ export default function LoginPage() {
             </svg>
             Sign in with Google
           </Button>
-          
+
           <div className="mt-8 pt-5 border-t border-white/[0.05] text-center select-none font-mono">
             <p className="text-[8.5px] tracking-widest text-muted-foreground/35 uppercase flex items-center justify-center gap-2">
-              <KeyRound className="h-3 w-3 text-muted-foreground/25" /> AES-256-GCM | SECURE CONNECTIONS ONLY
+              <KeyRound className="h-3 w-3 text-muted-foreground/25" />{" "}
+              AES-256-GCM | SECURE CONNECTIONS ONLY
             </p>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

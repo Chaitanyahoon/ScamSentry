@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import { memo, useRef, useEffect, useState } from "react"
-import type { ScamReport } from "@/contexts/reports-context"
-import maplibregl from "maplibre-gl"
-import "maplibre-gl/dist/maplibre-gl.css"
-import { AlertTriangle, Loader2 } from "lucide-react"
+import { memo, useRef, useEffect, useState } from "react";
+import type { ScamReport } from "@/contexts/reports-context";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { AlertTriangle, Loader2 } from "lucide-react";
 
 interface InteractiveMapProps {
-  centerLat: number
-  centerLng: number
-  reports?: ScamReport[]
-  currentLocation?: { lat: number; lng: number } | null
+  centerLat: number;
+  centerLng: number;
+  reports?: ScamReport[];
+  currentLocation?: { lat: number; lng: number } | null;
 }
 
 export const InteractiveMap = memo(function InteractiveMap({
@@ -19,13 +19,13 @@ export const InteractiveMap = memo(function InteractiveMap({
   reports = [],
   currentLocation,
 }: InteractiveMapProps) {
-  const mapContainer = useRef<HTMLDivElement | null>(null)
-  const map = useRef<maplibregl.Map | null>(null)
-  const [mapLoaded, setMapLoaded] = useState(false)
+  const mapContainer = useRef<HTMLDivElement | null>(null);
+  const map = useRef<maplibregl.Map | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   /* --------------------------- INITIALIZE MAP -------------------------------- */
   useEffect(() => {
-    if (map.current || !mapContainer.current) return
+    if (map.current || !mapContainer.current) return;
 
     try {
       // Standard dark mode tiles, with Forensic Amber styling for markers
@@ -35,20 +35,20 @@ export const InteractiveMap = memo(function InteractiveMap({
         center: [centerLng, centerLat],
         zoom: 4,
         attributionControl: false,
-      })
+      });
 
-      map.current.addControl(new maplibregl.NavigationControl(), "top-right")
+      map.current.addControl(new maplibregl.NavigationControl(), "top-right");
 
-      map.current.on("load", () => setMapLoaded(true))
+      map.current.on("load", () => setMapLoaded(true));
     } catch (err) {
-      console.error("Map initialization failed:", err)
+      console.error("Map initialization failed:", err);
     }
 
     return () => {
-      map.current?.remove()
-      map.current = null
-    }
-  }, [centerLat, centerLng])
+      map.current?.remove();
+      map.current = null;
+    };
+  }, [centerLat, centerLng]);
 
   /* ------------------------- KEEP CENTER IN SYNC ----------------------------- */
   useEffect(() => {
@@ -57,41 +57,44 @@ export const InteractiveMap = memo(function InteractiveMap({
         center: [centerLng, centerLat],
         essential: true,
         zoom: 8,
-        duration: 1500
-      })
+        duration: 1500,
+      });
     }
-  }, [centerLat, centerLng, mapLoaded])
+  }, [centerLat, centerLng, mapLoaded]);
 
   /* ----------------------------- DRAW MARKERS -------------------------------- */
   useEffect(() => {
-    if (!map.current || !mapLoaded) return
+    if (!map.current || !mapLoaded) return;
 
-    document.querySelectorAll(".maplibregl-marker").forEach((m) => m.remove())
+    document.querySelectorAll(".maplibregl-marker").forEach((m) => m.remove());
 
     if (currentLocation) {
       new maplibregl.Marker({ color: "#F59E0B" }) // Amber primary
         .setLngLat([currentLocation.lng, currentLocation.lat])
         .setPopup(
-          new maplibregl.Popup({ offset: 25, className: "custom-popup" }).setHTML(`
+          new maplibregl.Popup({ offset: 25, className: "custom-popup" })
+            .setHTML(`
             <div class="bg-[#0C0A07] border border-[#F59E0B]/50 p-4 shadow-sm font-sans tracking-tight">
               <h3 class="font-semibold text-[#F59E0B] mb-1 text-sm">Target Location</h3>
               <p class="text-xs text-gray-400">Search Center</p>
             </div>
           `),
         )
-        .addTo(map.current)
+        .addTo(map.current);
     }
 
     reports.forEach((r) => {
-      if (r.lat == null || r.lng == null) return
+      if (r.lat == null || r.lng == null) return;
 
       const riskColor =
-        r.riskLevel === "high" ? "#C0292A" : // Crimson
-          r.riskLevel === "medium" ? "#F5CE0B" : // Yellow-ish Warning 
-            "#737373" // Neutral gray for low
+        r.riskLevel === "high"
+          ? "#C0292A" // Crimson
+          : r.riskLevel === "medium"
+            ? "#F5CE0B" // Yellow-ish Warning
+            : "#737373"; // Neutral gray for low
 
-      const el = document.createElement("div")
-      el.className = "custom-marker"
+      const el = document.createElement("div");
+      el.className = "custom-marker";
       el.style.cssText = `
         width: 16px;
         height: 16px;
@@ -101,22 +104,24 @@ export const InteractiveMap = memo(function InteractiveMap({
         box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         transition: all 0.2s ease;
         border-radius: 50%;
-      `
+      `;
 
       el.addEventListener("mouseenter", () => {
-        el.style.transform = "scale(1.2)"
-        el.style.background = riskColor
-      })
+        el.style.transform = "scale(1.2)";
+        el.style.background = riskColor;
+      });
 
       el.addEventListener("mouseleave", () => {
-        el.style.transform = "scale(1)"
-        el.style.background = "rgba(12, 10, 7, 0.9)"
-      })
+        el.style.transform = "scale(1)";
+        el.style.background = "rgba(12, 10, 7, 0.9)";
+      });
 
       const riskBadgeColor =
-        r.riskLevel === "high" ? "text-[#C0292A] bg-[#C0292A]/10 border-[#C0292A]/20" :
-          r.riskLevel === "medium" ? "text-[#F5CE0B] bg-[#F5CE0B]/10 border-[#F5CE0B]/20" :
-            "text-[#737373] bg-[#737373]/10 border-[#737373]/20"
+        r.riskLevel === "high"
+          ? "text-[#C0292A] bg-[#C0292A]/10 border-[#C0292A]/20"
+          : r.riskLevel === "medium"
+            ? "text-[#F5CE0B] bg-[#F5CE0B]/10 border-[#F5CE0B]/20"
+            : "text-[#737373] bg-[#737373]/10 border-[#737373]/20";
 
       new maplibregl.Marker(el)
         .setLngLat([r.lng, r.lat])
@@ -124,7 +129,7 @@ export const InteractiveMap = memo(function InteractiveMap({
           new maplibregl.Popup({
             offset: 25,
             closeButton: false,
-            className: "custom-popup"
+            className: "custom-popup",
           }).setHTML(`
             <div class="bg-[#0C0A07]/95 backdrop-blur-sm border border-gray-800 p-5 shadow-xl min-w-[280px] max-w-[320px] font-sans">
               <div class="flex items-start justify-between mb-4 pb-3 border-b border-gray-800/50">
@@ -164,9 +169,9 @@ export const InteractiveMap = memo(function InteractiveMap({
             </div>
           `),
         )
-        .addTo(map.current!)
-    })
-  }, [reports, currentLocation, mapLoaded])
+        .addTo(map.current!);
+    });
+  }, [reports, currentLocation, mapLoaded]);
 
   /* ------------------------------- RENDER ------------------------------------ */
   return (
@@ -195,12 +200,14 @@ export const InteractiveMap = memo(function InteractiveMap({
         {!mapLoaded && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0C0A07] z-10 border border-gray-800/50">
             <Loader2 className="h-8 w-8 animate-spin text-[#F59E0B] mb-4" />
-            <p className="text-gray-400 font-medium text-sm">Loading Map Data...</p>
+            <p className="text-gray-400 font-medium text-sm">
+              Loading Map Data...
+            </p>
           </div>
         )}
       </div>
     </>
-  )
-})
+  );
+});
 
-export default InteractiveMap
+export default InteractiveMap;

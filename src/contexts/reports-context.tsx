@@ -1,8 +1,14 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { createContext, useContext, useEffect, useState, useCallback } from "react"
-import { db } from "@/lib/firebase" // Import Firebase db
+import type React from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
+import { db } from "@/lib/firebase"; // Import Firebase db
 import {
   collection,
   getDocs,
@@ -14,57 +20,70 @@ import {
   query,
   orderBy,
   Timestamp,
-  onSnapshot
-} from "firebase/firestore"
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
-import { storage } from "@/lib/firebase"
-import { useToast } from "@/hooks/use-toast"
+  onSnapshot,
+} from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
 
 export interface ScamReport {
-  id: string
-  title: string
-  company: string
-  scamType: string
-  industry: string
-  location: string
-  city: string
-  state: string
-  country: string
-  lat?: number
-  lng?: number
-  description: string
-  tags: string[]
-  anonymous: boolean
-  email?: string
-  status: "pending" | "approved" | "rejected"
-  createdAt: string
-  helpfulVotes: number
-  flagCount: number
-  views: number
-  riskLevel: "low" | "medium" | "high"
-  trustScore: number
-  evidenceUrls?: string[]
+  id: string;
+  title: string;
+  company: string;
+  scamType: string;
+  industry: string;
+  location: string;
+  city: string;
+  state: string;
+  country: string;
+  lat?: number;
+  lng?: number;
+  description: string;
+  tags: string[];
+  anonymous: boolean;
+  email?: string;
+  status: "pending" | "approved" | "rejected";
+  createdAt: string;
+  helpfulVotes: number;
+  flagCount: number;
+  views: number;
+  riskLevel: "low" | "medium" | "high";
+  trustScore: number;
+  evidenceUrls?: string[];
 }
 
 interface ReportsContextType {
-  reports: ScamReport[]
+  reports: ScamReport[];
   addReport: (
-    report: Omit<ScamReport, "id" | "createdAt" | "helpfulVotes" | "flagCount" | "views" | "trustScore" | "status">,
-  ) => Promise<ScamReport | null>
-  approveReport: (id: string) => Promise<void>
-  rejectReport: (id: string) => Promise<void>
-  deleteReport: (id: string) => Promise<void>
-  voteHelpful: (id: string) => Promise<void>
-  flagReport: (id: string) => Promise<void>
-  resolveReportFlags: (id: string) => Promise<void>
-  incrementViews: (id: string) => Promise<void>
-  getReportsByLocation: (lat: number, lng: number, radius?: number) => ScamReport[]
-  searchReportsByCity: (cityName: string) => ScamReport[]
-  uploadEvidence: (file: File) => Promise<string>
-  isLoadingReports: boolean
+    report: Omit<
+      ScamReport,
+      | "id"
+      | "createdAt"
+      | "helpfulVotes"
+      | "flagCount"
+      | "views"
+      | "trustScore"
+      | "status"
+    >,
+  ) => Promise<ScamReport | null>;
+  approveReport: (id: string) => Promise<void>;
+  rejectReport: (id: string) => Promise<void>;
+  deleteReport: (id: string) => Promise<void>;
+  voteHelpful: (id: string) => Promise<void>;
+  flagReport: (id: string) => Promise<void>;
+  resolveReportFlags: (id: string) => Promise<void>;
+  incrementViews: (id: string) => Promise<void>;
+  getReportsByLocation: (
+    lat: number,
+    lng: number,
+    radius?: number,
+  ) => ScamReport[];
+  searchReportsByCity: (cityName: string) => ScamReport[];
+  uploadEvidence: (file: File) => Promise<string>;
+  isLoadingReports: boolean;
 }
 
-const ReportsContext = createContext<ReportsContextType | undefined>(undefined)
+const ReportsContext = createContext<ReportsContextType | undefined>(undefined);
 
 /* -------------------------------------------------------------------------- */
 /*  helpers: snake-case ↔ camel-case                                           */
@@ -75,13 +94,13 @@ const GLOBAL_NODES = [
   { lat: 35.6762, lng: 139.6503, city: "Tokyo", country: "JP" },
   { lat: -33.8688, lng: 151.2093, city: "Sydney", country: "AU" },
   { lat: 1.3521, lng: 103.8198, city: "Singapore", country: "SG" },
-  { lat: 52.5200, lng: 13.4050, city: "Berlin", country: "DE" },
-  { lat: 28.6139, lng: 77.2090, city: "New Delhi", country: "IN" },
+  { lat: 52.52, lng: 13.405, city: "Berlin", country: "DE" },
+  { lat: 28.6139, lng: 77.209, city: "New Delhi", country: "IN" },
   { lat: -23.5505, lng: -46.6333, city: "Sao Paulo", country: "BR" },
   { lat: 30.0444, lng: 31.2357, city: "Cairo", country: "EG" },
   { lat: -26.2041, lng: 28.0473, city: "Johannesburg", country: "ZA" },
   { lat: 45.4215, lng: -75.6972, city: "Ottawa", country: "CA" },
-  { lat: 35.9078, lng: 127.7669, city: "Seoul", country: "KR" }
+  { lat: 35.9078, lng: 127.7669, city: "Seoul", country: "KR" },
 ];
 
 const getDeterministicCoords = (title: string) => {
@@ -94,7 +113,7 @@ const getDeterministicCoords = (title: string) => {
 };
 
 export const firestoreDocToScamReport = (docSnap: any): ScamReport => {
-  const data = docSnap.data()
+  const data = docSnap.data();
   let lat = data.lat;
   let lng = data.lng;
   let city = data.city ?? "";
@@ -125,18 +144,29 @@ export const firestoreDocToScamReport = (docSnap: any): ScamReport => {
     anonymous: data.anonymous ?? true,
     email: data.email ?? undefined,
     status: data.status || "approved",
-    createdAt: data.created_at?.toDate ? data.created_at.toDate().toISOString() : (data.created_at || new Date().toISOString()),
+    createdAt: data.created_at?.toDate
+      ? data.created_at.toDate().toISOString()
+      : data.created_at || new Date().toISOString(),
     helpfulVotes: data.helpful_votes || 0,
     flagCount: data.flag_count || 0,
     views: data.views || 0,
     riskLevel: data.risk_level as "low" | "medium" | "high",
     trustScore: data.trust_score || 50,
     evidenceUrls: data.evidence_urls || [],
-  }
-}
+  };
+};
 
 const scamReportToDbInsert = (
-  r: Omit<ScamReport, "id" | "createdAt" | "helpfulVotes" | "flagCount" | "views" | "trustScore" | "status">,
+  r: Omit<
+    ScamReport,
+    | "id"
+    | "createdAt"
+    | "helpfulVotes"
+    | "flagCount"
+    | "views"
+    | "trustScore"
+    | "status"
+  >,
 ) => ({
   title: r.title,
   company: r.company,
@@ -160,7 +190,7 @@ const scamReportToDbInsert = (
   trust_score: 50,
   status: "approved", // Default to approved for now
   evidence_urls: r.evidenceUrls || [],
-})
+});
 
 // -----------------------------------------------------------------------------
 // Local mock data used when Firebase is unavailable (preview mode)
@@ -226,7 +256,8 @@ const initialReports: ScamReport[] = [
     country: "USA",
     lat: 41.8781,
     lng: -87.6298,
-    description: 'Delivered five technical copywriting articles. The client reviewed and approved the drafts, but then shut down their email communication channel and blocked all invoice payment reminders.',
+    description:
+      "Delivered five technical copywriting articles. The client reviewed and approved the drafts, but then shut down their email communication channel and blocked all invoice payment reminders.",
     tags: ["ghost-client", "unpaid-work", "copywriting"],
     anonymous: false,
     email: "writer-consens@example.com",
@@ -238,44 +269,57 @@ const initialReports: ScamReport[] = [
     riskLevel: "low",
     trustScore: 65,
   },
-]
+];
 
 export function ReportsProvider({ children }: { children: React.ReactNode }) {
-  const { toast } = useToast()
-  const [reports, setReports] = useState<ScamReport[]>([])
-  const [isLoadingReports, setIsLoadingReports] = useState(true)
+  const { toast } = useToast();
+  const [reports, setReports] = useState<ScamReport[]>([]);
+  const [isLoadingReports, setIsLoadingReports] = useState(true);
 
   // Listen to reports from Firebase in real-time
   useEffect(() => {
-    setIsLoadingReports(true)
-    const q = query(collection(db, "scam_reports"), orderBy("created_at", "desc"))
+    setIsLoadingReports(true);
+    const q = query(
+      collection(db, "scam_reports"),
+      orderBy("created_at", "desc"),
+    );
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const fetchedReports: ScamReport[] = []
-      querySnapshot.forEach((doc) => {
-        fetchedReports.push(firestoreDocToScamReport(doc))
-      })
-      setReports(fetchedReports)
-      setIsLoadingReports(false)
-    }, (error) => {
-      console.error("Error listening to reports from Firebase:", error)
-      setReports(initialReports) // Fallback
-      setIsLoadingReports(false)
-    })
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        const fetchedReports: ScamReport[] = [];
+        querySnapshot.forEach((doc) => {
+          fetchedReports.push(firestoreDocToScamReport(doc));
+        });
+        setReports(fetchedReports);
+        setIsLoadingReports(false);
+      },
+      (error) => {
+        console.error("Error listening to reports from Firebase:", error);
+        setReports(initialReports); // Fallback
+        setIsLoadingReports(false);
+      },
+    );
 
-    return () => unsubscribe()
-  }, [])
+    return () => unsubscribe();
+  }, []);
 
   const addReport = useCallback(
     async (
       reportData: Omit<
         ScamReport,
-        "id" | "createdAt" | "helpfulVotes" | "flagCount" | "views" | "trustScore" | "status"
+        | "id"
+        | "createdAt"
+        | "helpfulVotes"
+        | "flagCount"
+        | "views"
+        | "trustScore"
+        | "status"
       >,
     ): Promise<ScamReport | null> => {
       try {
-        const payload = scamReportToDbInsert(reportData)
-        const docRef = await addDoc(collection(db, "scam_reports"), payload)
+        const payload = scamReportToDbInsert(reportData);
+        const docRef = await addDoc(collection(db, "scam_reports"), payload);
 
         // Construct the new report object to update local state immediately
         const newReport: ScamReport = {
@@ -287,163 +331,185 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
           flagCount: 0,
           views: 0,
           trustScore: 50,
-        }
+        };
 
-        setReports((prev) => [newReport, ...prev])
-        return newReport
-        setReports((prev) => [newReport, ...prev])
-        return newReport
+        setReports((prev) => [newReport, ...prev]);
+        return newReport;
+        setReports((prev) => [newReport, ...prev]);
+        return newReport;
       } catch (error) {
-        console.error("Error adding report:", error)
-        throw error
+        console.error("Error adding report:", error);
+        throw error;
       }
     },
     [],
-  )
+  );
 
   const approveReport = useCallback(async (id: string) => {
     try {
-      const reportRef = doc(db, "scam_reports", id)
-      await updateDoc(reportRef, { status: "approved" })
-      setReports((prev) => prev.map((r) => (r.id === id ? { ...r, status: "approved" as const } : r)))
+      const reportRef = doc(db, "scam_reports", id);
+      await updateDoc(reportRef, { status: "approved" });
+      setReports((prev) =>
+        prev.map((r) =>
+          r.id === id ? { ...r, status: "approved" as const } : r,
+        ),
+      );
     } catch (error) {
-      console.error("Error approving report:", error)
+      console.error("Error approving report:", error);
     }
-  }, [])
+  }, []);
 
   const rejectReport = useCallback(async (id: string) => {
     try {
-      const reportRef = doc(db, "scam_reports", id)
-      await updateDoc(reportRef, { status: "rejected" })
+      const reportRef = doc(db, "scam_reports", id);
+      await updateDoc(reportRef, { status: "rejected" });
       setReports((prev) =>
-        prev.map((report) => (report.id === id ? { ...report, status: "rejected" as const } : report)),
-      )
+        prev.map((report) =>
+          report.id === id
+            ? { ...report, status: "rejected" as const }
+            : report,
+        ),
+      );
     } catch (error) {
-      console.error("Error rejecting report:", error)
+      console.error("Error rejecting report:", error);
     }
-  }, [])
+  }, []);
 
   const deleteReport = useCallback(async (id: string) => {
-    console.log("Attempting to delete report with ID:", id)
+    console.log("Attempting to delete report with ID:", id);
     try {
-      await deleteDoc(doc(db, "scam_reports", id))
-      setReports((prev) => prev.filter((report) => report.id !== id))
+      await deleteDoc(doc(db, "scam_reports", id));
+      setReports((prev) => prev.filter((report) => report.id !== id));
       toast({
         title: "Report Deleted",
         description: "The report has been permanently removed.",
-      })
+      });
     } catch (error: any) {
-      console.error("Error deleting report:", error)
+      console.error("Error deleting report:", error);
       toast({
         title: "Deletion Failed",
         description: `Could not delete report: ${error.message}.`,
         variant: "destructive",
-      })
+      });
     }
-  }, [])
+  }, []);
 
   const voteHelpful = useCallback(async (id: string) => {
     try {
-      const reportRef = doc(db, "scam_reports", id)
+      const reportRef = doc(db, "scam_reports", id);
       await updateDoc(reportRef, {
         helpful_votes: increment(1),
-        trust_score: increment(2)
-      })
+        trust_score: increment(2),
+      });
 
       setReports((prev) =>
         prev.map((report) =>
           report.id === id
             ? {
-              ...report,
-              helpfulVotes: report.helpfulVotes + 1,
-              trustScore: Math.min(100, report.trustScore + 2),
-            }
+                ...report,
+                helpfulVotes: report.helpfulVotes + 1,
+                trustScore: Math.min(100, report.trustScore + 2),
+              }
             : report,
         ),
-      )
+      );
     } catch (error) {
-      console.error("Error voting helpful:", error)
+      console.error("Error voting helpful:", error);
     }
-  }, [])
+  }, []);
 
   const flagReport = useCallback(async (id: string) => {
     try {
-      const reportRef = doc(db, "scam_reports", id)
+      const reportRef = doc(db, "scam_reports", id);
       await updateDoc(reportRef, {
         flag_count: increment(1),
-        trust_score: increment(-5)
-      })
+        trust_score: increment(-5),
+      });
 
       setReports((prev) =>
         prev.map((report) =>
           report.id === id
             ? {
-              ...report,
-              flagCount: report.flagCount + 1,
-              trustScore: Math.max(0, report.trustScore - 5),
-            }
+                ...report,
+                flagCount: report.flagCount + 1,
+                trustScore: Math.max(0, report.trustScore - 5),
+              }
             : report,
         ),
-      )
+      );
     } catch (error) {
-      console.error("Error flagging report:", error)
+      console.error("Error flagging report:", error);
     }
-  }, [])
+  }, []);
 
   const resolveReportFlags = useCallback(async (id: string) => {
     try {
-      const reportRef = doc(db, "scam_reports", id)
-      await updateDoc(reportRef, { flag_count: 0 })
+      const reportRef = doc(db, "scam_reports", id);
+      await updateDoc(reportRef, { flag_count: 0 });
       setReports((prev) =>
-        prev.map((report) => (report.id === id ? { ...report, flagCount: 0 } : report)),
-      )
+        prev.map((report) =>
+          report.id === id ? { ...report, flagCount: 0 } : report,
+        ),
+      );
     } catch (error) {
-      console.error("Error resolving report flags:", error)
+      console.error("Error resolving report flags:", error);
     }
-  }, [])
+  }, []);
 
   const incrementViews = useCallback(async (id: string) => {
     try {
-      const reportRef = doc(db, "scam_reports", id)
-      await updateDoc(reportRef, { views: increment(1) })
-      setReports((prev) => prev.map((r) => (r.id === id ? { ...r, views: r.views + 1 } : r)))
+      const reportRef = doc(db, "scam_reports", id);
+      await updateDoc(reportRef, { views: increment(1) });
+      setReports((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, views: r.views + 1 } : r)),
+      );
     } catch (error) {
-      console.error("Error incrementing views:", error)
+      console.error("Error incrementing views:", error);
     }
-  }, [])
+  }, []);
 
   // Helper function for distance calculation (remains client-side)
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371 // Radius of the Earth in kilometers
-    const dLat = ((lat2 - lat1) * Math.PI) / 180
-    const dLon = ((lon2 - lon1) * Math.PI) / 180
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number => {
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    const d = R * c // Distance in kilometers
-    return d
-  }
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c; // Distance in kilometers
+    return d;
+  };
 
   const getReportsByLocation = useCallback(
     (lat: number, lng: number, radius = 50) => {
       return reports.filter((report) => {
-        if (!report.lat || !report.lng) return false
-        const distance = calculateDistance(lat, lng, report.lat, report.lng)
-        return distance <= radius && report.status === "approved"
-      })
+        if (!report.lat || !report.lng) return false;
+        const distance = calculateDistance(lat, lng, report.lat, report.lng);
+        return distance <= radius && report.status === "approved";
+      });
     },
     [reports],
-  )
+  );
 
   const searchReportsByCity = useCallback(
     (cityName: string) => {
       return reports.filter(
-        (report) => report.city.toLowerCase().includes(cityName.toLowerCase()) && report.status === "approved",
-      )
+        (report) =>
+          report.city.toLowerCase().includes(cityName.toLowerCase()) &&
+          report.status === "approved",
+      );
     },
     [reports],
-  )
+  );
 
   const value: ReportsContextType = {
     reports,
@@ -459,25 +525,27 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
     searchReportsByCity,
     uploadEvidence: async (file: File) => {
       try {
-        const storageRef = ref(storage, `evidence/${Date.now()}_${file.name}`)
-        const snapshot = await uploadBytes(storageRef, file)
-        const downloadURL = await getDownloadURL(snapshot.ref)
-        return downloadURL
+        const storageRef = ref(storage, `evidence/${Date.now()}_${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        return downloadURL;
       } catch (error) {
-        console.error("Error uploading evidence:", error)
-        throw error
+        console.error("Error uploading evidence:", error);
+        throw error;
       }
     },
     isLoadingReports,
-  }
+  };
 
-  return <ReportsContext.Provider value={value}>{children}</ReportsContext.Provider>
+  return (
+    <ReportsContext.Provider value={value}>{children}</ReportsContext.Provider>
+  );
 }
 
 export function useReports() {
-  const context = useContext(ReportsContext)
+  const context = useContext(ReportsContext);
   if (context === undefined) {
-    throw new Error("useReports must be used within a ReportsProvider")
+    throw new Error("useReports must be used within a ReportsProvider");
   }
-  return context
+  return context;
 }
