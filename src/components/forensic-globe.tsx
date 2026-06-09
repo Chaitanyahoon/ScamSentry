@@ -153,29 +153,29 @@ export function ForensicGlobe({ reports: propReports }: ForensicGlobeProps) {
     <div className="relative w-full h-full">
       {/* Control Overlay */}
       <div className="absolute top-6 left-6 z-10 space-y-4">
-        <div className="bg-[#0C0A09]/90 backdrop-blur-md border border-[#1F1914] p-5 rounded-lg shadow-2xl">
+        <div className="bg-card/90 backdrop-blur-md border border-border p-5 rounded-2xl shadow-xl">
           <div className="flex items-center gap-3 mb-3">
-            <div className="bg-primary/20 p-2 rounded border border-primary/30">
+            <div className="bg-primary/20 p-2 rounded-xl border border-primary/30">
               <GlobeIcon className="h-4 w-4 text-primary" />
             </div>
-            <h3 className="font-mono font-bold text-xs uppercase tracking-[0.2em] text-foreground">
-              Forensic Globe v2.6
+            <h3 className="font-semibold text-xs uppercase tracking-wider text-foreground">
+              Threat Intelligence Globe
             </h3>
           </div>
           <div className="space-y-2.5">
             <div className="flex items-center justify-between gap-12">
-              <span className="text-[10px] text-muted-foreground uppercase font-mono tracking-wider">
+              <span className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider">
                 Active Vectors
               </span>
-              <span className="text-[10px] text-primary font-mono font-bold">
+              <span className="text-[10px] text-primary font-bold">
                 {arcs.length}
               </span>
             </div>
             <div className="flex items-center justify-between gap-12">
-              <span className="text-[10px] text-muted-foreground uppercase font-mono tracking-wider">
+              <span className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider">
                 Intel Nodes
               </span>
-              <span className="text-[10px] text-foreground font-mono font-bold">
+              <span className="text-[10px] text-foreground font-bold">
                 {points.length}
               </span>
             </div>
@@ -284,7 +284,7 @@ export function ForensicGlobe({ reports: propReports }: ForensicGlobeProps) {
         hexBinPointWeight="size"
         hexBinResolution={4}
         hexMargin={0.2}
-        hexColor={() => "#1F1914"}
+        hexColor={() => "rgba(255, 255, 255, 0.08)"}
       />
     </div>
   );

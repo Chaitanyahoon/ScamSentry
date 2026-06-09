@@ -69,13 +69,13 @@ export const InteractiveMap = memo(function InteractiveMap({
     document.querySelectorAll(".maplibregl-marker").forEach((m) => m.remove());
 
     if (currentLocation) {
-      new maplibregl.Marker({ color: "#F59E0B" }) // Amber primary
+      new maplibregl.Marker({ color: "#f97316" }) // Orange primary
         .setLngLat([currentLocation.lng, currentLocation.lat])
         .setPopup(
           new maplibregl.Popup({ offset: 25, className: "custom-popup" })
             .setHTML(`
-            <div class="bg-[#0C0A07] border border-[#F59E0B]/50 p-4 shadow-sm font-sans tracking-tight">
-              <h3 class="font-semibold text-[#F59E0B] mb-1 text-sm">Target Location</h3>
+            <div class="bg-[#030712] border border-primary/50 p-4 rounded-xl shadow-md font-sans tracking-tight">
+              <h3 class="font-semibold text-primary mb-1 text-sm">Target Location</h3>
               <p class="text-xs text-gray-400">Search Center</p>
             </div>
           `),
@@ -131,10 +131,10 @@ export const InteractiveMap = memo(function InteractiveMap({
             closeButton: false,
             className: "custom-popup",
           }).setHTML(`
-            <div class="bg-[#0C0A07]/95 backdrop-blur-sm border border-gray-800 p-5 shadow-xl min-w-[280px] max-w-[320px] font-sans">
-              <div class="flex items-start justify-between mb-4 pb-3 border-b border-gray-800/50">
+            <div class="bg-[#030712]/95 backdrop-blur-sm border border-border p-5 rounded-2xl shadow-xl min-w-[280px] max-w-[320px] font-sans">
+              <div class="flex items-start justify-between mb-4 pb-3 border-b border-border/50">
                 <h3 class="text-sm font-semibold text-white flex-1 pr-2 tracking-tight line-clamp-1">${r.title}</h3>
-                <span class="px-2 py-0.5 border text-xs font-medium rounded-sm ${riskBadgeColor} shrink-0 capitalize">
+                <span class="px-2 py-0.5 border text-xs font-semibold rounded-full ${riskBadgeColor} shrink-0 capitalize">
                   ${r.riskLevel} Risk
                 </span>
               </div>
@@ -154,15 +154,15 @@ export const InteractiveMap = memo(function InteractiveMap({
                 </div>
                 <div class="flex items-center justify-between text-xs">
                   <span class="text-gray-500">Trust Score:</span>
-                  <span class="font-semibold text-green-500">${r.trustScore}%</span>
+                  <span class="font-semibold text-primary">${r.trustScore}%</span>
                 </div>
               </div>
 
-              <p class="text-xs text-gray-400 mb-5 line-clamp-2 leading-relaxed border-l-2 border-gray-800 pl-3">${r.description}</p>
+              <p class="text-xs text-gray-400 mb-5 line-clamp-2 leading-relaxed border-l-2 border-border pl-3">${r.description}</p>
               
               <a 
                 href="/reports/${r.id}" 
-                class="block w-full text-center px-4 py-2 bg-transparent border border-gray-700 hover:border-[#F59E0B] hover:text-[#F59E0B] text-gray-300 transition-colors text-sm font-medium rounded-sm"
+                class="block w-full text-center px-4 py-2 bg-transparent border border-border hover:border-primary hover:text-primary text-gray-300 transition-colors text-sm font-medium rounded-xl"
               >
                 View Full Details →
               </a>
@@ -195,12 +195,12 @@ export const InteractiveMap = memo(function InteractiveMap({
 
       <div
         ref={mapContainer}
-        className="relative bg-[#0C0A07] shadow-sm h-full w-full"
+        className="relative bg-background shadow-sm h-full w-full"
       >
         {!mapLoaded && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0C0A07] z-10 border border-gray-800/50">
-            <Loader2 className="h-8 w-8 animate-spin text-[#F59E0B] mb-4" />
-            <p className="text-gray-400 font-medium text-sm">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-background z-10 border border-border/50">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+            <p className="text-muted-foreground font-medium text-sm">
               Loading Map Data...
             </p>
           </div>
