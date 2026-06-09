@@ -152,7 +152,7 @@ export default function ApiDocsPage() {
                   You must be registered as a developer to generate an API key.
                 </p>
                 <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-mono" asChild>
-                  <a href="/admin/login">Developer Login</a>
+                  <a href="/login">Developer Login</a>
                 </Button>
               </div>
             ) : apiKey ? (

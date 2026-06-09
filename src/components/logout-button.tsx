@@ -22,7 +22,7 @@ export default function LogoutButton() {
         title: "Logged Out",
         description: "You have been successfully logged out.",
       })
-      router.push("/admin/login")
+      router.push("/login")
       router.refresh()
     } catch (error: any) {
       toast({

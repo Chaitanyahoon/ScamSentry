@@ -14,7 +14,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push("/admin/login")
+      router.push("/login")
     }
   }, [user, loading, router])
 
@@ -64,7 +64,7 @@ export default function AdminPage() {
                 onClick={async () => {
                   const { useAuth } = await import('@/contexts/auth-context')
                   // Will be handled by logout button
-                  window.location.href = "/admin/login?logout=true"
+                  window.location.href = "/login?logout=true"
                 }}
                 variant="destructive"
                 className="w-full"
