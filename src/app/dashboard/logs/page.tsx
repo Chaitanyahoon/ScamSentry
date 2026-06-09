@@ -184,11 +184,11 @@ export default function ForensicLogsPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1F1914] pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
         <div>
-          <h1 className="text-2xl font-mono font-bold text-foreground flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
             <Activity className="h-6 w-6 text-primary animate-pulse" />
-            FORENSIC <span className="text-primary">TELEMETRY LOGS</span>
+            Forensic Telemetry Logs
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Real-time scrolling debugger feed capturing DNS forensics, OSINT
@@ -196,9 +196,9 @@ export default function ForensicLogsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3 bg-[#0C0A09] border border-[#1F1914] px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-          <Server className="h-3.5 w-3.5 text-primary" />
-          LOGS BUFFER STATUS: ONLINE
+        <div className="flex items-center gap-3 bg-muted border border-border px-3.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground">
+          <Server className="h-4 w-4 text-primary" />
+          Logs Buffer Status: Online
         </div>
       </div>
 
@@ -210,21 +210,21 @@ export default function ForensicLogsPage() {
             onClick={() => setIsPlaying(!isPlaying)}
             variant="outline"
             className={cn(
-              "font-mono text-xs font-bold tracking-widest uppercase h-9 rounded-none border border-[#1F1914] bg-[#0C0A09]",
+              "text-xs font-semibold h-9 rounded-xl border border-border bg-card transition-all",
               isPlaying
-                ? "text-amber-500 hover:text-amber-400"
-                : "text-emerald-500 hover:text-emerald-400",
+                ? "text-amber-500 hover:text-amber-400 hover:bg-muted/30"
+                : "text-emerald-500 hover:text-emerald-400 hover:bg-muted/30",
             )}
           >
             {isPlaying ? (
               <>
                 <Pause className="h-3.5 w-3.5 mr-2" />
-                PAUSE_FEED
+                Pause Feed
               </>
             ) : (
               <>
                 <Play className="h-3.5 w-3.5 mr-2" />
-                RESUME_FEED
+                Resume Feed
               </>
             )}
           </Button>
@@ -232,10 +232,10 @@ export default function ForensicLogsPage() {
           <Button
             onClick={() => setLogs([])}
             variant="outline"
-            className="font-mono text-xs font-bold tracking-widest uppercase h-9 rounded-none border border-[#1F1914] bg-[#0C0A09] text-red-500 hover:text-red-400"
+            className="text-xs font-semibold h-9 rounded-xl border border-border bg-card text-red-500 hover:text-red-400 hover:bg-muted/30 transition-all"
           >
             <Trash2 className="h-3.5 w-3.5 mr-2" />
-            CLEAR_BUFFER
+            Clear Buffer
           </Button>
         </div>
 
@@ -244,9 +244,9 @@ export default function ForensicLogsPage() {
           <select
             value={sourceFilter}
             onChange={(e: any) => setSourceFilter(e.target.value)}
-            className="h-9 px-3 bg-[#0C0A09] border border-[#1F1914] text-foreground font-mono text-[10px] uppercase tracking-widest outline-none focus:border-primary/50 rounded-none cursor-pointer"
+            className="h-9 px-3 bg-background border border-border text-foreground text-xs rounded-xl focus:border-primary/50 outline-none cursor-pointer"
           >
-            <option value="all">ALL_SOURCES</option>
+            <option value="all">All Sources</option>
             <option value="ENGINE">ENGINE</option>
             <option value="SCRAPER">SCRAPER</option>
             <option value="VALIDATOR">VALIDATOR</option>
@@ -257,44 +257,44 @@ export default function ForensicLogsPage() {
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/60" />
             <input
               type="text"
-              placeholder="FILTER BY CONTENT..."
+              placeholder="Filter by content..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-9 pl-9 pr-4 bg-[#0C0A09] border border-[#1F1914] focus:border-primary/50 text-foreground font-mono text-[10px] rounded-none outline-none tracking-widest placeholder:text-muted-foreground/30 transition-all uppercase"
+              className="w-full h-9 pl-9 pr-4 bg-background border border-border focus:border-primary/50 text-foreground text-xs rounded-xl outline-none placeholder:text-muted-foreground/45 transition-all"
             />
           </div>
         </div>
       </div>
 
       {/* Retro Scrolling Terminal */}
-      <div className="border border-[#1F1914] bg-black rounded-none overflow-hidden shadow-2xl relative">
+      <div className="border border-border bg-black rounded-2xl overflow-hidden shadow-sm relative">
         {/* Scanlines Effect */}
         <div className="absolute inset-0 pointer-events-none bg-scanlines z-10 opacity-[0.04]" />
 
         {/* Terminal Header Bar */}
-        <div className="bg-[#0C0A09] p-3 border-b border-[#1F1914] flex items-center justify-between">
+        <div className="bg-card/40 p-3 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Terminal className="h-4 w-4 text-primary animate-pulse" />
-            <span className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest">
-              SECURE_SENTINEL_STREAMING_TELEMETRY
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Telemetry Stream
             </span>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 text-[9px] font-mono text-muted-foreground/50">
+            <div className="flex items-center gap-1 text-[10px] text-muted-foreground/50">
               <span
                 className={cn(
                   "h-1.5 w-1.5 rounded-full bg-emerald-500 mr-1.5",
                   isPlaying ? "animate-pulse" : "opacity-50",
                 )}
               ></span>
-              STATUS: {isPlaying ? "SCROLLING" : "HALTED"}
+              Status: {isPlaying ? "SCROLLING" : "HALTED"}
             </div>
-            <span className="text-[9px] font-mono text-muted-foreground/30">
+            <span className="text-[10px] text-muted-foreground/30">
               |
             </span>
-            <span className="text-[9px] font-mono text-muted-foreground/50">
-              BUFFER: {filteredLogs.length} LOGS
+            <span className="text-[10px] text-muted-foreground/50">
+              Buffer: {filteredLogs.length} logs
             </span>
           </div>
         </div>
@@ -305,14 +305,14 @@ export default function ForensicLogsPage() {
             <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground/40 space-y-2">
               <ShieldCheck className="h-8 w-8 text-muted-foreground/20" />
               <p className="uppercase tracking-widest text-[9px]">
-                NO LOGS IN BUFFER BUFFERING DRAINED
+                No logs in buffer
               </p>
             </div>
           ) : (
             filteredLogs.map((log) => (
               <div
                 key={log.id}
-                className="flex items-start gap-4 hover:bg-[#15110E]/10 p-1 border-l border-transparent hover:border-primary/20 transition-all"
+                className="flex items-start gap-4 hover:bg-muted/10 p-1 border-l border-transparent hover:border-primary/20 transition-all"
               >
                 {/* Time stamp */}
                 <span className="text-muted-foreground/40 tabular-nums shrink-0">

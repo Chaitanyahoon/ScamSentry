@@ -58,7 +58,7 @@ export default async function DossierPage({
           className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group"
         >
           <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-xs font-mono uppercase tracking-widest">
+          <span className="text-xs font-semibold uppercase tracking-wider">
             Back to Intelligence Feed
           </span>
         </Link>
@@ -66,15 +66,15 @@ export default async function DossierPage({
           <Button
             variant="outline"
             size="sm"
-            className="font-mono text-[10px] tracking-widest uppercase"
+            className="text-xs font-medium"
           >
             <FileText className="mr-2 h-4 w-4" /> Export JSON
           </Button>
           <Button
             size="sm"
-            className="bg-primary text-background font-bold font-mono text-[10px] tracking-widest uppercase px-6"
+            className="bg-primary text-primary-foreground font-semibold text-xs px-4"
           >
-            <Lock className="mr-2 h-4 w-4" /> CLASSIFIED REPORT
+            <Lock className="mr-2 h-4 w-4" /> SECURE REPORT
           </Button>
         </div>
       </div>
@@ -83,17 +83,17 @@ export default async function DossierPage({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-start gap-6">
-            <div className="bg-primary/10 p-5 rounded-2xl border border-primary/20 shadow-[0_0_30px_rgba(255,191,0,0.1)]">
+            <div className="bg-primary/10 p-5 rounded-2xl border border-primary/20 shadow-sm">
               <Fingerprint className="h-12 w-12 text-primary" />
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-mono font-bold tracking-tight text-foreground">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground">
                   {domain}
                 </h1>
                 <span
                   className={cn(
-                    "px-3 py-1 rounded text-[10px] font-bold uppercase tracking-tighter border",
+                    "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border",
                     forensics.score > 80
                       ? "bg-red-500/10 text-red-500 border-red-500/20"
                       : "bg-primary/10 text-primary border-primary/20",
@@ -102,17 +102,17 @@ export default async function DossierPage({
                   Risk Score: {forensics.score}/100
                 </span>
               </div>
-              <p className="text-muted-foreground font-mono text-xs flex items-center gap-2">
-                <Globe className="h-3 w-3" /> Targeted Entity:{" "}
+              <p className="text-muted-foreground text-sm flex items-center gap-2">
+                <Globe className="h-3 w-3 text-muted-foreground/70" /> Targeted Entity:{" "}
                 {dossier.type || "Generic Phishing"}
               </p>
               <div className="flex items-center gap-4 pt-2">
-                <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground uppercase bg-[#15110E] px-2 py-1 rounded border border-[#1F1914]">
-                  <Layers className="h-3 w-3" /> Hash: 0x
+                <div className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground uppercase bg-muted px-2.5 py-1.5 rounded-lg border border-border">
+                  <Layers className="h-3.5 w-3.5 text-muted-foreground/70" /> Hash: 0x
                   {forensics.fingerprint?.hash}
                 </div>
-                <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground uppercase bg-[#15110E] px-2 py-1 rounded border border-[#1F1914]">
-                  <Calendar className="h-3 w-3" /> First Seen:{" "}
+                <div className="flex items-center gap-2 text-[11px] text-muted-foreground uppercase bg-muted px-2.5 py-1.5 rounded-lg border border-border">
+                  <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" /> First Seen:{" "}
                   {dossier.firstSeen?.toLocaleDateString()}
                 </div>
               </div>
@@ -120,17 +120,17 @@ export default async function DossierPage({
           </div>
 
           {/* Forensic Narrative */}
-          <div className="bg-[#0C0A09] border border-[#1F1914] rounded-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-[#1F1914] bg-[#15110E]/50 flex items-center gap-2">
+          <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+            <div className="px-6 py-4 border-b border-border bg-muted/30 flex items-center gap-2">
               <Info className="h-4 w-4 text-primary" />
-              <h3 className="text-xs font-mono font-bold uppercase tracking-widest">
+              <h3 className="text-sm font-semibold uppercase tracking-wider">
                 Forensic Narrative
               </h3>
             </div>
             <div className="p-8 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-4">
-                  <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     Detection Vectors
                   </h4>
                   <ul className="space-y-4">
@@ -150,15 +150,15 @@ export default async function DossierPage({
 
                 <div className="space-y-6">
                   <div className="space-y-4">
-                    <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                       Infrastructure Profile
                     </h4>
                     <div className="space-y-3">
-                      <div className="p-4 bg-[#15110E] border border-[#1F1914] rounded-xl flex items-center justify-between group hover:border-primary/20 transition-all">
+                      <div className="p-4 bg-muted/40 border border-border rounded-xl flex items-center justify-between group hover:border-primary/20 transition-all">
                         <div className="flex items-center gap-3">
                           <Server className="h-4 w-4 text-primary opacity-60" />
                           <div>
-                            <p className="text-[9px] text-muted-foreground uppercase font-mono">
+                            <p className="text-[10px] text-muted-foreground uppercase font-semibold">
                               Registrar
                             </p>
                             <p className="text-xs font-bold text-foreground truncate">
@@ -170,10 +170,10 @@ export default async function DossierPage({
                         <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
 
-                      <div className="p-4 bg-[#15110E] border border-[#1F1914] rounded-xl space-y-2 group hover:border-primary/20 transition-all">
+                      <div className="p-4 bg-muted/40 border border-border rounded-xl space-y-2 group hover:border-primary/20 transition-all">
                         <div className="flex items-center gap-3">
                           <Globe className="h-4 w-4 text-primary opacity-60" />
-                          <p className="text-[9px] text-muted-foreground uppercase font-mono">
+                          <p className="text-[10px] text-muted-foreground uppercase font-semibold">
                             Nameservers
                           </p>
                         </div>
@@ -181,7 +181,7 @@ export default async function DossierPage({
                           {forensics.infrastructure?.nameservers?.map((ns) => (
                             <p
                               key={ns}
-                              className="text-xs font-mono text-foreground/80"
+                              className="text-xs font-mono text-muted-foreground"
                             >
                               {ns}
                             </p>
@@ -202,16 +202,16 @@ export default async function DossierPage({
 
         {/* Sidebar Intelligence */}
         <div className="space-y-6">
-          <div className="bg-[#0C0A09] border border-primary/20 rounded-2xl p-6 relative overflow-hidden group">
+          <div className="bg-card border border-border rounded-2xl p-6 relative overflow-hidden group shadow-sm">
             <div className="absolute top-0 right-0 p-3 opacity-5">
               <Network className="h-24 w-24 text-primary rotate-12" />
             </div>
-            <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-primary mb-4">
-              Neural Cluster ID
+            <h3 className="text-xs font-bold uppercase tracking-wider text-primary mb-4">
+              Threat Network Vector
             </h3>
             <div className="space-y-4 relative z-10">
               <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
-                <p className="text-[9px] text-muted-foreground uppercase mb-1">
+                <p className="text-[10px] text-muted-foreground uppercase mb-1 font-semibold">
                   Fingerprint SHA-256
                 </p>
                 <p className="text-xs font-mono font-bold text-primary break-all">
@@ -219,25 +219,25 @@ export default async function DossierPage({
                 </p>
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Our AI cluster engine has identified this infrastructure as part
-                of a recurring campaign. Shared traits discovered in structural
-                DNA and NS rotation patterns.
+                Our security engine has identified this infrastructure as part
+                of a recurring campaign. Shared traits discovered in infrastructure
+                setups and nameserver rotation patterns.
               </p>
               <Button
                 variant="ghost"
                 className="w-full text-xs text-primary hover:text-primary hover:bg-primary/10 justify-between"
               >
-                Explore Cluster Network
+                Explore Threat Network
                 <ChevronLeft className="h-4 w-4 rotate-180" />
               </Button>
             </div>
           </div>
 
-          <div className="bg-[#0C0A09] border border-[#1F1914] rounded-2xl p-6">
-            <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-foreground mb-4">
-              OSINT Feed Origin
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground mb-4">
+              Threat Intelligence Feed
             </h3>
-            <div className="flex items-center gap-4 p-4 bg-[#15110E] border border-[#1F1914] rounded-xl">
+            <div className="flex items-center gap-4 p-4 bg-muted/40 border border-border rounded-xl">
               <div className="bg-primary/10 p-2 rounded border border-primary/20">
                 <Globe className="h-4 w-4 text-primary" />
               </div>
@@ -246,7 +246,7 @@ export default async function DossierPage({
                   {dossier.source}
                 </p>
                 <p className="text-[9px] text-muted-foreground uppercase">
-                  Reporting Authority
+                  Feed Provider
                 </p>
               </div>
             </div>

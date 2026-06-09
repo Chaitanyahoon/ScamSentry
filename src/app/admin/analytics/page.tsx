@@ -60,28 +60,28 @@ export default function AnalyticsDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0C0A09] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Decorative Scanlines */}
-      <div className="absolute inset-x-0 top-0 h-px bg-primary/20 shadow-[0_0_20px_rgba(255,191,0,0.5)] z-0" />
-      <div className="fixed inset-0 pointer-events-none z-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:32px_32px] opacity-20 mask-image:linear-gradient(to_bottom,white,transparent)" />
+    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Decorative background grid and blurs */}
+      <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.05]" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto space-y-8 relative z-10">
         {/* Header */}
-        <div className="space-y-4 border-b border-[#1F1914] pb-8">
-          <div className="inline-flex items-center gap-2">
-            <Activity className="h-4 w-4 text-primary" />
-            <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2rem]">
-              ANALYTICS_TERMINAL_V2.19
+        <div className="space-y-4 border-b border-border pb-8">
+          <div className="inline-flex items-center gap-2 text-primary">
+            <Activity className="h-4 w-4" />
+            <span className="text-xs font-semibold uppercase tracking-wider">
+              Analytics Dashboard
             </span>
           </div>
-          <h1 className="text-4xl sm:text-6xl font-extrabold text-foreground uppercase tracking-widest drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-            Intelligence{" "}
-            <span className="text-primary drop-shadow-[0_0_10px_rgba(255,191,0,0.3)]">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight">
+            System Intelligence{" "}
+            <span className="text-primary">
               Metrics
             </span>
           </h1>
-          <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest border-l-2 border-primary/50 pl-4">
-            Real-time scan telemetry and system performance signatures.
+          <p className="text-sm text-muted-foreground border-l-2 border-primary/50 pl-4 max-w-xl">
+            Real-time scan telemetry and system performance diagnostics.
           </p>
 
           <div className="flex gap-2 mt-6">
@@ -89,13 +89,13 @@ export default function AnalyticsDashboard() {
               <button
                 key={d}
                 onClick={() => setDays(d)}
-                className={`px-4 py-1 font-mono text-[10px] uppercase tracking-widest transition-all border ${
+                className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
                   days === d
-                    ? "bg-primary text-black border-primary shadow-[0_0_10px_rgba(255,191,0,0.3)]"
-                    : "bg-[#15110E] text-muted-foreground border-[#1F1914] hover:border-primary/50"
+                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                    : "bg-muted text-muted-foreground border-border hover:border-primary/50"
                 }`}
               >
-                T-[{d}D]
+                {d} Days
               </button>
             ))}
           </div>
@@ -105,70 +105,63 @@ export default function AnalyticsDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             {
-              label: "TOTAL_SCANS",
+              label: "Total Scans",
               value: metrics.totalScans,
               icon: Activity,
-              detail: `IN_${days}D`,
+              detail: `Last ${days} days`,
               color: "text-primary",
             },
             {
-              label: "THREATS_DETECTED",
+              label: "Threats Deflected",
               value: metrics.threatsDetected,
               icon: AlertTriangle,
-              detail: `${metrics.totalScans > 0 ? ((metrics.threatsDetected / metrics.totalScans) * 100).toFixed(1) : 0}%_OF_SCANS`,
+              detail: `${metrics.totalScans > 0 ? ((metrics.threatsDetected / metrics.totalScans) * 100).toFixed(1) : 0}% of scans`,
               color: "text-red-500",
             },
             {
-              label: "AVG_TRUST_SCORE",
+              label: "Average Trust Score",
               value: `${metrics.averageScore.toFixed(1)}/100`,
               icon: TrendingUp,
-              detail: "SYSTEM_WIDE",
+              detail: "System wide",
               color: "text-primary",
             },
             {
-              label: "EST_FALSE_POSITIVES",
+              label: "Est. False Positives",
               value: metrics.falsePositiveEstimate,
               icon: CheckCircle,
-              detail: "HEURISTIC_SIG",
+              detail: "Heuristic engine",
               color: "text-orange-500",
             },
           ].map((kpi, idx) => (
             <div
               key={idx}
-              className="bg-[#15110E] border border-[#1F1914] p-6 relative group overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+              className="bg-card border border-border p-6 rounded-2xl relative group overflow-hidden shadow-sm hover:shadow-md transition-all"
             >
-              {/* HUD Corner Accents */}
-              <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-primary/20 group-hover:border-primary transition-colors" />
-              <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-primary/20 group-hover:border-primary transition-colors" />
-
               <div className="flex items-center justify-between mb-4">
-                <span className="text-[9px] font-mono font-bold text-muted-foreground uppercase tracking-widest">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   {kpi.label}
                 </span>
-                <kpi.icon className={`h-4 w-4 ${kpi.color} opacity-70`} />
+                <kpi.icon className={`h-4.5 w-4.5 ${kpi.color} opacity-75`} />
               </div>
               <div
-                className={`text-3xl font-mono font-bold ${kpi.color} mb-1 tracking-tighter`}
+                className={`text-3xl font-bold ${kpi.color} mb-1 tracking-tight`}
               >
-                {kpi.value}
+                {typeof kpi.value === "number" ? kpi.value.toLocaleString() : kpi.value}
               </div>
-              <div className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest">
+              <div className="text-xs text-muted-foreground/60">
                 {kpi.detail}
               </div>
-
-              {/* Scanline overlay */}
-              <div className="absolute inset-0 bg-[linear-gradient(transparent_0%,rgba(255,191,0,0.03)_50%,transparent_100%)] bg-[size:100%_4px] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Layer Accuracy */}
-          <div className="bg-[#15110E] border border-[#1F1914] p-8 shadow-[0_10px_40px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+          <div className="bg-card border border-border p-8 rounded-2xl shadow-sm relative overflow-hidden group">
             <div className="flex items-center gap-2 mb-6">
-              <TerminalSquare className="h-4 w-4 text-primary" />
-              <h2 className="text-xs font-mono font-bold text-foreground uppercase tracking-[0.2rem]">
-                LAYER_DIAGNOSTICS
+              <TerminalSquare className="h-4.5 w-4.5 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+                Detection Layer Diagnostics
               </h2>
             </div>
 
@@ -176,7 +169,7 @@ export default function AnalyticsDashboard() {
               <BarChart
                 data={[
                   {
-                    name: "TELEMETRY",
+                    name: "Telemetry",
                     Heuristics: metrics.layerAccuracy.heuristics,
                     Forensics: metrics.layerAccuracy.forensics,
                     "Threat Intel": metrics.layerAccuracy.threatIntel,
@@ -187,72 +180,66 @@ export default function AnalyticsDashboard() {
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke="#1F1914"
+                  stroke="rgba(255,255,255,0.08)"
                   vertical={false}
                 />
                 <XAxis
                   dataKey="name"
-                  stroke="#525252"
-                  fontSize={10}
-                  fontFamily="monospace"
+                  stroke="#888888"
+                  fontSize={11}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis
-                  stroke="#525252"
-                  fontSize={10}
-                  fontFamily="monospace"
+                  stroke="#888888"
+                  fontSize={11}
                   axisLine={false}
                   tickLine={false}
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#0C0A09",
-                    border: "1px solid #1F1914",
-                    borderRadius: "0",
+                    backgroundColor: "#030712",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: "12px",
                   }}
                   itemStyle={{
-                    fontSize: "10px",
-                    fontFamily: "monospace",
-                    textTransform: "uppercase",
+                    fontSize: "11px",
+                    textTransform: "capitalize",
                   }}
-                  cursor={{ fill: "#1F1914" }}
                 />
                 <Legend
-                  iconType="square"
+                  iconType="circle"
                   wrapperStyle={{
-                    fontSize: "10px",
-                    fontFamily: "monospace",
-                    textTransform: "uppercase",
+                    fontSize: "11px",
                     paddingTop: "20px",
                   }}
                 />
                 <Bar
                   dataKey="Heuristics"
-                  fill="#FFBF00"
-                  radius={[2, 2, 0, 0]}
+                  fill="#f97316"
+                  radius={[4, 4, 0, 0]}
                 />
-                <Bar dataKey="Forensics" fill="#0EA5E9" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="Forensics" fill="#0EA5E9" radius={[4, 4, 0, 0]} />
                 <Bar
                   dataKey="Threat Intel"
-                  fill="#F97316"
-                  radius={[2, 2, 0, 0]}
+                  fill="#f43f5e"
+                  radius={[4, 4, 0, 0]}
                 />
                 <Bar
                   dataKey="Internal Graph"
-                  fill="#EF4444"
-                  radius={[2, 2, 0, 0]}
+                  fill="#10b981"
+                  radius={[4, 4, 0, 0]}
                 />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
           {/* Scan Trend */}
-          <div className="bg-[#15110E] border border-[#1F1914] p-8 shadow-[0_10px_40px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+          <div className="bg-card border border-border p-8 rounded-2xl shadow-sm relative overflow-hidden group">
             <div className="flex items-center gap-2 mb-6">
-              <TrendingUp className="h-4 w-4 text-primary" />
-              <h2 className="text-xs font-mono font-bold text-foreground uppercase tracking-[0.2rem]">
-                VOLUME_TRAJECTORY
+              <TrendingUp className="h-4.5 w-4.5 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+                Scan Volume Trajectory
               </h2>
             </div>
 
@@ -263,54 +250,49 @@ export default function AnalyticsDashboard() {
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke="#1F1914"
+                  stroke="rgba(255,255,255,0.08)"
                   vertical={false}
                 />
                 <XAxis
                   dataKey="date"
-                  stroke="#525252"
-                  fontSize={10}
-                  fontFamily="monospace"
+                  stroke="#888888"
+                  fontSize={11}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis
-                  stroke="#525252"
-                  fontSize={10}
-                  fontFamily="monospace"
+                  stroke="#888888"
+                  fontSize={11}
                   axisLine={false}
                   tickLine={false}
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#0C0A09",
-                    border: "1px solid #1F1914",
-                    borderRadius: "0",
+                    backgroundColor: "#030712",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: "12px",
                   }}
                   itemStyle={{
-                    fontSize: "10px",
-                    fontFamily: "monospace",
-                    textTransform: "uppercase",
+                    fontSize: "11px",
                   }}
                 />
                 <Line
                   type="monotone"
                   dataKey="count"
-                  stroke="#FFBF00"
-                  strokeWidth={2}
+                  stroke="#f97316"
+                  strokeWidth={2.5}
                   dot={false}
                   activeDot={{
-                    r: 4,
-                    fill: "#FFBF00",
-                    stroke: "#0C0A09",
+                    r: 5,
+                    fill: "#f97316",
+                    stroke: "#030712",
                     strokeWidth: 2,
                   }}
                 />
-                {/* Area under line */}
                 <defs>
                   <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#FFBF00" stopOpacity={0.1} />
-                    <stop offset="95%" stopColor="#FFBF00" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.1} />
+                    <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
                   </linearGradient>
                 </defs>
               </LineChart>
@@ -320,29 +302,29 @@ export default function AnalyticsDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Top URL Patterns */}
-          <div className="bg-[#15110E] border border-[#1F1914] p-8 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+          <div className="bg-card border border-border p-8 rounded-2xl shadow-sm">
             <div className="flex items-center gap-2 mb-6">
-              <ShieldAlert className="h-4 w-4 text-primary" />
-              <h2 className="text-xs font-mono font-bold text-foreground uppercase tracking-[0.2rem]">
-                RECURRING_VECTORS
+              <ShieldAlert className="h-4.5 w-4.5 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+                Recurring Threat Vectors
               </h2>
             </div>
             <div className="space-y-3">
               {metrics.topUrlPatterns.map((item: any, idx: number) => (
                 <div
                   key={item.pattern}
-                  className="flex justify-between items-center p-4 bg-[#0C0A09] border border-[#1F1914] hover:border-primary/30 transition-colors group"
+                  className="flex justify-between items-center p-4 bg-muted/40 border border-border hover:border-primary/30 rounded-xl transition-all group"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-mono text-muted-foreground/30">
+                    <span className="text-xs font-mono text-muted-foreground/40">
                       {String(idx + 1).padStart(2, "0")}
                     </span>
-                    <span className="font-mono text-xs text-foreground uppercase tracking-widest">
+                    <span className="font-semibold text-sm text-foreground">
                       {item.pattern}
                     </span>
                   </div>
-                  <span className="font-mono text-[10px] font-bold text-primary group-hover:drop-shadow-[0_0_5px_rgba(255,191,0,0.5)] transition-all">
-                    {item.count} SCANS
+                  <span className="font-mono text-xs font-bold text-primary">
+                    {item.count} scans
                   </span>
                 </div>
               ))}
@@ -350,18 +332,18 @@ export default function AnalyticsDashboard() {
           </div>
 
           {/* Recent Scans */}
-          <div className="bg-[#15110E] border border-[#1F1914] p-8 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+          <div className="bg-card border border-border p-8 rounded-2xl shadow-sm">
             <div className="flex items-center gap-2 mb-6">
-              <Activity className="h-4 w-4 text-primary" />
-              <h2 className="text-xs font-mono font-bold text-foreground uppercase tracking-[0.2rem]">
-                LIVE_TELEMETRY_LOG
+              <Activity className="h-4.5 w-4.5 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+                Live Telemetry Log
               </h2>
             </div>
             <div className="space-y-3 max-h-[440px] overflow-y-auto pr-2 custom-scrollbar">
               {recentScans.slice(0, 10).map((scan) => (
                 <div
                   key={scan.id}
-                  className={`flex justify-between items-start p-4 border relative group transition-all hover:bg-white/5 ${
+                  className={`flex justify-between items-start p-4 border relative group transition-all rounded-xl hover:bg-muted/30 ${
                     scan.riskLevel === "Critical Threat"
                       ? "border-red-500/20 bg-red-500/5"
                       : scan.riskLevel === "Suspicious"
@@ -369,22 +351,21 @@ export default function AnalyticsDashboard() {
                         : "border-primary/20 bg-primary/5"
                   }`}
                 >
-                  {/* Pulse indicator for very recent scans */}
                   <div
-                    className={`absolute left-0 top-0 bottom-0 w-1 ${
+                    className={`absolute left-0 top-3 bottom-3 w-1 rounded-r-lg ${
                       scan.riskLevel === "Critical Threat"
-                        ? "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]"
+                        ? "bg-red-500"
                         : scan.riskLevel === "Suspicious"
                           ? "bg-orange-500"
                           : "bg-primary"
                     }`}
                   />
 
-                  <div className="space-y-1 flex-1 min-w-0 pr-4">
-                    <p className="font-mono text-xs text-foreground truncate uppercase tracking-widest">
+                  <div className="space-y-1 flex-1 min-w-0 pr-4 pl-2">
+                    <p className="font-mono text-xs text-foreground truncate">
                       {scan.url.replace(/^https?:\/\//, "")}
                     </p>
-                    <p className="text-[9px] font-mono text-muted-foreground/50 uppercase tracking-widest">
+                    <p className="text-[10px] text-muted-foreground/60">
                       {new Date(scan.timestamp).toLocaleString()}
                     </p>
                   </div>
@@ -393,7 +374,7 @@ export default function AnalyticsDashboard() {
                       {scan.finalScore}/100
                     </p>
                     <p
-                      className={`text-[9px] font-mono font-bold uppercase tracking-widest ${
+                      className={`text-[10px] font-bold uppercase ${
                         scan.riskLevel === "Critical Threat"
                           ? "text-red-500"
                           : scan.riskLevel === "Suspicious"
@@ -401,7 +382,7 @@ export default function AnalyticsDashboard() {
                             : "text-primary"
                       }`}
                     >
-                      {scan.riskLevel.replace(" ", "_")}
+                      {scan.riskLevel}
                     </p>
                   </div>
                 </div>
