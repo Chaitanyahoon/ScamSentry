@@ -1,0 +1,40 @@
+# Render Blueprint configuration for ScamSentry Backend Infrastructure
+# To deploy, upload your repository to GitHub and click "New > Blueprint Route" on Render dashboard.
+
+databases:
+  - name: scamsentry-db
+    databaseName: scamsentry
+    plan: free
+
+services:
+  - type: web
+    name: scamsentry-backend
+    env: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: scamsentry-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: scamsentry-cache
+          property: connectionString
+      - key: API_SECRET_KEY
+        generateValue: true # Generates a random 24-character key automatically
+      - key: ENVIRONMENT
+        value: production
+      - key: CORS_ALLOWED_ORIGINS
+        value: "*" # Update this in Render dashboard settings with your live Vercel Next.js URL for CORS protection
+      - key: GOOGLE_SAFE_BROWSING_API_KEY
+        sync: false # Set this value manually in the Render dashboard env variables settings
+      - key: GEMINI_API_KEY
+        sync: false # Set this value manually in the Render dashboard env variables settings
+
+  - type: keyvalue
+    name: scamsentry-cache
+    plan: free
+    ipAllowList: [] # Restricts access to Render's internal private network only
