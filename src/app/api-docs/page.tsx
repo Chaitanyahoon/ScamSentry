@@ -87,7 +87,7 @@ export default function ApiDocsPage() {
       <div className="bg-card border-b border-border py-12">
         <div className="container px-4 sm:px-6">
           <div className="max-w-3xl">
-            <h1 className="text-3xl font-bold text-foreground mb-4 font-mono flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-foreground mb-4 flex items-center gap-3">
               <Code className="h-8 w-8 text-primary" />
               ScamSentry API
             </h1>
@@ -103,7 +103,7 @@ export default function ApiDocsPage() {
         {/* Main Docs Content */}
         <div className="lg:col-span-2 space-y-10">
           <section>
-            <h2 className="text-xl font-bold font-mono mb-4 text-primary">
+            <h2 className="text-xl font-bold mb-4 text-primary">
               Overview
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
@@ -116,10 +116,10 @@ export default function ApiDocsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold font-mono mb-4 text-primary">
+            <h2 className="text-xl font-bold mb-4 text-primary">
               Endpoint: Verify Core
             </h2>
-            <div className="bg-[#0C0A07] border border-border p-4 rounded-md font-mono text-sm mb-4">
+            <div className="bg-muted border border-border p-4 rounded-xl font-mono text-sm mb-4">
               <span className="text-primary font-bold">POST</span>{" "}
               https://scamsentry.com/api/v1/verify
             </div>
@@ -127,7 +127,7 @@ export default function ApiDocsPage() {
             <h3 className="font-semibold text-foreground mb-2 mt-6">
               Request Headers
             </h3>
-            <div className="bg-[#0C0A07] border border-border p-4 rounded-md font-mono text-sm overflow-x-auto text-muted-foreground mb-6">
+            <div className="bg-muted border border-border p-4 rounded-xl font-mono text-sm overflow-x-auto text-muted-foreground mb-6">
               <span className="text-white">Authorization:</span> Bearer
               ss_live_your_api_key
               <br />
@@ -135,7 +135,7 @@ export default function ApiDocsPage() {
             </div>
 
             <h3 className="font-semibold text-foreground mb-2">Request Body</h3>
-            <div className="bg-[#0C0A07] border border-border p-4 rounded-md font-mono text-sm overflow-x-auto text-muted-foreground mb-6">
+            <div className="bg-muted border border-border p-4 rounded-xl font-mono text-sm overflow-x-auto text-muted-foreground mb-6">
               {JSON.stringify(
                 { url: "https://secure-login.paypal.com.scam.net" },
                 null,
@@ -146,7 +146,7 @@ export default function ApiDocsPage() {
             <h3 className="font-semibold text-foreground mb-2">
               Example Response
             </h3>
-            <div className="bg-[#0C0A07] border border-border p-4 rounded-md font-mono text-xs overflow-x-auto text-muted-foreground">
+            <div className="bg-muted border border-border p-4 rounded-xl font-mono text-xs overflow-x-auto text-muted-foreground">
               <pre>{`{
   "success": true,
   "meta": {
@@ -171,8 +171,8 @@ export default function ApiDocsPage() {
 
         {/* Sidebar: API Dashboard */}
         <div className="lg:col-span-1">
-          <div className="bg-card border border-border p-6 sticky top-24">
-            <h3 className="text-lg font-bold font-mono text-foreground mb-6 flex items-center gap-2">
+          <div className="bg-card border border-border p-6 rounded-2xl sticky top-24">
+            <h3 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
               <Key className="h-5 w-5 text-primary" />
               API Dashboard
             </h3>
@@ -193,7 +193,7 @@ export default function ApiDocsPage() {
                   You must be registered as a developer to generate an API key.
                 </p>
                 <Button
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-mono"
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
                   asChild
                 >
                   <a href="/login">Developer Login</a>
@@ -206,7 +206,7 @@ export default function ApiDocsPage() {
                     Your Live API Key
                   </label>
                   <div className="flex items-center gap-2">
-                    <div className="bg-[#0C0A07] border border-border px-3 py-2 font-mono text-sm text-primary flex-1 overflow-hidden text-ellipsis">
+                    <div className="bg-muted border border-border px-3 py-2 rounded-lg font-mono text-sm text-primary flex-1 overflow-hidden text-ellipsis">
                       {apiKey.key?.substring(0, 12)}...
                     </div>
                     <Button
@@ -229,7 +229,7 @@ export default function ApiDocsPage() {
 
                 <div className="pt-4 border-t border-border">
                   <Button
-                    className="w-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 font-mono"
+                    className="w-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 font-semibold"
                     asChild
                   >
                     <a href="/dashboard/api">Open Full Dashboard</a>
@@ -245,7 +245,7 @@ export default function ApiDocsPage() {
                       {apiKey.usageCount || 0} / {apiKey.planLimit || 1000}
                     </span>
                   </div>
-                  <div className="w-full bg-[#0C0A07] h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
                     <div
                       className="bg-primary h-full transition-all duration-500"
                       style={{
@@ -269,7 +269,7 @@ export default function ApiDocsPage() {
                 <Button
                   onClick={generateKey}
                   disabled={isGenerating}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-mono"
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
                 >
                   {isGenerating ? "Generating..." : "Generate live key"}
                 </Button>

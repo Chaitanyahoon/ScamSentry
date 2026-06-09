@@ -2,7 +2,6 @@ import type React from "react";
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
-// Removed ThemeProvider import
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Toaster } from "@/components/ui/toaster";
@@ -42,8 +41,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F59E0B" },
-    { media: "(prefers-color-scheme: dark)", color: "#0C0A07" },
+    { media: "(prefers-color-scheme: light)", color: "#f97316" },
+    { media: "(prefers-color-scheme: dark)", color: "#030712" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -62,7 +61,6 @@ export default function RootLayout({
         className={`${ibmPlexMono.variable} flex flex-col min-h-screen`}
         suppressHydrationWarning
       >
-        {/* ThemeProvider removed */}
         <ReportsProvider>
           <AuthProvider>
             <Header />
