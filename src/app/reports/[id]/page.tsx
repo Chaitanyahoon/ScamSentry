@@ -224,13 +224,13 @@ export default function ReportDetailPage() {
     getSourceDetails(report);
 
   return (
-    <div className="min-h-screen bg-background py-12 relative text-foreground">
+    <div className="min-h-screen bg-background py-8 relative text-foreground">
       <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.06]" />
 
       <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
           {/* Header Action Bar */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5">
             <button
               onClick={() => router.push("/reports")}
               className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors flex items-center group px-4 py-2 border border-border bg-card rounded-xl"
@@ -249,7 +249,7 @@ export default function ReportDetailPage() {
           {/* Source node indicator header banner */}
           <div
             className={cn(
-              "border border-border bg-card p-6 mb-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 rounded-2xl",
+              "border border-border bg-card p-4 mb-4 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-2xl",
             )}
           >
             <div className="flex-1">
@@ -287,13 +287,13 @@ export default function ReportDetailPage() {
           </div>
 
           {/* Master Dossier Console Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Left side: Main Dossier Payload (2 cols) */}
             <div className="lg:col-span-2 space-y-6">
               {/* Dossier Header and Payload Core */}
               <div className="bg-card border border-border rounded-2xl relative overflow-hidden shadow-lg">
                 {/* Header */}
-                <div className="p-6 sm:p-8 border-b border-border">
+                <div className="p-4 sm:p-5 border-b border-border">
                   <div className="flex items-center gap-2 text-xs text-muted-foreground/60 mb-2 font-mono">
                     <TerminalSquare className="h-4 w-4 text-primary" />
                     ID: {report.id}
@@ -304,14 +304,14 @@ export default function ReportDetailPage() {
                 </div>
 
                 {/* Body Content */}
-                <div className="p-6 sm:p-8 space-y-8">
+                <div className="p-4 sm:p-5 space-y-5">
                   {/* Incident Transcript Box */}
                   <div>
                     <div className="text-xs font-bold text-primary uppercase tracking-wider mb-3 flex items-center border-b border-border pb-2">
                       <Radio className="h-4 w-4 mr-2" />
                       Incident Report Details
                     </div>
-                    <div className="bg-background/80 border border-border p-6 text-sm leading-relaxed border-l-2 border-l-primary rounded-r-xl whitespace-pre-wrap">
+                    <div className="bg-background/80 border border-border p-4 text-sm leading-relaxed border-l-2 border-l-primary rounded-r-xl whitespace-pre-wrap">
                       <div className="text-foreground/90 font-sans">
                         {report.description}
                       </div>
@@ -320,7 +320,7 @@ export default function ReportDetailPage() {
 
                   {/* Target and Methodology Matrix */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-background border border-border p-5 rounded-xl">
+                    <div className="bg-background border border-border p-4 rounded-xl">
                       <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
                         <Fingerprint className="h-4.5 w-4.5 text-primary/70" />
                         Threat Vector
@@ -330,7 +330,7 @@ export default function ReportDetailPage() {
                       </span>
                     </div>
 
-                    <div className="bg-background border border-border p-5 rounded-xl">
+                    <div className="bg-background border border-border p-4 rounded-xl">
                       <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
                         <Building className="h-4.5 w-4.5 text-primary/70" />
                         Target Sector
@@ -342,7 +342,7 @@ export default function ReportDetailPage() {
                   </div>
 
                   {/* Meta Node Matrix */}
-                  <div className="bg-background border border-border p-6 rounded-xl space-y-4">
+                  <div className="bg-background border border-border p-4 rounded-xl space-y-3">
                     <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border/60 pb-2">
                       Dossier Parameters
                     </div>
@@ -385,7 +385,7 @@ export default function ReportDetailPage() {
 
                   {/* Assigned Threat Tags */}
                   <div>
-                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center border-b border-border pb-2">
+                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center border-b border-border pb-1.5">
                       <Tag className="h-4 w-4 mr-2" />
                       Assigned Threat Tags
                     </div>
@@ -413,14 +413,14 @@ export default function ReportDetailPage() {
             {/* Right side: Sidebar Telemetry Pane (1 col) */}
             <div className="space-y-6">
               {/* Telemetry Consensus dial panel */}
-              <div className="bg-card border border-border p-6 rounded-2xl relative shadow-lg">
+              <div className="bg-card border border-border p-4 rounded-2xl relative shadow-lg">
                 <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4 text-center border-b border-border pb-2">
                   Node Consensus
                 </div>
 
                 <div
                   className={cn(
-                    "bg-background p-6 text-center border border-border rounded-xl mb-6 transition-all duration-300 relative overflow-hidden",
+                    "bg-background p-4 text-center border border-border rounded-xl mb-4 transition-all duration-300 relative overflow-hidden",
                     flashConsensus &&
                       "border-success/80 bg-success/5 text-success scale-[1.02]",
                   )}
@@ -434,7 +434,7 @@ export default function ReportDetailPage() {
                 </div>
 
                 {/* Consensus meter gauge */}
-                <div className="space-y-3 mb-6 bg-background p-4 border border-border rounded-xl">
+                <div className="space-y-3 mb-4 bg-background p-3 border border-border rounded-xl">
                   <div className="flex justify-between text-xs font-bold text-muted-foreground">
                     <span>Safety Score</span>
                     <span className="font-mono text-primary">
@@ -468,7 +468,7 @@ export default function ReportDetailPage() {
               </div>
 
               {/* Security Risk Panel */}
-              <div className="bg-card border border-border p-6 rounded-2xl relative shadow-lg">
+              <div className="bg-card border border-border p-4 rounded-2xl relative shadow-lg">
                 <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4 text-center border-b border-border pb-2">
                   Threat Index
                 </div>
@@ -489,7 +489,7 @@ export default function ReportDetailPage() {
               </div>
 
               {/* Submitter Metadata Panel */}
-              <div className="bg-card border border-border p-6 rounded-2xl relative shadow-lg flex flex-col gap-4">
+              <div className="bg-card border border-border p-4 rounded-2xl relative shadow-lg flex flex-col gap-3">
                 <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center border-b border-border pb-2">
                   Credentials
                 </div>
@@ -522,7 +522,7 @@ export default function ReportDetailPage() {
 
           {/* Evidence matrix link section */}
           {report.evidenceUrls && report.evidenceUrls.length > 0 && (
-            <div className="bg-card border border-border p-6 sm:p-8 mt-6 rounded-2xl shadow-lg relative">
+            <div className="bg-card border border-border p-4 sm:p-5 mt-4 rounded-2xl shadow-lg relative">
               <h3 className="text-xs font-bold uppercase text-primary tracking-wider mb-4 flex items-center border-b border-border pb-2">
                 <Server className="h-4 w-4 mr-2" />
                 Attached Evidence Source Matrix
@@ -535,7 +535,7 @@ export default function ReportDetailPage() {
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-background border border-border hover:border-primary/45 rounded-xl text-xs text-muted-foreground hover:text-primary tracking-wider gap-4 group transition-all"
+                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-background border border-border hover:border-primary/45 rounded-xl text-xs text-muted-foreground hover:text-primary tracking-wider gap-4 group transition-all"
                   >
                     <span className="truncate max-w-[80%] font-mono">
                       ↳ Link {index + 1}: {url}

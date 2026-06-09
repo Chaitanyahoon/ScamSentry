@@ -324,26 +324,26 @@ export default function ReportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-16 relative font-sans text-foreground">
+    <div className="min-h-screen bg-background py-10 relative font-sans text-foreground">
       <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.03]" />
 
       <div className="container px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto relative z-10">
         {/* Header */}
-        <div className="text-center mb-10 max-w-xl mx-auto">
-          <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 bg-destructive/10 border border-destructive/20 text-xs font-semibold text-destructive rounded-full">
+        <div className="text-center mb-6 max-w-xl mx-auto">
+          <div className="inline-flex items-center gap-2 mb-2 px-3 py-1 bg-destructive/10 border border-destructive/20 text-xs font-semibold text-destructive rounded-full">
             <AlertTriangle className="h-3.5 w-3.5 animate-pulse" />
             Secure Report Channel
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
             Report a Scam Link
           </h1>
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-sm text-muted-foreground mt-1.5">
             Help protect the community. Log the details of job scams, phishing
             websites, or other fraudulent links.
           </p>
 
           {/* Progress Stepper */}
-          <div className="mt-8 flex items-center justify-between text-xs text-muted-foreground font-semibold">
+          <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground font-semibold">
             <span className={step >= 1 ? "text-primary font-bold" : ""}>
               1. Category
             </span>
@@ -361,7 +361,7 @@ export default function ReportPage() {
         {/* Form Container */}
         <div className="bg-card/50 backdrop-blur-sm border border-border shadow-xl rounded-2xl overflow-hidden relative">
           {/* Form Header */}
-          <div className="border-b border-border p-4 sm:p-6 bg-card/40 flex items-center justify-between">
+          <div className="border-b border-border py-2.5 px-4 bg-card/40 flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest">
               <TerminalSquare className="h-4 w-4 text-primary" />
               New Report Entry
@@ -372,12 +372,12 @@ export default function ReportPage() {
             </div>
           </div>
 
-          <div className="p-6 sm:p-10">
+          <div className="p-4 sm:p-5">
             {/* STEP 1: SCAM TYPE */}
             {step === 1 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="mb-4 border-b border-border pb-4">
-                  <h2 className="text-lg font-bold text-foreground tracking-tight">
+              <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="mb-2 border-b border-border pb-2">
+                  <h2 className="text-base font-bold text-foreground tracking-tight">
                     Step 1: Select Scam Category
                   </h2>
                   <p className="text-xs text-muted-foreground">
@@ -386,7 +386,7 @@ export default function ReportPage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-muted/10 border border-border p-6 rounded-xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-muted/10 border border-border p-3 rounded-xl">
                   {scamTypes.map((type) => {
                     const Icon = type.icon;
                     const isSelected = formData.scamType === type.id;
@@ -400,22 +400,22 @@ export default function ReportPage() {
                           }))
                         }
                         className={cn(
-                          "cursor-pointer border p-5 transition-all rounded-xl relative select-none",
+                          "cursor-pointer border p-3 transition-all rounded-xl relative select-none",
                           isSelected
                             ? "border-primary bg-primary/5 shadow-sm"
                             : "border-border bg-card/40 hover:border-primary/40 hover:bg-muted/20",
                         )}
                       >
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-3">
                           <div
                             className={cn(
-                              "p-2.5 rounded-lg border transition-colors",
+                              "p-1.5 rounded-lg border transition-colors",
                               isSelected
                                 ? "text-primary border-primary bg-primary/10"
                                 : "text-muted-foreground border-border bg-background",
                             )}
                           >
-                            <Icon className="h-4.5 w-4.5" />
+                            <Icon className="h-3.5 w-3.5" />
                           </div>
                           <div>
                             <h3 className="font-bold text-foreground text-xs uppercase tracking-wider">
@@ -423,7 +423,7 @@ export default function ReportPage() {
                             </h3>
                           </div>
                         </div>
-                        <p className="text-xs text-muted-foreground/85 mt-3 leading-relaxed">
+                        <p className="text-[11px] text-muted-foreground/80 mt-1 leading-relaxed">
                           {type.description}
                         </p>
                       </div>
@@ -435,9 +435,9 @@ export default function ReportPage() {
 
             {/* STEP 2: DETAILS */}
             {step === 2 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="mb-4 border-b border-border pb-4">
-                  <h2 className="text-lg font-bold text-foreground tracking-tight">
+              <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="mb-2 border-b border-border pb-2">
+                  <h2 className="text-base font-bold text-foreground tracking-tight">
                     Step 2: Incident Details
                   </h2>
                   <p className="text-xs text-muted-foreground">
@@ -446,11 +446,11 @@ export default function ReportPage() {
                   </p>
                 </div>
 
-                <div className="space-y-6 bg-muted/10 border border-border p-6 rounded-xl">
+                <div className="space-y-3 bg-muted/10 border border-border p-3 rounded-xl">
                   <div>
                     <Label
                       htmlFor="title"
-                      className="text-xs font-semibold text-foreground mb-2 block"
+                      className="text-xs font-semibold text-foreground mb-1.5 block"
                     >
                       Report Title *
                     </Label>
@@ -462,24 +462,24 @@ export default function ReportPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, title: e.target.value })
                         }
-                        className="h-11 bg-background/50 border-border text-foreground text-sm rounded-xl focus-visible:ring-primary focus-visible:border-primary placeholder:text-muted-foreground/35"
+                        className="h-10 bg-background/50 border-border text-foreground text-sm rounded-xl focus-visible:ring-primary focus-visible:border-primary placeholder:text-muted-foreground/35"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label
                         htmlFor="company"
-                        className="text-xs font-semibold text-foreground mb-2 block"
+                        className="text-xs font-semibold text-foreground mb-1.5 block"
                       >
                         Company / Entity Name
                       </Label>
                       <div className="relative">
-                        <Building className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground/45" />
+                        <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/45" />
                         <Input
                           id="company"
-                          className="pl-10 h-11 bg-background/50 border-border text-foreground text-sm rounded-xl focus-visible:ring-primary focus-visible:border-primary placeholder:text-muted-foreground/35"
+                          className="pl-10 h-10 bg-background/50 border-border text-foreground text-sm rounded-xl focus-visible:ring-primary focus-visible:border-primary placeholder:text-muted-foreground/35"
                           placeholder="E.g., Tech Solutions Inc."
                           value={formData.company}
                           onChange={(e) =>
@@ -494,7 +494,7 @@ export default function ReportPage() {
                     <div>
                       <Label
                         htmlFor="industry"
-                        className="text-xs font-semibold text-foreground mb-2 block"
+                        className="text-xs font-semibold text-foreground mb-1.5 block"
                       >
                         Industry Classification
                       </Label>
@@ -504,7 +504,7 @@ export default function ReportPage() {
                           setFormData({ ...formData, industry: val })
                         }
                       >
-                        <SelectTrigger className="h-11 bg-background/50 border-border text-foreground text-sm rounded-xl focus:ring-primary focus:border-primary">
+                        <SelectTrigger className="h-10 bg-background/50 border-border text-foreground text-sm rounded-xl focus:ring-primary focus:border-primary">
                           <SelectValue placeholder="Select Industry" />
                         </SelectTrigger>
                         <SelectContent className="bg-card border-border text-foreground rounded-xl">
@@ -525,15 +525,15 @@ export default function ReportPage() {
                   <div>
                     <Label
                       htmlFor="location"
-                      className="text-xs font-semibold text-foreground mb-2 block"
+                      className="text-xs font-semibold text-foreground mb-1.5 block"
                     >
                       Location (Optional)
                     </Label>
                     <div className="relative">
-                      <MapPin className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground/45" />
+                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/45" />
                       <Input
                         id="location"
-                        className="pl-10 h-11 bg-background/50 border-border text-foreground text-sm rounded-xl focus-visible:ring-primary focus-visible:border-primary placeholder:text-muted-foreground/35"
+                        className="pl-10 h-10 bg-background/50 border-border text-foreground text-sm rounded-xl focus-visible:ring-primary focus-visible:border-primary placeholder:text-muted-foreground/35"
                         placeholder="City, Country, or 'Online'"
                         value={formData.location}
                         onChange={(e) =>
@@ -546,13 +546,13 @@ export default function ReportPage() {
                   <div>
                     <Label
                       htmlFor="description"
-                      className="text-xs font-semibold text-foreground mb-2 block"
+                      className="text-xs font-semibold text-foreground mb-1.5 block"
                     >
                       Scam Description *
                     </Label>
                     <Textarea
                       id="description"
-                      rows={6}
+                      rows={4}
                       className="bg-background/50 border-border text-foreground text-sm rounded-xl resize-none focus-visible:ring-primary focus-visible:border-primary leading-relaxed placeholder:text-muted-foreground/35"
                       placeholder="Describe how the scam worked, the communications you received, domains mimicked, or payment requested..."
                       value={formData.description}
@@ -570,9 +570,9 @@ export default function ReportPage() {
 
             {/* STEP 3: REVIEW & SUBMIT */}
             {step === 3 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="mb-4 border-b border-border pb-4">
-                  <h2 className="text-lg font-bold text-foreground tracking-tight">
+              <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="mb-2 border-b border-border pb-2">
+                  <h2 className="text-base font-bold text-foreground tracking-tight">
                     Step 3: Verification & Submission
                   </h2>
                   <p className="text-xs text-muted-foreground">
@@ -581,18 +581,18 @@ export default function ReportPage() {
                   </p>
                 </div>
 
-                <div className="bg-muted/10 border border-border p-6 rounded-xl space-y-6">
+                <div className="bg-muted/10 border border-border p-3 rounded-xl space-y-3">
                   <div>
-                    <Label className="mb-3 block text-xs font-semibold text-foreground">
+                    <Label className="mb-2 block text-xs font-semibold text-foreground">
                       Related Scam Tags
                     </Label>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                       {commonTags.map((tag) => (
                         <Badge
                           key={tag}
                           variant="outline"
                           className={cn(
-                            "cursor-pointer py-1.5 px-3 rounded-full transition-all text-xs font-medium",
+                            "cursor-pointer py-1 px-2 rounded-full transition-all text-xs font-medium",
                             selectedTags.includes(tag)
                               ? "bg-primary border-primary text-primary-foreground shadow-sm"
                               : "bg-card hover:bg-muted text-muted-foreground border-border",
@@ -607,10 +607,10 @@ export default function ReportPage() {
 
                   {/* Evidence Upload */}
                   <div>
-                    <Label className="mb-3 block text-xs font-semibold text-foreground">
+                    <Label className="mb-2 block text-xs font-semibold text-foreground">
                       Attach Supporting Evidence (Optional)
                     </Label>
-                    <div className="border-2 border-dashed border-border bg-card/25 p-8 text-center hover:bg-muted/20 transition-all cursor-pointer rounded-xl group relative">
+                    <div className="border-2 border-dashed border-border bg-card/25 p-3.5 text-center hover:bg-muted/20 transition-all cursor-pointer rounded-xl group relative">
                       <input
                         type="file"
                         id="evidence-upload"
@@ -623,11 +623,11 @@ export default function ReportPage() {
                         htmlFor="evidence-upload"
                         className="cursor-pointer block w-full h-full"
                       >
-                        <Upload className="h-8 w-8 mx-auto text-primary/70 mb-3 group-hover:scale-105 transition-transform" />
-                        <span className="text-sm font-semibold text-foreground block">
+                        <Upload className="h-6 w-6 mx-auto text-primary/70 mb-2 group-hover:scale-105 transition-transform" />
+                        <span className="text-xs font-semibold text-foreground block">
                           Drag or Click to Upload screenshots or PDF files
                         </span>
-                        <span className="text-xs text-muted-foreground mt-1 block">
+                        <span className="text-[10px] text-muted-foreground mt-0.5 block">
                           Limit 5 files. Max size 5MB each.
                         </span>
                       </label>
@@ -635,11 +635,11 @@ export default function ReportPage() {
 
                     {/* File Preview */}
                     {evidenceFiles.length > 0 && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
                         {evidenceFiles.map((file, index) => (
                           <div
                             key={index}
-                            className="relative bg-card/60 border border-border p-3 rounded-xl flex items-center justify-between"
+                            className="relative bg-card/60 border border-border p-2.5 rounded-xl flex items-center justify-between"
                           >
                             <div className="flex flex-col flex-1 truncate text-xs pr-4">
                               <p className="font-semibold text-foreground truncate">
@@ -652,7 +652,7 @@ export default function ReportPage() {
                             <button
                               type="button"
                               onClick={() => removeFile(index)}
-                              className="text-muted-foreground hover:text-destructive border border-border bg-background p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
+                              className="text-muted-foreground hover:text-destructive border border-border bg-background p-1 rounded-lg hover:bg-destructive/10 transition-colors"
                             >
                               <X className="h-3.5 w-3.5" />
                             </button>
@@ -662,7 +662,7 @@ export default function ReportPage() {
                     )}
                   </div>
 
-                  <div className="border-t border-border pt-6 space-y-4">
+                  <div className="border-t border-border pt-4 space-y-3">
                     <div className="flex items-center space-x-3">
                       <Checkbox
                         id="anonymous"
@@ -684,7 +684,7 @@ export default function ReportPage() {
                       <div className="pl-8 animate-in fade-in duration-200">
                         <Label
                           htmlFor="email"
-                          className="text-xs font-semibold text-foreground mb-2 block"
+                          className="text-xs font-semibold text-foreground mb-1.5 block"
                         >
                           Contact Email
                         </Label>
@@ -696,20 +696,20 @@ export default function ReportPage() {
                           onChange={(e) =>
                             setFormData({ ...formData, email: e.target.value })
                           }
-                          className="h-11 bg-background/50 border-border text-foreground text-sm rounded-xl max-w-sm focus-visible:ring-primary focus-visible:border-primary placeholder:text-muted-foreground/35"
+                          className="h-10 bg-background/50 border-border text-foreground text-sm rounded-xl max-w-sm focus-visible:ring-primary focus-visible:border-primary placeholder:text-muted-foreground/35"
                         />
                       </div>
                     )}
                   </div>
 
                   {/* CAPTCHA validation */}
-                  <div className="bg-card/40 border border-border p-5 rounded-xl">
-                    <div className="flex flex-col gap-3">
+                  <div className="bg-card/40 border border-border p-3 rounded-xl">
+                    <div className="flex flex-col gap-2">
                       <Label className="text-xs font-bold text-primary">
                         Safety Verification
                       </Label>
-                      <div className="flex items-center gap-4">
-                        <span className="text-sm font-bold font-mono bg-background border border-border px-4 py-3 rounded-xl min-w-[100px] text-center select-none text-primary">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-bold font-mono bg-background border border-border px-3.5 py-2.5 rounded-xl min-w-[90px] text-center select-none text-primary">
                           {captchaQuestion}
                         </span>
                         <Input
@@ -717,7 +717,7 @@ export default function ReportPage() {
                           placeholder="Answer"
                           value={userCaptchaInput}
                           onChange={(e) => setUserCaptchaInput(e.target.value)}
-                          className="h-12 bg-background/50 border-border text-foreground text-sm rounded-xl max-w-[120px] focus-visible:ring-primary focus-visible:border-primary placeholder:text-muted-foreground/35"
+                          className="h-10 bg-background/50 border-border text-foreground text-sm rounded-xl max-w-[100px] focus-visible:ring-primary focus-visible:border-primary placeholder:text-muted-foreground/35"
                         />
                       </div>
                     </div>
@@ -727,15 +727,15 @@ export default function ReportPage() {
             )}
 
             {/* Buttons Deck */}
-            <div className="mt-8 flex justify-between pt-6 border-t border-border">
+            <div className="mt-4 flex justify-between pt-3 border-t border-border">
               {step > 1 ? (
                 <Button
                   variant="outline"
                   onClick={handleBack}
                   disabled={isSubmitting}
-                  className="h-11 px-6 font-semibold rounded-xl border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
+                  className="h-10 px-5 text-xs font-semibold rounded-xl border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
                 >
-                  <ChevronLeft className="mr-2 h-4 w-4" /> Back
+                  <ChevronLeft className="mr-1.5 h-3.5 w-3.5" /> Back
                 </Button>
               ) : (
                 <div />
@@ -744,24 +744,24 @@ export default function ReportPage() {
               {step < totalSteps ? (
                 <Button
                   onClick={handleNext}
-                  className="h-11 px-8 font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/10 transition-all"
+                  className="h-10 px-6 text-xs font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/10 transition-all"
                 >
-                  Next <ChevronRight className="ml-2 h-4 w-4" />
+                  Next <ChevronRight className="ml-1.5 h-3.5 w-3.5" />
                 </Button>
               ) : (
                 <Button
                   onClick={handleSubmit}
                   disabled={isSubmitting || isUploadingEvidence}
-                  className="h-11 px-8 font-bold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/15 transition-all active:scale-[0.98]"
+                  className="h-10 px-6 text-xs font-bold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/15 transition-all active:scale-[0.98]"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                      <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />{" "}
                       Submitting Report...
                     </>
                   ) : (
                     <>
-                      <Send className="mr-2 h-4 w-4" /> Submit Report
+                      <Send className="mr-1.5 h-3.5 w-3.5" /> Submit Report
                     </>
                   )}
                 </Button>
