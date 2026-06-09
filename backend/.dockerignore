@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+tests/
+scamsentry.db
+.env
+.git/
+*.pyc
+*.pyo
