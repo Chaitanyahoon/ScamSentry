@@ -313,7 +313,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#050403] py-16 relative overflow-hidden select-none">
+    <div className="min-h-screen flex items-center justify-center bg-background py-16 relative overflow-hidden select-none">
       {/* Laser Scanline Style Injection */}
       <style
         dangerouslySetInnerHTML={{
@@ -330,35 +330,35 @@ export default function LoginPage() {
       />
 
       {/* Futuristic Background Layout */}
-      <div className="fixed inset-0 pointer-events-none z-0 bg-grid-cyber opacity-35" />
+      <div className="fixed inset-0 pointer-events-none z-0 bg-grid-cyber opacity-[0.15]" />
 
       {/* Moving Laser Scanline */}
       <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent shadow-[0_0_12px_rgba(249,115,22,0.45)] animate-scanline pointer-events-none z-0" />
 
       {/* Background Neon Orbs */}
-      <div className="absolute top-1/6 left-1/4 w-[600px] h-[600px] bg-primary/[0.03] rounded-full blur-[160px] pointer-events-none z-0" />
-      <div className="absolute bottom-1/6 right-1/4 w-[600px] h-[600px] bg-secondary/[0.03] rounded-full blur-[160px] pointer-events-none z-0" />
+      <div className="absolute top-1/6 left-1/4 w-[600px] h-[600px] bg-primary/[0.05] rounded-full blur-[160px] pointer-events-none z-0" />
+      <div className="absolute bottom-1/6 right-1/4 w-[600px] h-[600px] bg-secondary/[0.05] rounded-full blur-[160px] pointer-events-none z-0" />
 
       <div className="w-full max-w-[460px] relative z-10 px-4 sm:px-6">
         {/* Main Card with Premium Cyber Glassmorphism */}
-        <div className="group relative bg-[#0a0d17]/85 border border-white/[0.05] hover:border-primary/30 p-8 sm:p-10 rounded-2xl transition-all duration-500 hover:shadow-[0_0_40px_rgba(249,115,22,0.08)] overflow-hidden backdrop-blur-3xl shadow-2xl">
+        <div className="group relative bg-[#090b11]/90 border border-white/[0.08] hover:border-primary/40 p-8 sm:p-10 rounded-2xl transition-all duration-300 hover:shadow-[0_0_40px_rgba(249,115,22,0.1)] overflow-hidden backdrop-blur-xl shadow-2xl">
           {/* Sweep gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.015] to-white/[0.04] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
           {/* Cyber grid pattern inside card */}
           <div className="absolute inset-0 bg-grid-cyber opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-500 pointer-events-none" />
 
           {/* Floating Sci-fi Corner Brackets */}
-          <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-primary/30 group-hover:border-primary transition-all duration-500" />
-          <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-primary/30 group-hover:border-primary transition-all duration-500" />
-          <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-primary/30 group-hover:border-primary transition-all duration-500" />
-          <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-primary/30 group-hover:border-primary transition-all duration-500" />
+          <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-primary/40 group-hover:border-primary transition-all duration-500" />
+          <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-primary/40 group-hover:border-primary transition-all duration-500" />
+          <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-primary/40 group-hover:border-primary transition-all duration-500" />
+          <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-primary/40 group-hover:border-primary transition-all duration-500" />
 
           {/* Radial Top Light Glow */}
           <div className="absolute -top-16 -right-16 w-32 h-32 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/15 transition-all duration-500 pointer-events-none" />
 
           {/* Terminal Title Bar */}
-          <div className="flex items-center justify-between border-b border-white/[0.05] pb-5 mb-8 select-none font-mono">
-            <div className="flex items-center gap-2 text-[10px] font-bold text-primary tracking-[0.25rem] uppercase">
+          <div className="flex items-center justify-between border-b border-white/[0.06] pb-5 mb-8 select-none font-mono">
+            <div className="flex items-center gap-2 text-[10px] font-bold text-primary tracking-[0.2rem] uppercase">
               <Terminal className="h-4 w-4 text-primary animate-pulse" />{" "}
               SECURE_GATEWAY_v4.5
             </div>
@@ -383,52 +383,58 @@ export default function LoginPage() {
                 </div>
               </div>
             </div>
-            <h1 className="text-2xl font-extrabold tracking-widest uppercase text-foreground mb-1">
-              SCAM<span className="text-primary gradient-text">SENTRY</span>
+            <h1 className="text-2xl font-extrabold tracking-widest uppercase text-white mb-1">
+              SCAM
+              <span className="text-primary bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent">
+                SENTRY
+              </span>
             </h1>
             <div className="flex items-center justify-center gap-2">
-              <div className="h-px w-5 bg-white/5" />
-              <p className="text-[9px] font-mono tracking-widest text-muted-foreground/50 uppercase">
+              <div className="h-px w-5 bg-white/[0.08]" />
+              <p className="text-[9px] font-mono tracking-widest text-white/50 uppercase">
                 Developer & Admin Gateway
               </p>
-              <div className="h-px w-5 bg-white/5" />
+              <div className="h-px w-5 bg-white/[0.08]" />
             </div>
           </div>
 
           {/* Mode Switcher Tab Bar */}
-          <div className="flex border border-white/[0.06] mb-8 font-mono text-[9px] uppercase tracking-wider bg-black/55 rounded-xl p-1 select-none">
+          <div className="flex bg-[#04060a] border border-white/[0.06] mb-8 font-mono text-xs rounded-xl p-1 select-none">
             <button
               type="button"
               onClick={() => setMode("login")}
               className={cn(
-                "flex-1 py-2.5 rounded-lg text-center transition-all relative font-extrabold flex items-center justify-center gap-1.5",
+                "flex-1 py-2.5 rounded-lg text-center transition-all relative font-bold flex items-center justify-center gap-1.5",
                 mode === "login"
-                  ? "text-primary bg-primary/10 border border-primary/20 shadow-[0_0_12px_rgba(249,115,22,0.15)]"
-                  : "text-muted-foreground/45 hover:text-muted-foreground/80",
+                  ? "text-black bg-primary font-bold shadow-[0_0_12px_rgba(249,115,22,0.25)] hover:bg-primary/95"
+                  : "text-white/60 hover:text-white hover:bg-white/[0.02]",
               )}
             >
               <Radio
-                className={cn("h-3 w-3", mode === "login" && "animate-pulse")}
+                className={cn(
+                  "h-3.5 w-3.5",
+                  mode === "login" && "animate-pulse",
+                )}
               />
-              [ AUTHORIZE SESSION ]
+              <span>Login</span>
             </button>
             <button
               type="button"
               onClick={() => setMode("register")}
               className={cn(
-                "flex-1 py-2.5 rounded-lg text-center transition-all relative font-extrabold flex items-center justify-center gap-1.5",
+                "flex-1 py-2.5 rounded-lg text-center transition-all relative font-bold flex items-center justify-center gap-1.5",
                 mode === "register"
-                  ? "text-primary bg-primary/10 border border-primary/20 shadow-[0_0_12px_rgba(249,115,22,0.15)]"
-                  : "text-muted-foreground/45 hover:text-muted-foreground/80",
+                  ? "text-black bg-primary font-bold shadow-[0_0_12px_rgba(249,115,22,0.25)] hover:bg-primary/95"
+                  : "text-white/60 hover:text-white hover:bg-white/[0.02]",
               )}
             >
               <Terminal
                 className={cn(
-                  "h-3 w-3",
+                  "h-3.5 w-3.5",
                   mode === "register" && "animate-pulse",
                 )}
               />
-              [ PROVISION NODE ]
+              <span>Register</span>
             </button>
           </div>
 
@@ -437,7 +443,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <Label
                 htmlFor="email"
-                className="text-[10px] font-bold tracking-[0.2em] uppercase text-muted-foreground/75 mb-1.5 block font-mono flex items-center gap-1.5 select-none"
+                className="text-[10px] font-bold tracking-[0.15em] uppercase text-white/80 mb-1.5 block font-mono flex items-center gap-1.5 select-none"
               >
                 <span className="h-1 w-1 bg-primary rounded-full animate-ping" />
                 {mode === "login"
@@ -446,7 +452,7 @@ export default function LoginPage() {
               </Label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
-                  <User className="h-4 w-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
+                  <User className="h-4 w-4 text-white/40 group-focus-within:text-primary transition-colors" />
                 </div>
                 <Input
                   id="email"
@@ -460,7 +466,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="bg-black/60 border-white/[0.08] focus:border-primary/50 focus:ring-1 focus:ring-primary/25 rounded-xl text-xs h-12 pl-12 text-foreground transition-all duration-300 placeholder:text-muted-foreground/25 font-mono"
+                  className="bg-black/60 border-white/[0.08] focus:border-primary/50 focus:ring-1 focus:ring-primary/25 rounded-xl text-xs h-12 pl-12 text-white transition-all duration-300 placeholder:text-white/30 font-mono"
                 />
               </div>
             </div>
@@ -469,14 +475,14 @@ export default function LoginPage() {
             <div className="space-y-2">
               <Label
                 htmlFor="password"
-                className="text-[10px] font-bold tracking-[0.2em] uppercase text-muted-foreground/75 mb-1.5 block font-mono flex items-center gap-1.5 select-none"
+                className="text-[10px] font-bold tracking-[0.15em] uppercase text-white/80 mb-1.5 block font-mono flex items-center gap-1.5 select-none"
               >
                 <span className="h-1 w-1 bg-primary rounded-full animate-ping" />
                 {mode === "login" ? "SECURITY PASSKEY" : "NEW SECURITY PASSKEY"}
               </Label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
-                  <Lock className="h-4 w-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
+                  <Lock className="h-4 w-4 text-white/40 group-focus-within:text-primary transition-colors" />
                 </div>
                 <Input
                   id="password"
@@ -486,7 +492,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="bg-black/60 border-white/[0.08] focus:border-primary/50 focus:ring-1 focus:ring-primary/25 rounded-xl text-xs h-12 pl-12 text-foreground transition-all duration-300 placeholder:text-muted-foreground/25 font-mono"
+                  className="bg-black/60 border-white/[0.08] focus:border-primary/50 focus:ring-1 focus:ring-primary/25 rounded-xl text-xs h-12 pl-12 text-white transition-all duration-300 placeholder:text-white/30 font-mono"
                 />
               </div>
             </div>
@@ -495,7 +501,7 @@ export default function LoginPage() {
             <div className="pt-2">
               <Button
                 type="submit"
-                className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-orange-600 hover:from-primary/95 hover:to-orange-500 text-primary-foreground transition-all duration-300 font-extrabold tracking-[0.2em] uppercase text-[10px] shadow-[0_0_20px_rgba(249,115,22,0.2)] hover:shadow-[0_0_30px_rgba(249,115,22,0.4)] active:scale-[0.98] flex items-center justify-center gap-2"
+                className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-orange-600 hover:from-primary/95 hover:to-orange-500 text-black transition-all duration-300 font-extrabold tracking-[0.2em] uppercase text-[10px] shadow-[0_0_20px_rgba(249,115,22,0.2)] hover:shadow-[0_0_30px_rgba(249,115,22,0.4)] active:scale-[0.98] flex items-center justify-center gap-2 border border-primary/20"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -517,10 +523,10 @@ export default function LoginPage() {
           {/* Integrated Auth Divider */}
           <div className="relative my-7 select-none">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/[0.06]"></div>
+              <div className="w-full border-t border-white/[0.08]"></div>
             </div>
             <div className="relative flex justify-center text-[8px] uppercase font-mono tracking-widest">
-              <span className="bg-[#0b0e18] px-3 text-muted-foreground/35">
+              <span className="bg-[#090b11] px-3 text-white/40">
                 OR INTEGRATED AUTH PROTOCOL
               </span>
             </div>
@@ -531,7 +537,7 @@ export default function LoginPage() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full h-12 rounded-xl border border-white/[0.08] bg-white/[0.01] hover:bg-white/[0.04] hover:text-foreground hover:border-white/[0.15] text-muted-foreground/80 transition-all duration-300 font-bold tracking-[0.1em] text-xs flex items-center justify-center gap-2.5 active:scale-[0.98] shadow-md shadow-black/20"
+            className="w-full h-12 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.08] hover:text-white hover:border-white/[0.2] text-white/80 transition-all duration-300 font-bold tracking-[0.1em] text-xs flex items-center justify-center gap-2.5 active:scale-[0.98] shadow-md shadow-black/20"
           >
             <svg
               className="h-4 w-4 mr-1 text-primary shrink-0"
@@ -557,10 +563,10 @@ export default function LoginPage() {
             Sign in with Google
           </Button>
 
-          <div className="mt-8 pt-5 border-t border-white/[0.05] text-center select-none font-mono">
-            <p className="text-[8.5px] tracking-widest text-muted-foreground/35 uppercase flex items-center justify-center gap-2">
-              <KeyRound className="h-3 w-3 text-muted-foreground/25" />{" "}
-              AES-256-GCM | SECURE CONNECTIONS ONLY
+          <div className="mt-8 pt-5 border-t border-white/[0.06] text-center select-none font-mono">
+            <p className="text-[8.5px] tracking-widest text-white/40 uppercase flex items-center justify-center gap-2">
+              <KeyRound className="h-3 w-3 text-white/30" /> AES-256-GCM |
+              SECURE CONNECTIONS ONLY
             </p>
           </div>
         </div>
