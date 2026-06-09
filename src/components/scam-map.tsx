@@ -208,54 +208,66 @@ export function ScamMap() {
           </div>
 
           {/* Stats Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-10 select-none">
-            <div className="bg-card border border-border p-6 relative overflow-hidden backdrop-blur-sm group hover:border-primary/30 rounded-2xl transition-all duration-300">
-              <div className="absolute left-0 top-3 bottom-3 w-1 bg-primary rounded-r-md" />
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
-                    <MapPin className="h-3.5 w-3.5 text-primary/70" />
-                    Total Threats
-                  </p>
-                  <p className="text-3xl font-bold text-foreground tracking-tight">
-                    {filteredReports.length.toString().padStart(3, '0')}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider mt-1">Geographic Nodes</p>
-                </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 select-none">
+            {/* Total Threats */}
+            <div className="group relative bg-[#090b11]/90 hover:bg-[#0d101b]/95 border border-white/[0.04] hover:border-primary/45 p-6 rounded-2xl transition-all duration-500 hover:shadow-[0_0_30px_rgba(249,115,22,0.06)] hover:-translate-y-1 overflow-hidden backdrop-blur-xl shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.01] to-white/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+              <div className="absolute inset-0 bg-grid-cyber opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 pointer-events-none" />
+              <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-primary/20 group-hover:border-primary/55 transition-colors duration-300" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-primary/20 group-hover:border-primary/55 transition-colors duration-300" />
+              <div className="absolute -top-12 -right-12 w-28 h-28 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500 pointer-events-none" />
+              <div className="absolute left-0 top-4 bottom-4 w-1 bg-primary rounded-r-full shadow-[0_0_10px_rgba(249,115,22,0.55)] group-hover:shadow-[0_0_18px_rgba(249,115,22,0.85)] group-hover:scale-y-[1.08] transition-all duration-500" />
+              <div className="relative z-10 flex flex-col justify-between h-full pl-2">
+                <p className="text-xs font-bold text-muted-foreground/75 uppercase tracking-widest flex items-center gap-2 mb-3 font-mono">
+                  <MapPin className="h-4 w-4 text-primary animate-pulse" />
+                  Total Threats
+                </p>
+                <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/70 tracking-tight font-mono mb-2">
+                  {filteredReports.length.toString().padStart(3, '0')}
+                </p>
+                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-mono">Geographic Nodes</p>
               </div>
             </div>
 
-            <div className="bg-card border border-border p-6 relative overflow-hidden backdrop-blur-sm group hover:border-primary/30 rounded-2xl transition-all duration-300">
-              <div className="absolute left-0 top-3 bottom-3 w-1 bg-destructive rounded-r-md" />
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
-                    <TrendingUp className="h-3.5 w-3.5 text-destructive/70" />
-                    Critical Entities
-                  </p>
-                  <p className="text-3xl font-bold text-destructive tracking-tight">
-                    {filteredReports.filter(r => r.riskLevel === "high").length.toString().padStart(3, '0')}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider mt-1">Immediate Containment</p>
-                </div>
+            {/* Critical Entities */}
+            <div className="group relative bg-[#090b11]/90 hover:bg-[#0d101b]/95 border border-white/[0.04] hover:border-destructive/45 p-6 rounded-2xl transition-all duration-500 hover:shadow-[0_0_30px_rgba(239,68,68,0.06)] hover:-translate-y-1 overflow-hidden backdrop-blur-xl shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.01] to-white/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+              <div className="absolute inset-0 bg-grid-cyber opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 pointer-events-none" />
+              <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-destructive/20 group-hover:border-destructive/55 transition-colors duration-300" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-destructive/20 group-hover:border-destructive/55 transition-colors duration-300" />
+              <div className="absolute -top-12 -right-12 w-28 h-28 bg-destructive/10 rounded-full blur-2xl group-hover:bg-destructive/20 transition-all duration-500 pointer-events-none" />
+              <div className="absolute left-0 top-4 bottom-4 w-1 bg-destructive rounded-r-full shadow-[0_0_10px_rgba(239,68,68,0.55)] group-hover:shadow-[0_0_18px_rgba(239,68,68,0.85)] group-hover:scale-y-[1.08] transition-all duration-500" />
+              <div className="relative z-10 flex flex-col justify-between h-full pl-2">
+                <p className="text-xs font-bold text-muted-foreground/75 uppercase tracking-widest flex items-center gap-2 mb-3 font-mono">
+                  <TrendingUp className="h-4 w-4 text-destructive animate-pulse" />
+                  Critical Entities
+                </p>
+                <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-destructive to-red-400 tracking-tight font-mono mb-2">
+                  {filteredReports.filter(r => r.riskLevel === "high").length.toString().padStart(3, '0')}
+                </p>
+                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-mono">Immediate Containment</p>
               </div>
             </div>
 
-            <div className="bg-card border border-border p-6 relative overflow-hidden backdrop-blur-sm group hover:border-primary/30 rounded-2xl transition-all duration-300">
-              <div className="absolute left-0 top-3 bottom-3 w-1 bg-success rounded-r-md" />
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
-                    <TerminalSquare className="h-3.5 w-3.5 text-success/70" />
-                    Avg Trust Score
-                  </p>
-                  <p className="text-3xl font-bold text-success tracking-tight">
-                    {filteredReports.length > 0
-                      ? Math.round(filteredReports.reduce((sum, r) => sum + r.trustScore, 0) / filteredReports.length)
-                      : 100}%
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider mt-1">Consensus Index</p>
-                </div>
+            {/* Avg Trust Score */}
+            <div className="group relative bg-[#090b11]/90 hover:bg-[#0d101b]/95 border border-white/[0.04] hover:border-emerald-500/45 p-6 rounded-2xl transition-all duration-500 hover:shadow-[0_0_30px_rgba(16,185,129,0.06)] hover:-translate-y-1 overflow-hidden backdrop-blur-xl shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.01] to-white/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+              <div className="absolute inset-0 bg-grid-cyber opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 pointer-events-none" />
+              <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-emerald-500/20 group-hover:border-emerald-500/55 transition-colors duration-300" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-emerald-500/20 group-hover:border-emerald-500/55 transition-colors duration-300" />
+              <div className="absolute -top-12 -right-12 w-28 h-28 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500 pointer-events-none" />
+              <div className="absolute left-0 top-4 bottom-4 w-1 bg-emerald-500 rounded-r-full shadow-[0_0_10px_rgba(16,185,129,0.55)] group-hover:shadow-[0_0_18px_rgba(16,185,129,0.85)] group-hover:scale-y-[1.08] transition-all duration-500" />
+              <div className="relative z-10 flex flex-col justify-between h-full pl-2">
+                <p className="text-xs font-bold text-muted-foreground/75 uppercase tracking-widest flex items-center gap-2 mb-3 font-mono">
+                  <TerminalSquare className="h-4 w-4 text-emerald-400 animate-pulse" />
+                  Avg Trust Score
+                </p>
+                <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500 tracking-tight font-mono mb-2">
+                  {filteredReports.length > 0
+                    ? Math.round(filteredReports.reduce((sum, r) => sum + r.trustScore, 0) / filteredReports.length)
+                    : 100}%
+                </p>
+                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-mono">Consensus Index</p>
               </div>
             </div>
           </div>
