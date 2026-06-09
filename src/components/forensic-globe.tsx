@@ -6,6 +6,7 @@ import { useReports, type ScamReport } from "@/contexts/reports-context";
 import { getRecentScans, ScanEvent } from "@/lib/analytics";
 import { Loader2, Zap, Globe as GlobeIcon, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 import { MapPin } from "lucide-react";
 import Link from "next/link";
@@ -149,7 +150,7 @@ export function ForensicGlobe({ reports: propReports }: ForensicGlobeProps) {
   }
 
   return (
-    <div className="relative h-full w-full bg-[#060504] overflow-hidden rounded-xl border border-[#1F1914]">
+    <div className="relative w-full h-full">
       {/* Control Overlay */}
       <div className="absolute top-6 left-6 z-10 space-y-4">
         <div className="bg-[#0C0A09]/90 backdrop-blur-md border border-[#1F1914] p-5 rounded-lg shadow-2xl">
@@ -180,22 +181,28 @@ export function ForensicGlobe({ reports: propReports }: ForensicGlobeProps) {
             </div>
           </div>
         </div>
-
-        <div className="flex gap-2">
-          <div className="bg-[#0C0A09]/80 backdrop-blur-sm border border-[#1F1914] flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-mono text-muted-foreground uppercase tracking-widest">
-            <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></div>
-            Live Telemetry
-          </div>
-        </div>
       </div>
 
       {/* Detail Overlay Card */}
       {selectedIntel && (
-        <div className="absolute right-6 top-6 z-20 w-72 bg-[#120F0D]/95 backdrop-blur-xl border border-primary/30 p-5 rounded-lg shadow-[0_0_50px_rgba(255,191,0,0.15)] animate-in fade-in slide-in-from-right-4 duration-300">
-          <div className="flex justify-between items-start mb-4">
-            <div className="bg-primary/10 px-2 py-0.5 border border-primary/20 rounded text-[9px] font-mono text-primary uppercase tracking-tighter">
-              {selectedIntel.riskLevel} Risk Entity
-            </div>
+        <div className="absolute top-4 right-4 z-[9999] w-80 bg-background/95 backdrop-blur-md border border-border p-6 rounded-2xl shadow-2xl animate-fade-in select-none">
+          <div className="flex items-center justify-between mb-4">
+            <span
+              className={cn(
+                "rounded-full text-[10px] font-bold tracking-wider uppercase px-2.5 py-0.5 border cursor-default",
+                selectedIntel.riskLevel === "high"
+                  ? "bg-red-500/10 text-red-500 border-red-500/30"
+                  : selectedIntel.riskLevel === "medium"
+                    ? "bg-warning/10 text-warning border-warning/30"
+                    : "bg-secondary/10 text-secondary border-secondary/30",
+              )}
+            >
+              {selectedIntel.riskLevel === "high"
+                ? "High Risk"
+                : selectedIntel.riskLevel === "medium"
+                  ? "Medium Risk"
+                  : "Low Risk"}
+            </span>
             <button
               onClick={() => setSelectedIntel(null)}
               className="text-muted-foreground hover:text-foreground transition-colors"
@@ -214,13 +221,13 @@ export function ForensicGlobe({ reports: propReports }: ForensicGlobeProps) {
           </div>
 
           <div className="space-y-3 mb-5 text-[11px]">
-            <div className="flex justify-between border-b border-[#1F1914] pb-1.5">
+            <div className="flex justify-between border-b border-border pb-1.5">
               <span className="text-muted-foreground">Company:</span>
               <span className="text-foreground font-medium">
                 {selectedIntel.company}
               </span>
             </div>
-            <div className="flex justify-between border-b border-[#1F1914] pb-1.5">
+            <div className="flex justify-between border-b border-border pb-1.5">
               <span className="text-muted-foreground">Vector:</span>
               <span className="text-foreground font-medium">
                 {selectedIntel.scamType}
@@ -241,12 +248,11 @@ export function ForensicGlobe({ reports: propReports }: ForensicGlobeProps) {
           <Button
             size="sm"
             variant="outline"
-            className="w-full text-[10px] h-8 font-mono tracking-widest uppercase bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary"
+            className="w-full text-xs font-semibold border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground rounded-xl transition-all h-9"
             asChild
           >
             <Link href={`/reports/${selectedIntel.id}`}>
-              Access Full Dossier{" "}
-              <Zap className="ml-1.5 h-3 w-3 fill-primary" />
+              View Full Report <Zap className="ml-1.5 h-3.5 w-3.5" />
             </Link>
           </Button>
         </div>

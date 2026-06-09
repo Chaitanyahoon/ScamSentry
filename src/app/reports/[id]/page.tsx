@@ -151,7 +151,7 @@ export default function ReportDetailPage() {
           <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
             <Loader2 className="h-4 w-4 text-primary animate-spin" />
             <span className="text-xs uppercase tracking-wider font-semibold text-foreground">
-              Retrieving Threat Dossier
+              Retrieving Threat Report
             </span>
           </div>
 
@@ -163,8 +163,8 @@ export default function ReportDetailPage() {
               </span>
             </div>
             <div className="flex justify-between">
-              <span>Dossier ID</span>
-              <span className="text-foreground truncate max-w-[200px] font-mono">
+              <span>Report ID</span>
+              <span className="text-foreground truncate max-w-[200px]">
                 {id}
               </span>
             </div>
@@ -176,7 +176,7 @@ export default function ReportDetailPage() {
 
           <div className="space-y-2">
             <div className="flex justify-between text-xs text-foreground font-semibold">
-              <span>Loading telemetry...</span>
+              <span>Loading report data...</span>
               <span>{progress}%</span>
             </div>
             <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
@@ -202,18 +202,18 @@ export default function ReportDetailPage() {
             </div>
           </div>
           <h2 className="text-base font-bold text-foreground mb-2 relative z-10">
-            Dossier Not Found
+            Report Not Found
           </h2>
           <p className="text-xs text-muted-foreground/80 mb-8 leading-relaxed relative z-10">
-            The requested intelligence logs are restricted, missing, or have
-            been deleted from local consensus storage.
+            The requested report could not be found. It may have been removed or
+            the link might be incorrect.
           </p>
           <Button
             onClick={() => router.push("/reports")}
             className="w-full text-xs font-semibold rounded-xl border border-border text-foreground bg-transparent hover:bg-card transition-all relative z-10"
             variant="outline"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" /> Return to Database
+            <ArrowLeft className="h-4 w-4 mr-2" /> Return to Directory
           </Button>
         </div>
       </div>
@@ -237,7 +237,7 @@ export default function ReportDetailPage() {
               className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors flex items-center group px-4 py-2 border border-border bg-card rounded-xl"
             >
               <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform text-primary" />
-              Back to Database
+              Back to Directory
             </button>
 
             {/* Live Connection Telemetry badge */}
@@ -254,13 +254,13 @@ export default function ReportDetailPage() {
             )}
           >
             <div className="flex-1">
-              <div className="text-[10px] text-muted-foreground/60 uppercase tracking-wider mb-1">
-                Intel Origin Node
+              <div className="text-[10px] text-muted-foreground/60 font-semibold uppercase tracking-wider mb-1">
+                Report Source
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <span
                   className={cn(
-                    "text-xs font-bold uppercase tracking-wider px-3 py-1 border rounded-full",
+                    "text-xs font-semibold px-3 py-1 border rounded-full",
                     badgeColor,
                   )}
                 >
@@ -279,9 +279,9 @@ export default function ReportDetailPage() {
                 href={sourceLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-xs uppercase tracking-wider rounded-xl transition-all"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-xs rounded-xl transition-all"
               >
-                Access Source Website
+                Visit Source Website
                 <ExternalLink className="h-4 w-4" />
               </a>
             )}
@@ -295,7 +295,7 @@ export default function ReportDetailPage() {
               <div className="bg-card border border-border rounded-2xl relative overflow-hidden shadow-lg">
                 {/* Header */}
                 <div className="p-4 sm:p-5 border-b border-border">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground/60 mb-2 font-mono">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground/60 mb-2">
                     <TerminalSquare className="h-4 w-4 text-primary" />
                     ID: {report.id}
                   </div>
@@ -308,9 +308,9 @@ export default function ReportDetailPage() {
                 <div className="p-4 sm:p-5 space-y-5">
                   {/* Incident Transcript Box */}
                   <div>
-                    <div className="text-xs font-bold text-primary uppercase tracking-wider mb-3 flex items-center border-b border-border pb-2">
-                      <Radio className="h-4 w-4 mr-2" />
-                      Incident Report Details
+                    <div className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3 flex items-center border-b border-border pb-2">
+                      <Radio className="h-4 w-4 mr-2 text-primary" />
+                      Report Description
                     </div>
                     <div className="bg-background/80 border border-border p-4 text-sm leading-relaxed border-l-2 border-l-primary rounded-r-xl whitespace-pre-wrap">
                       <div className="text-foreground/90 font-sans">
@@ -324,9 +324,9 @@ export default function ReportDetailPage() {
                     <div className="bg-background border border-border p-4 rounded-xl">
                       <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
                         <Fingerprint className="h-4.5 w-4.5 text-primary/70" />
-                        Threat Vector
+                        Threat Category
                       </div>
-                      <span className="text-sm font-bold text-foreground uppercase tracking-wide">
+                      <span className="text-sm font-semibold text-foreground">
                         {report.scamType}
                       </span>
                     </div>
@@ -336,7 +336,7 @@ export default function ReportDetailPage() {
                         <Building className="h-4.5 w-4.5 text-primary/70" />
                         Target Sector
                       </div>
-                      <span className="text-sm font-bold text-foreground uppercase tracking-wide">
+                      <span className="text-sm font-semibold text-foreground">
                         {report.industry || "General / Unclassified"}
                       </span>
                     </div>
@@ -345,14 +345,14 @@ export default function ReportDetailPage() {
                   {/* Meta Node Matrix */}
                   <div className="bg-background border border-border p-4 rounded-xl space-y-3">
                     <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border/60 pb-2">
-                      Dossier Parameters
+                      Report Parameters
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs uppercase tracking-wide">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs tracking-wide">
                       <div>
                         <div className="text-muted-foreground/60 text-[10px] mb-1">
                           Company/Entity
                         </div>
-                        <div className="font-bold text-foreground truncate">
+                        <div className="font-semibold text-foreground truncate">
                           {report.company || "Unknown"}
                         </div>
                       </div>
@@ -360,7 +360,7 @@ export default function ReportDetailPage() {
                         <div className="text-muted-foreground/60 text-[10px] mb-1">
                           Location
                         </div>
-                        <div className="font-bold text-foreground truncate">
+                        <div className="font-semibold text-foreground truncate">
                           {report.location || "Global"}
                         </div>
                       </div>
@@ -368,15 +368,15 @@ export default function ReportDetailPage() {
                         <div className="text-muted-foreground/60 text-[10px] mb-1">
                           Reported Time
                         </div>
-                        <div className="font-bold text-foreground font-mono">
-                          T-{getTimeAgo(report.createdAt)}
+                        <div className="font-semibold text-foreground">
+                          {getTimeAgo(report.createdAt)} ago
                         </div>
                       </div>
                       <div>
                         <div className="text-muted-foreground/60 text-[10px] mb-1">
                           Views Count
                         </div>
-                        <div className="font-bold text-foreground flex items-center gap-1.5">
+                        <div className="font-semibold text-foreground flex items-center gap-1.5">
                           <Eye className="h-3.5 w-3.5 text-primary" />
                           {report.views}
                         </div>
@@ -386,18 +386,18 @@ export default function ReportDetailPage() {
 
                   {/* Assigned Threat Tags */}
                   <div>
-                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center border-b border-border pb-1.5">
-                      <Tag className="h-4 w-4 mr-2" />
-                      Assigned Threat Tags
+                    <div className="text-xs font-semibold text-foreground uppercase tracking-wider mb-2 flex items-center border-b border-border pb-1.5">
+                      <Tag className="h-4 w-4 mr-2 text-primary" />
+                      Associated Tags
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {report.tags && report.tags.length > 0 ? (
                         report.tags.map((tag) => (
                           <span
                             key={tag}
-                            className="bg-background border border-border text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 text-muted-foreground hover:text-primary hover:border-primary/45 rounded-lg transition-colors"
+                            className="bg-background border border-border text-[10px] font-semibold px-3 py-1.5 text-muted-foreground hover:text-primary hover:border-primary/45 rounded-lg transition-colors"
                           >
-                            #{tag.replace(/\s+/g, "_").toUpperCase()}
+                            #{tag}
                           </span>
                         ))
                       ) : (
@@ -415,8 +415,8 @@ export default function ReportDetailPage() {
             <div className="space-y-6">
               {/* Telemetry Consensus dial panel */}
               <div className="bg-card border border-border p-4 rounded-2xl relative shadow-lg">
-                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4 text-center border-b border-border pb-2">
-                  Node Consensus
+                <div className="text-xs font-semibold text-foreground uppercase tracking-wider mb-4 text-center border-b border-border pb-2">
+                  Community Verification
                 </div>
 
                 <div
@@ -426,19 +426,19 @@ export default function ReportDetailPage() {
                       "border-success/80 bg-success/5 text-success scale-[1.02]",
                   )}
                 >
-                  <div className="text-4xl font-bold text-primary tracking-tight mb-1 font-mono">
+                  <div className="text-4xl font-bold text-primary tracking-tight mb-1">
                     {report.helpfulVotes}
                   </div>
                   <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                    Peer Verifications
+                    Verifications
                   </div>
                 </div>
 
                 {/* Consensus meter gauge */}
                 <div className="space-y-3 mb-4 bg-background p-3 border border-border rounded-xl">
-                  <div className="flex justify-between text-xs font-bold text-muted-foreground">
+                  <div className="flex justify-between text-xs font-semibold text-muted-foreground">
                     <span>Safety Score</span>
-                    <span className="font-mono text-primary">
+                    <span className="text-primary font-bold">
                       {report.trustScore}%
                     </span>
                   </div>
@@ -449,13 +449,13 @@ export default function ReportDetailPage() {
                     />
                   </div>
                   <div className="text-[9px] text-muted-foreground/50 text-center uppercase tracking-wider">
-                    Determines general platform trust
+                    Based on community votes and reports
                   </div>
                 </div>
 
                 <Button
                   className={cn(
-                    "w-full text-xs font-bold uppercase tracking-wider rounded-xl h-12 transition-all relative overflow-hidden",
+                    "w-full text-xs font-bold rounded-xl h-12 transition-all relative overflow-hidden",
                     hasVotedHelpful
                       ? "bg-success/15 text-success border border-success/30 hover:bg-success/20"
                       : "bg-primary text-primary-foreground hover:bg-primary/90",
@@ -464,14 +464,14 @@ export default function ReportDetailPage() {
                   disabled={hasVotedHelpful}
                 >
                   <ThumbsUp className="h-4 w-4 mr-2" />
-                  {hasVotedHelpful ? "Verified" : "Verify Node"}
+                  {hasVotedHelpful ? "Verified" : "Verify Report"}
                 </Button>
               </div>
 
               {/* Security Risk Panel */}
               <div className="bg-card border border-border p-4 rounded-2xl relative shadow-lg">
-                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4 text-center border-b border-border pb-2">
-                  Threat Index
+                <div className="text-xs font-semibold text-foreground uppercase tracking-wider mb-4 text-center border-b border-border pb-2">
+                  Risk Assessment
                 </div>
 
                 <div
@@ -485,20 +485,25 @@ export default function ReportDetailPage() {
                   )}
                 >
                   <ShieldAlert className="w-5 h-5" />
-                  <div>Level: {report.riskLevel} Risk</div>
+                  <div className="normal-case">
+                    {report.riskLevel === "high"
+                      ? "High Risk"
+                      : report.riskLevel === "medium"
+                        ? "Medium Risk"
+                        : "Low Risk"}
+                  </div>
                 </div>
               </div>
 
               {/* Submitter Metadata Panel */}
               <div className="bg-card border border-border p-4 rounded-2xl relative shadow-lg flex flex-col gap-3">
-                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center border-b border-border pb-2">
-                  Credentials
+                <div className="text-xs font-semibold text-foreground uppercase tracking-wider text-center border-b border-border pb-2">
+                  Reporter Information
                 </div>
 
                 <div className="text-xs text-center text-muted-foreground/75 leading-relaxed">
-                  Reporter Node:
-                  <br />
-                  <span className="text-foreground font-semibold font-mono text-[10px] break-all block mt-1">
+                  Submitted By:
+                  <span className="text-foreground font-semibold break-all block mt-1">
                     {report.anonymous ? "Anonymous Developer" : report.email}
                   </span>
                 </div>
@@ -506,7 +511,7 @@ export default function ReportDetailPage() {
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full h-10 text-xs font-bold uppercase tracking-wider rounded-xl border border-border transition-all",
+                    "w-full h-10 text-xs font-bold rounded-xl border border-border transition-all",
                     hasFlagged
                       ? "text-destructive border-destructive/30 bg-destructive/5"
                       : "text-muted-foreground hover:text-destructive hover:bg-destructive/10 hover:border-destructive/20",
@@ -515,7 +520,7 @@ export default function ReportDetailPage() {
                   disabled={hasFlagged}
                 >
                   <Flag className="h-4 w-4 mr-2" />
-                  {hasFlagged ? "Alert Logged" : "Flag Anomaly"}
+                  {hasFlagged ? "Alert Logged" : "Flag Report"}
                 </Button>
               </div>
             </div>
@@ -524,9 +529,9 @@ export default function ReportDetailPage() {
           {/* Evidence matrix link section */}
           {report.evidenceUrls && report.evidenceUrls.length > 0 && (
             <div className="bg-card border border-border p-4 sm:p-5 mt-4 rounded-2xl shadow-lg relative">
-              <h3 className="text-xs font-bold uppercase text-primary tracking-wider mb-4 flex items-center border-b border-border pb-2">
-                <Server className="h-4 w-4 mr-2" />
-                Attached Evidence Source Matrix
+              <h3 className="text-xs font-semibold uppercase text-foreground tracking-wider mb-4 flex items-center border-b border-border pb-2">
+                <Server className="h-4 w-4 mr-2 text-primary" />
+                Evidence and References
               </h3>
 
               <div className="space-y-2.5">
@@ -538,7 +543,7 @@ export default function ReportDetailPage() {
                     rel="noopener noreferrer"
                     className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-background border border-border hover:border-primary/45 rounded-xl text-xs text-muted-foreground hover:text-primary tracking-wider gap-4 group transition-all"
                   >
-                    <span className="truncate max-w-[80%] font-mono">
+                    <span className="truncate max-w-[80%] font-medium">
                       ↳ Link {index + 1}: {url}
                     </span>
                     <span className="flex items-center gap-1.5 shrink-0 font-bold text-primary border border-primary/20 bg-primary/5 px-3 py-1.5 rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-all">
