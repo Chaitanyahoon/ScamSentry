@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { TerminalSquare, ShieldAlert, ArrowLeft } from "lucide-react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { TerminalSquare, ShieldAlert, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 /**
  * Privacy Policy Manifest page.
@@ -13,7 +13,6 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-[#0C0A09] text-[#E8DBC8] py-20 px-4 sm:px-6 relative overflow-hidden font-mono">
       <div className="absolute inset-0 bg-grid-cyber opacity-[0.03] pointer-events-none" />
       <div className="max-w-2xl mx-auto space-y-8 relative z-10 border border-[#1F1914] bg-[#15110E] p-8 sm:p-12 shadow-[0_4px_24px_rgba(0,0,0,0.55)]">
-        
         {/* Corner HUD accent */}
         <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 [clip-path:polygon(100%_0,0_0,100%_100%)] pointer-events-none" />
 
@@ -35,7 +34,10 @@ export default function PrivacyPage() {
               <ShieldAlert className="h-3 w-3" /> 1. ZERO DATA HARVESTING
             </h2>
             <p>
-              ScamSentry operates on a deterministic, zero-trust framework. We do NOT log, store, or monitor any personal user details. Link forensic scanning is performed on-the-fly and processed completely locally.
+              ScamSentry operates on a deterministic, zero-trust framework. We
+              do NOT log, store, or monitor any personal user details. Link
+              forensic scanning is performed on-the-fly and processed completely
+              locally.
             </p>
           </section>
 
@@ -44,7 +46,10 @@ export default function PrivacyPage() {
               <ShieldAlert className="h-3 w-3" /> 2. SCANNING LOGS
             </h2>
             <p>
-              In order to update threat hotspot maps, anonymous URL metadata (the scanned domain and its compiled threat classification) is logged on our database. IPs and browser signatures are hashed client-side prior to transit and are completely undecipherable.
+              In order to update threat hotspot maps, anonymous URL metadata
+              (the scanned domain and its compiled threat classification) is
+              logged on our database. IPs and browser signatures are hashed
+              client-side prior to transit and are completely undecipherable.
             </p>
           </section>
 
@@ -53,7 +58,8 @@ export default function PrivacyPage() {
               <ShieldAlert className="h-3 w-3" /> 3. COOKIES & TRACKING
             </h2>
             <p>
-              This workstation utilizes zero advertising cookies, zero analytical trackers, and zero third-party telemetry integrations.
+              This workstation utilizes zero advertising cookies, zero
+              analytical trackers, and zero third-party telemetry integrations.
             </p>
           </section>
         </div>
@@ -63,12 +69,16 @@ export default function PrivacyPage() {
             STATUS: SECURE_ENVIRONMENT
           </span>
           <Link href="/">
-            <Button variant="outline" size="sm" className="font-bold uppercase text-[9px] tracking-widest border-primary/20 hover:bg-primary/10">
+            <Button
+              variant="outline"
+              size="sm"
+              className="font-bold uppercase text-[9px] tracking-widest border-primary/20 hover:bg-primary/10"
+            >
               <ArrowLeft className="mr-2 h-3.5 w-3.5" /> Return to Terminal
             </Button>
           </Link>
         </div>
       </div>
     </div>
-  )
+  );
 }

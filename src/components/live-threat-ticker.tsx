@@ -44,13 +44,13 @@ export function LiveThreatTicker() {
           return;
         }
         const data = await res.json();
-        
+
         const parsedThreats = (data.threats || []).map((t: any) => ({
           text: t.domain,
           source: t.source || "OSINT",
           isIncident: false,
           isHighlight: false,
-          time: t.firstSeen || new Date().toISOString()
+          time: t.firstSeen || new Date().toISOString(),
         }));
 
         const parsedIncidents = (data.incidents || []).map((i: any) => ({
@@ -58,13 +58,15 @@ export function LiveThreatTicker() {
           source: i.source || "Advisory",
           isIncident: true,
           isHighlight: i.isHighlight || false,
-          time: i.publishedAt || new Date().toISOString()
+          time: i.publishedAt || new Date().toISOString(),
         }));
 
         // Sort: Highlights at the front, then alternate
         const highlights = parsedIncidents.filter((i: any) => i.isHighlight);
-        const regularIncidents = parsedIncidents.filter((i: any) => !i.isHighlight);
-        
+        const regularIncidents = parsedIncidents.filter(
+          (i: any) => !i.isHighlight,
+        );
+
         const combined = [...highlights, ...parsedThreats, ...regularIncidents];
         if (combined.length > 0) {
           setItems(combined);
@@ -95,63 +97,79 @@ export function LiveThreatTicker() {
           </span>
         </div>
       </div>
- 
+
       {/* Scrolling Container */}
       <div className="flex whitespace-nowrap animate-marquee group-hover:[animation-play-state:paused] pl-[180px]">
         {scrollingItems.map((item, idx) => (
-          <div 
+          <div
             key={`${item.text}-${idx}`}
             className={cn(
               "inline-flex items-center gap-4 px-6 border-r border-border last:border-r-0 transition-colors",
-              item.isHighlight ? "bg-red-500/[0.03]" : ""
+              item.isHighlight ? "bg-red-500/[0.03]" : "",
             )}
           >
             <div className="flex items-center gap-2">
               {item.isIncident ? (
-                <ShieldAlert className={cn(
-                  "h-3.5 w-3.5", 
-                  item.isHighlight ? "text-red-500 animate-bounce" : "text-amber-500"
-                )} />
+                <ShieldAlert
+                  className={cn(
+                    "h-3.5 w-3.5",
+                    item.isHighlight
+                      ? "text-red-500 animate-bounce"
+                      : "text-amber-500",
+                  )}
+                />
               ) : (
                 <ShieldAlert className="h-3.5 w-3.5 text-primary opacity-70" />
               )}
-              <span className={cn(
-                "text-[11px] font-mono tracking-tight",
-                item.isHighlight 
-                  ? "text-red-400 font-bold uppercase tracking-wider drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]" 
-                  : item.isIncident 
-                  ? "text-amber-300 font-medium uppercase" 
-                  : "text-white lowercase"
-              )}>
+              <span
+                className={cn(
+                  "text-[11px] font-mono tracking-tight",
+                  item.isHighlight
+                    ? "text-red-400 font-bold uppercase tracking-wider drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]"
+                    : item.isIncident
+                      ? "text-amber-300 font-medium uppercase"
+                      : "text-white lowercase",
+                )}
+              >
                 {item.text}
               </span>
             </div>
-            <div className={cn(
-              "px-2.5 py-0.5 rounded-full border",
-              item.isHighlight 
-                ? "bg-red-500/10 border-red-500/30 text-red-500 animate-pulse font-black" 
-                : item.isIncident 
-                ? "bg-amber-500/10 border-amber-500/20 text-amber-500" 
-                : "bg-primary/10 border-primary/20 text-primary"
-            )}>
+            <div
+              className={cn(
+                "px-2.5 py-0.5 rounded-full border",
+                item.isHighlight
+                  ? "bg-red-500/10 border-red-500/30 text-red-500 animate-pulse font-black"
+                  : item.isIncident
+                    ? "bg-amber-500/10 border-amber-500/20 text-amber-500"
+                    : "bg-primary/10 border-primary/20 text-primary",
+              )}
+            >
               <span className="text-[9px] font-mono font-bold uppercase tracking-tighter">
                 {item.isHighlight ? "CRITICAL BULLETIN" : item.source}
               </span>
             </div>
             <span className="text-[10px] font-mono text-muted-foreground/45 tabular-nums">
-              {new Date(item.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+              {new Date(item.time).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              })}
             </span>
           </div>
         ))}
       </div>
- 
+
       {/* Right Gradient Fade */}
       <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
 
       <style jsx global>{`
         @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
         }
         .animate-marquee {
           display: flex;

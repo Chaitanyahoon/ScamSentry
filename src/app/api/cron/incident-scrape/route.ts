@@ -10,7 +10,8 @@ export async function GET(req: Request) {
     const querySecret = searchParams.get("secret");
     const authHeader = req.headers.get("authorization");
 
-    const isAuthHeaderValid = authHeader === `Bearer ${process.env.CRON_SECRET}`;
+    const isAuthHeaderValid =
+      authHeader === `Bearer ${process.env.CRON_SECRET}`;
     const isQuerySecretValid = querySecret === process.env.CRON_SECRET;
 
     if (!isAuthHeaderValid && !isQuerySecretValid) {
@@ -19,34 +20,50 @@ export async function GET(req: Request) {
 
     console.log("[CRON] Executing Daily Incident and Compromise Scraper...");
 
-    const backendUrl = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL;
+    const backendUrl =
+      process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL;
     let backendStats = {};
     let proxied = false;
 
     if (backendUrl) {
       try {
-        console.log(`[CRON] Proxying incident scraping request to FastAPI backend: ${backendUrl}`);
-        const response = await fetch(`${backendUrl}/api/v1/admin/scrape-incidents?background=false`, {
-          method: "POST",
-          headers: {
-            "X-Admin-Key": process.env.API_SECRET_KEY || "test-admin-secret-key-12345",
+        console.log(
+          `[CRON] Proxying incident scraping request to FastAPI backend: ${backendUrl}`,
+        );
+        const response = await fetch(
+          `${backendUrl}/api/v1/admin/scrape-incidents?background=false`,
+          {
+            method: "POST",
+            headers: {
+              "X-Admin-Key":
+                process.env.API_SECRET_KEY || "test-admin-secret-key-12345",
+            },
           },
-        });
+        );
 
         if (response.ok) {
           backendStats = await response.json();
           proxied = true;
-          console.log("[CRON] Backend incident scraper finished successfully. Syncing locally to Firestore...");
+          console.log(
+            "[CRON] Backend incident scraper finished successfully. Syncing locally to Firestore...",
+          );
         } else {
           const errText = await response.text();
-          console.warn(`[CRON] Backend incident scraper returned error ${response.status}: ${errText}. Running local sync.`);
+          console.warn(
+            `[CRON] Backend incident scraper returned error ${response.status}: ${errText}. Running local sync.`,
+          );
         }
       } catch (err) {
-        console.error("[CRON] Error connecting to backend for scraping. Running local sync:", err);
+        console.error(
+          "[CRON] Error connecting to backend for scraping. Running local sync:",
+          err,
+        );
       }
     }
 
-    console.log("[CRON] Executing Local Daily Incident and Compromise Scraper...");
+    console.log(
+      "[CRON] Executing Local Daily Incident and Compromise Scraper...",
+    );
     const stats = await scrapeCyberIncidents();
 
     return NextResponse.json({
@@ -54,10 +71,13 @@ export async function GET(req: Request) {
       timestamp: new Date().toISOString(),
       proxied,
       backend: proxied ? backendStats : null,
-      ...stats
+      ...stats,
     });
   } catch (error: any) {
     console.error("[CRON] Incident Scraper Route Error:", error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 },
+    );
   }
 }

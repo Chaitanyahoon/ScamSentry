@@ -60,21 +60,21 @@ export const ADMIN_CONFIG = {
   RESET_FAILED_ATTEMPTS_MS: 60 * 60 * 1000,
 
   // Helper functions
-  
+
   /**
    * Check if email domain is allowed
    */
   isEmailDomainAllowed(email: string): boolean {
-    if (!this.ENABLE_EMAIL_DOMAIN_CHECK) return true
-    if (this.ALLOWED_ADMIN_DOMAINS.length === 0) return true
-    const domain = email.split('@')[1]?.toLowerCase()
-    return this.ALLOWED_ADMIN_DOMAINS.includes(domain || '')
+    if (!this.ENABLE_EMAIL_DOMAIN_CHECK) return true;
+    if (this.ALLOWED_ADMIN_DOMAINS.length === 0) return true;
+    const domain = email.split("@")[1]?.toLowerCase();
+    return this.ALLOWED_ADMIN_DOMAINS.includes(domain || "");
   },
 
   /**
    * Get domain from email
    */
   getEmailDomain(email: string): string {
-    return email.split('@')[1] || 'unknown'
+    return email.split("@")[1] || "unknown";
   },
-}
+};

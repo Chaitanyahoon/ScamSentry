@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -11,11 +11,16 @@
 
   body {
     @apply bg-background text-foreground min-h-screen w-full selection:bg-primary/20 selection:text-primary;
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Outfit', sans-serif;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Outfit", sans-serif;
   }
 
   *,
@@ -28,57 +33,57 @@
 
   :root {
     /* ── MODERN CYBERSECURITY DARK MODE ── */
-    --background:      224 71% 4%;    /* #030712 — deep slate black */
-    --card:            222 47% 7%;    /* #0b0f19 — modern dark slate card */
-    --card-foreground: 220 14% 96%;   /* off-white */
-    --popover:         222 47% 7%;
+    --background: 224 71% 4%; /* #030712 — deep slate black */
+    --card: 222 47% 7%; /* #0b0f19 — modern dark slate card */
+    --card-foreground: 220 14% 96%; /* off-white */
+    --popover: 222 47% 7%;
     --popover-foreground: 220 14% 96%;
 
     /* Text */
-    --foreground:         220 14% 96%;  /* clean off-white */
-    --muted:              220 20% 10%;  /* lifted dark slate */
-    --muted-foreground:   220 9% 65%;   /* soft grey */
+    --foreground: 220 14% 96%; /* clean off-white */
+    --muted: 220 20% 10%; /* lifted dark slate */
+    --muted-foreground: 220 9% 65%; /* soft grey */
 
     /* Primary — Premium Orange/Amber */
-    --primary:            24 96% 53%;   /* #f97316 — clean, glowing orange */
-    --primary-foreground: 224 71% 4%;   /* deep black text on primary */
+    --primary: 24 96% 53%; /* #f97316 — clean, glowing orange */
+    --primary-foreground: 224 71% 4%; /* deep black text on primary */
 
     /* Secondary — Indigo/Blue Accent */
-    --secondary:            217 91% 60%;  /* #3b82f6 */
+    --secondary: 217 91% 60%; /* #3b82f6 */
     --secondary-foreground: 220 14% 96%;
 
     /* Accent */
-    --accent:            220 20% 12%;
+    --accent: 220 20% 12%;
     --accent-foreground: 220 14% 98%;
 
     /* Threat / Destructive — Vibrant Crimson */
-    --destructive:            0 84% 60%;  /* warning red */
+    --destructive: 0 84% 60%; /* warning red */
     --destructive-foreground: 220 14% 98%;
 
     /* Success — Vibrant Emerald */
-    --success:            142 76% 45%;  /* green */
+    --success: 142 76% 45%; /* green */
     --success-foreground: 220 14% 98%;
 
     /* Warning — Vivid Amber */
-    --warning:            38 92% 50%;
+    --warning: 38 92% 50%;
     --warning-foreground: 224 71% 4%;
 
     /* Borders & Inputs */
-    --border: 220 19% 16%;             /* #1f2937 */
-    --input:  220 19% 16%;
-    --ring:   24 96% 53%;
+    --border: 220 19% 16%; /* #1f2937 */
+    --input: 220 19% 16%;
+    --ring: 24 96% 53%;
 
     --radius: 0.75rem;
 
     /* Gradient stops */
     --primary-start: 24 96% 53%;
-    --primary-end:   217 91% 60%;
+    --primary-end: 217 91% 60%;
   }
 
   .dark {
     --background: 224 71% 4%;
     --foreground: 220 14% 96%;
-    --primary:    24 96% 53%;
+    --primary: 24 96% 53%;
   }
 }
 
@@ -105,11 +110,15 @@
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    transition:
+      border-color 0.25s ease,
+      box-shadow 0.25s ease;
   }
   .glass-card:hover {
     border-color: rgba(249, 115, 22, 0.3);
-    box-shadow: 0 8px 32px 0 rgba(249, 115, 22, 0.08), 0 0 0 1px rgba(249, 115, 22, 0.1);
+    box-shadow:
+      0 8px 32px 0 rgba(249, 115, 22, 0.08),
+      0 0 0 1px rgba(249, 115, 22, 0.1);
   }
 
   .glass-strong {
@@ -119,9 +128,12 @@
     overflow: hidden;
   }
   .glass-strong::after {
-    content: '';
+    content: "";
     position: absolute;
-    top: 0; left: 0; right: 0; height: 2px;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
     background: hsl(var(--primary));
     opacity: 0.7;
   }
@@ -135,7 +147,8 @@
   }
 
   .animated-gradient {
-    background: linear-gradient(-45deg,
+    background: linear-gradient(
+      -45deg,
       hsl(var(--primary)),
       hsl(var(--secondary)),
       hsl(38, 70%, 68%),
@@ -154,13 +167,13 @@
     text-transform: uppercase;
     font-weight: 700;
     letter-spacing: 0.15em;
-    font-family: 'Outfit', sans-serif;
+    font-family: "Outfit", sans-serif;
     border-radius: var(--radius);
     transition: all 0.25s ease;
     overflow: hidden;
   }
   .cyber-button::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     background: hsl(var(--primary));
@@ -179,7 +192,7 @@
   /* ── Grid Background ── */
   .bg-grid-cyber {
     background-image:
-      linear-gradient(to right,  hsla(24, 96%, 53%, 0.04) 1px, transparent 1px),
+      linear-gradient(to right, hsla(24, 96%, 53%, 0.04) 1px, transparent 1px),
       linear-gradient(to bottom, hsla(24, 96%, 53%, 0.04) 1px, transparent 1px);
     background-size: 48px 48px;
   }
@@ -187,24 +200,44 @@
 
 /* ── Keyframes ───────────────────────────────────────────── */
 @keyframes gradient-flow {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
   animation: fade-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.stagger-1 { animation-delay: 0.08s; }
-.stagger-2 { animation-delay: 0.16s; }
-.stagger-3 { animation-delay: 0.26s; }
-.stagger-4 { animation-delay: 0.38s; }
+.stagger-1 {
+  animation-delay: 0.08s;
+}
+.stagger-2 {
+  animation-delay: 0.16s;
+}
+.stagger-3 {
+  animation-delay: 0.26s;
+}
+.stagger-4 {
+  animation-delay: 0.38s;
+}
 
 @keyframes marquee {
   0% {
@@ -229,4 +262,4 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #f97316;
-}
+}

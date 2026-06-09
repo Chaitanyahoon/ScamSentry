@@ -40,12 +40,12 @@ export async function analyzeDomainForensics(inputUrl: string) {
     if (sslInfo.ageInDays < 2) {
       score += 45;
       flags.push(
-        `CRITICAL: SSL/TLS certificate was created less than 48 hours ago (${Math.floor(sslInfo.ageInDays * 24)} hours). Modern burner SSL footprint.`
+        `CRITICAL: SSL/TLS certificate was created less than 48 hours ago (${Math.floor(sslInfo.ageInDays * 24)} hours). Modern burner SSL footprint.`,
       );
     } else if (sslInfo.ageInDays < 15) {
       score += 20;
       flags.push(
-        `Suspicious: SSL/TLS certificate is very new (${Math.floor(sslInfo.ageInDays)} days).`
+        `Suspicious: SSL/TLS certificate is very new (${Math.floor(sslInfo.ageInDays)} days).`,
       );
     }
   }
@@ -62,25 +62,25 @@ export async function analyzeDomainForensics(inputUrl: string) {
     if (uniqueIps.length > 3) {
       score += 30;
       flags.push(
-        `Suspicious: Domain resolves to ${uniqueIps.length} distinct IPs. Possible fast-flux botnet distribution.`
+        `Suspicious: Domain resolves to ${uniqueIps.length} distinct IPs. Possible fast-flux botnet distribution.`,
       );
     }
 
     if (domain.match(/^\d+\.\d+\.\d+\.\d+$/)) {
       score += 80;
       flags.push(
-        "CRITICAL: Domain is a raw IP address (No hostname). Extreme risk marker."
+        "CRITICAL: Domain is a raw IP address (No hostname). Extreme risk marker.",
       );
     }
 
     // NEW: Mail Exchange (MX) Record Check
     const resolveMx = promisify(dns.resolveMx);
     let mxRecords = await resolveMx(domain).catch(() => []);
-    
+
     // Fallback: If no MX records are found on the subdomain (e.g. parts.length > 2), check the root domain
     const parts = domain.split(/[.]/);
     const rootDomain = parts.length > 1 ? parts.slice(-2).join(".") : domain;
-    
+
     if (mxRecords.length === 0 && parts.length > 2) {
       mxRecords = await resolveMx(rootDomain).catch(() => []);
     }
@@ -89,13 +89,17 @@ export async function analyzeDomainForensics(inputUrl: string) {
       "scam-sentry.vercel.app",
       "scam-sentry.app",
       "scamsentry.app",
-      "scamsentry.com"
+      "scamsentry.com",
     ].includes(domain);
 
-    if (mxRecords.length === 0 && !domain.includes("local") && !isTrustedAppDomain) {
+    if (
+      mxRecords.length === 0 &&
+      !domain.includes("local") &&
+      !isTrustedAppDomain
+    ) {
       score += 35;
       flags.push(
-        "High Risk: Domain has no Mail Exchange (MX) records. Legitimate business domains rarely skip mail setup."
+        "High Risk: Domain has no Mail Exchange (MX) records. Legitimate business domains rarely skip mail setup.",
       );
     } else {
       // Deduct minor risk if professional mail setup exists or is whitelisted
@@ -107,31 +111,39 @@ export async function analyzeDomainForensics(inputUrl: string) {
     if (spfRecords.length === 0 && parts.length > 2) {
       spfRecords = await resolveTxt(rootDomain).catch(() => [] as string[][]);
     }
-    
+
     // TXT records are returned as arrays of strings. Let's flatten them.
-    const flatTxtRecords = spfRecords.map(r => r.join(""));
-    const hasSpf = flatTxtRecords.some(r => r.toLowerCase().includes("v=spf1"));
-    
+    const flatTxtRecords = spfRecords.map((r) => r.join(""));
+    const hasSpf = flatTxtRecords.some((r) =>
+      r.toLowerCase().includes("v=spf1"),
+    );
+
     // NEW: DMARC (Domain-based Message Authentication) Record Check
-    let dmarcRecords = await resolveTxt(`_dmarc.${domain}`).catch(() => [] as string[][]);
+    let dmarcRecords = await resolveTxt(`_dmarc.${domain}`).catch(
+      () => [] as string[][],
+    );
     if (dmarcRecords.length === 0 && parts.length > 2) {
-      dmarcRecords = await resolveTxt(`_dmarc.${rootDomain}`).catch(() => [] as string[][]);
+      dmarcRecords = await resolveTxt(`_dmarc.${rootDomain}`).catch(
+        () => [] as string[][],
+      );
     }
-    const flatDmarcRecords = dmarcRecords.map(r => r.join(""));
-    const hasDmarc = flatDmarcRecords.some(r => r.toLowerCase().includes("v=dmarc1"));
+    const flatDmarcRecords = dmarcRecords.map((r) => r.join(""));
+    const hasDmarc = flatDmarcRecords.some((r) =>
+      r.toLowerCase().includes("v=dmarc1"),
+    );
 
     let emailSecurityScore = 0;
     if (!hasSpf && !domain.includes("local") && !isTrustedAppDomain) {
       emailSecurityScore += 15;
       flags.push(
-        `High Risk: Domain is missing SPF (Sender Policy Framework) records. Highly vulnerable to recruiter email spoofing.`
+        `High Risk: Domain is missing SPF (Sender Policy Framework) records. Highly vulnerable to recruiter email spoofing.`,
       );
     }
-    
+
     if (!hasDmarc && !domain.includes("local") && !isTrustedAppDomain) {
       emailSecurityScore += 10;
       flags.push(
-        `Suspicious: Domain is missing DMARC protection records. Associated with spoofable talent recruitment outreach.`
+        `Suspicious: Domain is missing DMARC protection records. Associated with spoofable talent recruitment outreach.`,
       );
     }
 
@@ -145,7 +157,7 @@ export async function analyzeDomainForensics(inputUrl: string) {
     }
   } catch (e) {
     flags.push(
-      `Forensic Alert: Domain ${domain} failed basic DNS connectivity (Offline or Ghost domain).`
+      `Forensic Alert: Domain ${domain} failed basic DNS connectivity (Offline or Ghost domain).`,
     );
     score += 30;
   }
@@ -155,13 +167,16 @@ export async function analyzeDomainForensics(inputUrl: string) {
     const { getAdminDb } = await import("../firebase-admin");
     const db = getAdminDb();
     const docId = domain.replace(/\./g, "_");
-    const threatDoc = await db.collection("threat_intel_feeds").doc(docId).get();
+    const threatDoc = await db
+      .collection("threat_intel_feeds")
+      .doc(docId)
+      .get();
 
     if (threatDoc.exists) {
       const data = threatDoc.data();
       score += 100;
       flags.push(
-        `CRITICAL: Domain ${domain} is listed on the global ${data?.source || "OSINT"} blocklist for phishing.`
+        `CRITICAL: Domain ${domain} is listed on the global ${data?.source || "OSINT"} blocklist for phishing.`,
       );
     }
   } catch (e) {
@@ -169,7 +184,9 @@ export async function analyzeDomainForensics(inputUrl: string) {
   }
 
   // 5. RDAP & Registrar Pedigree
-  let infrastructure: { nameservers?: string[], registrar?: string } | undefined;
+  let infrastructure:
+    | { nameservers?: string[]; registrar?: string }
+    | undefined;
   try {
     // We will extract the root domain since RDAP query for full subdomains usually fails
     // e.g., for secure.login.paypal.com.scam.net we want scam.net
@@ -186,42 +203,72 @@ export async function analyzeDomainForensics(inputUrl: string) {
 
     if (rdapRes.ok) {
       const rdapData = await rdapRes.json();
-      
+
       // NEW: Nameserver Reputation Audit
-      const nameServers = (rdapData.nameservers || []).map((ns: any) => ns.ldhName || "");
-      const registrar = rdapData.entities?.find((e: any) => e.roles?.includes("registrar"))?.vcardArray?.[1]?.find((v: any) => v[0] === "fn")?.[3] || "";
-      
+      const nameServers = (rdapData.nameservers || []).map(
+        (ns: any) => ns.ldhName || "",
+      );
+      const registrar =
+        rdapData.entities
+          ?.find((e: any) => e.roles?.includes("registrar"))
+          ?.vcardArray?.[1]?.find((v: any) => v[0] === "fn")?.[3] || "";
+
       infrastructure = { nameservers: nameServers, registrar };
 
-      const suspiciousRegistrars = ["reg.ru", "todaynic", "eranet", "cheapdomain", "hostinger", "namesilo", "1api", "porkbun", "bizcn", "tucows"];
-      if (registrar && suspiciousRegistrars.some((r) => registrar.toLowerCase().includes(r))) {
+      const suspiciousRegistrars = [
+        "reg.ru",
+        "todaynic",
+        "eranet",
+        "cheapdomain",
+        "hostinger",
+        "namesilo",
+        "1api",
+        "porkbun",
+        "bizcn",
+        "tucows",
+      ];
+      if (
+        registrar &&
+        suspiciousRegistrars.some((r) => registrar.toLowerCase().includes(r))
+      ) {
         score += 30;
         flags.push(
-          `High Risk: Domain registered through highly abused provider (${registrar}). Associated with ephemeral phishing.`
+          `High Risk: Domain registered through highly abused provider (${registrar}). Associated with ephemeral phishing.`,
         );
       }
 
       const suspiciousNS = ["freenom", "freehost", "burner", "disposable"];
-      if (nameServers.some((ns: string) => suspiciousNS.some(s => ns.toLowerCase().includes(s)))) {
+      if (
+        nameServers.some((ns: string) =>
+          suspiciousNS.some((s) => ns.toLowerCase().includes(s)),
+        )
+      ) {
         score += 40;
-        flags.push("High Risk: Domain uses nameservers linked to disposable or high-abuse hosting.");
+        flags.push(
+          "High Risk: Domain uses nameservers linked to disposable or high-abuse hosting.",
+        );
       }
 
       const events = rdapData.events || [];
       const registrationEvent = events.find(
-        (e: any) => e.eventAction === "registration"
+        (e: any) => e.eventAction === "registration",
       );
 
       if (registrationEvent && registrationEvent.eventDate) {
         const creationDate = new Date(registrationEvent.eventDate);
-        const ageInDays = (Date.now() - creationDate.getTime()) / (1000 * 60 * 60 * 24);
+        const ageInDays =
+          (Date.now() - creationDate.getTime()) / (1000 * 60 * 60 * 24);
 
         if (ageInDays < 15) {
           score += 75;
-          flags.push(`CRITICAL: Domain is ultra-new (${Math.floor(ageInDays)} days). High-confidence burner domain signature.`);
+          flags.push(
+            `CRITICAL: Domain is ultra-new (${Math.floor(ageInDays)} days). High-confidence burner domain signature.`,
+          );
         } else if (ageInDays < 60) {
           score += 45;
-          flags.push(`High Risk: Domain is very new (${Math.floor(ageInDays)} days). Potential seasonal phishing campaign.`);
+          flags.push(
+            `High Risk: Domain is very new (${Math.floor(ageInDays)} days). Potential seasonal phishing campaign.`,
+          );
         } else {
           score -= 15;
         }
@@ -234,15 +281,16 @@ export async function analyzeDomainForensics(inputUrl: string) {
 
   // NEW: Active Brand Lockdown Forensics
   try {
-    const { getActiveBrandLockdowns } = await import("../services/incident-scraper");
+    const { getActiveBrandLockdowns } =
+      await import("../services/incident-scraper");
     const activeLockdowns = await getActiveBrandLockdowns().catch(() => []);
-    
+
     for (const brand of activeLockdowns) {
       const brandClean = brand.toLowerCase();
       if (domain.toLowerCase().includes(brandClean)) {
-        const isOfficial = 
-          domain === `${brandClean}.com` || 
-          domain === `${brandClean}.io` || 
+        const isOfficial =
+          domain === `${brandClean}.com` ||
+          domain === `${brandClean}.io` ||
           domain === `${brandClean}.org` ||
           domain.endsWith(`.${brandClean}.com`) ||
           domain.endsWith(`.${brandClean}.io`);
@@ -250,7 +298,7 @@ export async function analyzeDomainForensics(inputUrl: string) {
         if (!isOfficial) {
           score += 35;
           flags.push(
-            `CRITICAL ALERT: Domain mimics '${brandClean.toUpperCase()}' which is currently flagged under an ACTIVE CYBERSECURITY INCIDENT compromise! Phishing risk is extremely elevated during this exploit window.`
+            `CRITICAL ALERT: Domain mimics '${brandClean.toUpperCase()}' which is currently flagged under an ACTIVE CYBERSECURITY INCIDENT compromise! Phishing risk is extremely elevated during this exploit window.`,
           );
         }
       }
@@ -261,13 +309,18 @@ export async function analyzeDomainForensics(inputUrl: string) {
 
   // 6. Threat Fingerprinting (NEW: Neural Cluster ID)
   const { generateThreatFingerprint } = await import("../fingerprints");
-  const fingerprint = generateThreatFingerprint(inputUrl, flags, { base: score }, infrastructure);
+  const fingerprint = generateThreatFingerprint(
+    inputUrl,
+    flags,
+    { base: score },
+    infrastructure,
+  );
 
   return {
     score: Math.min(Math.max(score, 0), 100),
     flags,
     analyzedDomains: [domain],
     fingerprint,
-    infrastructure
+    infrastructure,
   };
 }

@@ -56,7 +56,10 @@ export async function logScanEvent(event: ScanEvent): Promise<void> {
   }
 }
 
-export async function getRecentScans(apiKeyId?: string, days: number = 7): Promise<ScanEvent[]> {
+export async function getRecentScans(
+  apiKeyId?: string,
+  days: number = 7,
+): Promise<ScanEvent[]> {
   try {
     const since = new Date();
     since.setDate(since.getDate() - days);
@@ -69,13 +72,17 @@ export async function getRecentScans(apiKeyId?: string, days: number = 7): Promi
       const q = query(
         collection(db, "scan_events"),
         where("apiKeyId", "==", apiKeyId),
-        limit(2000)
+        limit(2000),
       );
       const snapshot = await getDocs(q);
       snapshot.forEach((doc) => {
         const data = doc.data();
         const docTimestamp = data.timestamp;
-        const tsDate = docTimestamp?.toDate ? docTimestamp.toDate() : (docTimestamp ? new Date(docTimestamp) : null);
+        const tsDate = docTimestamp?.toDate
+          ? docTimestamp.toDate()
+          : docTimestamp
+            ? new Date(docTimestamp)
+            : null;
         if (tsDate && tsDate >= since) {
           fetched.push({
             id: doc.id,
@@ -93,13 +100,17 @@ export async function getRecentScans(apiKeyId?: string, days: number = 7): Promi
         collection(db, "scan_events"),
         where("timestamp", ">=", sinceTimestamp),
         orderBy("timestamp", "desc"),
-        limit(1000)
+        limit(1000),
       );
       const snapshot = await getDocs(q);
       snapshot.forEach((doc) => {
         const data = doc.data();
         const docTimestamp = data.timestamp;
-        const tsDate = docTimestamp?.toDate ? docTimestamp.toDate() : (docTimestamp ? new Date(docTimestamp) : new Date());
+        const tsDate = docTimestamp?.toDate
+          ? docTimestamp.toDate()
+          : docTimestamp
+            ? new Date(docTimestamp)
+            : new Date();
         fetched.push({
           id: doc.id,
           ...data,
@@ -115,7 +126,10 @@ export async function getRecentScans(apiKeyId?: string, days: number = 7): Promi
   }
 }
 
-export async function getAnalyticsMetrics(apiKeyId?: string, days: number = 30): Promise<AnalyticsMetrics> {
+export async function getAnalyticsMetrics(
+  apiKeyId?: string,
+  days: number = 30,
+): Promise<AnalyticsMetrics> {
   try {
     const scans = await getRecentScans(apiKeyId, days);
 
@@ -123,12 +137,12 @@ export async function getAnalyticsMetrics(apiKeyId?: string, days: number = 30):
     const threatsDetected = scans.filter(
       (s) => s.riskLevel === "Critical Threat",
     ).length;
-    const suspicious = scans.filter(
-      (s) => s.riskLevel === "Suspicious",
-    ).length;
+    const suspicious = scans.filter((s) => s.riskLevel === "Suspicious").length;
 
     const averageScore =
-      totalScans > 0 ? scans.reduce((sum, s) => sum + s.finalScore, 0) / totalScans : 0;
+      totalScans > 0
+        ? scans.reduce((sum, s) => sum + s.finalScore, 0) / totalScans
+        : 0;
 
     // Layer accuracy: % of scans where layer triggered
     const heuristicsTriggered = scans.filter(
@@ -186,9 +200,11 @@ export async function getAnalyticsMetrics(apiKeyId?: string, days: number = 30):
       falsePositiveEstimate,
       averageScore,
       layerAccuracy: {
-        heuristics: totalScans > 0 ? (heuristicsTriggered / totalScans) * 100 : 0,
+        heuristics:
+          totalScans > 0 ? (heuristicsTriggered / totalScans) * 100 : 0,
         forensics: totalScans > 0 ? (forensicsTriggered / totalScans) * 100 : 0,
-        threatIntel: totalScans > 0 ? (threatIntelTriggered / totalScans) * 100 : 0,
+        threatIntel:
+          totalScans > 0 ? (threatIntelTriggered / totalScans) * 100 : 0,
         internalGraph:
           totalScans > 0 ? (internalGraphTriggered / totalScans) * 100 : 0,
         semantic: totalScans > 0 ? (semanticTriggered / totalScans) * 100 : 0,

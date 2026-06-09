@@ -1,5 +1,12 @@
-import Link from "next/link"
-import { Users, MessageSquare, ShieldAlert, ShieldCheck, Bell, Radio } from "lucide-react"
+import Link from "next/link";
+import {
+  Users,
+  MessageSquare,
+  ShieldAlert,
+  ShieldCheck,
+  Bell,
+  Radio,
+} from "lucide-react";
 
 export default function CommunityPage() {
   return (
@@ -23,8 +30,9 @@ export default function CommunityPage() {
             </h1>
 
             <p className="text-base text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-              We are building a collaborative network for freelancers to share security intelligence, 
-              verify contracts, and defend our workspace from fraudulent clients.
+              We are building a collaborative network for freelancers to share
+              security intelligence, verify contracts, and defend our workspace
+              from fraudulent clients.
             </p>
           </div>
 
@@ -35,9 +43,12 @@ export default function CommunityPage() {
                 <div className="flex items-center w-11 h-11 rounded-xl border border-primary/20 bg-primary/5 justify-center mb-4">
                   <MessageSquare className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">Discussion Forums</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Discussion Forums
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                  Secure community spaces to swap client reviews, flag suspicious clauses, and audit contracts.
+                  Secure community spaces to swap client reviews, flag
+                  suspicious clauses, and audit contracts.
                 </p>
               </div>
               <div className="inline-flex items-center self-start px-2.5 py-1 rounded-full border border-warning/20 bg-warning/10 text-warning text-xs font-medium">
@@ -51,9 +62,12 @@ export default function CommunityPage() {
                 <div className="flex items-center w-11 h-11 rounded-xl border border-secondary/20 bg-secondary/5 justify-center mb-4">
                   <Users className="w-5 h-5 text-secondary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">Expert Consultation</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Expert Consultation
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                  Direct access to experienced freelancers and legal advisors for assistance with payment disputes.
+                  Direct access to experienced freelancers and legal advisors
+                  for assistance with payment disputes.
                 </p>
               </div>
               <div className="inline-flex items-center self-start px-2.5 py-1 rounded-full border border-warning/20 bg-warning/10 text-warning text-xs font-medium">
@@ -67,9 +81,12 @@ export default function CommunityPage() {
                 <div className="flex items-center w-11 h-11 rounded-xl border border-success/20 bg-success/5 justify-center mb-4">
                   <ShieldCheck className="w-5 h-5 text-success" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">Verified Companies</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Verified Companies
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                  A curated database of vetted organizations with verified prompt payments and positive reviews.
+                  A curated database of vetted organizations with verified
+                  prompt payments and positive reviews.
                 </p>
               </div>
               <Link
@@ -86,9 +103,12 @@ export default function CommunityPage() {
                 <div className="flex items-center w-11 h-11 rounded-xl border border-destructive/20 bg-destructive/5 justify-center mb-4">
                   <ShieldAlert className="w-5 h-5 text-destructive" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">Early Warning System</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Early Warning System
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                  Real-time alerts when scam patterns, bad faith contracts, or fake jobs match your criteria.
+                  Real-time alerts when scam patterns, bad faith contracts, or
+                  fake jobs match your criteria.
                 </p>
               </div>
               <div className="inline-flex items-center self-start px-2.5 py-1 rounded-full border border-warning/20 bg-warning/10 text-warning text-xs font-medium">
@@ -105,7 +125,8 @@ export default function CommunityPage() {
               </h2>
             </div>
             <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-              Subscribe to receive updates when new community modules and protection tools are launched.
+              Subscribe to receive updates when new community modules and
+              protection tools are launched.
             </p>
             <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
               <input
@@ -121,5 +142,5 @@ export default function CommunityPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

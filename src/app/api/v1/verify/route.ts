@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { analyzeDomainForensics } from "@/lib/validator/forensics";
 import { analyzeInternalGraph } from "@/lib/validator/internal-graph";
-import { freeTierLimiter, proTierLimiter, enterpriseTierLimiter } from "@/lib/rate-limit";
+import {
+  freeTierLimiter,
+  proTierLimiter,
+  enterpriseTierLimiter,
+} from "@/lib/rate-limit";
 import { getAdminDb } from "@/lib/firebase-admin";
 import admin from "firebase-admin";
 import { logScanEvent, ScanEvent } from "@/lib/analytics";
@@ -47,8 +51,11 @@ export async function GET(req: Request) {
 
     if (!apiKey) {
       return NextResponse.json(
-        { error: "Unauthorized. Missing 'x-api-key' header. Please obtain an API key from the developer dashboard." },
-        { status: 401, headers: CORS_HEADERS }
+        {
+          error:
+            "Unauthorized. Missing 'x-api-key' header. Please obtain an API key from the developer dashboard.",
+        },
+        { status: 401, headers: CORS_HEADERS },
       );
     }
 
@@ -60,11 +67,12 @@ export async function GET(req: Request) {
       console.error("[VERIFY] Firebase Admin not initialized:", firebaseErr);
       return NextResponse.json(
         { error: "Internal Server Error. Database connectivity offline." },
-        { status: 500, headers: CORS_HEADERS }
+        { status: 500, headers: CORS_HEADERS },
       );
     }
 
-    const keysSnap = await db.collection("api_keys")
+    const keysSnap = await db
+      .collection("api_keys")
       .where("key", "==", apiKey)
       .limit(1)
       .get();
@@ -72,7 +80,7 @@ export async function GET(req: Request) {
     if (keysSnap.empty) {
       return NextResponse.json(
         { error: "Unauthorized. Invalid 'x-api-key' header value." },
-        { status: 401, headers: CORS_HEADERS }
+        { status: 401, headers: CORS_HEADERS },
       );
     }
 
@@ -81,8 +89,11 @@ export async function GET(req: Request) {
 
     if (keyData.status !== "active") {
       return NextResponse.json(
-        { error: "Unauthorized. This API key has been revoked by the administrator." },
-        { status: 401, headers: CORS_HEADERS }
+        {
+          error:
+            "Unauthorized. This API key has been revoked by the administrator.",
+        },
+        { status: 401, headers: CORS_HEADERS },
       );
     }
 
@@ -92,8 +103,11 @@ export async function GET(req: Request) {
 
     if (usageCount >= planLimit) {
       return NextResponse.json(
-        { error: "Usage quota exceeded. Please upgrade your plan in the developer dashboard." },
-        { status: 403, headers: CORS_HEADERS }
+        {
+          error:
+            "Usage quota exceeded. Please upgrade your plan in the developer dashboard.",
+        },
+        { status: 403, headers: CORS_HEADERS },
       );
     }
 
@@ -103,7 +117,8 @@ export async function GET(req: Request) {
 
     if (tier === "enterprise") {
       if (enterpriseTierLimiter) {
-        const { success } = await enterpriseTierLimiter.limit(rateLimitIdentifier);
+        const { success } =
+          await enterpriseTierLimiter.limit(rateLimitIdentifier);
         rateLimitPassed = success;
       } else {
         rateLimitPassed = checkLocalRateLimit(rateLimitIdentifier, 300);
@@ -128,8 +143,10 @@ export async function GET(req: Request) {
     if (!rateLimitPassed) {
       const limitVal = tier === "enterprise" ? 300 : tier === "pro" ? 60 : 5;
       return NextResponse.json(
-        { error: `Rate limit exceeded (${limitVal} req/min) for API key tier '${tier.toUpperCase()}'.` },
-        { status: 429, headers: CORS_HEADERS }
+        {
+          error: `Rate limit exceeded (${limitVal} req/min) for API key tier '${tier.toUpperCase()}'.`,
+        },
+        { status: 429, headers: CORS_HEADERS },
       );
     }
 
@@ -140,7 +157,7 @@ export async function GET(req: Request) {
     if (!domain) {
       return NextResponse.json(
         { error: "Missing 'domain' parameter." },
-        { status: 400, headers: CORS_HEADERS }
+        { status: 400, headers: CORS_HEADERS },
       );
     }
 
@@ -151,7 +168,8 @@ export async function GET(req: Request) {
     let isSuspiciousRegistrar = false;
     let forensicsScore = 0;
 
-    const backendUrl = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL;
+    const backendUrl =
+      process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL;
     let backendUsed = false;
 
     if (backendUrl) {
@@ -160,7 +178,9 @@ export async function GET(req: Request) {
         if (!/^https?:\/\//i.test(targetUrl)) {
           targetUrl = `http://${targetUrl}`;
         }
-        console.log(`[B2B verify] Proxying domain check for: "${targetUrl}" to FastAPI backend: ${backendUrl}`);
+        console.log(
+          `[B2B verify] Proxying domain check for: "${targetUrl}" to FastAPI backend: ${backendUrl}`,
+        );
         const backendResponse = await fetch(`${backendUrl}/api/v1/scan`, {
           method: "POST",
           headers: {
@@ -171,31 +191,50 @@ export async function GET(req: Request) {
 
         if (backendResponse.ok) {
           const data = await backendResponse.json();
-          const L2 = data.layer_results.find((lr: any) => lr.layer === "L2") || { score_contribution: 0, details: {} };
-          const L4 = data.layer_results.find((lr: any) => lr.layer === "L4") || { score_contribution: 0, details: {} };
+          const L2 = data.layer_results.find(
+            (lr: any) => lr.layer === "L2",
+          ) || { score_contribution: 0, details: {} };
+          const L4 = data.layer_results.find(
+            (lr: any) => lr.layer === "L4",
+          ) || { score_contribution: 0, details: {} };
 
           // Whitelist check
-          isVerified = !!(L4.details.match && L4.details.match.verified && L4.details.match.threat_type === "whitelist"); 
-          trustScore = isVerified ? 100 : Math.max(0, 100 - L2.score_contribution);
+          isVerified = !!(
+            L4.details.match &&
+            L4.details.match.verified &&
+            L4.details.match.threat_type === "whitelist"
+          );
+          trustScore = isVerified
+            ? 100
+            : Math.max(0, 100 - L2.score_contribution);
 
           const l2Flags = L2.details.triggered_checks || [];
-          isNewDomain = l2Flags.some((f: string) => f.includes("Domain age") && f.includes("days"));
-          isSuspiciousRegistrar = l2Flags.some((f: string) => f.includes("low-reputation registrar"));
+          isNewDomain = l2Flags.some(
+            (f: string) => f.includes("Domain age") && f.includes("days"),
+          );
+          isSuspiciousRegistrar = l2Flags.some((f: string) =>
+            f.includes("low-reputation registrar"),
+          );
           forensicsScore = L2.score_contribution;
           backendUsed = true;
         } else {
           const errText = await backendResponse.text();
-          console.warn(`[B2B verify] Backend error status ${backendResponse.status}: ${errText}. Falling back to local.`);
+          console.warn(
+            `[B2B verify] Backend error status ${backendResponse.status}: ${errText}. Falling back to local.`,
+          );
         }
       } catch (err) {
-        console.error("[B2B verify] Backend connection failed. Falling back to local:", err);
+        console.error(
+          "[B2B verify] Backend connection failed. Falling back to local:",
+          err,
+        );
       }
     }
 
     if (!backendUsed) {
       const [forensics, internal] = await Promise.all([
         analyzeDomainForensics(domain),
-        analyzeInternalGraph(domain)
+        analyzeInternalGraph(domain),
       ]);
 
       isVerified = internal.score === -100;
@@ -206,7 +245,12 @@ export async function GET(req: Request) {
     }
 
     // 5. Log scan event for analytics
-    const riskLevel = trustScore <= 20 ? "Critical Threat" : trustScore <= 60 ? "Suspicious" : "Secure";
+    const riskLevel =
+      trustScore <= 20
+        ? "Critical Threat"
+        : trustScore <= 60
+          ? "Suspicious"
+          : "Secure";
     const scanEvent: ScanEvent = {
       url: domain,
       finalScore: trustScore,
@@ -233,7 +277,7 @@ export async function GET(req: Request) {
     // 6. Increment key usage in Firestore
     await keyDoc.ref.update({
       usageCount: admin.firestore.FieldValue.increment(1),
-      lastUsedAt: admin.firestore.FieldValue.serverTimestamp()
+      lastUsedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     return NextResponse.json(
@@ -251,16 +295,16 @@ export async function GET(req: Request) {
           forensicSignals: {
             isNewDomain,
             isSuspiciousRegistrar,
-            isWhitelisted: isVerified
-          }
-        }
+            isWhitelisted: isVerified,
+          },
+        },
       },
-      { status: 200, headers: CORS_HEADERS }
+      { status: 200, headers: CORS_HEADERS },
     );
   } catch (error: any) {
     return NextResponse.json(
       { error: "Internal Server Error", details: error.message },
-      { status: 500, headers: CORS_HEADERS }
+      { status: 500, headers: CORS_HEADERS },
     );
   }
 }

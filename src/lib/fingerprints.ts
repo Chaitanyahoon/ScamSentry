@@ -15,7 +15,7 @@ export function generateThreatFingerprint(
   url: string,
   flags: string[],
   scores: Record<string, number>,
-  infrastructure?: { nameservers?: string[], registrar?: string }
+  infrastructure?: { nameservers?: string[]; registrar?: string },
 ): ForensicFingerprint {
   const components: string[] = [];
 
@@ -55,7 +55,8 @@ export function generateThreatFingerprint(
 
   // Calculate Severity
   const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
-  const severity = totalScore > 70 ? "high" : totalScore > 30 ? "medium" : "low";
+  const severity =
+    totalScore > 70 ? "high" : totalScore > 30 ? "medium" : "low";
 
   return { hash, components, severity };
 }
@@ -63,12 +64,12 @@ export function generateThreatFingerprint(
 function calculateEntropy(str: string): number {
   const len = str.length;
   if (len === 0) return 0;
-  
+
   const freqs: Record<string, number> = {};
   for (const char of str) {
     freqs[char] = (freqs[char] || 0) + 1;
   }
-  
+
   return Object.values(freqs).reduce((sum, f) => {
     const p = f / len;
     return sum - p * Math.log2(p);

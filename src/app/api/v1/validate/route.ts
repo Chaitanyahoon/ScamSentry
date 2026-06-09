@@ -5,7 +5,11 @@ import { analyzeThreatIntel } from "@/lib/validator/threat-intel";
 import { analyzeInternalGraph } from "@/lib/validator/internal-graph";
 
 import { generateThreatFingerprint } from "@/lib/fingerprints";
-import { freeTierLimiter, proTierLimiter, enterpriseTierLimiter } from "@/lib/rate-limit";
+import {
+  freeTierLimiter,
+  proTierLimiter,
+  enterpriseTierLimiter,
+} from "@/lib/rate-limit";
 import { logScanEvent, ScanEvent } from "@/lib/analytics";
 import { dispatchBrandAlert } from "@/lib/webhook-dispatcher";
 import { getAdminDb } from "@/lib/firebase-admin";
@@ -46,8 +50,11 @@ export async function POST(req: Request) {
 
     if (!apiKey) {
       return NextResponse.json(
-        { error: "Unauthorized. Missing 'x-api-key' header. Please obtain an API key from the developer dashboard." },
-        { status: 401, headers: CORS_HEADERS }
+        {
+          error:
+            "Unauthorized. Missing 'x-api-key' header. Please obtain an API key from the developer dashboard.",
+        },
+        { status: 401, headers: CORS_HEADERS },
       );
     }
 
@@ -59,11 +66,12 @@ export async function POST(req: Request) {
       console.error("[VALIDATE] Firebase Admin not initialized:", firebaseErr);
       return NextResponse.json(
         { error: "Internal Server Error. Database connectivity offline." },
-        { status: 500, headers: CORS_HEADERS }
+        { status: 500, headers: CORS_HEADERS },
       );
     }
 
-    const keysSnap = await db.collection("api_keys")
+    const keysSnap = await db
+      .collection("api_keys")
       .where("key", "==", apiKey)
       .limit(1)
       .get();
@@ -71,7 +79,7 @@ export async function POST(req: Request) {
     if (keysSnap.empty) {
       return NextResponse.json(
         { error: "Unauthorized. Invalid 'x-api-key' header value." },
-        { status: 401, headers: CORS_HEADERS }
+        { status: 401, headers: CORS_HEADERS },
       );
     }
 
@@ -80,8 +88,11 @@ export async function POST(req: Request) {
 
     if (keyData.status !== "active") {
       return NextResponse.json(
-        { error: "Unauthorized. This API key has been revoked by the administrator." },
-        { status: 401, headers: CORS_HEADERS }
+        {
+          error:
+            "Unauthorized. This API key has been revoked by the administrator.",
+        },
+        { status: 401, headers: CORS_HEADERS },
       );
     }
 
@@ -91,8 +102,11 @@ export async function POST(req: Request) {
 
     if (usageCount >= planLimit) {
       return NextResponse.json(
-        { error: "Usage quota exceeded. Please upgrade your plan in the developer dashboard." },
-        { status: 403, headers: CORS_HEADERS }
+        {
+          error:
+            "Usage quota exceeded. Please upgrade your plan in the developer dashboard.",
+        },
+        { status: 403, headers: CORS_HEADERS },
       );
     }
 
@@ -102,7 +116,8 @@ export async function POST(req: Request) {
 
     if (tier === "enterprise") {
       if (enterpriseTierLimiter) {
-        const { success } = await enterpriseTierLimiter.limit(rateLimitIdentifier);
+        const { success } =
+          await enterpriseTierLimiter.limit(rateLimitIdentifier);
         rateLimitPassed = success;
       } else {
         rateLimitPassed = checkLocalRateLimit(rateLimitIdentifier, 300);
@@ -127,8 +142,10 @@ export async function POST(req: Request) {
     if (!rateLimitPassed) {
       const limitVal = tier === "enterprise" ? 300 : tier === "pro" ? 60 : 5;
       return NextResponse.json(
-        { error: `Rate limit exceeded (${limitVal} req/min) for API key tier '${tier.toUpperCase()}'.` },
-        { status: 429, headers: CORS_HEADERS }
+        {
+          error: `Rate limit exceeded (${limitVal} req/min) for API key tier '${tier.toUpperCase()}'.`,
+        },
+        { status: 429, headers: CORS_HEADERS },
       );
     }
 
@@ -137,7 +154,7 @@ export async function POST(req: Request) {
     if (!body || !body.payload || typeof body.payload !== "string") {
       return NextResponse.json(
         { error: 'Invalid request shape. Expected { "payload": "string" }' },
-        { status: 400, headers: CORS_HEADERS }
+        { status: 400, headers: CORS_HEADERS },
       );
     }
 
@@ -155,7 +172,8 @@ export async function POST(req: Request) {
     let internalLedgerVerified = false;
 
     // Attempt to query the FastAPI backend if BACKEND_API_URL or NEXT_PUBLIC_API_URL is configured
-    const backendUrl = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL;
+    const backendUrl =
+      process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL;
     let backendUsed = false;
 
     if (backendUrl) {
@@ -164,7 +182,9 @@ export async function POST(req: Request) {
         if (!/^https?:\/\//i.test(targetUrl)) {
           targetUrl = `http://${targetUrl}`;
         }
-        console.log(`[B2B API] Proxying scan request for: "${targetUrl}" to FastAPI backend: ${backendUrl}`);
+        console.log(
+          `[B2B API] Proxying scan request for: "${targetUrl}" to FastAPI backend: ${backendUrl}`,
+        );
         const backendResponse = await fetch(`${backendUrl}/api/v1/scan`, {
           method: "POST",
           headers: {
@@ -175,10 +195,18 @@ export async function POST(req: Request) {
 
         if (backendResponse.ok) {
           const data = await backendResponse.json();
-          const L1 = data.layer_results.find((lr: any) => lr.layer === "L1") || { score_contribution: 0, details: {} };
-          const L2 = data.layer_results.find((lr: any) => lr.layer === "L2") || { score_contribution: 0, details: {} };
-          const L3 = data.layer_results.find((lr: any) => lr.layer === "L3") || { score_contribution: 0, details: {} };
-          const L4 = data.layer_results.find((lr: any) => lr.layer === "L4") || { score_contribution: 0, details: {} };
+          const L1 = data.layer_results.find(
+            (lr: any) => lr.layer === "L1",
+          ) || { score_contribution: 0, details: {} };
+          const L2 = data.layer_results.find(
+            (lr: any) => lr.layer === "L2",
+          ) || { score_contribution: 0, details: {} };
+          const L3 = data.layer_results.find(
+            (lr: any) => lr.layer === "L3",
+          ) || { score_contribution: 0, details: {} };
+          const L4 = data.layer_results.find(
+            (lr: any) => lr.layer === "L4",
+          ) || { score_contribution: 0, details: {} };
 
           finalScore = 100 - data.risk_score;
           if (data.risk_level === "dangerous") riskLevel = "Critical Threat";
@@ -190,14 +218,18 @@ export async function POST(req: Request) {
           const l3Flags: string[] = [];
           if (L3.details.matches && Array.isArray(L3.details.matches)) {
             L3.details.matches.forEach((m: any) => {
-              l3Flags.push(`CRITICAL: Google Safe Browsing flagged threat: ${m.threat_type} on ${m.platform}`);
+              l3Flags.push(
+                `CRITICAL: Google Safe Browsing flagged threat: ${m.threat_type} on ${m.platform}`,
+              );
             });
           }
           const l4Flags: string[] = [];
           if (L4.details.match) {
             const m = L4.details.match;
             const verifiedLabel = m.verified ? "Verified" : "Unverified";
-            l4Flags.push(`CRITICAL: Internal Graph Ledger Match: ${verifiedLabel} ${m.threat_type} (confidence: ${m.confidence}%)`);
+            l4Flags.push(
+              `CRITICAL: Internal Graph Ledger Match: ${verifiedLabel} ${m.threat_type} (confidence: ${m.confidence}%)`,
+            );
           }
 
           forensicDetails = [...l1Flags, ...l2Flags, ...l3Flags, ...l4Flags];
@@ -209,10 +241,15 @@ export async function POST(req: Request) {
           backendUsed = true;
         } else {
           const errText = await backendResponse.text();
-          console.warn(`[B2B API] Backend error status ${backendResponse.status}: ${errText}. Falling back to local.`);
+          console.warn(
+            `[B2B API] Backend error status ${backendResponse.status}: ${errText}. Falling back to local.`,
+          );
         }
       } catch (err) {
-        console.error("[B2B API] Backend connection failed. Falling back to local:", err);
+        console.error(
+          "[B2B API] Backend connection failed. Falling back to local:",
+          err,
+        );
       }
     }
 
@@ -248,7 +285,7 @@ export async function POST(req: Request) {
       forensics: forensicsScore,
       threatIntel: threatIntelScore,
       internalGraph: internalLedgerVerified ? 100 : 0,
-      semantic: 0
+      semantic: 0,
     } as Record<string, number>);
 
     // 6. Log scan event for analytics
@@ -280,25 +317,27 @@ export async function POST(req: Request) {
     // 7. Increment key usage in Firestore
     await keyDoc.ref.update({
       usageCount: admin.firestore.FieldValue.increment(1),
-      lastUsedAt: admin.firestore.FieldValue.serverTimestamp()
+      lastUsedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     // 8. B2B Brand Monitoring Trigger (Webhook Dispatch)
     if (finalScore <= 25) {
-      const brandMatch = forensicDetails.find(d => d.includes("mimics '") || d.includes("spoofing major brand '"));
+      const brandMatch = forensicDetails.find(
+        (d) => d.includes("mimics '") || d.includes("spoofing major brand '"),
+      );
       if (brandMatch) {
-         const brandName = brandMatch.match(/'([^']+)'/)?.[1];
-         if (brandName) {
-            await dispatchBrandAlert(brandName, {
-              alertType: "BRAND_MIMICRY",
-              severity: finalScore <= 20 ? "CRITICAL" : "HIGH",
-              targetBrand: brandName,
-              maliciousUrl: input,
-              fingerprint: fingerprint.hash,
-              detectedAt: new Date().toISOString(),
-              forensicSummary: forensicDetails
-            });
-         }
+        const brandName = brandMatch.match(/'([^']+)'/)?.[1];
+        if (brandName) {
+          await dispatchBrandAlert(brandName, {
+            alertType: "BRAND_MIMICRY",
+            severity: finalScore <= 20 ? "CRITICAL" : "HIGH",
+            targetBrand: brandName,
+            maliciousUrl: input,
+            fingerprint: fingerprint.hash,
+            detectedAt: new Date().toISOString(),
+            forensicSummary: forensicDetails,
+          });
+        }
       }
     }
 
@@ -318,22 +357,39 @@ export async function POST(req: Request) {
           severity: riskLevel,
           fingerprint: fingerprint.hash,
           diagnostics: {
-            heuristics: { triggerCount: heuristicsCount, scorePenalty: heuristicsScore },
-            dnsForensics: { scorePenalty: forensicsScore, flags: forensicDetails.filter(f => f.startsWith("DNS") || f.startsWith("SSL") || f.startsWith("Domain age")) },
-            threatIntel: { scorePenalty: threatIntelScore, flags: forensicDetails.filter(f => f.includes("Google Safe Browsing") || f.includes("URLhaus")) },
+            heuristics: {
+              triggerCount: heuristicsCount,
+              scorePenalty: heuristicsScore,
+            },
+            dnsForensics: {
+              scorePenalty: forensicsScore,
+              flags: forensicDetails.filter(
+                (f) =>
+                  f.startsWith("DNS") ||
+                  f.startsWith("SSL") ||
+                  f.startsWith("Domain age"),
+              ),
+            },
+            threatIntel: {
+              scorePenalty: threatIntelScore,
+              flags: forensicDetails.filter(
+                (f) =>
+                  f.includes("Google Safe Browsing") || f.includes("URLhaus"),
+              ),
+            },
             internalLedger: { verifiedScamsFound: internalLedgerVerified },
-            semanticAI: undefined
+            semanticAI: undefined,
           },
-          details: forensicDetails
+          details: forensicDetails,
         },
       },
-      { status: 200, headers: CORS_HEADERS }
+      { status: 200, headers: CORS_HEADERS },
     );
   } catch (error: any) {
     console.error("Forensic Engine Crash:", error);
     return NextResponse.json(
       { error: "Internal Server Error", details: error.message },
-      { status: 500, headers: CORS_HEADERS }
+      { status: 500, headers: CORS_HEADERS },
     );
   }
 }

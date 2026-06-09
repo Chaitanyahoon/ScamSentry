@@ -18,25 +18,56 @@ MAX_L1_SCORE = 100
 
 SPOOFED_BRANDS_PATTERN = re.compile(
     r"(paypal|apple|google|microsoft|amazon|netflix|meta|facebook|instagram|bankofamerica|chase|wellsfargo|binance|coinbase|stripe|twitch|adobe|dropbox|uber|airbnb|spotify)-?(login|secure|verify|update|support|auth|billing|account|confirm|validate|check)",
-    re.IGNORECASE
+    re.IGNORECASE,
 )
 
 SUSPICIOUS_KEYWORDS_PATTERN = re.compile(
     r"(free-iphone|hack|crack|cheats|generator|giveaway|claim-prize|free-money|verification-required|update-payment|urgent-action|account-suspended|confirm-identity|unusual-activity|click-here|act-now|limited-time|verify-account|unlock-account|suspicious-activity|click-link|validate-card|re-enter-password)",
-    re.IGNORECASE
+    re.IGNORECASE,
 )
 
 FREE_HOSTING_PATTERN = re.compile(
     r"\.(000webhostapp|herokuapp|vercel|netlify|onrender|pythonanywhere|duckdns|bounceme|no-ip|ngrok|replit|github\.io|pages|surge\.sh|netlify\.app|vercel\.app)\.",
-    re.IGNORECASE
+    re.IGNORECASE,
 )
 
 LOOKALIKE_TLDS: set[str] = {
-    ".xyz", ".top", ".buzz", ".cn", ".ru", ".cc", ".pw", ".su", ".info", ".loan",
-    ".club", ".work", ".gq", ".win", ".bid", ".tk", ".ml", ".ga", ".cf", ".zip",
-    ".ltd", ".review", ".hair", ".racing", ".science", ".online", ".site", ".space",
-    ".store", ".download", ".stream", ".webcam", ".accountant", ".date", ".men",
-    ".monster"
+    ".xyz",
+    ".top",
+    ".buzz",
+    ".cn",
+    ".ru",
+    ".cc",
+    ".pw",
+    ".su",
+    ".info",
+    ".loan",
+    ".club",
+    ".work",
+    ".gq",
+    ".win",
+    ".bid",
+    ".tk",
+    ".ml",
+    ".ga",
+    ".cf",
+    ".zip",
+    ".ltd",
+    ".review",
+    ".hair",
+    ".racing",
+    ".science",
+    ".online",
+    ".site",
+    ".space",
+    ".store",
+    ".download",
+    ".stream",
+    ".webcam",
+    ".accountant",
+    ".date",
+    ".men",
+    ".monster",
 }
 
 IP_ADDRESS_PATTERN = re.compile(r"^https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
@@ -65,11 +96,40 @@ MONITORED_BRANDS: list[str] = [
 ]
 
 HOMOGLYPH_MAP: dict[str, str] = {
-    'а': 'a', 'е': 'e', 'і': 'i', 'о': 'o', 'р': 'p', 'с': 'c', 'у': 'y', 'х': 'x',
-    'А': 'A', 'Е': 'E', 'І': 'I', 'О': 'O', 'Р': 'P', 'С': 'C', 'У': 'Y', 'Х': 'X',
-    'α': 'a', 'ε': 'e', 'ι': 'i', 'ο': 'o', 'ρ': 'p', 'ν': 'v', 'τ': 't', 'χ': 'x',
-    'ɩ': 'i', 'Ɩ': 'I', 'օ': 'o', 'ԁ': 'd', 'զ': 'q', 'ｗ': 'w', 'ｖ': 'v', 'ｕ': 'u',
-    '0': 'o', '1': 'l',
+    "а": "a",
+    "е": "e",
+    "і": "i",
+    "о": "o",
+    "р": "p",
+    "с": "c",
+    "у": "y",
+    "х": "x",
+    "А": "A",
+    "Е": "E",
+    "І": "I",
+    "О": "O",
+    "Р": "P",
+    "С": "C",
+    "У": "Y",
+    "Х": "X",
+    "α": "a",
+    "ε": "e",
+    "ι": "i",
+    "ο": "o",
+    "ρ": "p",
+    "ν": "v",
+    "τ": "t",
+    "χ": "x",
+    "ɩ": "i",
+    "Ɩ": "I",
+    "օ": "o",
+    "ԁ": "d",
+    "զ": "q",
+    "ｗ": "w",
+    "ｖ": "v",
+    "ｕ": "u",
+    "0": "o",
+    "1": "l",
 }
 
 
@@ -104,7 +164,7 @@ def _calculate_entropy(s: str) -> float:
     for x in range(256):
         p_x = s.count(chr(x)) / len(s)
         if p_x > 0:
-            entropy += - p_x * math.log2(p_x)
+            entropy += -p_x * math.log2(p_x)
     return entropy
 
 
@@ -170,7 +230,9 @@ def check_heuristics(url: str) -> dict:
     # 3. Spoofed Brands (Keywords combination) → +90
     if SPOOFED_BRANDS_PATTERN.search(full_url):
         score += 90
-        triggered.append("URL structure mimics official brands using phishing keywords (e.g., login/verify)")
+        triggered.append(
+            "URL structure mimics official brands using phishing keywords (e.g., login/verify)"
+        )
 
     # 4. Suspicious General Keywords → +30
     if SUSPICIOUS_KEYWORDS_PATTERN.search(full_url):
@@ -178,10 +240,20 @@ def check_heuristics(url: str) -> dict:
         triggered.append("URL contains high-risk scam incentive or urgency terminology")
 
     # 5. Free Hosting / DDNS → +45
-    is_trusted = any(hostname == d or hostname.endswith("." + d) for d in ["scam-sentry.vercel.app", "scam-sentry.app", "scamsentry.app", "scamsentry.com"])
+    is_trusted = any(
+        hostname == d or hostname.endswith("." + d)
+        for d in [
+            "scam-sentry.vercel.app",
+            "scam-sentry.app",
+            "scamsentry.app",
+            "scamsentry.com",
+        ]
+    )
     if FREE_HOSTING_PATTERN.search(full_url) and not is_trusted:
         score += 45
-        triggered.append("Domain relies on free hosting or Dynamic DNS, commonly abused by burner phishing sites")
+        triggered.append(
+            "Domain relies on free hosting or Dynamic DNS, commonly abused by burner phishing sites"
+        )
 
     # 6. Lookalike TLDs → +50
     if hostname:
@@ -214,7 +286,9 @@ def check_heuristics(url: str) -> dict:
         ]
         if len(numeric_segments) >= 3:
             score += 35
-            triggered.append("Domain has 3+ segments containing digits (newly-registered pattern)")
+            triggered.append(
+                "Domain has 3+ segments containing digits (newly-registered pattern)"
+            )
 
     # 11. Brand mimicry detection → +90
     if hostname:
@@ -230,7 +304,9 @@ def check_heuristics(url: str) -> dict:
             for part in parts[:-2]:
                 if part in MONITORED_BRANDS:
                     score += 90
-                    triggered.append(f"Suspicious subdomain includes a major brand name as an embedded component: '{part}'")
+                    triggered.append(
+                        f"Suspicious subdomain includes a major brand name as an embedded component: '{part}'"
+                    )
                     break
 
     # 13. Homoglyph / visual lookalike character detection → +90
@@ -238,12 +314,16 @@ def check_heuristics(url: str) -> dict:
         normalized = _normalize_homoglyphs(hostname)
         if hostname != normalized:
             score += 90
-            triggered.append(f"Visual Spoofing detected: Hostname uses lookalike characters to mimic '{normalized}'")
+            triggered.append(
+                f"Visual Spoofing detected: Hostname uses lookalike characters to mimic '{normalized}'"
+            )
 
     # 14. Homoglyph Punycode detection → +80
     if hostname and hostname.startswith("xn--"):
         score += 80
-        triggered.append("Domain uses IDN Punycode encoding (potential homoglyph/spoofing)")
+        triggered.append(
+            "Domain uses IDN Punycode encoding (potential homoglyph/spoofing)"
+        )
 
     # 15. Path and Query Entropy Analysis → +40
     path_and_query = parsed.path + parsed.query
@@ -251,7 +331,9 @@ def check_heuristics(url: str) -> dict:
         entropy = _calculate_entropy(path_and_query)
         if entropy > 5.2:
             score += 40
-            triggered.append(f"URL path/query has extreme entropy ({entropy:.2f}). Heavy obfuscation marker.")
+            triggered.append(
+                f"URL path/query has extreme entropy ({entropy:.2f}). Heavy obfuscation marker."
+            )
 
     # Cap at MAX_L1_SCORE
     capped_score = min(score, MAX_L1_SCORE)

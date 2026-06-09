@@ -11,6 +11,7 @@ from app.models.ledger import LedgerEntry
 
 # ── L1 Heuristics Tests ────────────────────────────────────────────────
 
+
 def test_l1_heuristics_safe() -> None:
     res = check_heuristics("https://google.com")
     assert res["score"] == 0
@@ -29,12 +30,17 @@ def test_l1_heuristics_malicious() -> None:
 
 # ── L2 DNS / WHOIS / SSL Tests ────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_l2_dns_safe() -> None:
     mock_whois = {
         "creation_date": None,
         "registrar": "Google LLC",
-        "raw": {"domain_name": "google.com", "registrar": "Google LLC", "creation_date": None},
+        "raw": {
+            "domain_name": "google.com",
+            "registrar": "Google LLC",
+            "creation_date": None,
+        },
     }
     mock_ssl = {"valid": True, "self_signed": False, "expired": False, "error": None}
 
@@ -47,9 +53,11 @@ async def test_l2_dns_safe() -> None:
             return ["v=DMARC1; p=reject"]
         return []
 
-    with patch("app.services.l2_dns._whois_lookup", return_value=mock_whois), \
-         patch("app.services.l2_dns._check_ssl", return_value=mock_ssl), \
-         patch("app.services.l2_dns._query_doh", side_effect=mock_query_doh):
+    with (
+        patch("app.services.l2_dns._whois_lookup", return_value=mock_whois),
+        patch("app.services.l2_dns._check_ssl", return_value=mock_ssl),
+        patch("app.services.l2_dns._query_doh", side_effect=mock_query_doh),
+    ):
         res = await check_dns("https://google.com")
         assert res["score"] == 0
         assert res["passed"] is True
@@ -61,7 +69,11 @@ async def test_l2_dns_malicious() -> None:
     mock_whois = {
         "creation_date": None,
         "registrar": "namecheap",
-        "raw": {"domain_name": "evil.tk", "registrar": "namecheap", "creation_date": None},
+        "raw": {
+            "domain_name": "evil.tk",
+            "registrar": "namecheap",
+            "creation_date": None,
+        },
     }
     mock_ssl = {"valid": False, "self_signed": True, "expired": False, "error": None}
 
@@ -74,15 +86,18 @@ async def test_l2_dns_malicious() -> None:
             return ["v=DMARC1; p=reject"]
         return []
 
-    with patch("app.services.l2_dns._whois_lookup", return_value=mock_whois), \
-         patch("app.services.l2_dns._check_ssl", return_value=mock_ssl), \
-         patch("app.services.l2_dns._query_doh", side_effect=mock_query_doh):
+    with (
+        patch("app.services.l2_dns._whois_lookup", return_value=mock_whois),
+        patch("app.services.l2_dns._check_ssl", return_value=mock_ssl),
+        patch("app.services.l2_dns._query_doh", side_effect=mock_query_doh),
+    ):
         res = await check_dns("https://evil.tk")
         assert res["score"] == 75
         assert res["passed"] is False
 
 
 # ── L3 Google Safe Browsing Tests ─────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_l3_google_safe_browsing_no_key() -> None:
@@ -98,8 +113,10 @@ async def test_l3_google_safe_browsing_no_key() -> None:
 @pytest.mark.asyncio
 async def test_l3_google_safe_browsing_flagged() -> None:
     # Flagged url
-    with patch("app.services.l3_threat.get_settings") as mock_settings, \
-         patch("httpx.AsyncClient.post") as mock_post:
+    with (
+        patch("app.services.l3_threat.get_settings") as mock_settings,
+        patch("httpx.AsyncClient.post") as mock_post,
+    ):
         mock_settings.return_value.GOOGLE_SAFE_BROWSING_API_KEY = "test-key"
 
         mock_resp = MagicMock()
@@ -122,6 +139,7 @@ async def test_l3_google_safe_browsing_flagged() -> None:
 
 
 # ── L4 Ledger Tests ───────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_l4_ledger(db) -> None:
@@ -168,6 +186,7 @@ async def test_l4_ledger(db) -> None:
 
 # ── Redis Cache Tests ─────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_redis_cache_operations() -> None:
     url = "https://example-test-cache.com"
@@ -188,6 +207,7 @@ async def test_redis_cache_operations() -> None:
 
 
 # ── New Platform Optimizations Tests ───────────────────────────────────
+
 
 def test_l1_brand_mimicry() -> None:
     # Mimics github but with typo (+15) -> total score capped at 30
@@ -210,14 +230,20 @@ async def test_l2_dns_doh_penalties() -> None:
     mock_whois = {
         "creation_date": None,
         "registrar": "Google LLC",
-        "raw": {"domain_name": "google.com", "registrar": "Google LLC", "creation_date": None},
+        "raw": {
+            "domain_name": "google.com",
+            "registrar": "Google LLC",
+            "creation_date": None,
+        },
     }
     mock_ssl = {"valid": True, "self_signed": False, "expired": False, "error": None}
 
     # Simulate missing MX, SPF, DMARC (return empty lists)
-    with patch("app.services.l2_dns._whois_lookup", return_value=mock_whois), \
-         patch("app.services.l2_dns._check_ssl", return_value=mock_ssl), \
-         patch("app.services.l2_dns._query_doh", return_value=[]):
+    with (
+        patch("app.services.l2_dns._whois_lookup", return_value=mock_whois),
+        patch("app.services.l2_dns._check_ssl", return_value=mock_ssl),
+        patch("app.services.l2_dns._query_doh", return_value=[]),
+    ):
         res = await check_dns("https://google.com")
         # MX missing (+35), SPF missing (+15), DMARC missing (+10) -> total 60
         assert res["score"] == 60
@@ -229,9 +255,11 @@ async def test_l2_dns_doh_penalties() -> None:
 
 @pytest.mark.asyncio
 async def test_l3_threat_urlhaus_flagged() -> None:
-    with patch("app.services.l3_threat.get_settings") as mock_settings, \
-         patch("app.services.l3_threat.check_urlhaus", return_value=True):
-        mock_settings.return_value.GOOGLE_SAFE_BROWSING_API_KEY = "" # Skip GSB
+    with (
+        patch("app.services.l3_threat.get_settings") as mock_settings,
+        patch("app.services.l3_threat.check_urlhaus", return_value=True),
+    ):
+        mock_settings.return_value.GOOGLE_SAFE_BROWSING_API_KEY = ""  # Skip GSB
         res = await check_google_safe_browsing("https://malicious-urlhaus.com")
         assert res["score"] == 100
         assert res["passed"] is False
@@ -242,6 +270,7 @@ async def test_l3_threat_urlhaus_flagged() -> None:
 @pytest.mark.asyncio
 async def test_cache_prewarming() -> None:
     from app.services.cache import prewarm_cache, get_cached_domain_reputation
+
     # Prewarm
     await prewarm_cache()
     # Check if google.com is pre-warmed
@@ -253,24 +282,24 @@ async def test_cache_prewarming() -> None:
 
 def test_assemble_db_url() -> None:
     from app.config import Settings
-    
+
     # 1. postgresql:// target
-    res1 = Settings.assemble_db_url("postgresql://postgres:password@localhost:5432/scamsentry")
+    res1 = Settings.assemble_db_url(
+        "postgresql://postgres:password@localhost:5432/scamsentry"
+    )
     assert res1 == "postgresql+asyncpg://postgres:password@localhost:5432/scamsentry"
-    
+
     # 2. postgres:// target
     res2 = Settings.assemble_db_url("postgres://user:pass@render.com:5432/db")
     assert res2 == "postgresql+asyncpg://user:pass@render.com:5432/db"
-    
+
     # 3. Already correct target
     res3 = Settings.assemble_db_url("postgresql+asyncpg://user:pass@localhost/db")
     assert res3 == "postgresql+asyncpg://user:pass@localhost/db"
-    
+
     # 4. Other types/values
     res4 = Settings.assemble_db_url("sqlite:///:memory:")
     assert res4 == "sqlite:///:memory:"
 
+
 # CI trigger comment 2
-
-
-
