@@ -187,17 +187,29 @@ async def check_dns(url: str) -> dict:
             triggered.append(f"Low-reputation registrar: {whois_data['registrar']}")
             break
 
-    # ── 4. DNS checks (MX, SPF, DMARC via DoH) ─────────────────────
+    # ── 4. DNS checks (A, AAAA, MX, SPF, DMARC via DoH) ────────────
     try:
-        mx_answers, txt_answers, dmarc_answers = await asyncio.gather(
-            _query_doh(hostname, "MX"),
-            _query_doh(hostname, "TXT"),
-            _query_doh(f"_dmarc.{hostname}", "TXT"),
-            return_exceptions=True,
+        a_answers, aaaa_answers, mx_answers, txt_answers, dmarc_answers = (
+            await asyncio.gather(
+                _query_doh(hostname, "A"),
+                _query_doh(hostname, "AAAA"),
+                _query_doh(hostname, "MX"),
+                _query_doh(hostname, "TXT"),
+                _query_doh(f"_dmarc.{hostname}", "TXT"),
+                return_exceptions=True,
+            )
         )
     except Exception:
-        mx_answers, txt_answers, dmarc_answers = [], [], []
+        a_answers, aaaa_answers, mx_answers, txt_answers, dmarc_answers = (
+            [],
+            [],
+            [],
+            [],
+            [],
+        )
 
+    a_answers = a_answers if isinstance(a_answers, list) else []
+    aaaa_answers = aaaa_answers if isinstance(aaaa_answers, list) else []
     mx_answers = mx_answers if isinstance(mx_answers, list) else []
     txt_answers = txt_answers if isinstance(txt_answers, list) else []
     dmarc_answers = dmarc_answers if isinstance(dmarc_answers, list) else []
@@ -217,6 +229,23 @@ async def check_dns(url: str) -> dict:
     if not has_dmarc:
         score += 10
         triggered.append("Domain lacks DMARC email spoofing protections")
+
+    # ── 5. Unresolved Domain check ─────────────────────────────────
+    has_a = len(a_answers) > 0
+    has_aaaa = len(aaaa_answers) > 0
+    if not has_a and not has_aaaa:
+        try:
+            loop = asyncio.get_running_loop()
+            await loop.getaddrinfo(hostname, None, family=socket.AF_UNSPEC)
+            has_a = True
+        except Exception:
+            pass
+
+    if not has_a and not has_aaaa:
+        score += 70
+        triggered.append(
+            "Domain does not resolve to any active IP address (NXDOMAIN)"
+        )
 
     # Cap at MAX_L2_SCORE
     capped_score = min(score, MAX_L2_SCORE)

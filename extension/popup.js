@@ -33,13 +33,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     mainUiEl.style.display = 'block';
 
     if (result && result.status !== 'error') {
-      const isMalicious = result.status === 'malicious' || result.score > 70;
+      const threatScore = result.score || 0;
+      const isMalicious = result.status === 'malicious' || threatScore > 70;
+      const isSuspicious = !isMalicious && (result.status === 'suspicious' || threatScore > 20);
       
-      badgeEl.textContent = isMalicious ? 'Malicious' : 'Safe';
-      badgeEl.className = `risk-badge ${isMalicious ? 'malicious' : 'safe'}`;
+      if (isMalicious) {
+        badgeEl.textContent = 'Malicious';
+        badgeEl.className = 'risk-badge malicious';
+      } else if (isSuspicious) {
+        badgeEl.textContent = 'Suspicious';
+        badgeEl.className = 'risk-badge suspicious';
+      } else {
+        badgeEl.textContent = 'Safe';
+        badgeEl.className = 'risk-badge safe';
+      }
       
       // Update score display - display true Trust Score (100 - threat penalty)
-      const threatScore = result.score || 0;
       const trustScore = Math.max(0, 100 - threatScore);
       scoreBarEl.style.width = `${trustScore}%`;
       scoreValEl.textContent = `${trustScore}%`;
@@ -47,8 +56,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (isMalicious) {
         scoreBarEl.style.backgroundColor = '#FF4D4D';
         scoreValEl.style.color = '#FF4D4D';
+      } else if (isSuspicious) {
+        scoreBarEl.style.backgroundColor = '#F59E0B';
+        scoreValEl.style.color = '#F59E0B';
       } else {
-        scoreBarEl.style.backgroundColor = ''; // Reverts to CSS primary amber
+        scoreBarEl.style.backgroundColor = ''; // Reverts to CSS primary orange
         scoreValEl.style.color = '';
       }
     }

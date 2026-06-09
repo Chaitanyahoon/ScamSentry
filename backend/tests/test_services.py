@@ -78,6 +78,8 @@ async def test_l2_dns_malicious() -> None:
     mock_ssl = {"valid": False, "self_signed": True, "expired": False, "error": None}
 
     async def mock_query_doh(name, record_type):
+        if record_type in ("A", "AAAA"):
+            return ["192.0.2.1"]
         if record_type == "MX":
             return ["10 mail.example.com"]
         if record_type == "TXT" and not name.startswith("_dmarc"):

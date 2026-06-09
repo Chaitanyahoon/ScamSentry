@@ -4,14 +4,15 @@
   <meta charset="UTF-8">
   <style>
     :root {
-      --primary: #FFBF00;
-      --bg: #0C0A09;
-      --card: #120F0D;
-      --text: #F5F5F4;
-      --muted: #A8A29E;
-      --border: #1F1914;
-      --red: #FF4D4D;
-      --success: #10B981;
+      --primary: #f97316;
+      --bg: #09090b;
+      --card: #121214;
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --border: #27272a;
+      --red: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
     }
 
     body {
@@ -38,10 +39,10 @@
     }
 
     .logo-box {
-      background-color: rgba(255, 191, 0, 0.1);
-      border: 1px solid rgba(255, 191, 0, 0.3);
+      background-color: rgba(249, 115, 22, 0.1);
+      border: 1px solid rgba(249, 115, 22, 0.3);
       padding: 6px;
-      border-radius: 4px;
+      border-radius: 8px;
     }
 
     .logo-icon {
@@ -52,19 +53,17 @@
     }
 
     h1 {
-      font-size: 11px;
-      font-family: monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.2em;
+      font-size: 13px;
+      font-weight: 700;
       margin: 0;
-      color: var(--primary);
+      color: var(--text);
     }
 
     .status-card {
       background-color: var(--card);
       border: 1px solid var(--border);
       padding: 16px;
-      border-radius: 8px;
+      border-radius: 12px;
       margin-bottom: 16px;
     }
 
@@ -77,21 +76,35 @@
 
     .status-label {
       font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
+      font-weight: 600;
       color: var(--muted);
     }
 
     .risk-badge {
       font-size: 9px;
       padding: 2px 8px;
-      border-radius: 3px;
-      font-weight: bold;
+      border-radius: 9999px;
+      font-weight: 700;
       text-transform: uppercase;
     }
 
-    .risk-badge.safe { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
-    .risk-badge.malicious { background: rgba(255, 77, 77, 0.1); color: var(--red); border: 1px solid rgba(255, 77, 77, 0.3); }
+    .risk-badge.safe {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .risk-badge.malicious {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .risk-badge.suspicious {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
 
     .url-display {
       font-size: 12px;
@@ -99,12 +112,13 @@
       color: var(--text);
       line-height: 1.4;
       margin-bottom: 8px;
+      font-weight: 500;
     }
 
     .score-bar-container {
-      height: 4px;
+      height: 6px;
       background: var(--border);
-      border-radius: 2px;
+      border-radius: 9999px;
       overflow: hidden;
       margin: 12px 0;
     }
@@ -114,6 +128,7 @@
       background: var(--primary);
       width: 0%;
       transition: width 1s ease-out;
+      border-radius: 9999px;
     }
 
     .stats-grid {
@@ -127,7 +142,7 @@
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--border);
       padding: 10px;
-      border-radius: 6px;
+      border-radius: 10px;
     }
 
     .stat-val {
@@ -140,7 +155,7 @@
     .stat-lbl {
       font-size: 9px;
       color: var(--muted);
-      text-transform: uppercase;
+      font-weight: 500;
     }
 
     footer {
@@ -150,19 +165,18 @@
     .action-btn {
       width: 100%;
       background: var(--primary);
-      color: var(--bg);
+      color: #ffffff;
       border: none;
       padding: 10px;
-      border-radius: 4px;
+      border-radius: 10px;
       font-size: 11px;
-      font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
+      font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      transition: all 0.2s ease;
     }
 
     .action-btn:hover {
@@ -183,22 +197,22 @@
       <div class="logo-box">
         <div class="logo-icon"></div>
       </div>
-      <h1>ScamSentry Shield v1.0</h1>
+      <h1>ScamSentry Shield</h1>
     </header>
 
-    <div id="loading">Initializing Forensic Scan...</div>
+    <div id="loading">Scanning page status...</div>
 
     <div id="main-ui" style="display: none;">
       <div class="status-card">
         <div class="status-header">
-          <span class="status-label">Current Page Analysis</span>
+          <span class="status-label">Page Reputation</span>
           <span id="risk-badge" class="risk-badge safe">Safe</span>
         </div>
         <div id="current-url" class="url-display">https://google.com</div>
         <div class="score-bar-container">
           <div id="score-bar" class="score-bar"></div>
         </div>
-        <div style="display: flex; justify-content: space-between; font-size: 9px; color: var(--muted);">
+        <div style="display: flex; justify-content: space-between; font-size: 9px; color: var(--muted); font-weight: 500;">
           <span>Trust Score</span>
           <span id="score-val" style="color: var(--primary); font-weight: bold;">0%</span>
         </div>
@@ -206,12 +220,12 @@
 
       <div class="stats-grid">
         <div class="stat-box">
-          <span class="stat-val" id="links-scanned">1,240</span>
+          <span class="stat-val" id="links-scanned">0</span>
           <span class="stat-lbl">Links Scanned</span>
         </div>
         <div class="stat-box">
-          <span class="stat-val" id="threats-blocked" style="color: var(--red);">42</span>
-          <span class="stat-lbl">Threats Deflected</span>
+          <span class="stat-val" id="threats-blocked" style="color: var(--red);">0</span>
+          <span class="stat-lbl">Threats Blocked</span>
         </div>
       </div>
 
