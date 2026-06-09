@@ -2,6 +2,7 @@
  * ScamSentry Extension Content Styles
  * 
  * Provides visual trust indicators and threat alerts for links.
+ * Uses the modern orange (#f97316) brand palette.
  */
 
 /* Pending Scan Indicator */
@@ -12,16 +13,16 @@
 
 /* Suspicious Link Style */
 .ss-scan-suspicious {
-  background-color: rgba(255, 191, 0, 0.08) !important;
-  border-bottom: 2px dashed #FFBF00 !important;
-  color: #FFBF00 !important;
+  background-color: rgba(249, 115, 22, 0.08) !important;
+  border-bottom: 2px dashed #f97316 !important;
+  color: #f97316 !important;
 }
 
 /* Malicious Link Style */
 .ss-scan-malicious {
-  background-color: rgba(255, 77, 77, 0.1) !important;
-  border-bottom: 2px solid #FF4D4D !important;
-  color: #FF4D4D !important;
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  border-bottom: 2px solid #ef4444 !important;
+  color: #ef4444 !important;
   font-weight: bold !important;
 }
 
@@ -53,24 +54,24 @@
   z-index: 1;
 }
 
-/* Amber Shield (Suspicious) */
+/* Orange Shield (Suspicious) */
 .ss-shield-suspicious .ss-dot {
-  background-color: #FFBF00;
-  box-shadow: 0 0 5px rgba(255, 191, 0, 0.5);
+  background-color: #f97316;
+  box-shadow: 0 0 5px rgba(249, 115, 22, 0.5);
 }
 
 .ss-shield-suspicious .ss-pulse {
-  background-color: rgba(255, 191, 0, 0.3);
+  background-color: rgba(249, 115, 22, 0.3);
 }
 
 /* Red Shield (Malicious) */
 .ss-shield-malicious .ss-dot {
-  background-color: #FF4D4D;
-  box-shadow: 0 0 8px rgba(255, 77, 77, 0.6);
+  background-color: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
 }
 
 .ss-shield-malicious .ss-pulse {
-  background-color: rgba(255, 77, 77, 0.4);
+  background-color: rgba(239, 68, 68, 0.4);
 }
 
 @keyframes ss-pulse-anim {

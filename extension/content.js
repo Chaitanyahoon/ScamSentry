@@ -158,8 +158,8 @@ function injectEmailBadge(parent, type, email, data) {
     iconColor = '#EF4444'; // Red
     iconGlow = 'rgba(239, 68, 68, 0.4)';
   } else if (type === 'suspicious') {
-    iconColor = '#F59E0B'; // Amber
-    iconGlow = 'rgba(245, 158, 11, 0.4)';
+    iconColor = '#f97316'; // Orange brand
+    iconGlow = 'rgba(249, 115, 22, 0.4)';
   }
 
   badge.innerHTML = `
@@ -179,7 +179,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 /**
- * Renders a premium, Forensic Amber styled terminal popup overlay card
+ * Renders a modern dashboard-styled scan result overlay card
  */
 function showScanResultOverlay(url, result) {
   const existing = document.getElementById('ss-scan-overlay-root');
@@ -191,43 +191,64 @@ function showScanResultOverlay(url, result) {
   const isThreat = result.status === 'malicious' || result.score > 70;
   const isSuspicious = result.score > 20 && result.score <= 70;
   
-  let headerColor = '#EF4444'; // Red
-  let headerTitle = 'CRITICAL_THREAT_DETECTED';
-  let borderGlow = 'rgba(239, 68, 68, 0.35)';
+  let accentColor = '#ef4444';
+  let badgeLabel = 'Malicious';
+  let badgeBg = 'rgba(239, 68, 68, 0.1)';
+  let badgeBorder = 'rgba(239, 68, 68, 0.3)';
+  let borderGlow = 'rgba(239, 68, 68, 0.2)';
 
   if (!isThreat && !isSuspicious) {
-    headerColor = '#10B981'; // Green
-    headerTitle = 'SECURE_NODE_CLEARED';
-    borderGlow = 'rgba(16, 185, 129, 0.35)';
+    accentColor = '#10b981';
+    badgeLabel = 'Safe';
+    badgeBg = 'rgba(16, 185, 129, 0.1)';
+    badgeBorder = 'rgba(16, 185, 129, 0.3)';
+    borderGlow = 'rgba(16, 185, 129, 0.2)';
   } else if (isSuspicious) {
-    headerColor = '#F59E0B'; // Amber
-    headerTitle = 'ELEVATED_RISK_WARNING';
-    borderGlow = 'rgba(245, 158, 11, 0.35)';
+    accentColor = '#f59e0b';
+    badgeLabel = 'Suspicious';
+    badgeBg = 'rgba(245, 158, 11, 0.1)';
+    badgeBorder = 'rgba(245, 158, 11, 0.3)';
+    borderGlow = 'rgba(245, 158, 11, 0.2)';
   }
 
+  const trustScore = Math.max(0, 100 - result.score);
+
   root.innerHTML = `
-    <div style="position: fixed; top: 30px; right: 30px; z-index: 10000000; width: 340px; background-color: #0C0A09; border: 1.5px solid ${headerColor}; padding: 20px; font-family: monospace; color: #E8DBC8; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 15px ${borderGlow}; border-radius: 4px; font-size: 11px; line-height: 1.4;">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1F1914; padding-bottom: 8px; margin-bottom: 12px;">
-        <span style="color: ${headerColor}; font-weight: bold; letter-spacing: 0.1em;">[ ${headerTitle} ]</span>
-        <button id="ss-overlay-close-btn" style="background: none; border: none; color: #E8DBC8; cursor: pointer; font-size: 16px; font-family: monospace; line-height: 1;">&times;</button>
+    <div style="position: fixed; top: 24px; right: 24px; z-index: 10000000; width: 340px; background-color: #09090b; border: 1px solid #27272a; padding: 0; font-family: 'Inter', -apple-system, sans-serif; color: #f4f4f5; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px ${borderGlow}; border-radius: 16px; font-size: 12px; line-height: 1.5; overflow: hidden; animation: ss-overlay-in 0.3s ease;">
+      <style>@keyframes ss-overlay-in { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }</style>
+      <div style="padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #27272a;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="background: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.3); padding: 4px; border-radius: 6px;">
+            <div style="width: 12px; height: 12px; background: #f97316; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"></div>
+          </div>
+          <span style="font-size: 12px; font-weight: 700; color: #f4f4f5;">ScamSentry Shield</span>
+        </div>
+        <button id="ss-overlay-close-btn" style="background: none; border: none; color: #a1a1aa; cursor: pointer; font-size: 18px; line-height: 1; padding: 0; transition: color 0.2s;">&times;</button>
       </div>
-      <div style="margin-bottom: 12px; word-break: break-all;">
-        <span style="color: #8C5A1A;">TARGET_URI:</span> ${url}<br/>
-        <span style="color: #8C5A1A;">TRUST_SCORE:</span> <span style="font-weight: bold; color: ${headerColor};">${100 - result.score}/100</span><br/>
-        <span style="color: #8C5A1A;">RISK_FACTOR:</span> ${result.score}%
+      <div style="padding: 16px 18px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span style="font-size: 10px; font-weight: 600; color: #a1a1aa;">Page Reputation</span>
+          <span style="font-size: 9px; padding: 2px 8px; border-radius: 9999px; font-weight: 700; text-transform: uppercase; background: ${badgeBg}; color: ${accentColor}; border: 1px solid ${badgeBorder};">${badgeLabel}</span>
+        </div>
+        <div style="font-size: 11px; word-break: break-all; color: #f4f4f5; font-weight: 500; margin-bottom: 12px; line-height: 1.4;">${url}</div>
+        <div style="height: 6px; background: #27272a; border-radius: 9999px; overflow: hidden; margin-bottom: 6px;">
+          <div style="height: 100%; width: ${trustScore}%; background: ${accentColor}; border-radius: 9999px; transition: width 0.8s ease;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 9px; color: #a1a1aa; font-weight: 500; margin-bottom: 14px;">
+          <span>Trust Score</span>
+          <span style="color: ${accentColor}; font-weight: 700;">${trustScore}%</span>
+        </div>
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid #27272a; border-radius: 10px; padding: 12px;">
+          <div style="font-size: 10px; font-weight: 600; color: #a1a1aa; margin-bottom: 8px;">Forensic Signals</div>
+          <ul style="margin: 0; padding-left: 16px; list-style-type: disc; font-size: 11px; color: #f4f4f5; opacity: 0.85;">
+            ${result.flags && result.flags.length > 0
+              ? result.flags.map(f => `<li style="margin-bottom: 4px;">${f}</li>`).join('')
+              : `<li style="color: #10b981;">No suspicious signals detected.</li>`
+            }
+          </ul>
+        </div>
       </div>
-      <div style="border-top: 1px solid #1F1914; padding-top: 10px;">
-        <span style="color: #8C5A1A; font-weight: bold;">FORENSIC_SIGNALS:</span>
-        <ul style="margin: 6px 0 0 0; padding-left: 16px; list-style-type: square; color: #E8DBC8; opacity: 0.85; word-wrap: break-word;">
-          ${result.flags && result.flags.length > 0 
-            ? result.flags.map(f => `<li style="margin-bottom: 4px;">${f}</li>`).join('') 
-            : `<li style="color: #10B981;">No suspicious forensic anomalies captured.</li>`
-          }
-        </ul>
-      </div>
-      <div style="margin-top: 14px; text-align: right; font-size: 8px; color: #8C5A1A; letter-spacing: 0.05em; border-top: 1px solid #1F1914; padding-top: 6px;">
-        SCAMSENTRY COMPLIANCE LABS
-      </div>
+      <div style="padding: 10px 18px; text-align: right; font-size: 9px; color: #a1a1aa; border-top: 1px solid #27272a; font-weight: 500;">ScamSentry Shield v1.0</div>
     </div>
   `;
 
@@ -319,8 +340,8 @@ function injectTrustShieldBadge(element, result) {
     iconGlow = 'rgba(239, 68, 68, 0.4)';
   } else if (isSuspicious) {
     type = "suspicious";
-    iconColor = '#F59E0B';
-    iconGlow = 'rgba(245, 158, 11, 0.4)';
+    iconColor = '#f97316';
+    iconGlow = 'rgba(249, 115, 22, 0.4)';
   }
   
   const shield = document.createElement('span');
