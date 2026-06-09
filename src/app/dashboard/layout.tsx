@@ -38,7 +38,7 @@ export default function DashboardLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-[#060504]">
+    <div className="flex min-h-screen bg-background">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div
@@ -50,23 +50,23 @@ export default function DashboardLayout({
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-[#0C0A09] border-r border-[#1F1914] transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
+          "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="h-full flex flex-col">
           {/* Logo */}
-          <div className="p-6 border-b border-[#1F1914]">
+          <div className="p-6 border-b border-border">
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="bg-primary/20 p-1 rounded border border-primary/30 group-hover:border-primary/60 transition-colors w-10 h-10 flex items-center justify-center">
+              <div className="bg-primary/20 p-1 rounded-lg border border-primary/30 group-hover:border-primary/60 transition-colors w-10 h-10 flex items-center justify-center">
                 <img
                   src="/logo-icon.png"
                   alt="ScamSentry"
                   className="h-7 w-7 object-contain"
                 />
               </div>
-              <span className="font-mono font-bold text-lg tracking-tighter text-foreground">
-                SCAM<span className="text-primary">SENTRY</span>
+              <span className="font-bold text-lg tracking-tight text-foreground">
+                Scam<span className="text-primary">Sentry</span>
               </span>
             </Link>
           </div>
@@ -80,10 +80,10 @@ export default function DashboardLayout({
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all group",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group",
                     isActive
                       ? "bg-primary/10 text-primary border border-primary/20"
-                      : "text-muted-foreground hover:bg-[#15110E] hover:text-foreground border border-transparent",
+                      : "text-muted-foreground hover:bg-muted/30 hover:text-foreground border border-transparent",
                   )}
                 >
                   <item.icon
@@ -101,8 +101,8 @@ export default function DashboardLayout({
           </nav>
 
           {/* User Profile Footer */}
-          <div className="p-4 border-t border-[#1F1914]">
-            <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-[#15110E] border border-[#1F1914]">
+          <div className="p-4 border-t border-border">
+            <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-muted/30 border border-border">
               <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30 text-primary">
                 <User className="h-4 w-4" />
               </div>
@@ -122,7 +122,7 @@ export default function DashboardLayout({
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
-        <header className="h-16 bg-[#0C0A09]/80 backdrop-blur-md border-b border-[#1F1914] flex items-center justify-between px-6 sticky top-0 z-30">
+        <header className="h-16 bg-card/80 backdrop-blur-md border-b border-border flex items-center justify-between px-6 sticky top-0 z-30">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
@@ -132,20 +132,20 @@ export default function DashboardLayout({
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <h2 className="text-sm font-mono font-bold text-muted-foreground uppercase tracking-widest">
-              Forensic Intelligence Dashboard
+            <h2 className="text-sm font-semibold text-muted-foreground tracking-wide">
+              Intelligence Dashboard
             </h2>
           </div>
 
           <div className="flex items-center gap-4">
             <button className="relative p-2 text-muted-foreground hover:text-primary transition-colors">
               <Bell className="h-5 w-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-[#0C0A09]"></span>
+              <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-card"></span>
             </button>
-            <div className="h-4 w-px bg-[#1F1914] mx-1"></div>
+            <div className="h-4 w-px bg-border mx-1"></div>
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
-              <span className="text-[10px] font-mono text-muted-foreground uppercase">
+              <span className="text-[10px] font-medium text-muted-foreground">
                 Engine Live
               </span>
             </div>
@@ -153,7 +153,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-[#070605] p-6 lg:p-10">
+        <main className="flex-1 overflow-y-auto bg-background p-6 lg:p-10">
           {children}
         </main>
       </div>
