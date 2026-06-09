@@ -115,13 +115,13 @@ export default function ReportsPage() {
       voteHelpful(reportId);
       setVotedReports((prev) => new Set(prev).add(reportId));
       toast({
-        title: "TELEMETRY LOGGED",
-        description: "Peer verification added to the consensus matrix.",
+        title: "Vote Recorded",
+        description: "Thank you for verifying this report.",
       });
     } else {
       toast({
-        title: "DUPLICATE ENTRY",
-        description: "You have already verified this node.",
+        title: "Already Verified",
+        description: "You have already verified this report.",
         variant: "destructive",
       });
     }
@@ -132,13 +132,14 @@ export default function ReportsPage() {
       flagReport(reportId);
       setFlaggedReportsLocal((prev) => new Set(prev).add(reportId));
       toast({
-        title: "NODE FLAGGED",
-        description: "Alert dispatched to moderator protocols.",
+        title: "Report Flagged",
+        description:
+          "Thank you. This report has been flagged for moderator review.",
       });
     } else {
       toast({
-        title: "DUPLICATE ENTRY",
-        description: "Node already flagged for review.",
+        title: "Already Flagged",
+        description: "This report is already flagged for review.",
         variant: "destructive",
       });
     }

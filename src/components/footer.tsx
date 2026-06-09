@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Github } from "lucide-react";
+import { Logo } from "@/components/logo";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -11,7 +12,8 @@ export function Footer() {
           {/* Logo & Platform Info */}
           <div className="md:col-span-2 space-y-6">
             <div className="space-y-3">
-              <Link href="/" className="flex items-center gap-2">
+              <Link href="/" className="flex items-center gap-2.5">
+                <Logo className="h-6 w-6" />
                 <span className="text-sm font-bold text-white tracking-wider uppercase font-sans">
                   SCAM<span className="text-primary">SENTRY</span>
                 </span>
@@ -76,6 +78,14 @@ export function Footer() {
                   className="hover:text-primary transition-colors"
                 >
                   OSINT Feed
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/community"
+                  className="hover:text-primary transition-colors"
+                >
+                  Community Hub
                 </Link>
               </li>
               <li>

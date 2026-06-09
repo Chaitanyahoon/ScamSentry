@@ -119,8 +119,8 @@ export default function LoginPage() {
       }
 
       toast({
-        title: "ACCESS_GRANTED",
-        description: "SECURITY HANDSHAKE COMPLETED. LOADING CONSOLE...",
+        title: "Login Successful",
+        description: "Welcome back! Redirecting to dashboard...",
       });
 
       const role = adminUser?.role || "user";
@@ -160,18 +160,19 @@ export default function LoginPage() {
         console.error("Failed to log audit action:", auditError);
       }
 
-      let errorMessage = "UNKNOWN_ERROR_DURING_HANDSHAKE";
-      let errorTitle = "SYS_ERR: AUTH_FAILED";
+      let errorMessage =
+        "An unknown error occurred during sign in. Please try again.";
+      let errorTitle = "Authentication Failed";
 
       if (
         error.code === "auth/invalid-credential" ||
         error.code === "auth/user-not-found" ||
         error.code === "auth/wrong-password"
       ) {
-        errorTitle = "SYS_ERR: INVALID_CREDENTIALS";
-        errorMessage = "AUTH PAYLOAD REJECTED BY ACCESS CONTROL FIREWALL.";
+        errorTitle = "Invalid Credentials";
+        errorMessage = "Please check your email and password and try again.";
       } else if (error.message?.includes("not authorized")) {
-        errorTitle = "SYS_ERR: DOMAIN_REJECTED";
+        errorTitle = "Unauthorized Email Domain";
         errorMessage = error.message;
       } else if (error.message) {
         errorMessage = error.message;
@@ -221,24 +222,25 @@ export default function LoginPage() {
       }
 
       toast({
-        title: "ACCOUNT_CREATED",
-        description: "DEVELOPER NODE PROVISIONED. ESTABLISHING PROFILE...",
+        title: "Account Created",
+        description:
+          "Your account has been created. Redirecting to dashboard...",
       });
 
       router.push("/dashboard");
       router.refresh();
     } catch (error: any) {
       console.error("Registration error:", error);
-      let errorMessage = "UNKNOWN_ERROR_DURING_PROVISIONING";
-      let errorTitle = "SYS_ERR: PROVISION_FAILED";
+      let errorMessage =
+        "An unknown error occurred during registration. Please try again.";
+      let errorTitle = "Registration Failed";
 
       if (error.code === "auth/email-already-in-use") {
-        errorTitle = "SYS_ERR: EMAIL_TAKEN";
-        errorMessage = "THIS NETWORK ID IS ALREADY REGISTERED.";
+        errorTitle = "Email Already Registered";
+        errorMessage = "This email address is already in use.";
       } else if (error.code === "auth/weak-password") {
-        errorTitle = "SYS_ERR: WEAK_PASSKEY";
-        errorMessage =
-          "PASSKEY STRENGTH UNACCEPTABLE (MUST BE AT LEAST 6 CHARACTERS).";
+        errorTitle = "Weak Password";
+        errorMessage = "Password must be at least 6 characters long.";
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -276,8 +278,8 @@ export default function LoginPage() {
       }
 
       toast({
-        title: "ACCESS_GRANTED",
-        description: "SECURITY HANDSHAKE COMPLETED. LOADING CONSOLE...",
+        title: "Login Successful",
+        description: "Welcome back! Redirecting to dashboard...",
       });
 
       const role = adminUser?.role || "user";
@@ -290,8 +292,10 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error("Google sign in error:", error);
       toast({
-        title: "SYS_ERR: GOOGLE_AUTH_FAILED",
-        description: error.message || "Failed to authenticate with Google.",
+        title: "Google Authentication Failed",
+        description:
+          error.message ||
+          "Could not authenticate with Google. Please try again.",
         variant: "destructive",
       });
     } finally {

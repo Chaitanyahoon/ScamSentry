@@ -123,8 +123,8 @@ export default function ReportDetailPage() {
       voteHelpful(report.id);
       setHasVotedHelpful(true);
       toast({
-        title: "CONSENSUS_LOGGED",
-        description: "Node consensus score adjusted in database.",
+        title: "Vote Recorded",
+        description: "Thank you for verifying this report.",
       });
     }
   };
@@ -134,8 +134,9 @@ export default function ReportDetailPage() {
       flagReport(report.id);
       setHasFlagged(true);
       toast({
-        title: "ANOMALY_FLAGGED",
-        description: "Target report marked for moderation review.",
+        title: "Report Flagged",
+        description:
+          "Thank you. This report has been flagged for moderator review.",
       });
     }
   };
