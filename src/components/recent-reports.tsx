@@ -1,5 +1,4 @@
-"use client";
-
+import { useState } from "react";
 import Link from "next/link";
 import {
   Clock,
@@ -19,6 +18,7 @@ import { cn } from "@/lib/utils";
 export function RecentReports() {
   const { reports, voteHelpful } = useReports();
   const { toast } = useToast();
+  const [votedReports, setVotedReports] = useState<Set<string>>(new Set());
 
   // Get the 4 most recent approved reports
   const recentReports = reports
@@ -30,11 +30,14 @@ export function RecentReports() {
     .slice(0, 4);
 
   const handleHelpfulVote = (reportId: string) => {
-    voteHelpful(reportId);
-    toast({
-      title: "Vote Recorded",
-      description: "Thank you for verifying this report.",
-    });
+    if (!votedReports.has(reportId)) {
+      voteHelpful(reportId);
+      setVotedReports((prev: Set<string>) => new Set(prev).add(reportId));
+      toast({
+        title: "Vote Recorded",
+        description: "Thank you for verifying this report.",
+      });
+    }
   };
 
   const getTimeAgo = (dateString: string) => {
@@ -171,13 +174,21 @@ export function RecentReports() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 rounded-xl text-xs font-bold text-muted-foreground hover:text-success hover:bg-success/15 transition-colors border border-transparent"
+                      className={cn(
+                        "h-8 rounded-xl text-xs font-bold transition-colors border border-transparent",
+                        votedReports.has(report.id)
+                          ? "text-success bg-success/10 hover:text-success"
+                          : "text-muted-foreground hover:text-success hover:bg-success/15",
+                      )}
                       onClick={() => handleHelpfulVote(report.id)}
+                      disabled={votedReports.has(report.id)}
                     >
                       <ThumbsUp className="h-3.5 w-3.5 mr-2" />
-                      {report.helpfulVotes > 0
+                      {votedReports.has(report.id)
                         ? `Verified (${report.helpfulVotes})`
-                        : "Verify Report"}
+                        : report.helpfulVotes > 0
+                          ? `Verify (${report.helpfulVotes})`
+                          : "Verify Report"}
                     </Button>
 
                     <Link

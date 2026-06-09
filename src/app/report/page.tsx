@@ -154,8 +154,8 @@ export default function ReportPage() {
       const newFiles = Array.from(files);
       if (evidenceFiles.length + newFiles.length > 5) {
         toast({
-          title: "LIMIT EXCEEDED",
-          description: "Maximum of 5 files allowed.",
+          title: "File Limit Exceeded",
+          description: "You can upload a maximum of 5 files.",
           variant: "destructive",
         });
         return;
@@ -163,8 +163,8 @@ export default function ReportPage() {
       const oversizedFiles = newFiles.filter((f) => f.size > 5 * 1024 * 1024);
       if (oversizedFiles.length > 0) {
         toast({
-          title: "FILE TOO LARGE",
-          description: "Files must not exceed 5MB.",
+          title: "File Too Large",
+          description: "Each file must be smaller than 5MB.",
           variant: "destructive",
         });
         return;
@@ -181,8 +181,8 @@ export default function ReportPage() {
     if (step === 1) {
       if (!formData.scamType) {
         toast({
-          title: "MISSING INFO",
-          description: "Please select a scam vector classification.",
+          title: "Classification Required",
+          description: "Please select a scam category.",
           variant: "destructive",
         });
         return;
@@ -191,8 +191,8 @@ export default function ReportPage() {
     if (step === 2) {
       if (!formData.title || !formData.description) {
         toast({
-          title: "INCOMPLETE DOSSIER",
-          description: "Dossier title and description parameters are required.",
+          title: "Form Incomplete",
+          description: "Please fill in both the title and description.",
           variant: "destructive",
         });
         return;
@@ -210,8 +210,8 @@ export default function ReportPage() {
   const handleSubmit = async () => {
     if (Number.parseInt(userCaptchaInput) !== captchaAnswer) {
       toast({
-        title: "VERIFICATION FAILED",
-        description: "Incorrect CAPTCHA response.",
+        title: "Verification Failed",
+        description: "The CAPTCHA response is incorrect. Please try again.",
         variant: "destructive",
       });
       generateCaptcha();
@@ -229,13 +229,14 @@ export default function ReportPage() {
           );
           evidenceUrls = await Promise.all(uploadPromises);
           toast({
-            title: "UPLOADS SECURED",
-            description: "Evidence payloads stored.",
+            title: "Uploads Successful",
+            description: "Your evidence files have been uploaded.",
           });
         } catch (uploadError) {
           toast({
-            title: "UPLOAD ERROR",
-            description: "Some file packets failed to transmit.",
+            title: "Upload Failed",
+            description:
+              "Failed to upload some evidence files. Please try again.",
             variant: "destructive",
           });
         } finally {
@@ -297,9 +298,9 @@ export default function ReportPage() {
 
       if (newReport) {
         toast({
-          title: "DOSSIER SUBMITTED",
+          title: "Report Submitted",
           description:
-            "Your report has been logged and queued for consensus review.",
+            "Your report has been submitted successfully and is queued for verification.",
         });
         router.push(`/report/success/${newReport.id}`);
       } else {
@@ -307,9 +308,9 @@ export default function ReportPage() {
       }
     } catch (error: any) {
       toast({
-        title: "SUBMISSION FAILED",
+        title: "Submission Failed",
         description:
-          "An error occurred while logging telemetry. Please re-run.",
+          "An error occurred while submitting your report. Please try again.",
         variant: "destructive",
       });
     } finally {
