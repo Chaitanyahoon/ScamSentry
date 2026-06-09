@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Filter, Clock, MapPin, ThumbsUp, Flag, ShieldAlert, TerminalSquare, AlertTriangle, Cpu, Radio, Network, Database, Eye } from "lucide-react"
+import { Search, Filter, Clock, MapPin, ThumbsUp, Flag, ShieldAlert, TerminalSquare, AlertTriangle, Cpu, Radio, Network, Database, Eye, Building } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useReports } from "@/contexts/reports-context"
 import { toast } from "sonner"
 import Link from "next/link"
+import { cn } from "@/lib/utils"
 
 export default function ReportsPage() {
   const { reports, voteHelpful, flagReport } = useReports()
