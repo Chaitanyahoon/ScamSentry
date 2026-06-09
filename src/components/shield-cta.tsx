@@ -26,7 +26,7 @@ export function ShieldCTA() {
   ];
 
   return (
-    <section className="relative py-24 sm:py-32 bg-background border-b border-[#1F1914] overflow-hidden">
+    <section className="relative py-24 sm:py-32 bg-background border-b border-border overflow-hidden">
       {/* Background Decorative - Amber Fog */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[160px] pointer-events-none" />
 
@@ -39,10 +39,7 @@ export function ShieldCTA() {
               <div className="absolute inset-0 bg-primary/5 rounded-full animate-pulse blur-3xl opacity-50" />
 
               {/* The "Shield" Card */}
-              <div className="relative z-10 w-full max-w-[340px] aspect-[4/5] bg-[#0C0A09] border border-[#1F1914] rounded-[32px] p-8 shadow-2xl shadow-primary/10 overflow-hidden group">
-                {/* Internal Scanline Effect */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,13,0)_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px] pointer-events-none" />
-
+              <div className="relative z-10 w-full max-w-[340px] aspect-[4/5] bg-card border border-border rounded-[32px] p-8 shadow-2xl shadow-primary/10 overflow-hidden group">
                 <div className="h-full flex flex-col justify-between">
                   <div className="space-y-6">
                     <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
@@ -59,7 +56,7 @@ export function ShieldCTA() {
                   </div>
 
                   {/* Visual Scanning Animation Placeholder */}
-                  <div className="flex-1 my-8 border-y border-[#1F1914] bg-[#12100D] rounded-xl flex items-center justify-center overflow-hidden font-mono text-[10px] text-muted-foreground/30 leading-tight p-4">
+                  <div className="flex-1 my-8 border-y border-border bg-muted/40 rounded-xl flex items-center justify-center overflow-hidden font-mono text-[10px] text-muted-foreground/50 leading-tight p-4">
                     <code>
                       DETERMINISTIC_SCAN_START...
                       <br />
@@ -75,13 +72,13 @@ export function ShieldCTA() {
                     </code>
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-[#1F1914]">
+                  <div className="flex items-center justify-between pt-4 border-t border-border">
                     <span className="text-[10px] font-mono text-emerald-500 font-bold uppercase tracking-widest">
                       Active Protect
                     </span>
                     <div className="flex gap-1">
                       <div className="h-1 w-4 bg-primary rounded-full"></div>
-                      <div className="h-1 w-2 bg-[#1F1914] rounded-full"></div>
+                      <div className="h-1 w-2 bg-border rounded-full"></div>
                     </div>
                   </div>
                 </div>
@@ -128,7 +125,7 @@ export function ShieldCTA() {
               <a
                 href="/extension.zip"
                 download="ScamSentry-Extension.zip"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-[#0C0A09] font-bold rounded-2xl hover:scale-[1.02] transition-transform shadow-xl shadow-primary/20 cursor-pointer"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-bold rounded-2xl hover:scale-[1.02] transition-transform shadow-xl shadow-primary/20 cursor-pointer"
               >
                 Add to Browser (Free)
                 <Shield className="h-4 w-4" />

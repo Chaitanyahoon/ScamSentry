@@ -164,9 +164,8 @@ export function ScamMap() {
   ];
 
   return (
-    <section className="relative min-h-screen bg-background py-16 text-foreground relative overflow-hidden">
-      {/* Grid Pattern Background */}
-      <div className="fixed inset-0 pointer-events-none z-0 bg-[linear-gradient(rgba(245,158,11,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(245,158,11,0.01)_1px,transparent_1px)] bg-[size:32px_32px] opacity-35" />
+    <section className="relative min-h-screen bg-background py-16 text-foreground overflow-hidden">
+      {/* Background blurs */}
       <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[140px] pointer-events-none z-0" />
       <div className="absolute bottom-1/4 left-1/4 w-[600px] h-[600px] bg-red-500/[0.02] rounded-full blur-[160px] pointer-events-none z-0" />
 
@@ -174,14 +173,14 @@ export function ScamMap() {
         <div className="mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 border border-primary/20 bg-[#15110E] text-primary mb-6 rounded-full text-xs font-semibold tracking-wider uppercase">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 border border-primary/20 bg-primary/10 text-primary mb-6 rounded-full text-xs font-semibold tracking-wider uppercase">
               <Layers className="h-3.5 w-3.5 animate-pulse" />
               <span>Global Threat Map</span>
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-foreground mb-4 uppercase tracking-wider">
               Interactive Heatmap
             </h2>
-            <p className="text-sm text-muted-foreground/80 leading-relaxed max-w-2xl mx-auto border-l-2 border-primary/50 pl-4 py-1">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl mx-auto border-l-2 border-primary/50 pl-4 py-1">
               Track reported scams and malicious organizations across geographic
               regions in real-time.
             </p>
@@ -190,7 +189,7 @@ export function ScamMap() {
           {/* Search & Filters */}
           <div className="mb-10 space-y-4">
             {/* Search Bar */}
-            <div className="bg-card/25 border border-border p-6 rounded-2xl backdrop-blur-sm shadow-xl">
+            <div className="bg-card border border-border p-6 rounded-2xl backdrop-blur-sm shadow-sm">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-1 group">
                   <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/45" />
@@ -240,7 +239,7 @@ export function ScamMap() {
             </div>
 
             {/* Risk Level Filters */}
-            <div className="flex flex-wrap gap-2 bg-card/20 border border-border p-4 rounded-2xl select-none">
+            <div className="flex flex-wrap gap-2 bg-card/60 border border-border p-4 rounded-2xl select-none shadow-sm">
               <button
                 onClick={() => setSelectedRiskFilter(null)}
                 className={cn(
@@ -276,66 +275,57 @@ export function ScamMap() {
           {/* Stats Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 select-none">
             {/* Total Threats */}
-            <div className="group relative bg-[#090b11]/90 hover:bg-[#0d101b]/95 border border-white/[0.04] hover:border-primary/45 p-6 rounded-2xl transition-all duration-500 hover:shadow-[0_0_30px_rgba(249,115,22,0.06)] hover:-translate-y-1 overflow-hidden backdrop-blur-xl shadow-lg">
+            <div className="group relative bg-card border border-border p-6 rounded-2xl transition-all duration-500 hover:shadow-md hover:-translate-y-1 overflow-hidden shadow-sm">
               <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.01] to-white/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-              <div className="absolute inset-0 bg-grid-cyber opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 pointer-events-none" />
-              <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-primary/20 group-hover:border-primary/55 transition-colors duration-300" />
-              <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-primary/20 group-hover:border-primary/55 transition-colors duration-300" />
               <div className="absolute -top-12 -right-12 w-28 h-28 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500 pointer-events-none" />
-              <div className="absolute left-0 top-4 bottom-4 w-1 bg-primary rounded-r-full shadow-[0_0_10px_rgba(249,115,22,0.55)] group-hover:shadow-[0_0_18px_rgba(249,115,22,0.85)] group-hover:scale-y-[1.08] transition-all duration-500" />
+              <div className="absolute left-0 top-4 bottom-4 w-1 bg-primary rounded-r-full shadow-[0_0_10px_rgba(249,115,22,0.55)] group-hover:scale-y-[1.08] transition-all duration-500" />
               <div className="relative z-10 flex flex-col justify-between h-full pl-2">
-                <p className="text-xs font-bold text-muted-foreground/75 uppercase tracking-widest flex items-center gap-2 mb-3 font-mono">
+                <p className="text-xs font-bold text-muted-foreground/75 uppercase tracking-wider flex items-center gap-2 mb-3">
                   <MapPin className="h-4 w-4 text-primary animate-pulse" />
                   Total Threats
                 </p>
-                <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/70 tracking-tight font-mono mb-2">
+                <p className="text-4xl font-extrabold text-foreground tracking-tight mb-2">
                   {filteredReports.length.toString().padStart(3, "0")}
                 </p>
-                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-mono">
+                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider">
                   Geographic Nodes
                 </p>
               </div>
             </div>
 
             {/* Critical Entities */}
-            <div className="group relative bg-[#090b11]/90 hover:bg-[#0d101b]/95 border border-white/[0.04] hover:border-destructive/45 p-6 rounded-2xl transition-all duration-500 hover:shadow-[0_0_30px_rgba(239,68,68,0.06)] hover:-translate-y-1 overflow-hidden backdrop-blur-xl shadow-lg">
+            <div className="group relative bg-card border border-border p-6 rounded-2xl transition-all duration-500 hover:shadow-md hover:-translate-y-1 overflow-hidden shadow-sm">
               <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.01] to-white/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-              <div className="absolute inset-0 bg-grid-cyber opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 pointer-events-none" />
-              <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-destructive/20 group-hover:border-destructive/55 transition-colors duration-300" />
-              <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-destructive/20 group-hover:border-destructive/55 transition-colors duration-300" />
               <div className="absolute -top-12 -right-12 w-28 h-28 bg-destructive/10 rounded-full blur-2xl group-hover:bg-destructive/20 transition-all duration-500 pointer-events-none" />
-              <div className="absolute left-0 top-4 bottom-4 w-1 bg-destructive rounded-r-full shadow-[0_0_10px_rgba(239,68,68,0.55)] group-hover:shadow-[0_0_18px_rgba(239,68,68,0.85)] group-hover:scale-y-[1.08] transition-all duration-500" />
+              <div className="absolute left-0 top-4 bottom-4 w-1 bg-destructive rounded-r-full shadow-[0_0_10px_rgba(239,68,68,0.55)] group-hover:scale-y-[1.08] transition-all duration-500" />
               <div className="relative z-10 flex flex-col justify-between h-full pl-2">
-                <p className="text-xs font-bold text-muted-foreground/75 uppercase tracking-widest flex items-center gap-2 mb-3 font-mono">
+                <p className="text-xs font-bold text-muted-foreground/75 uppercase tracking-wider flex items-center gap-2 mb-3">
                   <TrendingUp className="h-4 w-4 text-destructive animate-pulse" />
                   Critical Entities
                 </p>
-                <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-destructive to-red-400 tracking-tight font-mono mb-2">
+                <p className="text-4xl font-extrabold text-destructive tracking-tight mb-2">
                   {filteredReports
                     .filter((r) => r.riskLevel === "high")
                     .length.toString()
                     .padStart(3, "0")}
                 </p>
-                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-mono">
+                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider">
                   Immediate Containment
                 </p>
               </div>
             </div>
 
             {/* Avg Trust Score */}
-            <div className="group relative bg-[#090b11]/90 hover:bg-[#0d101b]/95 border border-white/[0.04] hover:border-emerald-500/45 p-6 rounded-2xl transition-all duration-500 hover:shadow-[0_0_30px_rgba(16,185,129,0.06)] hover:-translate-y-1 overflow-hidden backdrop-blur-xl shadow-lg">
+            <div className="group relative bg-card border border-border p-6 rounded-2xl transition-all duration-500 hover:shadow-md hover:-translate-y-1 overflow-hidden shadow-sm">
               <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.01] to-white/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-              <div className="absolute inset-0 bg-grid-cyber opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 pointer-events-none" />
-              <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-emerald-500/20 group-hover:border-emerald-500/55 transition-colors duration-300" />
-              <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-emerald-500/20 group-hover:border-emerald-500/55 transition-colors duration-300" />
               <div className="absolute -top-12 -right-12 w-28 h-28 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500 pointer-events-none" />
-              <div className="absolute left-0 top-4 bottom-4 w-1 bg-emerald-500 rounded-r-full shadow-[0_0_10px_rgba(16,185,129,0.55)] group-hover:shadow-[0_0_18px_rgba(16,185,129,0.85)] group-hover:scale-y-[1.08] transition-all duration-500" />
+              <div className="absolute left-0 top-4 bottom-4 w-1 bg-emerald-500 rounded-r-full shadow-[0_0_10px_rgba(16,185,129,0.55)] group-hover:scale-y-[1.08] transition-all duration-500" />
               <div className="relative z-10 flex flex-col justify-between h-full pl-2">
-                <p className="text-xs font-bold text-muted-foreground/75 uppercase tracking-widest flex items-center gap-2 mb-3 font-mono">
+                <p className="text-xs font-bold text-muted-foreground/75 uppercase tracking-wider flex items-center gap-2 mb-3">
                   <TerminalSquare className="h-4 w-4 text-emerald-400 animate-pulse" />
                   Avg Trust Score
                 </p>
-                <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500 tracking-tight font-mono mb-2">
+                <p className="text-4xl font-extrabold text-emerald-400 tracking-tight mb-2">
                   {filteredReports.length > 0
                     ? Math.round(
                         filteredReports.reduce(
@@ -346,7 +336,7 @@ export function ScamMap() {
                     : 100}
                   %
                 </p>
-                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-mono">
+                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider">
                   Consensus Index
                 </p>
               </div>
@@ -354,7 +344,7 @@ export function ScamMap() {
           </div>
 
           {/* Map Section */}
-          <div className="mb-10 bg-[#0C0A09] border border-border overflow-hidden h-[400px] sm:h-[600px] lg:h-[700px] relative rounded-2xl shadow-xl group">
+          <div className="mb-10 bg-card border border-border overflow-hidden h-[400px] sm:h-[600px] lg:h-[700px] relative rounded-2xl shadow-sm group">
             {viewMode === "3d" ? (
               <div className="absolute inset-0 z-0">
                 <ForensicGlobe reports={filteredReports} />
@@ -376,12 +366,12 @@ export function ScamMap() {
 
             {/* Map Overlay for Info */}
             <div className="absolute bottom-6 left-6 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-              <div className="bg-[#0C0A09]/95 border border-[#1F1914] p-4 rounded-none">
-                <p className="font-mono text-[10px] text-primary uppercase tracking-[0.2em]">
-                  Neural Engine v2.6
+              <div className="bg-card/95 border border-border p-4 rounded-xl shadow-md">
+                <p className="text-xs font-semibold text-primary uppercase tracking-wider">
+                  ScamSentry Threat Map
                 </p>
                 <p className="text-muted-foreground text-xs mt-1 italic">
-                  Mapping global attack vectors using deterministic telemetry...
+                  Geographic telemetry representing active incident reports.
                 </p>
               </div>
             </div>
@@ -415,20 +405,16 @@ export function ScamMap() {
 
           {/* Threat Registry Ledger Table */}
           {filteredReports.length > 0 ? (
-            <div className="border border-border bg-card/45 backdrop-blur-md relative overflow-hidden select-text rounded-2xl shadow-xl">
-              {/* Corner accents */}
-              <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-primary/20 pointer-events-none" />
-              <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-primary/20 pointer-events-none" />
-
+            <div className="border border-border bg-card/45 backdrop-blur-md relative overflow-hidden select-text rounded-2xl shadow-sm">
               {/* Table Title Bar */}
               <div className="bg-card/95 p-4 border-b border-border/60 flex justify-between items-center select-none">
                 <div className="flex items-center gap-2">
                   <TerminalSquare className="h-4 w-4 text-primary" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">
+                  <span className="text-xs font-bold uppercase tracking-wider text-foreground">
                     Threat Registry Ledger
                   </span>
                 </div>
-                <span className="text-[8px] font-mono text-muted-foreground/40 uppercase tracking-widest hidden sm:inline">
+                <span className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-wider hidden sm:inline">
                   Verification Protocol: Peer Consensus
                 </span>
               </div>
@@ -567,7 +553,7 @@ export function ScamMap() {
                 No Telemetry Found
               </h3>
               <p className="text-xs text-muted-foreground/75 uppercase tracking-widest max-w-md mx-auto leading-relaxed">
-                The current matrix query yielded zero results. Adjust filtering
+                The current query yielded zero results. Adjust filtering
                 parameters to expand search radius.
               </p>
               <Button

@@ -143,23 +143,17 @@ export default function ThreatNodeGraph({ reports }: ThreatNodeGraphProps) {
   }, [reports]);
 
   return (
-    <div className="bg-[#15110E] border border-[#1F1914] relative overflow-hidden group p-6 h-full flex flex-col justify-between">
-      {/* HUD Accent Corner */}
-      <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 [clip-path:polygon(100%_0,0_0,100%_100%)] pointer-events-none" />
-
-      <div className="border-b border-[#1F1914] pb-4 mb-6 flex items-center justify-between">
-        <h3 className="text-[10px] font-bold font-mono uppercase tracking-widest text-primary flex items-center gap-2">
-          <Share2 className="h-3 w-3" /> INFRASTRUCTURE_CORRELATION_MAP
+    <div className="bg-card border border-border relative overflow-hidden group p-6 h-full flex flex-col justify-between rounded-2xl shadow-sm">
+      <div className="border-b border-border pb-4 mb-6 flex items-center justify-between">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-primary flex items-center gap-2">
+          <Share2 className="h-3.5 w-3.5" /> Infrastructure Correlation Map
         </h3>
-        <span className="text-[8px] font-mono text-muted-foreground/50">
-          CRT_FORCE_GRAPH_v2.0
+        <span className="text-[10px] font-semibold text-muted-foreground/60">
+          Force Graph Matrix
         </span>
       </div>
 
-      <div className="relative flex-1 w-full bg-[#0C0A09]/50 border border-[#1F1914] p-4 h-[300px] flex items-center justify-center overflow-hidden">
-        {/* CRT Scanline overlay effect */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,13,0)_50%,rgba(0,0,0,0.15)_50%)] bg-[length:100%_4px] pointer-events-none z-10" />
-
+      <div className="relative flex-1 w-full bg-muted/40 border border-border p-4 h-[300px] flex items-center justify-center overflow-hidden rounded-xl">
         <svg viewBox="0 0 560 300" className="w-full h-full select-none">
           {/* Render Connections (Edges) */}
           {edges.map((edge, idx) => {
@@ -216,7 +210,7 @@ export default function ThreatNodeGraph({ reports }: ThreatNodeGraphProps) {
                 {/* Core node circle */}
                 <circle
                   r={radius}
-                  fill={isHub ? "#0C0A09" : node.color}
+                  fill={isHub ? "#030712" : node.color}
                   stroke={node.color}
                   strokeWidth={2}
                 />
@@ -230,11 +224,9 @@ export default function ThreatNodeGraph({ reports }: ThreatNodeGraphProps) {
                 <text
                   y={isHub ? -20 : 18}
                   textAnchor="middle"
-                  fill={isHovered ? "#E8DBC8" : "#8C5A1A"}
-                  fontSize={8}
-                  fontFamily="monospace"
-                  fontWeight={isHub ? "bold" : "normal"}
-                  className="transition-colors duration-200"
+                  fill={isHovered ? "#ffffff" : "#a3a3a3"}
+                  fontSize={9}
+                  className="transition-colors duration-200 font-semibold"
                 >
                   {isHub ? node.label : node.label.substring(0, 16)}
                 </text>
@@ -245,7 +237,7 @@ export default function ThreatNodeGraph({ reports }: ThreatNodeGraphProps) {
 
         {/* Dynamic Telemetry Tooltip HUD Card */}
         {hoveredNode && (
-          <div className="absolute bottom-4 left-4 right-4 bg-[#0C0A09] border border-[#1F1914] p-3 font-mono text-[9px] text-[#E8DBC8] z-20 flex justify-between items-center shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <div className="absolute bottom-4 left-4 right-4 bg-[#030712] border border-border p-3.5 rounded-xl text-xs text-foreground z-20 flex justify-between items-center shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-200">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 {hoveredNode.type === "hub" ? (
@@ -257,32 +249,30 @@ export default function ThreatNodeGraph({ reports }: ThreatNodeGraphProps) {
                   {hoveredNode.label}
                 </span>
               </div>
-              <span className="text-muted-foreground">
+              <span className="text-muted-foreground text-[10px]">
                 {hoveredNode.type === "hub"
-                  ? "SHARED SYSTEM INFRASTRUCTURE NODE"
-                  : `RISK_LEVEL: ${hoveredNode.risk?.toUpperCase()} // OFF_SHORE_HOSTED`}
+                  ? "Shared System Infrastructure Node"
+                  : `Risk Level: ${hoveredNode.risk?.toUpperCase()} // Offshore Hosted`}
               </span>
             </div>
-            <div className="text-right text-[8px] text-[#8C5A1A]">
-              COORD_X: {Math.round(hoveredNode.x)}
+            <div className="text-right text-[9px] text-primary/70 font-mono">
+              X: {Math.round(hoveredNode.x)}
               <br />
-              COORD_Y: {Math.round(hoveredNode.y)}
+              Y: {Math.round(hoveredNode.y)}
             </div>
           </div>
         )}
       </div>
 
-      <div className="mt-4 pt-4 border-t border-[#1F1914] flex justify-between items-center text-[8px] font-mono text-muted-foreground/40">
+      <div className="mt-4 pt-4 border-t border-border flex justify-between items-center text-[10px] font-medium text-muted-foreground/60">
         <span className="flex items-center gap-1">
-          <div className="h-1.5 w-1.5 rounded-full bg-red-500" /> Critical
-          Threats
+          <div className="h-1.5 w-1.5 rounded-full bg-red-500" /> Critical Threats
         </span>
         <span className="flex items-center gap-1">
-          <div className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Suspicious
-          Links
+          <div className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Suspicious Links
         </span>
         <span className="flex items-center gap-1">
-          <div className="h-1.5 w-1.5 rounded-full bg-yellow-500" /> Share Hubs
+          <div className="h-1.5 w-1.5 rounded-full bg-yellow-500" /> Shared Hubs
         </span>
       </div>
     </div>
