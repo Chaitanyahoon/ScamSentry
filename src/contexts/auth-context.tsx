@@ -193,7 +193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (sessionTimeoutRef.current) clearTimeout(sessionTimeoutRef.current)
             if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current)
 
-            router.push("/admin/login")
+            router.push("/login")
         } catch (error) {
             console.error("Error signing out:", error)
         }
