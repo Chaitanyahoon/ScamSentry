@@ -6,9 +6,6 @@ import {
   ArrowRight,
   Loader2,
   Link as LinkIcon,
-  FileText,
-  Globe,
-  TerminalSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";

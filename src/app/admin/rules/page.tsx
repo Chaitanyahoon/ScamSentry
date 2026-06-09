@@ -199,52 +199,54 @@ export default function RulesManagementPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0C0A09] p-8 relative overflow-hidden">
-      {/* Decorative Scanlines */}
-      <div className="absolute inset-x-0 top-0 h-px bg-primary/20 shadow-[0_0_20px_rgba(255,191,0,0.5)] z-0" />
-      <div className="fixed inset-0 pointer-events-none z-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:32px_32px] opacity-10" />
+    <div className="min-h-screen bg-background p-8 relative overflow-hidden">
+      {/* Decorative background grids and blurs */}
+      <div className="absolute inset-0 z-0 bg-grid-cyber opacity-[0.05]" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto space-y-8 relative z-10">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1F1914] pb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-2">
-              <Zap className="h-4 w-4 text-primary" />
-              <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2rem]">
-                LOGIC_CONTROL_SURFACE
+            <div className="inline-flex items-center gap-2 text-primary">
+              <Zap className="h-4 w-4" />
+              <span className="text-xs font-semibold uppercase tracking-wider">
+                Logic Control Panel
               </span>
             </div>
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground uppercase tracking-widest drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight">
               Detection{" "}
-              <span className="text-primary drop-shadow-[0_0_10px_rgba(255,191,0,0.3)]">
+              <span className="text-primary">
                 Protocols
               </span>
             </h1>
-            <p className="text-sm font-mono text-muted-foreground uppercase tracking-widest border-l-2 border-primary/50 pl-4 max-w-2xl">
-              Configure heuristic weights and signal thresholds for the neural
+            <p className="text-sm text-muted-foreground border-l-2 border-primary/50 pl-4 max-w-2xl">
+              Configure heuristic weights and signal thresholds for the security
               detection stack.
             </p>
           </div>
 
           <div className="flex gap-3">
-            <button
+            <Button
               onClick={handleRefresh}
               disabled={refreshing || loading}
-              className="px-4 py-2 font-mono text-[10px] uppercase tracking-widest transition-all border bg-[#15110E] text-muted-foreground border-[#1F1914] hover:border-primary/50 flex items-center gap-2"
+              variant="outline"
+              className="text-xs font-semibold rounded-xl flex items-center gap-2 border-border bg-card"
             >
               <RefreshCw
-                className={`w-3 h-3 ${refreshing ? "animate-spin" : ""}`}
+                className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`}
               />
-              RECALIBRATE
-            </button>
-            <button
+              Recalibrate
+            </Button>
+            <Button
               onClick={handleResetRules}
               disabled={saving || loading}
-              className="px-4 py-2 font-mono text-[10px] uppercase tracking-widest transition-all border bg-[#15110E] text-red-500/70 border-red-500/20 hover:border-red-500 flex items-center gap-2"
+              variant="outline"
+              className="text-xs font-semibold rounded-xl border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive flex items-center gap-2"
             >
-              <RotateCcw className="w-3 h-3" />
-              WIPE_DEFAULTS
-            </button>
+              <RotateCcw className="w-3.5 h-3.5" />
+              Reset Defaults
+            </Button>
           </div>
         </div>
 
@@ -254,12 +256,12 @@ export default function RulesManagementPage() {
           onValueChange={setActiveCategory}
           className="w-full"
         >
-          <TabsList className="bg-[#15110E] border border-[#1F1914] rounded-none p-1 h-auto flex-wrap sm:flex-nowrap">
+          <TabsList className="bg-muted border border-border rounded-xl p-1 h-auto flex-wrap sm:flex-nowrap">
             {CATEGORIES.map((cat) => (
               <TabsTrigger
                 key={cat.id}
                 value={cat.id}
-                className="rounded-none px-6 py-2 font-mono text-[10px] uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-black transition-all"
+                className="rounded-lg px-6 py-2 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
                 {cat.label}
               </TabsTrigger>
@@ -272,41 +274,40 @@ export default function RulesManagementPage() {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {[
                   {
-                    label: "REGISTERED_RULES",
+                    label: "Registered Rules",
                     value: rules.length,
-                    detail: "TOTAL_COUNT",
+                    detail: "Total rules count",
                   },
                   {
-                    label: "ACTIVE_SIGNALS",
+                    label: "Active Signals",
                     value: enabledRulesCount,
-                    detail: "LIVE_STREAMS",
+                    detail: "Enabled filters",
                     color: "text-green-500",
                   },
                   {
-                    label: "CUMULATIVE_WEIGHT",
+                    label: "Cumulative Weight",
                     value: totalWeight,
-                    detail: "IMPACT_SUM",
+                    detail: "Total weight impact",
                   },
                   {
-                    label: "AGGREGATE_ACCURACY",
+                    label: "Aggregate Accuracy",
                     value: `${((rules.reduce((sum, r) => sum + (r.stats?.accuracy || 0), 0) / Math.max(rules.length, 1)) * 100).toFixed(1)}%`,
-                    detail: "VALIDATION_CONF",
+                    detail: "Validation success",
                   },
                 ].map((stat, idx) => (
                   <div
                     key={idx}
-                    className="bg-[#15110E] border border-[#1F1914] p-6 relative group overflow-hidden"
+                    className="bg-card border border-border p-6 rounded-2xl relative group overflow-hidden shadow-sm"
                   >
-                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-primary/20 group-hover:border-primary transition-colors" />
-                    <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest block mb-2">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
                       {stat.label}
                     </span>
                     <div
-                      className={`text-2xl font-mono font-bold ${stat.color || "text-foreground"} mb-1`}
+                      className={`text-2xl font-bold ${stat.color || "text-foreground"} mb-1`}
                     >
                       {stat.value}
                     </div>
-                    <div className="text-[9px] font-mono text-muted-foreground/40 uppercase tracking-widest">
+                    <div className="text-xs text-muted-foreground/60">
                       {stat.detail}
                     </div>
                   </div>
@@ -315,22 +316,22 @@ export default function RulesManagementPage() {
 
               {/* Rules List */}
               {loading ? (
-                <div className="text-center py-20 font-mono text-[10px] uppercase tracking-widest animate-pulse">
-                  SYNCHRONIZING_RULESET...
+                <div className="text-center py-20 text-xs font-semibold uppercase tracking-wider animate-pulse text-muted-foreground">
+                  Synchronizing ruleset...
                 </div>
               ) : rules.length === 0 ? (
-                <div className="bg-[#15110E] border border-[#1F1914] py-12 text-center font-mono text-xs text-muted-foreground uppercase tracking-widest">
-                  NO_PROTOCOLS_FOUND_IN_THIS_LAYER
+                <div className="bg-card border border-border py-12 rounded-2xl text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider shadow-sm">
+                  No protocols found in this layer
                 </div>
               ) : (
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                   {rules.map((rule) => (
                     <div
                       key={rule.id}
-                      className={`bg-[#15110E] border transition-all duration-300 relative group ${
+                      className={`bg-card border transition-all duration-300 relative group rounded-2xl overflow-hidden shadow-sm ${
                         expandedRules.has(rule.id!)
                           ? "border-primary/40 ring-1 ring-primary/10"
-                          : "border-[#1F1914] hover:border-primary/20"
+                          : "border-border hover:border-primary/20"
                       }`}
                     >
                       <div className="p-6">
@@ -347,28 +348,38 @@ export default function RulesManagementPage() {
                                 className="data-[state=checked]:bg-primary"
                               />
                               <div className="space-y-1">
-                                <h3 className="font-mono text-sm font-bold text-foreground uppercase tracking-widest">
+                                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
                                   {rule.name}
                                 </h3>
                                 <div className="flex gap-2">
-                                  <Badge className="rounded-none bg-[#0C0A09] border-[#1F1914] text-[9px] font-mono text-primary py-0">
-                                    {rule.enabled ? "ACTIVE" : "OFFLINE"}
+                                  <Badge
+                                    variant="outline"
+                                    className={`text-[9px] font-semibold py-0 rounded-full ${
+                                      rule.enabled
+                                        ? "bg-green-500/10 text-green-500 border-green-500/25"
+                                        : "bg-muted text-muted-foreground border-border"
+                                    }`}
+                                  >
+                                    {rule.enabled ? "Active" : "Offline"}
                                   </Badge>
                                   {rule.confidence && (
-                                    <Badge className="rounded-none bg-[#0C0A09] border-[#1F1914] text-[9px] font-mono text-muted-foreground py-0 uppercase">
-                                      CFD: {(rule.confidence * 100).toFixed(0)}%
+                                    <Badge
+                                      variant="outline"
+                                      className="bg-muted border-border text-[9px] font-semibold py-0 rounded-full text-muted-foreground uppercase"
+                                    >
+                                      Confidence: {(rule.confidence * 100).toFixed(0)}%
                                     </Badge>
                                   )}
                                 </div>
                               </div>
                             </div>
-                            <p className="text-[11px] font-mono text-muted-foreground leading-relaxed uppercase pr-8">
+                            <p className="text-xs text-muted-foreground leading-relaxed pr-8">
                               {rule.description}
                             </p>
                           </div>
                           <button
                             onClick={() => toggleRuleExpanded(rule.id!)}
-                            className="p-1 hover:bg-white/5 transition-colors border border-[#1F1914]"
+                            className="p-1.5 hover:bg-muted/60 transition-colors border border-border rounded-lg"
                           >
                             {expandedRules.has(rule.id!) ? (
                               <ChevronUp className="w-4 h-4 text-primary" />
@@ -379,12 +390,12 @@ export default function RulesManagementPage() {
                         </div>
 
                         {/* Weight Control */}
-                        <div className="space-y-4 pt-4 border-t border-[#1F1914]">
+                        <div className="space-y-4 pt-4 border-t border-border">
                           <div className="flex items-center justify-between">
-                            <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest">
-                              DETECTION_SENSITIVITY
+                            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                              Detection Sensitivity
                             </label>
-                            <span className="text-xs font-mono font-bold text-primary tracking-tighter">
+                            <span className="text-xs font-bold text-primary">
                               {rule.weight}/100
                             </span>
                           </div>
@@ -402,22 +413,22 @@ export default function RulesManagementPage() {
 
                         {/* Expanded Details */}
                         {expandedRules.has(rule.id!) && rule.stats && (
-                          <div className="mt-6 pt-6 border-t border-[#1F1914] space-y-6">
+                          <div className="mt-6 pt-6 border-t border-border space-y-6">
                             <div className="space-y-4">
                               <div className="flex items-center gap-2">
-                                <Target className="h-3 w-3 text-primary" />
-                                <h4 className="text-[10px] font-mono font-bold text-foreground uppercase tracking-widest">
-                                  PERFORMANCE_SIGNATURE
+                                <Target className="h-4 w-4 text-primary" />
+                                <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                                  Performance Diagnostics
                                 </h4>
                               </div>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 {/* Trigger Rate */}
                                 <div className="space-y-2">
                                   <div className="flex justify-between">
-                                    <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">
-                                      TRIGGER_RATE
+                                    <span className="text-[10px] font-semibold text-muted-foreground uppercase">
+                                      Trigger Rate
                                     </span>
-                                    <span className="text-[9px] font-mono font-bold text-foreground uppercase tracking-widest">
+                                    <span className="text-[10px] font-bold text-foreground">
                                       {(rule.stats.triggerRate * 100).toFixed(
                                         1,
                                       )}
@@ -426,45 +437,45 @@ export default function RulesManagementPage() {
                                   </div>
                                   <Progress
                                     value={rule.stats.triggerRate * 100}
-                                    className="h-1 bg-[#0C0A09] rounded-none [&>div]:bg-primary"
+                                    className="h-1.5 bg-muted rounded-full [&>div]:bg-primary"
                                   />
                                 </div>
 
                                 {/* Accuracy */}
                                 <div className="space-y-2">
                                   <div className="flex justify-between">
-                                    <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">
-                                      PRECISION_INDEX
+                                    <span className="text-[10px] font-semibold text-muted-foreground uppercase">
+                                      Precision Index
                                     </span>
                                     <span
-                                      className={`text-[9px] font-mono font-bold uppercase tracking-widest ${getAccuracyColor(rule.stats.accuracy)}`}
+                                      className={`text-[10px] font-bold uppercase ${getAccuracyColor(rule.stats.accuracy)}`}
                                     >
                                       {(rule.stats.accuracy * 100).toFixed(1)}%
                                     </span>
                                   </div>
                                   <Progress
                                     value={rule.stats.accuracy * 100}
-                                    className="h-1 bg-[#0C0A09] rounded-none [&>div]:bg-primary"
+                                    className="h-1.5 bg-muted rounded-full [&>div]:bg-primary"
                                   />
                                 </div>
 
                                 {/* Detection Count */}
-                                <div className="bg-[#0C0A09] border border-[#1F1914] p-3 text-center">
-                                  <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest block mb-1">
-                                    TOTAL_MATCHES
+                                <div className="bg-muted/40 border border-border p-3 text-center rounded-xl">
+                                  <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
+                                    Total Matches
                                   </span>
-                                  <p className="font-mono text-lg font-bold text-foreground tabular-nums">
+                                  <p className="text-base font-bold text-foreground tabular-nums">
                                     {rule.stats.triggered.toLocaleString()}
                                   </p>
                                 </div>
 
                                 {/* False Positive Rate */}
-                                <div className="bg-[#0C0A09] border border-[#1F1914] p-3 text-center">
-                                  <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest block mb-1">
-                                    NOISE_ESTIMATE
+                                <div className="bg-muted/40 border border-border p-3 text-center rounded-xl">
+                                  <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
+                                    Noise Estimate
                                   </span>
                                   <p
-                                    className={`font-mono text-lg font-bold tabular-nums ${getFalsePositiveColor(rule.falsePositiveRate || 0)}`}
+                                    className={`text-base font-bold tabular-nums ${getFalsePositiveColor(rule.falsePositiveRate || 0)}`}
                                   >
                                     {(
                                       (rule.falsePositiveRate || 0) * 100
@@ -477,13 +488,11 @@ export default function RulesManagementPage() {
 
                             {/* Last Updated */}
                             {rule.lastUpdated && (
-                              <div className="text-[9px] font-mono text-muted-foreground/30 uppercase tracking-[0.2rem] pt-2 border-t border-[#1F1914] text-right">
-                                LAST_MODIFIED:{" "}
+                              <div className="text-[10px] text-muted-foreground/40 uppercase tracking-wider pt-2 border-t border-border text-right">
+                                Last Modified:{" "}
                                 {
                                   new Date(rule.lastUpdated)
-                                    .toISOString()
-                                    .replace("T", "_")
-                                    .split(".")[0]
+                                    .toLocaleDateString()
                                 }
                               </div>
                             )}
@@ -499,48 +508,50 @@ export default function RulesManagementPage() {
         </Tabs>
 
         {/* Category Management Section */}
-        <div className="bg-[#15110E] border border-[#1F1914] p-8 mt-12 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+        <div className="bg-card border border-border p-8 mt-12 rounded-2xl shadow-sm">
           <div className="flex items-center gap-2 mb-8">
-            <ShieldCheck className="h-4 w-4 text-primary" />
-            <h2 className="text-xs font-mono font-bold text-foreground uppercase tracking-[0.2rem]">
-              BULK_LAYER_OVERRIDE
+            <ShieldCheck className="h-4.5 w-4.5 text-primary" />
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+              Bulk Layer Override
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {CATEGORIES.map((cat) => (
               <div
                 key={cat.id}
-                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-[#0C0A09] border border-[#1F1914] hover:border-primary/30 transition-all gap-4"
+                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-muted/40 border border-border hover:border-primary/30 rounded-xl transition-all gap-4"
               >
                 <div className="space-y-1">
-                  <p className="font-mono text-xs font-bold text-foreground uppercase tracking-widest">
+                  <p className="text-xs font-bold text-foreground uppercase tracking-wider">
                     {cat.label}
                   </p>
-                  <p className="text-[10px] font-mono text-muted-foreground uppercase">
+                  <p className="text-[10px] text-muted-foreground uppercase">
                     {cat.description}
                   </p>
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
-                  <button
+                  <Button
                     onClick={() =>
                       enableCategoryRules(cat.id, user?.uid || "admin")
                     }
                     disabled={saving}
-                    className="flex-1 sm:flex-none px-3 py-1 font-mono text-[9px] uppercase tracking-widest bg-green-500/10 text-green-500 border border-green-500/20 hover:bg-green-500/20 transition-all flex items-center justify-center gap-1"
+                    size="sm"
+                    className="flex-1 sm:flex-none h-8 bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/20 text-xs font-semibold rounded-lg flex items-center justify-center gap-1"
                   >
-                    <Check className="w-3 h-3" />
-                    ENABLE
-                  </button>
-                  <button
+                    <Check className="w-3.5 h-3.5" />
+                    Enable
+                  </Button>
+                  <Button
                     onClick={() =>
                       disableCategoryRules(cat.id, user?.uid || "admin")
                     }
                     disabled={saving}
-                    className="flex-1 sm:flex-none px-3 py-1 font-mono text-[9px] uppercase tracking-widest bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-all flex items-center justify-center gap-1"
+                    size="sm"
+                    className="flex-1 sm:flex-none h-8 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 text-xs font-semibold rounded-lg flex items-center justify-center gap-1"
                   >
-                    <X className="w-3 h-3" />
-                    HALT
-                  </button>
+                    <X className="w-3.5 h-3.5" />
+                    Halt
+                  </Button>
                 </div>
               </div>
             ))}

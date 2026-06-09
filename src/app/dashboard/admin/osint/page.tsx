@@ -89,9 +89,9 @@ export default function OSINTPage() {
       {/* OSINT Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-mono font-bold text-foreground flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
             <Database className="h-6 w-6 text-primary" />
-            OSINT <span className="text-primary">INTELLIGENCE</span>
+            OSINT Threat Feed
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Global threat feed synchronization and blocklist forensics.
@@ -101,20 +101,20 @@ export default function OSINTPage() {
         <Button
           onClick={handleSync}
           disabled={syncing}
-          className="bg-primary hover:bg-primary/90 text-background font-bold tracking-tight shadow-[0_0_20px_rgba(255,191,0,0.2)]"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-sm"
         >
           {syncing ? (
             <RefreshCcw className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <RefreshCcw className="mr-2 h-4 w-4" />
           )}
-          {syncing ? "SYNCHRONIZING..." : "SYNCHRONIZE NOW"}
+          {syncing ? "Synchronizing..." : "Synchronize Now"}
         </Button>
       </div>
 
       {/* Sync Status Feedback */}
       {syncResult && (
-        <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-4 animate-in slide-in-from-top-4 duration-500">
+        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-4 animate-in slide-in-from-top-4 duration-500">
           <CheckCircle2 className="h-5 w-5 text-emerald-500" />
           <div className="flex-1 text-sm text-emerald-200">
             <span className="font-bold">Intelligence Sync Complete:</span>{" "}
@@ -168,13 +168,13 @@ export default function OSINTPage() {
       </div>
 
       {/* Threat Intel Table */}
-      <div className="bg-[#0C0A09] border border-[#1F1914] rounded-xl overflow-hidden shadow-2xl">
-        <div className="p-6 border-b border-[#1F1914] flex items-center justify-between">
-          <h3 className="font-mono text-sm font-bold flex items-center gap-2">
+      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+        <div className="p-6 border-b border-border flex items-center justify-between">
+          <h3 className="text-sm font-semibold flex items-center gap-2">
             <Search className="h-4 w-4 text-muted-foreground" />
-            LATEST OSINT DOSSIERS
+            Latest OSINT Threat Dossiers
           </h3>
-          <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground">
+          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse"></div>
             Real-time Feed
           </div>
@@ -183,7 +183,7 @@ export default function OSINTPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="bg-[#15110E] text-muted-foreground text-[10px] uppercase tracking-wider">
+              <tr className="bg-muted/50 text-muted-foreground text-xs uppercase tracking-wider border-b border-border">
                 <th className="px-6 py-4 font-bold">Domain Hash</th>
                 <th className="px-6 py-4 font-bold">Source Feed</th>
                 <th className="px-6 py-4 font-bold">Classification</th>
@@ -192,12 +192,12 @@ export default function OSINTPage() {
                 <th className="px-6 py-4 font-bold"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1F1914]">
+            <tbody className="divide-y divide-border">
               {threats.length === 0 && !loading && (
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-6 py-12 text-center text-muted-foreground font-mono text-xs"
+                    className="px-6 py-12 text-center text-muted-foreground text-sm"
                   >
                     No threats detected in the current OSINT cycle.
                   </td>
@@ -206,13 +206,13 @@ export default function OSINTPage() {
               {threats.map((threat, i) => (
                 <tr
                   key={i}
-                  className="hover:bg-[#15110E]/50 transition-colors group"
+                  className="hover:bg-muted/30 transition-colors group"
                 >
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
                       <Link
                         href={`/dashboard/admin/dossier/${threat.domain.replace(/\./g, "_")}`}
-                        className="font-mono text-foreground font-medium hover:text-primary transition-colors cursor-pointer"
+                        className="text-foreground font-semibold hover:text-primary transition-colors cursor-pointer"
                       >
                         {threat.domain}
                       </Link>
@@ -226,10 +226,10 @@ export default function OSINTPage() {
                       {threat.source}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-muted-foreground font-mono text-xs italic">
+                  <td className="px-6 py-4 text-muted-foreground text-xs italic">
                     {threat.type || "unknown-vector"}
                   </td>
-                  <td className="px-6 py-4 text-muted-foreground font-mono text-xs">
+                  <td className="px-6 py-4 text-muted-foreground text-xs">
                     {new Date(threat.firstSeen).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4">
@@ -265,18 +265,18 @@ export default function OSINTPage() {
 
 function StatsCard({ label, value, sub, icon: Icon, color }: any) {
   return (
-    <div className="bg-[#0C0A09] border border-[#1F1914] p-5 rounded-xl space-y-3 hover:border-primary/30 transition-all group">
+    <div className="bg-card border border-border p-5 rounded-2xl space-y-3 hover:border-primary/30 transition-all group shadow-sm">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground px-2 py-1 bg-[#15110E] rounded">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-2.5 py-1 bg-muted rounded-lg">
           {label}
         </span>
         <Icon className={cn("h-4 w-4", color)} />
       </div>
       <div>
-        <h4 className="text-2xl font-bold text-foreground font-mono">
+        <h4 className="text-2xl font-bold text-foreground font-sans">
           {value}
         </h4>
-        <p className="text-[10px] text-muted-foreground uppercase tracking-tight">
+        <p className="text-[10px] text-muted-foreground uppercase tracking-tight font-semibold mt-1">
           {sub}
         </p>
       </div>

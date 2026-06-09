@@ -8,7 +8,6 @@ import {
   Star,
   Loader2,
   ShieldCheck,
-  Terminal,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -130,8 +129,8 @@ export default function SafeCompaniesPage() {
               "Firebase permissions missing. Falling back to mock data.",
             );
             toast({
-              title: "API_RESTRICTED",
-              description: "FALLBACK TO LOCAL CACHE. DATABASE KERNEL PANIC.",
+              title: "Offline Directory",
+              description: "Currently showing cached verified directory.",
               variant: "default",
             });
           }
