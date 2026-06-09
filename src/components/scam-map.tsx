@@ -41,6 +41,12 @@ export function ScamMap() {
     null,
   );
   const [viewMode, setViewMode] = useState<"2d" | "3d">("3d");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedRiskFilter, searchResults]);
 
   useEffect(() => {
     if (searchResults) {
@@ -129,6 +135,12 @@ export function ScamMap() {
 
     return matchesSearch && matchesRisk;
   });
+
+  const totalPages = Math.ceil(filteredReports.length / ITEMS_PER_PAGE);
+  const paginatedReports = filteredReports.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
 
   const riskLevels = [
     {
@@ -435,7 +447,7 @@ export function ScamMap() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/30">
-                    {filteredReports.map((report) => (
+                    {paginatedReports.map((report) => (
                       <tr
                         key={report.id}
                         className="hover:bg-card/40 transition-colors group"
@@ -516,6 +528,37 @@ export function ScamMap() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Pagination controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between border-t border-border/60 p-4 bg-card/95 select-none">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    disabled={currentPage === 1}
+                    className="h-8 px-3 rounded-lg border-border bg-background text-[11px] font-semibold hover:bg-muted text-muted-foreground disabled:opacity-50"
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-[11px] text-muted-foreground">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
+                    disabled={currentPage === totalPages}
+                    className="h-8 px-3 rounded-lg border-border bg-background text-[11px] font-semibold hover:bg-muted text-muted-foreground disabled:opacity-50"
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="border border-border p-16 text-center bg-card/45 backdrop-blur-md relative overflow-hidden rounded-2xl">
