@@ -1,17 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Filter, Clock, MapPin, ThumbsUp, Flag, ShieldAlert, TerminalSquare, AlertTriangle, Cpu, Radio, Network, Database, Eye, Building } from "lucide-react"
+import { Search, Filter, Clock, MapPin, ThumbsUp, Flag, ShieldAlert, TerminalSquare, AlertTriangle, Cpu, Radio, Network, Database, Eye, Building, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useReports } from "@/contexts/reports-context"
-import { toast } from "sonner"
+import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 export default function ReportsPage() {
-  const { reports, voteHelpful, flagReport } = useReports()
+  const { reports, voteHelpful, flagReport, isLoadingReports } = useReports()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedType, setSelectedType] = useState("all")
   const [selectedIndustry, setSelectedIndustry] = useState("all")
@@ -23,6 +24,15 @@ export default function ReportsPage() {
 
   const approvedReports = reports.filter((report) => report.status === "approved")
 
+  const latestReportTime = approvedReports.length > 0
+    ? Math.max(...approvedReports.map((r) => {
+        const t = new Date(r.createdAt).getTime();
+        return isNaN(t) ? 0 : t;
+      }))
+    : Date.now()
+
+  const referenceTime = latestReportTime > 0 ? latestReportTime : Date.now()
+
   const filteredReports = approvedReports.filter((report) => {
     const matchesSearch =
       report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -33,7 +43,7 @@ export default function ReportsPage() {
     const matchesTab =
       activeTab === "all" ||
       (activeTab === "high-risk" && report.riskLevel === "high") ||
-      (activeTab === "recent" && new Date(report.createdAt).getTime() > Date.now() - 24 * 60 * 60 * 1000)
+      (activeTab === "recent" && new Date(report.createdAt).getTime() > referenceTime - 24 * 60 * 60 * 1000)
 
     return matchesSearch && matchesType && matchesIndustry && matchesTab
   })
@@ -55,14 +65,15 @@ export default function ReportsPage() {
     if (!votedReports.has(reportId)) {
       voteHelpful(reportId)
       setVotedReports((prev) => new Set(prev).add(reportId))
-      toast.success("TELEMETRY LOGGED", {
+      toast({
+        title: "TELEMETRY LOGGED",
         description: "Peer verification added to the consensus matrix.",
-        style: { background: "#0C0A09", border: "1px solid #4D7A2A", color: "#F59E0B", fontFamily: "monospace" }
       })
     } else {
-      toast.error("DUPLICATE ENTRY", {
+      toast({
+        title: "DUPLICATE ENTRY",
         description: "You have already verified this node.",
-        style: { background: "#0C0A09", border: "1px solid #EF4444", color: "#EF4444", fontFamily: "monospace" }
+        variant: "destructive",
       })
     }
   }
@@ -71,14 +82,15 @@ export default function ReportsPage() {
     if (!flaggedReportsLocal.has(reportId)) {
       flagReport(reportId)
       setFlaggedReportsLocal((prev) => new Set(prev).add(reportId))
-      toast.success("NODE FLAGGED", {
+      toast({
+        title: "NODE FLAGGED",
         description: "Alert dispatched to moderator protocols.",
-        style: { background: "#0C0A09", border: "1px solid #F59E0B", color: "#F59E0B", fontFamily: "monospace" }
       })
     } else {
-      toast.error("DUPLICATE ENTRY", {
+      toast({
+        title: "DUPLICATE ENTRY",
         description: "Node already flagged for review.",
-        style: { background: "#0C0A09", border: "1px solid #EF4444", color: "#EF4444", fontFamily: "monospace" }
+        variant: "destructive",
       })
     }
   }
@@ -213,6 +225,7 @@ export default function ReportsPage() {
                     <SelectItem value="Upfront Payment Scam" className="text-xs focus:bg-primary/20 focus:text-primary">Upfront Payment</SelectItem>
                     <SelectItem value="Identity Theft" className="text-xs focus:bg-primary/20 focus:text-primary">Identity Theft</SelectItem>
                     <SelectItem value="Phishing Attempt" className="text-xs focus:bg-primary/20 focus:text-primary">Phishing Attempt</SelectItem>
+                    <SelectItem value="Cybersecurity Advisory" className="text-xs focus:bg-primary/20 focus:text-primary">Cybersecurity Advisory</SelectItem>
                     <SelectItem value="Other" className="text-xs focus:bg-primary/20 focus:text-primary">Other Vectors</SelectItem>
                   </SelectContent>
                 </Select>
@@ -255,121 +268,20 @@ export default function ReportsPage() {
                   activeTab === "recent" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
-                Past 24 Hours ({approvedReports.filter((r) => new Date(r.createdAt).getTime() > Date.now() - 24 * 60 * 60 * 1000).length})
+                Past 24 Hours ({approvedReports.filter((r) => new Date(r.createdAt).getTime() > referenceTime - 24 * 60 * 60 * 1000).length})
               </button>
             </div>
           </div>
 
-          {/* Dossiers Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {sortedReports.map((report) => (
-              <div 
-                key={report.id} 
-                className="group flex flex-col bg-card border border-border hover:border-primary/40 hover:shadow-lg transition-all duration-300 relative rounded-2xl overflow-hidden"
-              >
-                {/* Left accent vertical indicator bar */}
-                <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r-md transition-all ${
-                  report.riskLevel === 'high' ? 'bg-destructive/80 group-hover:bg-destructive' : 'bg-primary/20 group-hover:bg-primary'
-                }`} />
-
-                {/* Card Header Panel */}
-                <div className="pl-6 pr-4 py-4 border-b border-border/60 flex justify-between items-center gap-4 select-none">
-                  <div className="flex items-center gap-2">
-                    <span className={`h-1.5 w-1.5 rounded-full animate-pulse ${
-                      report.riskLevel === 'high' ? 'bg-destructive' : 'bg-primary'
-                    }`} />
-                    <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider font-mono">
-                      Report ID: {report.id.substring(0, 10).toUpperCase()}
-                    </span>
-                  </div>
-                  
-                  {/* Status Badge */}
-                  <span className={cn("inline-flex items-center gap-1 px-2.5 py-0.5 border text-[10px] font-semibold rounded-full",
-                    report.riskLevel === 'high' 
-                      ? 'border-destructive/20 bg-destructive/10 text-destructive' 
-                      : 'border-primary/20 bg-primary/5 text-primary'
-                  )}>
-                    {report.riskLevel === 'high' ? 'Critical Risk' : `${report.riskLevel} Risk`}
-                  </span>
-                </div>
-
-                {/* Main Card Content */}
-                <div className="p-6 flex-1 flex flex-col justify-between pl-8">
-                  <div>
-                    {/* Title */}
-                    <Link href={`/reports/${report.id}`} className="hover:text-primary transition-colors inline-block w-full mb-3">
-                      <h2 className="text-sm font-bold text-foreground capitalize tracking-wide leading-snug line-clamp-1">
-                        {report.title}
-                      </h2>
-                    </Link>
-
-                    {/* Description Snippet */}
-                    <p className="text-xs text-muted-foreground/90 leading-relaxed line-clamp-3 mb-6 border-l-2 border-border pl-3 whitespace-pre-wrap">
-                      {report.description}
-                    </p>
-                  </div>
-
-                  {/* High Tech Mini Data Grid */}
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground p-3 border border-border rounded-xl bg-background/50">
-                      <div className="flex items-center gap-1.5 truncate">
-                        <Building className="h-3.5 w-3.5 text-primary/70 shrink-0" />
-                        <span className="text-foreground/80 truncate font-semibold">{report.company || "General"}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="h-3.5 w-3.5 text-primary/70 shrink-0" />
-                        <span className="text-foreground/80">{new Date(report.createdAt).toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 truncate">
-                        <ShieldAlert className="h-3.5 w-3.5 text-primary/70 shrink-0" />
-                        <span className="text-foreground/80 truncate">{report.scamType}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Eye className="h-3.5 w-3.5 text-primary/70 shrink-0" />
-                        <span className="text-foreground/80 font-mono">{report.views} Reads</span>
-                      </div>
-                    </div>
-
-                    {/* Actions Panel inside Card */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 select-none">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          className="h-8 text-[10px] font-bold uppercase tracking-widest rounded-xl border-border hover:bg-success/15 hover:border-success/35 hover:text-success transition-all"
-                          onClick={() => handleHelpfulVote(report.id)}
-                          disabled={votedReports.has(report.id)}
-                        >
-                          <ThumbsUp className="h-3 w-3 mr-1.5" />
-                          {votedReports.has(report.id) ? "Verified" : "Verify"} ({report.helpfulVotes})
-                        </Button>
-                        
-                        <Button
-                          variant="ghost"
-                          className="h-8 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all"
-                          onClick={() => handleFlag(report.id)}
-                          disabled={flaggedReportsLocal.has(report.id)}
-                        >
-                          Flag
-                        </Button>
-                      </div>
-
-                      <Link href={`/reports/${report.id}`}>
-                        <Button 
-                          className="h-8 text-[10px] font-bold uppercase tracking-widest rounded-xl border border-primary/30 text-primary bg-primary/5 hover:bg-primary hover:text-primary-foreground transition-all"
-                        >
-                          Read dossier
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Empty query result matrix fall back */}
-          {sortedReports.length === 0 && (
+          {/* Dossiers Grid / Loading / Empty Fallbacks */}
+          {isLoadingReports ? (
+            <div className="py-24 text-center border border-border bg-card/10 rounded-2xl">
+              <Loader2 className="h-8 w-8 text-primary animate-spin mx-auto mb-4" />
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Accessing decentralized intelligence registry...
+              </p>
+            </div>
+          ) : sortedReports.length === 0 ? (
             <div className="border border-border p-16 text-center bg-card/40 rounded-2xl backdrop-blur-sm">
               <ShieldAlert className="h-12 w-12 text-muted-foreground/45 mx-auto mb-4 animate-pulse" />
               <h3 className="text-sm font-bold uppercase tracking-widest text-foreground mb-2">
@@ -390,6 +302,117 @@ export default function ReportsPage() {
               >
                 Reset Filters
               </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {sortedReports.map((report) => (
+                <div 
+                  key={report.id} 
+                  className="group flex flex-col bg-card border border-border hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.02] transition-all duration-300 relative rounded-2xl overflow-hidden"
+                >
+                  {/* Left accent vertical indicator bar - spans full height */}
+                  <div className={cn(
+                    "absolute left-0 top-0 bottom-0 w-1 transition-all duration-300",
+                    report.riskLevel === 'high' ? 'bg-destructive/80 group-hover:bg-destructive' : 'bg-primary/30 group-hover:bg-primary'
+                  )} />
+
+                  {/* Card Header Panel */}
+                  <div className="px-6 py-4 border-b border-border/60 flex justify-between items-center gap-4 select-none">
+                    <div className="flex items-center gap-2">
+                      <span className={cn(
+                        "h-1.5 w-1.5 rounded-full animate-pulse",
+                        report.riskLevel === 'high' ? 'bg-destructive' : 'bg-primary'
+                      )} />
+                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider font-mono">
+                        Report ID: {report.id.substring(0, 10).toUpperCase()}
+                      </span>
+                    </div>
+                    
+                    {/* Status Badge */}
+                    <span className={cn("inline-flex items-center gap-1 px-2.5 py-0.5 border text-[10px] font-semibold rounded-full",
+                      report.riskLevel === 'high' 
+                        ? 'border-destructive/20 bg-destructive/10 text-destructive' 
+                        : 'border-primary/20 bg-primary/5 text-primary'
+                    )}>
+                      {report.riskLevel === 'high' ? 'Critical Risk' : `${report.riskLevel} Risk`}
+                    </span>
+                  </div>
+
+                  {/* Main Card Content */}
+                  <div className="p-6 flex-1 flex flex-col justify-between">
+                    <div className="space-y-3">
+                      {/* Title */}
+                      <Link href={`/reports/${report.id}`} className="hover:text-primary transition-colors inline-block w-full">
+                        <h2 className="text-base font-bold text-foreground capitalize tracking-wide leading-snug line-clamp-1">
+                          {report.title}
+                        </h2>
+                      </Link>
+
+                      {/* Description Snippet */}
+                      <p className="text-xs text-muted-foreground/80 leading-relaxed line-clamp-3 mb-4 whitespace-pre-wrap">
+                        {report.description}
+                      </p>
+                    </div>
+
+                    {/* Clean Horizontal Metadata chips flow (No weird inner box) */}
+                    <div className="space-y-5 mt-4">
+                      <div className="flex flex-wrap gap-2 text-[10px] font-medium text-muted-foreground/80 select-none">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-muted/30 border border-border/60 rounded-full shrink-0">
+                          <Building className="h-3 w-3 text-primary/70" />
+                          <span className="truncate max-w-[120px] text-foreground/80">{report.company || "General"}</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-muted/30 border border-border/60 rounded-full shrink-0">
+                          <Clock className="h-3 w-3 text-primary/70" />
+                          <span className="text-foreground/80">{new Date(report.createdAt).toLocaleDateString()}</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-muted/30 border border-border/60 rounded-full shrink-0">
+                          <ShieldAlert className="h-3 w-3 text-primary/70" />
+                          <span className="truncate max-w-[120px] text-foreground/80">{report.scamType}</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-muted/30 border border-border/60 rounded-full shrink-0">
+                          <Eye className="h-3 w-3 text-primary/70" />
+                          <span className="text-foreground/80 font-mono">{report.views} Reads</span>
+                        </span>
+                      </div>
+
+                      {/* Actions Panel inside Card */}
+                      <div className="flex items-center justify-between gap-3 border-t border-border pt-4 select-none">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-[10px] font-bold uppercase tracking-wider rounded-xl border-border hover:bg-success/10 hover:border-success/30 hover:text-success transition-all"
+                            onClick={() => handleHelpfulVote(report.id)}
+                            disabled={votedReports.has(report.id)}
+                          >
+                            <ThumbsUp className="h-3.5 w-3.5 mr-1.5" />
+                            {votedReports.has(report.id) ? "Verified" : "Verify"} ({report.helpfulVotes})
+                          </Button>
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all"
+                            onClick={() => handleFlag(report.id)}
+                            disabled={flaggedReportsLocal.has(report.id)}
+                          >
+                            Flag
+                          </Button>
+                        </div>
+
+                        <Link href={`/reports/${report.id}`}>
+                          <Button 
+                            className="h-8 text-[10px] font-bold uppercase tracking-wider rounded-xl border border-primary/30 text-primary bg-primary/5 hover:bg-primary hover:text-primary-foreground transition-all"
+                          >
+                            Read dossier
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
