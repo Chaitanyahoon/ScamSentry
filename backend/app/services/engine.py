@@ -17,6 +17,10 @@ from __future__ import annotations
 import logging
 import time
 
+import asyncio
+import logging
+import time
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.l1_heuristics import check_heuristics
@@ -34,6 +38,35 @@ def _map_risk_level(score: int) -> str:
     if score <= 69:
         return "suspicious"
     return "dangerous"
+
+
+async def _safe_check_dns(url: str) -> dict:
+    """Safely run L2 check, catching errors."""
+    try:
+        return await check_dns(url)
+    except Exception as exc:
+        logger.warning("L2 check failed: %s", exc)
+        return {"score": 0, "passed": True, "details": {"error": str(exc)}}
+
+
+async def _safe_check_safe_browsing(url: str) -> dict:
+    """Safely run L3 check, catching errors."""
+    try:
+        return await check_google_safe_browsing(url)
+    except Exception as exc:
+        logger.warning("L3 check failed: %s", exc)
+        return {"score": 0, "passed": True, "details": {"error": str(exc)}}
+
+
+async def _safe_check_ledger(url: str, db: AsyncSession | None) -> dict:
+    """Safely run L4 check, catching errors."""
+    if db is None:
+        return {"score": 0, "passed": True, "details": {"skipped": True}}
+    try:
+        return await check_ledger(url, db)
+    except Exception as exc:
+        logger.warning("L4 check failed: %s", exc)
+        return {"score": 0, "passed": True, "details": {"error": str(exc)}}
 
 
 async def run_engine(url: str, db: AsyncSession | None = None) -> dict:
@@ -79,67 +112,24 @@ async def run_engine(url: str, db: AsyncSession | None = None) -> dict:
         elapsed_ms = int((time.perf_counter() - start) * 1000)
         return _build_result(total_score, layer_results, elapsed_ms)
 
-    # ── L2 — DNS / WHOIS / SSL ─────────────────────────────────────
-    try:
-        l2 = await check_dns(url)
-    except Exception as exc:
-        logger.warning("L2 check failed: %s", exc)
-        l2 = {"score": 0, "passed": True, "details": {"error": str(exc)}}
-
-    total_score += l2["score"]
-    layer_results.append(
-        {
-            "layer": "L2",
-            "passed": l2["passed"],
-            "score_contribution": l2["score"],
-            "details": l2["details"],
-        }
+    # ── L2, L3, L4 Parallel Execution ──────────────────────────────
+    l2_res, l3_res, l4_res = await asyncio.gather(
+        _safe_check_dns(url),
+        _safe_check_safe_browsing(url),
+        _safe_check_ledger(url, db),
     )
 
-    if total_score >= 100:
-        elapsed_ms = int((time.perf_counter() - start) * 1000)
-        return _build_result(total_score, layer_results, elapsed_ms)
-
-    # ── L3 — Google Safe Browsing ──────────────────────────────────
-    try:
-        l3 = await check_google_safe_browsing(url)
-    except Exception as exc:
-        logger.warning("L3 check failed: %s", exc)
-        l3 = {"score": 0, "passed": True, "details": {"error": str(exc)}}
-
-    total_score += l3["score"]
-    layer_results.append(
-        {
-            "layer": "L3",
-            "passed": l3["passed"],
-            "score_contribution": l3["score"],
-            "details": l3["details"],
-        }
-    )
-
-    if total_score >= 100:
-        elapsed_ms = int((time.perf_counter() - start) * 1000)
-        return _build_result(total_score, layer_results, elapsed_ms)
-
-    # ── L4 — Internal Ledger ───────────────────────────────────────
-    if db is not None:
-        try:
-            l4 = await check_ledger(url, db)
-        except Exception as exc:
-            logger.warning("L4 check failed: %s", exc)
-            l4 = {"score": 0, "passed": True, "details": {"error": str(exc)}}
-    else:
-        l4 = {"score": 0, "passed": True, "details": {"skipped": True}}
-
-    total_score += l4["score"]
-    layer_results.append(
-        {
-            "layer": "L4",
-            "passed": l4["passed"],
-            "score_contribution": l4["score"],
-            "details": l4["details"],
-        }
-    )
+    # ── Aggregate Results ──────────────────────────────────────────
+    for layer_name, res in [("L2", l2_res), ("L3", l3_res), ("L4", l4_res)]:
+        total_score += res["score"]
+        layer_results.append(
+            {
+                "layer": layer_name,
+                "passed": res["passed"],
+                "score_contribution": res["score"],
+                "details": res["details"],
+            }
+        )
 
     elapsed_ms = int((time.perf_counter() - start) * 1000)
     return _build_result(total_score, layer_results, elapsed_ms)
@@ -158,3 +148,4 @@ def _build_result(
         "layer_results": layer_results,
         "processing_time_ms": processing_time_ms,
     }
+

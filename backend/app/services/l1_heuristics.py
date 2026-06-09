@@ -220,12 +220,12 @@ def check_heuristics(url: str) -> dict:
         score += 80
         triggered.append("URL contains IP address instead of domain name")
 
-    # 2. More than 4 subdomains → +40
+    # 2. More than 3 subdomains → +20
     if hostname:
         subdomain_count = hostname.count(".")
-        if subdomain_count > 4:
-            score += 40
-            triggered.append(f"Domain has {subdomain_count} subdomain levels (>4)")
+        if subdomain_count > 3:
+            score += 20
+            triggered.append(f"Domain has {subdomain_count} subdomain levels (>3)")
 
     # 3. Spoofed Brands (Keywords combination) → +90
     if SPOOFED_BRANDS_PATTERN.search(full_url):
@@ -334,6 +334,28 @@ def check_heuristics(url: str) -> dict:
             triggered.append(
                 f"URL path/query has extreme entropy ({entropy:.2f}). Heavy obfuscation marker."
             )
+
+    # 16. Scheme Check: plain HTTP scheme → +20
+    original_scheme_is_http = url.lower().startswith("http://")
+    if original_scheme_is_http and hostname not in ("localhost", "127.0.0.1"):
+        score += 20
+        triggered.append("URL uses unencrypted HTTP protocol instead of HTTPS")
+
+    # 17. Non-Standard Port Check: port other than 80/443 → +25
+    if parsed.port and parsed.port not in (80, 443):
+        score += 25
+        triggered.append(f"URL uses non-standard port: :{parsed.port}")
+
+    # 18. Double Extensions Check: path contains double extensions like file.pdf.exe → +30
+    path_lower = parsed.path.lower()
+    if re.search(
+        r"\.[a-z0-9]+\.(exe|zip|rar|scr|cab|bat|cmd|pif|dmg|sh|msi)$",
+        path_lower,
+    ):
+        score += 30
+        triggered.append(
+            "URL path contains a suspicious double file extension (e.g. .pdf.exe)"
+        )
 
     # Cap at MAX_L1_SCORE
     capped_score = min(score, MAX_L1_SCORE)
