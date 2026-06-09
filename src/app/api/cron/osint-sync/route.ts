@@ -8,8 +8,14 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: Request) {
   try {
     // 1. Authorization strictly gated to Vercel Cron or specific Admin secret
+    const { searchParams } = new URL(req.url);
+    const querySecret = searchParams.get("secret");
     const authHeader = req.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+
+    const isAuthHeaderValid = authHeader === `Bearer ${process.env.CRON_SECRET}`;
+    const isQuerySecretValid = querySecret === process.env.CRON_SECRET;
+
+    if (!isAuthHeaderValid && !isQuerySecretValid) {
       return new Response('Unauthorized', { status: 401 });
     }
 

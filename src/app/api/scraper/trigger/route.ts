@@ -23,10 +23,13 @@ export async function POST() {
     console.log("[SCRAPER_TRIGGER] Manual scrape requested from UI...");
 
     const backendUrl = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL;
+    let backendStats = {};
+    let proxied = false;
+
     if (backendUrl) {
       try {
         console.log(`[SCRAPER_TRIGGER] Proxying incident scraping request to FastAPI backend: ${backendUrl}`);
-        const response = await fetch(`${backendUrl}/api/v1/admin/scrape-incidents`, {
+        const response = await fetch(`${backendUrl}/api/v1/admin/scrape-incidents?background=false`, {
           method: "POST",
           headers: {
             "X-Admin-Key": process.env.API_SECRET_KEY || "test-admin-secret-key-12345",
@@ -34,30 +37,26 @@ export async function POST() {
         });
 
         if (response.ok) {
-          const data = await response.json();
-          return NextResponse.json({
-            success: true,
-            timestamp: new Date().toISOString(),
-            proxied: true,
-            processed: "QUEUED",
-            lockdownsTriggered: "QUEUED",
-            ...data
-          });
+          backendStats = await response.json();
+          proxied = true;
+          console.log("[SCRAPER_TRIGGER] Backend scraper finished successfully. Syncing to Firestore locally...");
         } else {
           const errText = await response.text();
-          console.warn(`[SCRAPER_TRIGGER] Backend scraper returned error ${response.status}: ${errText}. Falling back to local scraper.`);
+          console.warn(`[SCRAPER_TRIGGER] Backend scraper returned error ${response.status}: ${errText}. Running local sync.`);
         }
       } catch (err) {
-        console.error("[SCRAPER_TRIGGER] Error connecting to backend for scraping. Falling back to local scraper:", err);
+        console.error("[SCRAPER_TRIGGER] Error connecting to backend for scraping. Running local sync:", err);
       }
     }
 
+    console.log("[SCRAPER_TRIGGER] Running local daily incident scraper...");
     const stats = await scrapeCyberIncidents();
 
     return NextResponse.json({
       success: true,
       timestamp: new Date().toISOString(),
-      proxied: false,
+      proxied,
+      backend: proxied ? backendStats : null,
       ...stats
     });
   } catch (error: any) {
