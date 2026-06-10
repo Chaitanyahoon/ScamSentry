@@ -124,7 +124,12 @@ export async function GET(req: Request) {
     }
 
     // 2. Perform Rate Limiting based on tier
-    const rateLimitIdentifier = `apikey:${apiKey}`;
+    const rawIp = req.headers.get("x-forwarded-for") || "127.0.0.1";
+    const ip = rawIp.split(",")[0].trim();
+    const rateLimitIdentifier =
+      apiKey === "ss_ext_public_v1"
+        ? `apikey:${apiKey}:${ip}`
+        : `apikey:${apiKey}`;
     let rateLimitPassed = true;
 
     if (tier === "enterprise") {
