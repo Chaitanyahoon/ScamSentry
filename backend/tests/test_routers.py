@@ -18,6 +18,14 @@ async def test_health_check(client) -> None:
     assert data["environment"] == "development"
 
 
+@pytest.mark.asyncio
+async def test_health_check_text(client) -> None:
+    response = await client.get("/health?format=text")
+    assert response.status_code == 200
+    assert response.text == "OK"
+    assert "text/plain" in response.headers["content-type"]
+
+
 # ── Scan Router Tests ─────────────────────────────────────────────────
 
 
