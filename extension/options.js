@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusEl = document.getElementById('status');
 
   // Default Fallbacks
-  const DEFAULT_API_URL = 'https://scamsentry.vercel.app/api/v1';
-  const DEFAULT_DASHBOARD_URL = 'https://scamsentry.vercel.app/dashboard';
+  const DEFAULT_API_URL = 'https://thecodecafe.vercel.app/api/v1';
+  const DEFAULT_DASHBOARD_URL = 'https://thecodecafe.vercel.app/dashboard';
 
   // Load current values
   chrome.storage.local.get(['api_base_url', 'dashboard_url'], (settings) => {
