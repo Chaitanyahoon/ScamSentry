@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 4. Action handlers
   dashboardBtn.addEventListener('click', () => {
     chrome.storage.local.get('dashboard_url', (settings) => {
-      const targetUrl = settings.dashboard_url || 'https://thecodecafe.vercel.app/dashboard';
+      const targetUrl = settings.dashboard_url || 'https://scam-sentry.vercel.app/dashboard';
       chrome.tabs.create({ url: targetUrl });
     });
   });

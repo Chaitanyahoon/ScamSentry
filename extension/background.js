@@ -5,7 +5,7 @@
  * Implements local caching to reduce API load and improve latency.
  */
 
-const DEFAULT_API_URL = 'https://thecodecafe.vercel.app/api/v1';
+const DEFAULT_API_URL = 'https://scam-sentry.vercel.app/api/v1';
 const CACHE_TTL = 3600 * 1000; // 1 hour
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
