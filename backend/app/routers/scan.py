@@ -7,6 +7,7 @@ GET  /api/v1/scan/{id}  → Retrieve a previous scan by UUID
 
 from __future__ import annotations
 
+import logging
 import uuid
 from datetime import UTC, datetime
 
@@ -20,6 +21,7 @@ from app.schemas.scan import ScanRequest, ScanResponse, LayerResult
 from app.services.cache import get_cached_scan, set_cached_scan
 from app.services.engine import run_engine
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/scan", tags=["scan"])
 
 
@@ -41,6 +43,7 @@ async def create_scan(
             scan_id=cached["scan_id"],
             url=cached["url"],
             risk_score=cached["risk_score"],
+            safety_score=cached.get("safety_score", 100 - cached["risk_score"]),
             risk_level=cached["risk_level"],
             layer_results=[LayerResult(**lr) for lr in cached["layer_results"]],
             processing_time_ms=cached["processing_time_ms"],
@@ -107,6 +110,7 @@ async def create_scan(
         "scan_id": scan_id_str,
         "url": url_str,
         "risk_score": result["risk_score"],
+        "safety_score": 100 - result["risk_score"],
         "risk_level": result["risk_level"],
         "layer_results": result["layer_results"],
         "processing_time_ms": result["processing_time_ms"],
@@ -124,6 +128,7 @@ async def create_scan(
         scan_id=scan_id_str,
         url=url_str,
         risk_score=result["risk_score"],
+        safety_score=100 - result["risk_score"],
         risk_level=result["risk_level"],
         layer_results=[LayerResult(**lr) for lr in result["layer_results"]],
         processing_time_ms=result["processing_time_ms"],
@@ -162,6 +167,7 @@ async def get_scan(
         scan_id=str(scan.id),
         url=scan.url,
         risk_score=scan.risk_score or 0,
+        safety_score=100 - (scan.risk_score or 0),
         risk_level=(scan.risk_level.value if scan.risk_level else "safe"),
         layer_results=layer_results,
         processing_time_ms=scan.processing_time_ms or 0,
