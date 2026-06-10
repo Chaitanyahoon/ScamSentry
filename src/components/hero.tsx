@@ -73,13 +73,12 @@ export function Hero() {
               Shield Active
             </div>
             <span>Stop threats before they load:</span>
-            <a
-              href="/extension.zip"
-              download="ScamSentry-Extension.zip"
+            <Link
+              href="/extension"
               className="font-semibold text-foreground hover:text-primary transition-colors flex items-center gap-1 underline underline-offset-4 decoration-primary/40 hover:decoration-primary"
             >
               Get ScamSentry Extension (Free) <ArrowRight className="h-3 w-3" />
-            </a>
+            </Link>
           </div>
 
           {/* Social proof — one quiet line */}
