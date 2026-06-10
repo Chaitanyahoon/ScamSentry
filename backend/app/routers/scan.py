@@ -48,68 +48,87 @@ async def create_scan(
             submitted_at=cached["submitted_at"],
         )
 
-    # 2. Create Scan record with status=processing
-    scan = Scan(
-        id=uuid.uuid4(),
-        url=url_str,
-        status=ScanStatus.processing,
-        submitted_at=datetime.now(UTC),
-    )
-    db.add(scan)
-    await db.flush()
-
-    # 3. Run detection engine
+    # 2. Try to run with database persistence
+    database_ok = True
     try:
-        result = await run_engine(url_str, db=db)
-    except Exception as exc:
-        scan.status = ScanStatus.error
-        await db.commit()
-        raise HTTPException(status_code=500, detail=f"Engine error: {exc}") from exc
-
-    # 4. Save ScanResult rows per layer
-    for lr in result["layer_results"]:
-        scan_result = ScanResult(
+        scan = Scan(
             id=uuid.uuid4(),
-            scan_id=scan.id,
-            layer=LayerName(lr["layer"]),
-            passed=lr["passed"],
-            score_contribution=lr["score_contribution"],
-            details=lr["details"],
+            url=url_str,
+            status=ScanStatus.processing,
+            submitted_at=datetime.now(UTC),
         )
-        db.add(scan_result)
+        db.add(scan)
+        await db.flush()
+    except Exception as db_exc:
+        logger.warning("Database write failed on startup; running in stateless mode: %s", db_exc)
+        database_ok = False
 
-    # 5. Update Scan record
-    scan.status = ScanStatus.complete
-    scan.risk_score = result["risk_score"]
-    scan.risk_level = RiskLevel(result["risk_level"])
-    scan.processing_time_ms = result["processing_time_ms"]
-    await db.commit()
-    await db.refresh(scan)
+    if database_ok:
+        try:
+            result = await run_engine(url_str, db=db)
+            
+            # Save ScanResult rows per layer
+            for lr in result["layer_results"]:
+                scan_result = ScanResult(
+                    id=uuid.uuid4(),
+                    scan_id=scan.id,
+                    layer=LayerName(lr["layer"]),
+                    passed=lr["passed"],
+                    score_contribution=lr["score_contribution"],
+                    details=lr["details"],
+                )
+                db.add(scan_result)
+
+            # Update Scan record
+            scan.status = ScanStatus.complete
+            scan.risk_score = result["risk_score"]
+            scan.risk_level = RiskLevel(result["risk_level"])
+            scan.processing_time_ms = result["processing_time_ms"]
+            await db.commit()
+            await db.refresh(scan)
+            
+            scan_id_str = str(scan.id)
+            submitted_at_dt = scan.submitted_at
+        except Exception as exc:
+            scan.status = ScanStatus.error
+            try:
+                await db.commit()
+            except Exception:
+                pass
+            raise HTTPException(status_code=500, detail=f"Engine error: {exc}") from exc
+    else:
+        # Stateless Fallback Engine (no db logs)
+        result = await run_engine(url_str, db=None)
+        scan_id_str = str(uuid.uuid4())
+        submitted_at_dt = datetime.now(UTC)
 
     # 6. Build response
     response_data = {
-        "scan_id": str(scan.id),
+        "scan_id": scan_id_str,
         "url": url_str,
-        "risk_score": scan.risk_score,
-        "risk_level": scan.risk_level.value,
+        "risk_score": result["risk_score"],
+        "risk_level": result["risk_level"],
         "layer_results": result["layer_results"],
-        "processing_time_ms": scan.processing_time_ms,
+        "processing_time_ms": result["processing_time_ms"],
         "cached": False,
-        "submitted_at": scan.submitted_at.isoformat(),
+        "submitted_at": submitted_at_dt.isoformat(),
     }
 
     # 7. Cache the result
-    await set_cached_scan(url_str, response_data)
+    try:
+        await set_cached_scan(url_str, response_data)
+    except Exception as cache_exc:
+        logger.warning("Cache write failed: %s", cache_exc)
 
     return ScanResponse(
-        scan_id=str(scan.id),
+        scan_id=scan_id_str,
         url=url_str,
-        risk_score=scan.risk_score,
-        risk_level=scan.risk_level.value,
+        risk_score=result["risk_score"],
+        risk_level=result["risk_level"],
         layer_results=[LayerResult(**lr) for lr in result["layer_results"]],
-        processing_time_ms=scan.processing_time_ms,
+        processing_time_ms=result["processing_time_ms"],
         cached=False,
-        submitted_at=scan.submitted_at,
+        submitted_at=submitted_at_dt,
     )
 
 
