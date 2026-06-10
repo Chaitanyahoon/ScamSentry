@@ -27,7 +27,8 @@ class ScanResponse(BaseModel):
 
     scan_id: str
     url: str
-    risk_score: int  # 0-100
+    risk_score: int  # 0-100 (risk metric)
+    safety_score: int  # 0-100 (safety/trust metric: 100 is safe, 0 is unsafe)
     risk_level: str  # "safe" | "suspicious" | "dangerous"
     layer_results: list[LayerResult]
     processing_time_ms: int
