@@ -185,6 +185,54 @@ def _check_brand_mimicry(domain: str) -> str | None:
     return None
 
 
+def _is_dga_domain(domain: str) -> bool:
+    """Detect if a domain label looks algorithmically generated (DGA)."""
+    if not domain:
+        return False
+    
+    # Extract the main second-level domain name (e.g., "paypal" in "sub.paypal.com")
+    parts = domain.lower().split('.')
+    if len(parts) >= 2:
+        sld = parts[-2]
+    else:
+        sld = domain.lower()
+    
+    if len(sld) < 8:
+        return False
+        
+    # Calculate vowel ratio
+    vowels = set("aeiou")
+    vowel_count = sum(1 for char in sld if char in vowels)
+    vowel_ratio = vowel_count / len(sld) if len(sld) > 0 else 0
+    
+    # Calculate consonant runs
+    consonant_run = 0
+    max_consonant_run = 0
+    consonants = set("bcdfghjklmnpqrstvwxyz")
+    for char in sld:
+        if char in consonants:
+            consonant_run += 1
+            max_consonant_run = max(max_consonant_run, consonant_run)
+        else:
+            consonant_run = 0
+
+    # High entropy check
+    entropy = _calculate_entropy(sld)
+    
+    # If entropy is high and vowel ratio is extremely low, or long consonant run, or digit ratio is high
+    digit_count = sum(1 for char in sld if char.isdigit())
+    digit_ratio = digit_count / len(sld) if len(sld) > 0 else 0
+
+    if max_consonant_run >= 5:
+        return True
+    if entropy > 3.2 and vowel_ratio < 0.15:
+        return True
+    if len(sld) > 10 and digit_ratio > 0.4:
+        return True
+        
+    return False
+
+
 # ── Public API ────────────────────────────────────────────────────────
 
 
@@ -356,6 +404,12 @@ def check_heuristics(url: str) -> dict:
         triggered.append(
             "URL path contains a suspicious double file extension (e.g. .pdf.exe)"
         )
+
+    # 19. Algorithmic Domain Generation (DGA) Heuristic check → +35
+    if hostname:
+        if _is_dga_domain(hostname):
+            score += 35
+            triggered.append("Domain name appears to be algorithmically generated (DGA pattern)")
 
     # Cap at MAX_L1_SCORE
     capped_score = min(score, MAX_L1_SCORE)

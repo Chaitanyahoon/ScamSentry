@@ -82,9 +82,21 @@ def _whois_lookup(domain: str) -> dict:
         socket.setdefaulttimeout(orig_timeout)
 
 
+def _extract_issuer_org(cert: dict) -> str:
+    """Extract organization name from certificate issuer dict."""
+    try:
+        for rdn in cert.get("issuer", []):
+            for item in rdn:
+                if item[0] == "organizationName":
+                    return str(item[1])
+    except Exception:
+        pass
+    return ""
+
+
 def _check_ssl(hostname: str) -> dict:
     """Check SSL certificate validity for *hostname*."""
-    result = {"valid": False, "self_signed": False, "expired": False, "error": None}
+    result = {"valid": False, "self_signed": False, "expired": False, "issuer_org": "", "error": None}
     try:
         ctx = ssl.create_default_context()
         with socket.create_connection((hostname, 443), timeout=5) as sock:
@@ -92,6 +104,7 @@ def _check_ssl(hostname: str) -> dict:
                 cert = ssock.getpeercert()
                 if cert:
                     result["valid"] = True
+                    result["issuer_org"] = _extract_issuer_org(cert)
                     # Check expiry
                     not_after = ssl.cert_time_to_seconds(cert["notAfter"])
                     if datetime.fromtimestamp(not_after, tz=UTC) < datetime.now(UTC):
@@ -246,6 +259,22 @@ async def check_dns(url: str) -> dict:
         triggered.append(
             "Domain does not resolve to any active IP address (NXDOMAIN)"
         )
+
+    # ── 6. Low trust SSL + ultra-new domain age combo ────────────────
+    ssl_issuer = ssl_data.get("issuer_org", "").lower()
+    if creation_date and isinstance(creation_date, datetime) and ssl_issuer:
+        # Ensure timezone-aware comparison
+        if creation_date.tzinfo is None:
+            age_days = (datetime.now(UTC).replace(tzinfo=None) - creation_date).days
+        else:
+            age_days = (datetime.now(UTC) - creation_date).days
+
+        # If age is under 60 days and issuer is Let's Encrypt / ZeroSSL (commonly abused by burner phishing sites)
+        if age_days < 60 and any(keyword in ssl_issuer for keyword in ["let's encrypt", "zerossl", "cpanel", "sectigo"]):
+            score += 35
+            triggered.append(
+                f"Suspicious combination: newly registered domain ({age_days} days) using temporary/free SSL issuer ({ssl_data.get('issuer_org')})"
+            )
 
     # Cap at MAX_L2_SCORE
     capped_score = min(score, MAX_L2_SCORE)

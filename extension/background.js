@@ -147,3 +147,66 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     });
   }
 });
+
+// Real-time Tab Navigation Interception & Alerting
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  // Trigger on URL change loading state
+  if (changeInfo.url) {
+    const url = changeInfo.url;
+    // Ignore extension local files, system interfaces, and localhost checks
+    if (url.startsWith('chrome://') || url.startsWith('chrome-extension://') || url.startsWith('about:') || !url.startsWith('http') || url.includes('localhost') || url.includes('127.0.0.1')) {
+      return;
+    }
+    
+    chrome.storage.local.get(['settings_auto_block', 'settings_suspicious_warn', 'ss_bypass_whitelist', 'settings_notifications'], async (settings) => {
+      const autoBlock = settings.settings_auto_block !== false; // Default: true
+      if (!autoBlock) return;
+
+      let domain = '';
+      try {
+        domain = new URL(url).hostname;
+      } catch (e) {
+        return;
+      }
+
+      // Check if domain is temporarily whitelisted by user
+      const whitelist = settings.ss_bypass_whitelist || [];
+      if (whitelist.includes(domain)) {
+        console.log(`[ScamSentry] Domain whitelisted by user: ${domain}`);
+        return;
+      }
+
+      const result = await handleUrlCheck(url);
+      if (result && result.status !== 'error') {
+        const score = result.score || 0;
+        const isMalicious = result.status === 'malicious' || score > 70;
+        const isSuspicious = result.status === 'suspicious' || (score > 20 && score <= 70);
+        const warnSuspicious = settings.settings_suspicious_warn === true;
+
+        const shouldBlock = isMalicious || (isSuspicious && warnSuspicious);
+
+        if (shouldBlock) {
+          console.warn(`[ScamSentry] Intercepted malicious website: ${url}`);
+          
+          // Redirect the tab to blocked page warning
+          const blockedPageUrl = chrome.runtime.getURL(
+            `blocked.html?url=${encodeURIComponent(url)}&flags=${encodeURIComponent((result.flags || []).join(','))}`
+          );
+          chrome.tabs.update(tabId, { url: blockedPageUrl });
+
+          // Send system desktop notification alert
+          const notifEnabled = settings.settings_notifications !== false; // Default: true
+          if (notifEnabled) {
+            chrome.notifications.create(`ss_notif_${Date.now()}`, {
+              type: 'basic',
+              iconUrl: 'icons/icon128.png',
+              title: 'ScamSentry Alert: Threat Blocked',
+              message: `A threat was detected and blocked on domain: ${domain}`,
+              priority: 2
+            });
+          }
+        }
+      }
+    });
+  }
+});

@@ -211,6 +211,35 @@
       </div>
     </div>
 
+    <!-- Security Preferences Section -->
+    <div style="margin-top: 25px; margin-bottom: 25px; border-top: 1px solid var(--border); padding-top: 20px;">
+      <h2 style="font-size: 13px; font-weight: 700; margin: 0 0 15px 0; color: var(--text); letter-spacing: -0.01em;">Endpoint Protections</h2>
+      
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <div>
+          <label style="margin: 0; font-size: 11.5px; color: var(--text); font-weight: 600;">Real-Time Auto-Blocking</label>
+          <div style="font-size: 9.5px; color: var(--muted); margin-top: 2px; line-height: 1.4;">Intercept and block dangerous scam/phishing hosts immediately.</div>
+        </div>
+        <input type="checkbox" id="auto-block" style="accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer;">
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <div>
+          <label style="margin: 0; font-size: 11.5px; color: var(--text); font-weight: 600;">Warn on Suspicious Sites</label>
+          <div style="font-size: 9.5px; color: var(--muted); margin-top: 2px; line-height: 1.4;">Redirect and alert on amber status (suspicious/unverified) hosts.</div>
+        </div>
+        <input type="checkbox" id="suspicious-warn" style="accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer;">
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <div>
+          <label style="margin: 0; font-size: 11.5px; color: var(--text); font-weight: 600;">Desktop Notifications</label>
+          <div style="font-size: 9.5px; color: var(--muted); margin-top: 2px; line-height: 1.4;">Dispatch native OS alerts when background threats are deflected.</div>
+        </div>
+        <input type="checkbox" id="notifications" style="accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer;">
+      </div>
+    </div>
+
     <div id="status" class="status-msg"></div>
 
     <div class="btn-group">
