@@ -79,12 +79,32 @@ Every URL/Email submitted goes through a gauntlet of verification layers, engine
 *   **Styling**: Pure CSS Custom Variables (`#15110E` Burnt Amber / `#0C0A09` Deep Carbon), Tailwind CSS
 *   **Data Tier**: Firebase (Auth, Firestore DB), Upstash Redis (Distributed Rate Limiting, because we can't afford actors DDOSing our free database tier)
 *   **Data Visualizations**: Time-series `AreaChart` and distribution `PieChart` styled in terminal-amber via `recharts`
-*   **Test Suite**: 9 Jest Suites, **162 passing tests** to guarantee the pipeline remains rock solid.
+*   **Test Suite**: 9 Jest Suites, **164 passing tests** to guarantee the pipeline remains rock solid.
 
 ---
 
-## 📁 Environment Setup
+## 📁 Repository Folder Structure
 
+The repository is structured as a clean monorepo:
+
+*   📂 **[src/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/src)**: Next.js Frontend Application
+    *   📂 **[app/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/src/app)**: Web page routes, layout templates, and API endpoints (e.g. validator, community, reports).
+    *   📂 **[components/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/src/components)**: Cyberpunk-themed widgets (Forensic Globe, Threat Node Graph, Recharts logs panels).
+    *   📂 **[lib/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/src/lib)**: Shared utility modules (Firebase admin client, rate-limit profiles, webhooks).
+*   📂 **[backend/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/backend)**: High-Performance FastAPI Scanner Server (Python 3.13)
+    *   📂 **[app/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/backend/app)**: Core Python logic including database models, routers, and layers L1–L4 engines.
+    *   📂 **[tests/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/backend/tests)**: Comprehensive Python pytest suites.
+*   📂 **[extension/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/extension)**: Real-time Chrome Interception Extension (Manifest v3)
+    *   📄 **[background.js](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/extension/background.js)**: Async service worker listening to tab transitions and triggering blocks.
+    *   📄 **[blocked.html](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/extension/blocked.html)**: Interactive block page warning users away from detected threats.
+*   📂 **[__tests__/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/__tests__)**: Jest Frontend automated tests folder.
+*   📂 **[scripts/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/scripts)**: Batch scanning command line tools ([cli.ts](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/scripts/cli.ts)).
+
+---
+
+## ⚙️ Environment Setup & Installations
+
+### 💻 1. Next.js Frontend Setup
 1. **Clone & Install Dependencies**
    ```bash
    git clone https://github.com/Chaitanyahoon/ScamSentry.git
@@ -117,15 +137,46 @@ Every URL/Email submitted goes through a gauntlet of verification layers, engine
    # Workstation accessible at http://localhost:3000
    ```
 
+### 🐍 2. FastAPI Backend Setup
+1. **Navigate to the Backend directory & Create Virtualenv**
+   ```bash
+   cd backend
+   python -m venv .venv
+   ```
+2. **Activate the Environment**
+   * **Windows (PowerShell)**:
+     ```powershell
+     .\.venv\Scripts\Activate.ps1
+     ```
+   * **macOS / Linux**:
+     ```bash
+     source .venv/bin/activate
+     ```
+3. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. **Run Server**
+   ```bash
+   uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+   # API docs accessible at http://127.0.0.1:8000/docs
+   ```
+
+### 🔌 3. Chrome Extension Installation
+1. Open Google Chrome and navigate to `chrome://extensions/`.
+2. Toggle **"Developer mode"** in the top-right corner to **ON**.
+3. Click the **"Load unpacked"** button in the top-left.
+4. Select the **`extension`** folder from this repository.
+5. The ScamSentry Shield badge will appear in your extensions list, ready to protect your web navigation!
+
 ---
 
 ## 🛠️ Developer Utility Commands
 
 *   **Execute Full Verification Tests**
-    ```bash
-    npm run test
-    ```
-*   **Trigger Next.js Turbopack Production Compilation**
+    *   **Frontend**: `npm run test`
+    *   **Backend**: `.\.venv\Scripts\pytest` (from `/backend` folder)
+*   **Trigger Next.js Production Compilation**
     ```bash
     npm run build
     ```
