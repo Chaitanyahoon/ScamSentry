@@ -105,6 +105,8 @@ export default function ApiDashboardPage() {
   );
   const [utrNumber, setUtrNumber] = useState("");
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
+  const [paymentRequests, setPaymentRequests] = useState<any[]>([]);
+  const [showBillingHistory, setShowBillingHistory] = useState(false);
 
   const getUpiQrUrl = (amount: number, planName: string) => {
     const upiLink = `upi://pay?pa=${UPI_ID}&pn=${UPI_NAME}&am=${amount}&cu=INR&tn=${encodeURIComponent(planName + " Plan Upgrade - ScamSentry")}`;
@@ -135,6 +137,7 @@ export default function ApiDashboardPage() {
       setShowUpgradeModal(false);
       setUtrNumber("");
       setSelectedPlan(null);
+      await fetchDashboardData();
     } catch (e) {
       console.error("Payment request error:", e);
       toast({
@@ -246,6 +249,31 @@ export default function ApiDashboardPage() {
         setMetrics(null);
         setRecentScans([]);
       }
+
+      // 3. Fetch Payment Requests
+      const paymentsQ = query(
+        collection(db, "payment_requests"),
+        where("userId", "==", user.uid)
+      );
+      const paymentsSnapshot = await getDocs(paymentsQ).catch(() => null);
+      const paymentsList: any[] = [];
+      if (paymentsSnapshot) {
+        paymentsSnapshot.forEach((doc) => {
+          const data = doc.data();
+          paymentsList.push({
+            id: doc.id,
+            ...data,
+            createdAt: data.createdAt?.toDate
+              ? data.createdAt.toDate().toISOString()
+              : data.createdAt || new Date().toISOString(),
+          });
+        });
+        paymentsList.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      }
+      setPaymentRequests(paymentsList);
     } catch (e) {
       console.error("Dashboard data fetch error:", e);
     } finally {
@@ -563,6 +591,12 @@ export default function ApiDashboardPage() {
                 const isUpgrade = planIdx > currentIdx;
                 const isDowngrade = planIdx < currentIdx;
 
+                const recentRequest = paymentRequests.find(
+                  (p) => p.requestedTier === key,
+                );
+                const isPending = recentRequest?.status === "pending";
+                const isRejected = recentRequest?.status === "rejected";
+
                 return (
                   <div
                     key={key}
@@ -617,8 +651,20 @@ export default function ApiDashboardPage() {
                         <div className="w-full text-center text-[11px] font-bold py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20">
                           Current Plan
                         </div>
+                      ) : isPending ? (
+                        <div className="w-full text-center py-2 px-3 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20 flex flex-col gap-0.5 select-none">
+                          <span className="text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1">
+                            <Clock className="h-3 w-3 animate-spin text-amber-500" /> Pending Review
+                          </span>
+                          <span className="text-[9px] text-muted-foreground/80 font-mono font-medium">UTR: {recentRequest.utrNumber}</span>
+                        </div>
                       ) : isUpgrade ? (
                         <div className="space-y-1.5">
+                          {isRejected && (
+                            <div className="text-center py-1.5 px-2 bg-destructive/10 text-destructive border border-destructive/20 rounded-lg text-[9px] font-medium leading-tight">
+                              Verification failed (UTR: {recentRequest.utrNumber}). Please review payment details and retry.
+                            </div>
+                          )}
                           <Button
                             disabled={!apiKey}
                             onClick={() => {
@@ -628,7 +674,7 @@ export default function ApiDashboardPage() {
                             className="w-full h-8 text-[11px] font-bold bg-primary text-primary-foreground hover:opacity-90 rounded-lg transition-all"
                           >
                             <Zap className="h-3 w-3 mr-1.5" />
-                            Upgrade
+                            {isRejected ? "Retry Upgrade" : "Upgrade"}
                           </Button>
                           {!apiKey && (
                             <p className="text-[9px] text-muted-foreground text-center">
@@ -646,6 +692,71 @@ export default function ApiDashboardPage() {
                 );
               })}
             </div>
+
+            {/* Expandable Billing History */}
+            {paymentRequests.length > 0 && (
+              <div className="mt-5 pt-4 border-t border-border/50">
+                <button
+                  onClick={() => setShowBillingHistory(!showBillingHistory)}
+                  className="w-full flex items-center justify-between text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors py-1 cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Clock className="h-3.5 w-3.5" />
+                    Billing & Upgrade History
+                  </span>
+                  <span className="text-[10px] bg-muted px-2 py-0.5 rounded-full">
+                    {paymentRequests.length}
+                  </span>
+                </button>
+
+                {showBillingHistory && (
+                  <div className="mt-3.5 space-y-2.5 max-h-[220px] overflow-y-auto pr-1 animate-in slide-in-from-top-2 duration-200">
+                    {paymentRequests.map((req) => (
+                      <div
+                        key={req.id}
+                        className="bg-background/50 border border-border p-3 rounded-xl flex items-center justify-between text-xs"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-foreground capitalize">
+                              {req.requestedTier} Tier
+                            </span>
+                            <span className="text-[10px] text-muted-foreground font-mono">
+                              ₹{req.amount}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground font-mono">
+                            UTR: {req.utrNumber}
+                          </p>
+                          <p className="text-[9px] text-muted-foreground/60">
+                            {new Date(req.createdAt).toLocaleDateString(undefined, {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })} at {new Date(req.createdAt).toLocaleTimeString(undefined, {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        </div>
+                        <span
+                          className={cn(
+                            "text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider",
+                            req.status === "approved"
+                              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                              : req.status === "rejected"
+                                ? "bg-destructive/10 border-destructive/20 text-destructive"
+                                : "bg-warning/10 border-warning/20 text-warning",
+                          )}
+                        >
+                          {req.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Quick Terminal Guide */}
