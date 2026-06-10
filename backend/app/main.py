@@ -12,7 +12,7 @@ import os
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
@@ -131,8 +131,10 @@ app.include_router(incident_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["system"])
-async def health_check() -> dict:
-    """Return system health and current timestamp."""
+async def health_check(format: str | None = None):
+    """Return system health. Use ?format=text for a minimal text response."""
+    if format == "text":
+        return Response(content="OK", media_type="text/plain")
     return {
         "status": "ok",
         "timestamp": datetime.now(UTC).isoformat(),
