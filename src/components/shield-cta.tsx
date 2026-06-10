@@ -2,6 +2,7 @@
 
 import { Shield, Zap, Lock, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 export function ShieldCTA() {
   const features = [
@@ -122,14 +123,13 @@ export function ShieldCTA() {
             </div>
 
             <div className="pt-6">
-              <a
-                href="/extension.zip"
-                download="ScamSentry-Extension.zip"
+              <Link
+                href="/extension"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-bold rounded-2xl hover:scale-[1.02] transition-transform shadow-xl shadow-primary/20 cursor-pointer"
               >
                 Add to Browser (Free)
                 <Shield className="h-4 w-4" />
-              </a>
+              </Link>
             </div>
           </div>
         </div>
