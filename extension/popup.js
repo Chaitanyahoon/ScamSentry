@@ -91,6 +91,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       scoreBarEl.style.backgroundColor = '#f97316'; // Brand orange
       scoreValEl.style.color = '#f97316';
     }
+
+    // Populate active threat flags list
+    const indicatorsCard = document.getElementById('indicators-card');
+    const indicatorsList = document.getElementById('indicators-list');
+    
+    if (result.flags && result.flags.length > 0) {
+      indicatorsList.innerHTML = '';
+      result.flags.forEach(flag => {
+        const li = document.createElement('li');
+        li.textContent = formatFlagName(flag);
+        li.style.marginBottom = '4.5px';
+        indicatorsList.appendChild(li);
+      });
+      indicatorsCard.style.display = 'block';
+    } else {
+      indicatorsCard.style.display = 'none';
+    }
   });
 
   // 3. Load global stats from storage
@@ -106,4 +123,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       chrome.tabs.create({ url: targetUrl });
     });
   });
+
+  function formatFlagName(flag) {
+    let formatted = flag
+      .replace(/_/g, ' ')
+      .replace(/([A-Z])/g, ' $1')
+      .trim();
+    formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    
+    if (formatted.toLowerCase().includes('homoglyph')) {
+      return `${formatted} (Lookalike characters)`;
+    }
+    if (formatted.toLowerCase().includes('http scheme')) {
+      return `${formatted} (Insecure connection)`;
+    }
+    if (formatted.toLowerCase().includes('double extension')) {
+      return `${formatted} (Dual extension payload)`;
+    }
+    return formatted;
+  }
 });

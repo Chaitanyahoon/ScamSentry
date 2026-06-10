@@ -1,25 +1,34 @@
 /**
  * ScamSentry Options Page Logic
  * 
- * Manages configuration variables (API Base URL, Dashboard URL)
+ * Manages configuration variables and protection settings
  * stored in chrome.storage.local.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
   const apiUrlInput = document.getElementById('api-url');
   const dashboardUrlInput = document.getElementById('dashboard-url');
+  const autoBlockCheckbox = document.getElementById('auto-block');
+  const suspiciousWarnCheckbox = document.getElementById('suspicious-warn');
+  const notificationsCheckbox = document.getElementById('notifications');
+  
   const saveBtn = document.getElementById('save-btn');
   const resetBtn = document.getElementById('reset-btn');
   const statusEl = document.getElementById('status');
 
-  // Default Fallbacks
-  const DEFAULT_API_URL = 'https://scam-sentry.vercel.app/api/v1';
-  const DEFAULT_DASHBOARD_URL = 'https://scam-sentry.vercel.app/dashboard';
-
   // Load current values
-  chrome.storage.local.get(['api_base_url', 'dashboard_url'], (settings) => {
+  chrome.storage.local.get([
+    'api_base_url',
+    'dashboard_url',
+    'settings_auto_block',
+    'settings_suspicious_warn',
+    'settings_notifications'
+  ], (settings) => {
     apiUrlInput.value = settings.api_base_url || '';
     dashboardUrlInput.value = settings.dashboard_url || '';
+    autoBlockCheckbox.checked = settings.settings_auto_block !== false; // Default: true
+    suspiciousWarnCheckbox.checked = settings.settings_suspicious_warn === true; // Default: false
+    notificationsCheckbox.checked = settings.settings_notifications !== false; // Default: true
   });
 
   // Save handler
@@ -40,7 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     chrome.storage.local.set({
       api_base_url: apiUrl,
-      dashboard_url: dashboardUrl
+      dashboard_url: dashboardUrl,
+      settings_auto_block: autoBlockCheckbox.checked,
+      settings_suspicious_warn: suspiciousWarnCheckbox.checked,
+      settings_notifications: notificationsCheckbox.checked
     }, () => {
       showStatus('Configuration saved successfully.', 'success');
     });
@@ -48,9 +60,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Reset handler
   resetBtn.addEventListener('click', () => {
-    chrome.storage.local.remove(['api_base_url', 'dashboard_url'], () => {
+    chrome.storage.local.remove([
+      'api_base_url',
+      'dashboard_url',
+      'settings_auto_block',
+      'settings_suspicious_warn',
+      'settings_notifications',
+      'ss_bypass_whitelist'
+    ], () => {
       apiUrlInput.value = '';
       dashboardUrlInput.value = '';
+      autoBlockCheckbox.checked = true;
+      suspiciousWarnCheckbox.checked = false;
+      notificationsCheckbox.checked = true;
       showStatus('Settings reset to default production values.', 'success');
     });
   });

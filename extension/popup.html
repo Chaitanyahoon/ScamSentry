@@ -306,7 +306,14 @@
         <div class="stat-box">
           <span class="stat-val" id="threats-blocked" style="color: var(--red);">0</span>
           <span class="stat-lbl">Threats Blocked</span>
-        </div>
+      </div>
+
+      <!-- Forensic Indicators Drawer -->
+      <div id="indicators-card" style="display: none; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 16px; padding: 14px; margin-top: 16px;">
+        <span style="font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 8px;">Active Threat Flags</span>
+        <ul id="indicators-list" style="margin: 0; padding-left: 16px; font-size: 11px; color: var(--text); opacity: 0.85; line-height: 1.5; text-align: left;">
+          <!-- Injected dynamically -->
+        </ul>
       </div>
 
       <div id="error-message"></div>
