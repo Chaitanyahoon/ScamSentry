@@ -52,6 +52,7 @@ async def test_create_scan_success(client, db) -> None:
         data = response.json()
         assert data["url"] == "https://suspicious-target.com/"
         assert data["risk_score"] == 35
+        assert data["safety_score"] == 65
         assert data["risk_level"] == "suspicious"
         assert data["cached"] is False
         assert len(data["layer_results"]) == 4

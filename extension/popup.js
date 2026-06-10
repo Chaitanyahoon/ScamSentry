@@ -88,8 +88,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       scoreBarEl.style.backgroundColor = '#f59e0b';
       scoreValEl.style.color = '#f59e0b';
     } else {
-      scoreBarEl.style.backgroundColor = '#f97316'; // Brand orange
-      scoreValEl.style.color = '#f97316';
+      scoreBarEl.style.backgroundColor = '#10b981'; // Success green
+      scoreValEl.style.color = '#10b981';
     }
 
     // Populate active threat flags list
