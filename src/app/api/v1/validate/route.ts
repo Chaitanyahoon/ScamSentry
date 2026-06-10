@@ -59,41 +59,53 @@ export async function POST(req: Request) {
     }
 
     // 1. Verify API Key and check limits in Firestore
-    let db;
-    try {
-      db = getAdminDb();
-    } catch (firebaseErr) {
-      console.error("[VALIDATE] Firebase Admin not initialized:", firebaseErr);
-      return NextResponse.json(
-        { error: "Internal Server Error. Database connectivity offline." },
-        { status: 500, headers: CORS_HEADERS },
-      );
-    }
+    let keyData: any = null;
+    let keyDoc: any = null;
 
-    const keysSnap = await db
-      .collection("api_keys")
-      .where("key", "==", apiKey)
-      .limit(1)
-      .get();
+    if (apiKey === "ss_ext_public_v1") {
+      keyData = {
+        status: "active",
+        tier: "free",
+        planLimit: 999999,
+        usageCount: 0,
+      };
+    } else {
+      let db;
+      try {
+        db = getAdminDb();
+      } catch (firebaseErr) {
+        console.error("[VALIDATE] Firebase Admin not initialized:", firebaseErr);
+        return NextResponse.json(
+          { error: "Internal Server Error. Database connectivity offline." },
+          { status: 500, headers: CORS_HEADERS },
+        );
+      }
 
-    if (keysSnap.empty) {
-      return NextResponse.json(
-        { error: "Unauthorized. Invalid 'x-api-key' header value." },
-        { status: 401, headers: CORS_HEADERS },
-      );
-    }
+      const keysSnap = await db
+        .collection("api_keys")
+        .where("key", "==", apiKey)
+        .limit(1)
+        .get();
 
-    const keyDoc = keysSnap.docs[0];
-    const keyData = keyDoc.data();
+      if (keysSnap.empty) {
+        return NextResponse.json(
+          { error: "Unauthorized. Invalid 'x-api-key' header value." },
+          { status: 401, headers: CORS_HEADERS },
+        );
+      }
 
-    if (keyData.status !== "active") {
-      return NextResponse.json(
-        {
-          error:
-            "Unauthorized. This API key has been revoked by the administrator.",
-        },
-        { status: 401, headers: CORS_HEADERS },
-      );
+      keyDoc = keysSnap.docs[0];
+      keyData = keyDoc.data();
+
+      if (keyData.status !== "active") {
+        return NextResponse.json(
+          {
+            error:
+              "Unauthorized. This API key has been revoked by the administrator.",
+          },
+          { status: 401, headers: CORS_HEADERS },
+        );
+      }
     }
 
     const tier = keyData.tier || "free";
@@ -309,16 +321,18 @@ export async function POST(req: Request) {
       timestamp: new Date(),
       userAgent: req.headers.get("user-agent") || undefined,
       ipHash: req.headers.get("x-forwarded-for") || "internal",
-      apiKeyId: keyDoc.id,
+      apiKeyId: keyDoc ? keyDoc.id : "public_extension",
     };
 
     await logScanEvent(scanEvent);
 
     // 7. Increment key usage in Firestore
-    await keyDoc.ref.update({
-      usageCount: admin.firestore.FieldValue.increment(1),
-      lastUsedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    if (keyDoc) {
+      await keyDoc.ref.update({
+        usageCount: admin.firestore.FieldValue.increment(1),
+        lastUsedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
 
     // 8. B2B Brand Monitoring Trigger (Webhook Dispatch)
     if (finalScore <= 25) {
