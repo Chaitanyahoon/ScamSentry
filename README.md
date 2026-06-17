@@ -188,6 +188,22 @@ The repository is structured as a clean monorepo:
 
 ---
 
+## 🤝 Contributing & Licensing
+
+We welcome all community contributions, security audits, and issue reports!
+*   Refer to our **[Contributing Guide](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/CONTRIBUTING.md)** for developer setup details, code formatting standards, and PR workflows.
+*   ScamSentry is licensed under the open-source **[MIT License](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/LICENSE)**.
+
+---
+
+## 🧪 Continuous Integration (CI/CD)
+
+The repository runs automated quality checks on pull requests and commits to the `main` branch:
+*   **[Frontend CI/CD](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/.github/workflows/frontend-ci.yml)**: Validates ESLint standards, checks Next.js production builds, and runs the Jest unit testing suite.
+*   **[Backend CI/CD](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/.github/workflows/backend-ci.yml)**: Enforces Ruff linting and verifies scan engine pipelines using pytest.
+
+---
+
 <div align="center">
   <sub>Managed by the ScamSentry Research Labs · Engineered with ❤️ and a complete lack of venture capital funding</sub>
 </div>
