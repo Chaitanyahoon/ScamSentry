@@ -143,7 +143,10 @@ async def test_l2_low_reputation_tld() -> None:
     ):
         res = await check_dns("https://evil-site.click")
         assert res["score"] >= 30
-        assert any("Low-reputation TLD" in check for check in res["details"]["triggered_checks"])
+        assert any(
+            "Low-reputation TLD" in check
+            for check in res["details"]["triggered_checks"]
+        )
 
 
 # ── L3 Google Safe Browsing Tests ─────────────────────────────────────

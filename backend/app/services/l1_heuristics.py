@@ -72,28 +72,7 @@ LOOKALIKE_TLDS: set[str] = {
 
 IP_ADDRESS_PATTERN = re.compile(r"^https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
 
-MONITORED_BRANDS: list[str] = [
-    "vercel",
-    "github",
-    "paypal",
-    "paytm",
-    "amazon",
-    "google",
-    "microsoft",
-    "apple",
-    "facebook",
-    "phonepe",
-    "sbi",
-    "hdfc",
-    "uber",
-    "tesla",
-    "openai",
-    "linkedin",
-    "twitter",
-    "whatsapp",
-    "telegram",
-    "discord",
-]
+from app.constants import MONITORED_BRANDS  # noqa: E402
 
 HOMOGLYPH_MAP: dict[str, str] = {
     "а": "a",

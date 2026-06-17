@@ -14,11 +14,13 @@ from datetime import UTC, datetime
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 from app.config import get_settings
 from app.middleware.rate_limit import RateLimitMiddleware
+from starlette.responses import RedirectResponse
 from app.routers.scan import router as scan_router
 from app.routers.report import router as report_router
 from app.routers.admin import router as admin_router
@@ -112,7 +114,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-XSS-Protection"] = "0"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         if get_settings().ENVIRONMENT == "production":
-            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+            response.headers["Strict-Transport-Security"] = (
+                "max-age=31536000; includeSubDomains"
+            )
         return response
 
 
@@ -125,11 +129,20 @@ MAX_BODY_SIZE = 1_048_576  # 1 MB
 class RequestBodySizeMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         content_length = request.headers.get("content-length")
-        if content_length and int(content_length) > MAX_BODY_SIZE:
-            return JSONResponse(
-                status_code=413,
-                content={"detail": f"Request body too large. Max: {MAX_BODY_SIZE} bytes."},
-            )
+        if content_length:
+            try:
+                if int(content_length) > MAX_BODY_SIZE:
+                    return JSONResponse(
+                        status_code=413,
+                        content={
+                            "detail": f"Request body too large. Max: {MAX_BODY_SIZE} bytes."
+                        },
+                    )
+            except (ValueError, TypeError):
+                return JSONResponse(
+                    status_code=400,
+                    content={"detail": "Invalid Content-Length header"},
+                )
         return await call_next(request)
 
 
@@ -151,6 +164,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# HTTPS Redirect Middleware (production only)
+
+
+class HTTPSRedirectMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if get_settings().ENVIRONMENT == "production":
+            proto = request.headers.get("X-Forwarded-Proto", request.url.scheme)
+            if proto != "https":
+                url = str(request.url).replace("http://", "https://", 1)
+                return RedirectResponse(url=url, status_code=301)
+        return await call_next(request)
+
+
+app.add_middleware(HTTPSRedirectMiddleware)
+
 # Rate Limiting Middleware
 app.add_middleware(RateLimitMiddleware)
 
@@ -171,8 +199,37 @@ async def health_check(format: str | None = None):
     """Return system health. Use ?format=text for a minimal text response."""
     if format == "text":
         return Response(content="OK", media_type="text/plain")
-    return {
+
+    health: dict = {
         "status": "ok",
         "timestamp": datetime.now(UTC).isoformat(),
         "environment": get_settings().ENVIRONMENT,
     }
+
+    # Check Redis connectivity
+    try:
+        from app.services.cache import _client as _redis_client
+
+        if _redis_client is not None:
+            await _redis_client.ping()
+            health["redis"] = "ok"
+        else:
+            health["redis"] = "not_connected"
+    except Exception:
+        health["redis"] = "error"
+
+    # Check database connectivity
+    try:
+        from app.database import engine as _db_engine
+        from sqlalchemy.ext.asyncio import AsyncSession
+
+        async with AsyncSession(_db_engine) as session:
+            await session.execute(text("SELECT 1"))
+        health["database"] = "ok"
+    except Exception:
+        health["database"] = "error"
+
+    if health.get("redis") == "error" or health.get("database") == "error":
+        health["status"] = "degraded"
+
+    return health

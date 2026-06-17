@@ -22,8 +22,15 @@ COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
+# Create non-root user
+RUN addgroup --system --gid 1001 appuser && \
+    adduser --system --uid 1001 --ingroup appuser appuser
+
 # Copy the rest of the application code into the container
-COPY . .
+COPY --chown=appuser:appuser . .
+
+# Switch to non-root user
+USER appuser
 
 # Expose the port that FastAPI/uvicorn runs on
 EXPOSE 8000

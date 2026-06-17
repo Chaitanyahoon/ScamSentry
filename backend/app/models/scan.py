@@ -11,6 +11,7 @@ from sqlalchemy import (
     DateTime,
     Enum,
     ForeignKey,
+    Index,
     Integer,
     String,
     Boolean,
@@ -64,8 +65,12 @@ class Scan(Base):
         default=ScanStatus.pending,
     )
     risk_score = Column(Integer, nullable=True)
-    risk_level = Column(Enum(RiskLevel), nullable=True)
+    risk_level = Column(Enum(RiskLevel), nullable=True, index=True)
     processing_time_ms = Column(Integer, nullable=True)
+
+    __table_args__ = (
+        Index("ix_scans_status", "status"),
+    )
 
     # Relationship
     results = relationship(

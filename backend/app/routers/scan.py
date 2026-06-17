@@ -7,24 +7,63 @@ GET  /api/v1/scan/{id}  → Retrieve a previous scan by UUID
 
 from __future__ import annotations
 
+import ipaddress
 import logging
 import uuid
 from datetime import UTC, datetime
-
 from urllib.parse import urlparse
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.middleware.auth import verify_admin_key
 from app.models.scan import Scan, ScanResult, ScanStatus, RiskLevel, LayerName
 from app.models.ledger import LedgerEntry
-from app.schemas.scan import ScanRequest, ScanResponse, LayerResult, VoteRequest, VoteResponse
+from app.schemas.scan import (
+    ScanRequest,
+    ScanResponse,
+    LayerResult,
+    VoteRequest,
+    VoteResponse,
+)
+from app.utils.domain import extract_domain
 from app.services.cache import get_cached_scan, set_cached_scan
 from app.services.engine import run_engine
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/scan", tags=["scan"])
+
+_BLOCKED_NETWORKS = [
+    ipaddress.ip_network("127.0.0.0/8"),
+    ipaddress.ip_network("10.0.0.0/8"),
+    ipaddress.ip_network("172.16.0.0/12"),
+    ipaddress.ip_network("192.168.0.0/16"),
+    ipaddress.ip_network("169.254.0.0/16"),
+    ipaddress.ip_network("::1/128"),
+    ipaddress.ip_network("fc00::/7"),
+]
+
+
+def _is_private_ip(hostname: str) -> bool:
+    """Return True if hostname resolves to a private/loopback address."""
+    try:
+        addr = ipaddress.ip_address(hostname)
+        return any(addr in net for net in _BLOCKED_NETWORKS)
+    except ValueError:
+        # hostname is not an IP literal — resolve it
+        import socket
+
+        try:
+            resolved = socket.getaddrinfo(hostname, None)
+            for family, _, _, _, sockaddr in resolved:
+                addr = ipaddress.ip_address(sockaddr[0])
+                if any(addr in net for net in _BLOCKED_NETWORKS):
+                    return True
+        except (socket.gaierror, OSError):
+            return False
+    return False
 
 
 # ── POST /scan ────────────────────────────────────────────────────────
@@ -36,7 +75,21 @@ async def create_scan(
     db: AsyncSession = Depends(get_db),
 ) -> ScanResponse:
     """Submit a URL for threat analysis."""
-    url_str = str(body.url)
+    url_str = str(body.url).replace("\n", "").replace("\r", "")
+
+    # SSRF protection: block private/internal IPs
+    try:
+        parsed = urlparse(url_str)
+        hostname = parsed.hostname or ""
+        if _is_private_ip(hostname):
+            raise HTTPException(
+                status_code=400,
+                detail="Scanning private/internal network addresses is not allowed",
+            )
+    except HTTPException:
+        raise
+    except Exception:
+        pass
 
     # 1. Check Redis cache
     cached = await get_cached_scan(url_str)
@@ -180,15 +233,7 @@ async def get_scan(
     )
 
 
-def _extract_domain(url: str) -> str:
-    try:
-        parsed = urlparse(url if "://" in url else f"http://{url}")
-        return (parsed.hostname or url).lower()
-    except Exception:
-        return url.lower()
-
-
-@router.post("/vote", response_model=VoteResponse)
+@router.post("/vote", response_model=VoteResponse, dependencies=[Depends(verify_admin_key)])
 async def cast_vote(
     body: VoteRequest,
     db: AsyncSession = Depends(get_db),
@@ -200,7 +245,7 @@ async def cast_vote(
     if vote_type not in ("safe", "unsafe"):
         raise HTTPException(status_code=422, detail="Vote must be 'safe' or 'unsafe'")
 
-    domain = _extract_domain(url_str)
+    domain = extract_domain(url_str)
     if not domain:
         raise HTTPException(status_code=400, detail="Invalid URL or domain")
 
@@ -209,12 +254,12 @@ async def cast_vote(
     result = await db.execute(stmt)
     entry = result.scalar_one_or_none()
 
-    success = True
     message = ""
     confidence = 0
     verified = False
 
     if vote_type == "unsafe":
+        success = True
         if entry is None:
             # Create a new community threat entry
             entry = LedgerEntry(
@@ -241,8 +286,10 @@ async def cast_vote(
 
     elif vote_type == "safe":
         if entry is None:
+            success = False
             message = "Domain is not in the threat ledger."
         else:
+            success = True
             if entry.source == "community":
                 entry.confidence -= 10
                 if entry.confidence <= 0:
@@ -253,7 +300,9 @@ async def cast_vote(
                     message = f"Safety vote recorded. Threat confidence reduced to {entry.confidence}%."
                     confidence = entry.confidence
             else:
-                message = f"Safety vote recorded but overridden by {entry.source} authority."
+                message = (
+                    f"Safety vote recorded but overridden by {entry.source} authority."
+                )
                 confidence = entry.confidence
                 verified = entry.verified
 

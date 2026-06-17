@@ -46,8 +46,6 @@ async def test_request_body_within_limit():
 @pytest.mark.asyncio
 async def test_rate_limiter_degraded_mode(client):
     """When Redis is unavailable, rate limiter logs warning and passes request through."""
-    from unittest.mock import patch
-
     mock_engine_result = {
         "risk_score": 15,
         "risk_level": "safe",

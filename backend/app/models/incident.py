@@ -7,7 +7,7 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import Column, DateTime, String, Boolean
+from sqlalchemy import Column, DateTime, Index, String, Boolean
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 
 from app.database import Base
@@ -28,6 +28,11 @@ class Incident(Base):
     source = Column(String(100), nullable=False)
     is_highlight = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+
+    __table_args__ = (
+        Index("ix_incidents_published_at", "published_at"),
+        Index("ix_incidents_is_highlight", "is_highlight"),
+    )
 
     def __repr__(self) -> str:
         return f"<Incident {self.title!r} source={self.source}>"

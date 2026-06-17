@@ -42,20 +42,28 @@ class Settings(BaseSettings):
 
     # ── External APIs ─────────────────────────────────────────────────
     GOOGLE_SAFE_BROWSING_API_KEY: str = ""
-    GEMINI_API_KEY: str = ""  # Optional — reserved for future L5 layer
 
-    # ── Security ──────────────────────────────────────────────────────
+    # ── Auth ──────────────────────────────────────────────────────────
     API_SECRET_KEY: str = f"dev-{secrets.token_hex(16)}"
-    CORS_ALLOWED_ORIGINS: str = "http://localhost:3000"  # Comma-separated list of allowed origins
+    ADMIN_API_KEY: str = f"admin-{secrets.token_hex(16)}"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRY_HOURS: int = 24
+    CORS_ALLOWED_ORIGINS: str = "http://localhost:3000"
 
     # ── Environment ───────────────────────────────────────────────────
-    ENVIRONMENT: str = "development"  # "development" | "production"
+    ENVIRONMENT: str = "development"
 
     @model_validator(mode="after")
     def validate_production_secret(self) -> "Settings":
         if self.ENVIRONMENT == "production":
             if not self.API_SECRET_KEY or self.API_SECRET_KEY.startswith("dev-"):
-                raise ValueError("API_SECRET_KEY must be set to a secure custom value in production!")
+                raise ValueError(
+                    "API_SECRET_KEY must be set to a secure custom value in production!"
+                )
+            if not self.ADMIN_API_KEY or self.ADMIN_API_KEY.startswith("admin-"):
+                raise ValueError(
+                    "ADMIN_API_KEY must be set to a secure custom value in production!"
+                )
         elif self.API_SECRET_KEY.startswith("dev-"):
             logger = logging.getLogger(__name__)
             logger.warning(

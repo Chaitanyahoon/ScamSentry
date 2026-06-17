@@ -1,4 +1,5 @@
 from collections.abc import AsyncGenerator
+import jwt
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
@@ -9,6 +10,7 @@ import fakeredis
 
 from app.database import Base, get_db
 from app.main import app
+from app.config import get_settings
 
 # Use in-memory SQLite for testing
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -84,3 +86,14 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
+
+
+@pytest.fixture
+def admin_token() -> str:
+    """Generate a valid JWT admin token for test requests."""
+    settings = get_settings()
+    return jwt.encode(
+        {"sub": "admin", "exp": 9_999_999_999},
+        settings.API_SECRET_KEY,
+        algorithm=settings.JWT_ALGORITHM,
+    )

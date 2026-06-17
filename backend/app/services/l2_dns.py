@@ -12,14 +12,13 @@ import logging
 import socket
 import ssl
 from datetime import UTC, datetime
-from urllib.parse import urlparse
-
 import httpx
 
 from app.services.cache import (
     get_cached_domain_reputation,
     set_cached_domain_reputation,
 )
+from app.utils.domain import extract_domain
 
 logger = logging.getLogger(__name__)
 
@@ -50,15 +49,6 @@ LOW_REPUTATION_TLDS: set[str] = {
 
 
 # ── Internal helpers ──────────────────────────────────────────────────
-
-
-def _extract_domain(url: str) -> str:
-    """Pull the hostname out of a URL string."""
-    try:
-        parsed = urlparse(url if "://" in url else f"http://{url}")
-        return parsed.hostname or url
-    except Exception:
-        return url
 
 
 def _whois_lookup(domain: str) -> dict:
@@ -165,7 +155,7 @@ async def check_dns(url: str) -> dict:
             "details": { "whois": {...}, "ssl": {...}, "triggered_checks": [...] },
         }
     """
-    hostname = _extract_domain(url)
+    hostname = extract_domain(url)
 
     # 1. Try to read from domain reputation cache
     cached = await get_cached_domain_reputation(hostname)

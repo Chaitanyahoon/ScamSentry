@@ -26,11 +26,17 @@ logger = logging.getLogger(__name__)
 
 @router.get("/incidents", response_model=list[IncidentResponse])
 async def get_incidents(
-    limit: int = 30,
+    offset: int = 0,
+    limit: int = 20,
     db: AsyncSession = Depends(get_db),
 ) -> list[Incident]:
-    """Retrieve recent cybersecurity global incidents."""
-    stmt = select(Incident).order_by(Incident.published_at.desc()).limit(limit)
+    """Retrieve recent cybersecurity global incidents with pagination."""
+    stmt = (
+        select(Incident)
+        .order_by(Incident.published_at.desc())
+        .offset(offset)
+        .limit(min(limit, 100))
+    )
     result = await db.execute(stmt)
     incidents = list(result.scalars().all())
 

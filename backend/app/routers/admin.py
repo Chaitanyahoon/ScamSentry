@@ -1,186 +1,244 @@
 """
 ScamSentry API — Admin Router
 
-POST /api/v1/admin/ledger  → Create a verified LedgerEntry (requires X-Admin-Key)
+Admin-only endpoints for managing the threat ledger, syncing OSINT feeds,
+and controlling the scraper.  Authentication uses JWT Bearer tokens obtained
+from ``POST /api/v1/admin/login``.
 """
 
 from __future__ import annotations
 
+import hmac
+import logging
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field, ConfigDict
+import jwt
+import httpx
+from fastapi import APIRouter, Body, Depends, HTTPException, Header, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import get_settings
 from app.database import get_db
 from app.middleware.auth import verify_admin_key
 from app.models.ledger import LedgerEntry
 
-router = APIRouter(prefix="/admin", tags=["admin"])
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/admin", tags=["Admin"])
 
 
-# ── Schemas ───────────────────────────────────────────────────────────
+@router.post("/login")
+async def admin_login(
+    x_admin_key: str = Header(..., alias="X-Admin-Key"),
+):
+    """Exchange the static *ADMIN_API_KEY* for a short-lived JWT.
 
+    Send::
 
-class LedgerCreate(BaseModel):
-    """Schema for creating a new ledger entry via Admin API."""
+        POST /api/v1/admin/login
+        X-Admin-Key: <your-admin-key>
 
-    domain: str = Field(..., description="The domain name (e.g. evil.com)")
-    threat_type: str = Field(
-        ..., description="The type of threat (e.g. phishing, malware)"
-    )
-    confidence: int = Field(100, ge=0, le=100, description="Confidence level (0-100)")
-    source: str = Field("admin", description="Source of report")
-
-
-class LedgerResponse(BaseModel):
-    """Response schema for created ledger entry."""
-
-    id: uuid.UUID
-    domain: str
-    threat_type: str
-    confidence: int
-    source: str
-    reported_at: datetime
-    verified: bool
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-# ── POST /admin/ledger ────────────────────────────────────────────────
-
-
-@router.post(
-    "/ledger",
-    response_model=LedgerResponse,
-    dependencies=[Depends(verify_admin_key)],
-)
-async def create_ledger_entry(
-    body: LedgerCreate,
-    db: AsyncSession = Depends(get_db),
-) -> LedgerEntry:
+    Returns a JWT token valid for *JWT_EXPIRY_HOURS* hours.
     """
-    Create a verified ledger entry.
+    settings = get_settings()
 
-    This endpoint is protected by the ``X-Admin-Key`` header.
-    """
-    # 1. Clean domain name
-    domain = body.domain.strip().lower()
-
-    # 2. Check if domain already exists in the ledger
-    stmt = select(LedgerEntry).where(LedgerEntry.domain == domain)
-    res = await db.execute(stmt)
-    existing = res.scalar_one_or_none()
-
-    if existing is not None:
+    if not x_admin_key or not hmac.compare_digest(x_admin_key, settings.ADMIN_API_KEY):
         raise HTTPException(
-            status_code=400,
-            detail=f"Domain '{domain}' already exists in ledger",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid admin key",
         )
 
-    # 3. Create entry
+    now = datetime.now(UTC)
+    payload = {
+        "iss": "scamsentry-api",
+        "iat": now,
+        "exp": now + timedelta(hours=settings.JWT_EXPIRY_HOURS),
+        "sub": "admin",
+        "role": "admin",
+    }
+    token = jwt.encode(
+        payload, settings.API_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
+    )
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "expires_in": settings.JWT_EXPIRY_HOURS * 3600,
+    }
+
+
+# ── Ledger CRUD ─────────────────────────────────────────────────────────
+
+
+@router.post("/ledger", dependencies=[Depends(verify_admin_key)])
+async def create_ledger_entry(
+    domain: str = Body(...),
+    threat_type: str = Body(...),
+    confidence: int = Body(50),
+    source: str = Body("admin"),
+    db: AsyncSession = Depends(get_db),
+):
+    """Add a verified domain to the threat ledger."""
+    if confidence < 0 or confidence > 100:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Confidence must be between 0 and 100",
+        )
+
     entry = LedgerEntry(
         id=uuid.uuid4(),
         domain=domain,
-        threat_type=body.threat_type,
-        confidence=body.confidence,
-        source=body.source,
+        threat_type=threat_type,
+        confidence=confidence,
+        source=source,
         reported_at=datetime.now(UTC),
-        verified=True,  # Admin entry is automatically verified
+        verified=True,
     )
     db.add(entry)
     await db.commit()
     await db.refresh(entry)
 
-    return entry
+    return {
+        "id": str(entry.id),
+        "domain": entry.domain,
+        "threat_type": entry.threat_type,
+        "confidence": entry.confidence,
+        "source": entry.source,
+        "reported_at": entry.reported_at.isoformat(),
+        "verified": entry.verified,
+    }
 
 
-# ── POST /admin/sync-osint ────────────────────────────────────────────
+@router.get("/ledger", dependencies=[Depends(verify_admin_key)])
+async def list_ledger_entries(
+    offset: int = 0,
+    limit: int = 50,
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = (
+        select(LedgerEntry)
+        .offset(offset)
+        .limit(limit)
+        .order_by(LedgerEntry.reported_at.desc())
+    )
+    result = await db.execute(stmt)
+    entries = result.scalars().all()
+    return [
+        {
+            "id": str(e.id),
+            "domain": e.domain,
+            "threat_type": e.threat_type,
+            "confidence": e.confidence,
+            "source": e.source,
+            "verified": e.verified,
+        }
+        for e in entries
+    ]
 
 
-@router.post(
-    "/sync-osint",
-    dependencies=[Depends(verify_admin_key)],
-)
+@router.delete("/ledger/{entry_id}", dependencies=[Depends(verify_admin_key)])
+async def delete_ledger_entry(
+    entry_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(LedgerEntry).where(LedgerEntry.id == entry_id)
+    result = await db.execute(stmt)
+    entry = result.scalar_one_or_none()
+    if not entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Ledger entry not found"
+        )
+
+    await db.delete(entry)
+    await db.commit()
+    return {"success": True, "message": "Ledger entry deleted"}
+
+
+# ── OSINT Sync ──────────────────────────────────────────────────────────
+
+
+@router.post("/sync-osint", dependencies=[Depends(verify_admin_key)])
 async def sync_osint(
     db: AsyncSession = Depends(get_db),
-) -> dict:
-    """
-    Fetch recent active threats from URLhaus and batch insert new domains into the ledger.
-    """
-    import httpx
-    from urllib.parse import urlparse
+):
+    """Pull known malicious URLs from URLhaus and insert into the ledger."""
+    urlhaus_url = "https://urlhaus.abuse.ch/downloads/text_recent/"
+    stats = {"success": True, "processed": 0, "inserted": 0}
 
-    url = "https://urlhaus-api.abuse.ch/v1/urls/recent/"
     try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            response = await client.get(url)
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.get(urlhaus_url)
 
-        if response.status_code != 200:
+        if resp.status_code != 200:
             raise HTTPException(
-                status_code=502,
-                detail=f"OSINT provider returned status {response.status_code}",
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"URLhaus responded with HTTP {resp.status_code}",
             )
-        data = response.json()
-    except Exception as exc:
-        raise HTTPException(
-            status_code=502,
-            detail=f"Failed to fetch threats from OSINT provider: {exc}",
-        ) from exc
 
-    urls_data = data.get("urls", [])
-    if not urls_data:
-        return {"success": True, "inserted": 0, "message": "No active threats found"}
+        lines = resp.text.strip().splitlines()
+        # Skip comment lines and header
+        urls = [
+            line.strip() for line in lines if line.strip() and not line.startswith("#")
+        ]
 
-    # Filter top 100 online active threats to control DB growth
-    recent_threats = [t for t in urls_data if t.get("url_status") == "online"][:100]
+        # Collect unique domains from URLs
+        from urllib.parse import urlparse
 
-    # Extract unique domains and their threat types
-    domains_to_add: set[tuple[str, str]] = set()
-    for threat in recent_threats:
-        t_url = threat.get("url")
-        if not t_url:
-            continue
-        try:
-            parsed = urlparse(t_url if "://" in t_url else f"http://{t_url}")
-            hostname = (parsed.hostname or "").lower().strip()
-            if hostname:
-                domains_to_add.add((hostname, threat.get("threat") or "phishing"))
-        except Exception:
-            continue
+        domains = []
+        for url in urls:
+            stats["processed"] += 1
+            try:
+                parsed = urlparse(url)
+                domain = (parsed.hostname or "").lower()
+                if not domain:
+                    continue
+                domains.append(domain)
+            except Exception as e:
+                logger.warning("Failed to parse URL %s: %s", url, e)
+                continue
 
-    if not domains_to_add:
-        return {"success": True, "inserted": 0, "message": "No valid domains extracted"}
-
-    # Check which domains already exist in the database
-    candidate_domains = list({d[0] for d in domains_to_add})
-    stmt = select(LedgerEntry.domain).where(LedgerEntry.domain.in_(candidate_domains))
-    res = await db.execute(stmt)
-    existing_domains = set(res.scalars().all())
-
-    inserted = 0
-    for domain, threat_type in domains_to_add:
-        if domain not in existing_domains:
-            entry = LedgerEntry(
-                id=uuid.uuid4(),
-                domain=domain,
-                threat_type=threat_type,
-                confidence=80,  # OSINT confidence defaults to 80%
-                source="OSINT Threat Feed (URLhaus)",
-                reported_at=datetime.now(UTC),
-                verified=True,
+        # Batch deduplicate: fetch all existing domains in one query
+        if domains:
+            unique_domains = list(set(domains))
+            stmt = select(LedgerEntry.domain).where(
+                LedgerEntry.domain.in_(unique_domains)
             )
-            db.add(entry)
-            inserted += 1
+            result = await db.execute(stmt)
+            existing_domains = {row[0] for row in result.all()}
 
-    if inserted > 0:
+            # Batch insert only new domains
+            new_entries = []
+            for domain in unique_domains:
+                if domain in existing_domains:
+                    continue
+                new_entries.append(
+                    LedgerEntry(
+                        id=uuid.uuid4(),
+                        domain=domain,
+                        threat_type="malware",
+                        confidence=95,
+                        source="OSINT Threat Feed (URLhaus)",
+                        reported_at=datetime.now(UTC),
+                        verified=True,
+                    )
+                )
+            if new_entries:
+                db.add_all(new_entries)
+                stats["inserted"] = len(new_entries)
+
         await db.commit()
 
-    return {
-        "success": True,
-        "processed": len(recent_threats),
-        "inserted": inserted,
-        "message": f"Successfully synchronized {inserted} new threats from URLhaus",
-    }
+    except httpx.RequestError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Failed to fetch URLhaus feed: {exc}",
+        )
+
+    logger.info(
+        "OSINT sync complete — processed=%d, inserted=%d",
+        stats["processed"],
+        stats["inserted"],
+    )
+    return stats

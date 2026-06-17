@@ -10,13 +10,13 @@ import re
 import uuid
 import xml.etree.ElementTree as ET
 from datetime import UTC, datetime, timedelta
-from urllib.parse import urlparse
-
 import httpx
 from sqlalchemy import select
 
 from app.models.incident import BrandLockdown, Incident
 from app.models.ledger import LedgerEntry
+from app.utils.domain import extract_domain
+from app.constants import MONITORED_BRANDS
 
 logger = logging.getLogger(__name__)
 
@@ -24,32 +24,6 @@ ADVISORY_FEEDS = [
     {"url": "https://www.bleepingcomputer.com/feed/", "name": "BleepingComputer"},
     {"url": "https://feeds.feedburner.com/TheHackersNews", "name": "The Hacker News"},
     {"url": "https://krebsonsecurity.com/feed/", "name": "Krebs on Security"},
-]
-
-MONITORED_BRANDS = [
-    "vercel",
-    "github",
-    "paypal",
-    "paytm",
-    "india",
-    "amazon",
-    "netflix",
-    "google",
-    "microsoft",
-    "apple",
-    "facebook",
-    "phonepe",
-    "sbi",
-    "hdfc",
-    "uber",
-    "tesla",
-    "openai",
-    "linkedin",
-    "twitter",
-    "x.com",
-    "whatsapp",
-    "telegram",
-    "discord",
 ]
 
 HIGHLIGHT_KEYWORDS = [
@@ -104,8 +78,7 @@ async def generate_reports_from_incidents(db) -> dict:
         for incident in incidents:
             t_url = incident.link
             try:
-                parsed = urlparse(t_url if "://" in t_url else f"http://{t_url}")
-                domain = (parsed.hostname or "").lower().strip()
+                domain = extract_domain(t_url)
                 if not domain:
                     continue
 
@@ -125,7 +98,8 @@ async def generate_reports_from_incidents(db) -> dict:
                     )
                     db.add(entry)
                     reports_generated += 1
-            except Exception:
+            except Exception as e:
+                logger.warning("Failed to generate report for incident: %s", e)
                 continue
 
         if reports_generated > 0:

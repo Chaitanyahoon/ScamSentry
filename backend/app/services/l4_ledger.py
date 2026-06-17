@@ -8,25 +8,15 @@ Max score contribution: 15 points.
 from __future__ import annotations
 
 import logging
-from urllib.parse import urlparse
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.ledger import LedgerEntry
+from app.utils.domain import extract_domain
 
 logger = logging.getLogger(__name__)
 
 MAX_L4_SCORE = 100
-
-
-def _extract_domain(url: str) -> str:
-    """Pull the hostname out of a URL string."""
-    try:
-        parsed = urlparse(url if "://" in url else f"http://{url}")
-        return (parsed.hostname or "").lower()
-    except Exception:
-        return ""
 
 
 async def check_ledger(url: str, db: AsyncSession) -> dict:
@@ -42,7 +32,7 @@ async def check_ledger(url: str, db: AsyncSession) -> dict:
             "details": { "domain": str, "match": dict | None },
         }
     """
-    domain = _extract_domain(url)
+    domain = extract_domain(url)
     if not domain:
         return {
             "score": 0,

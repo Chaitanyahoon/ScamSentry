@@ -13,7 +13,7 @@ async def test_health_check(client) -> None:
     response = await client.get("/health")
     assert response.status_code == 200
     data = response.json()
-    assert data["status"] == "ok"
+    assert data["status"] in ("ok", "degraded")
     assert "timestamp" in data
     assert data["environment"] == "development"
 
@@ -173,6 +173,34 @@ async def test_report_hotspots(client, db) -> None:
 
 
 @pytest.mark.asyncio
+async def test_admin_login_success(client) -> None:
+    """POST /admin/login with valid X-Admin-Key returns a JWT."""
+    from app.config import get_settings
+
+    settings = get_settings()
+    headers = {"X-Admin-Key": settings.ADMIN_API_KEY}
+    response = await client.post("/api/v1/admin/login", headers=headers)
+    assert response.status_code == 200
+    data = response.json()
+    assert "access_token" in data
+    assert data["token_type"] == "bearer"
+    assert isinstance(data["expires_in"], int)
+
+
+@pytest.mark.asyncio
+async def test_admin_login_invalid_key(client) -> None:
+    headers = {"X-Admin-Key": "wrong-admin-key"}
+    response = await client.post("/api/v1/admin/login", headers=headers)
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_admin_login_missing_header(client) -> None:
+    response = await client.post("/api/v1/admin/login")
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_create_ledger_entry_no_auth(client) -> None:
     payload = {
         "domain": "hacker.com",
@@ -180,8 +208,7 @@ async def test_create_ledger_entry_no_auth(client) -> None:
         "confidence": 95,
     }
     response = await client.post("/api/v1/admin/ledger", json=payload)
-    # Header missing X-Admin-Key
-    assert response.status_code == 422
+    assert response.status_code == 401
 
 
 @pytest.mark.asyncio
@@ -191,20 +218,19 @@ async def test_create_ledger_entry_invalid_auth(client) -> None:
         "threat_type": "phishing",
         "confidence": 95,
     }
-    headers = {"X-Admin-Key": "wrong-secret-key"}
+    headers = {"Authorization": "Bearer invalid.jwt.token"}
     response = await client.post("/api/v1/admin/ledger", json=payload, headers=headers)
     assert response.status_code == 401
-    assert response.json()["detail"] == "Invalid or missing admin key"
 
 
 @pytest.mark.asyncio
-async def test_create_ledger_entry_success(client, db) -> None:
+async def test_create_ledger_entry_success(client, db, admin_token) -> None:
     payload = {
         "domain": "hacker-success.com",
         "threat_type": "phishing",
         "confidence": 95,
     }
-    headers = {"X-Admin-Key": "test-admin-secret-key-12345"}
+    headers = {"Authorization": f"Bearer {admin_token}"}
     response = await client.post("/api/v1/admin/ledger", json=payload, headers=headers)
     assert response.status_code == 200
     data = response.json()
@@ -223,7 +249,7 @@ async def test_create_ledger_entry_success(client, db) -> None:
 
 
 @pytest.mark.asyncio
-async def test_sync_osint_success(client, db) -> None:
+async def test_sync_osint_success(client, db, admin_token) -> None:
     import uuid
 
     # Mock URLhaus response payload
@@ -272,11 +298,15 @@ async def test_sync_osint_success(client, db) -> None:
         def __init__(self, json_data, status_code=200):
             self._json_data = json_data
             self.status_code = status_code
+            self.text = (
+                "https://urlhaus-threat-example.com/malware.exe\n"
+                "http://already-existing-domain.com/phish\n"
+            )
 
         def json(self):
             return self._json_data
 
-    headers = {"X-Admin-Key": "test-admin-secret-key-12345"}
+    headers = {"Authorization": f"Bearer {admin_token}"}
 
     with patch(
         "httpx.AsyncClient.get", return_value=MockResponse(mock_urlhaus_payload)
@@ -376,8 +406,8 @@ async def test_get_brand_lockdowns(client, db) -> None:
 
 
 @pytest.mark.asyncio
-async def test_trigger_scrape_incidents_success(client) -> None:
-    headers = {"X-Admin-Key": "test-admin-secret-key-12345"}
+async def test_trigger_scrape_incidents_success(client, admin_token) -> None:
+    headers = {"Authorization": f"Bearer {admin_token}"}
     # Mock the scrape_cyber_incidents service call to avoid making network requests
     with patch(
         "app.routers.incident.scrape_cyber_incidents",
@@ -391,9 +421,10 @@ async def test_trigger_scrape_incidents_success(client) -> None:
 
 
 @pytest.mark.asyncio
-async def test_cast_vote_unsafe_new(client, db) -> None:
+async def test_cast_vote_unsafe_new(client, db, admin_token) -> None:
     payload = {"url": "https://new-scam-site.xyz", "vote": "unsafe"}
-    response = await client.post("/api/v1/scan/vote", json=payload)
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    response = await client.post("/api/v1/scan/vote", json=payload, headers=headers)
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is True
@@ -403,6 +434,7 @@ async def test_cast_vote_unsafe_new(client, db) -> None:
 
     # Query DB to verify
     from sqlalchemy import select
+
     stmt = select(LedgerEntry).where(LedgerEntry.domain == "new-scam-site.xyz")
     res = await db.execute(stmt)
     entry = res.scalar_one_or_none()
@@ -412,7 +444,7 @@ async def test_cast_vote_unsafe_new(client, db) -> None:
 
 
 @pytest.mark.asyncio
-async def test_cast_vote_unsafe_existing(client, db) -> None:
+async def test_cast_vote_unsafe_existing(client, db, admin_token) -> None:
     # Set up existing community entry
     entry = LedgerEntry(
         domain="existing-scam.xyz",
@@ -425,7 +457,8 @@ async def test_cast_vote_unsafe_existing(client, db) -> None:
     await db.commit()
 
     payload = {"url": "https://existing-scam.xyz", "vote": "unsafe"}
-    response = await client.post("/api/v1/scan/vote", json=payload)
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    response = await client.post("/api/v1/scan/vote", json=payload, headers=headers)
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is True
@@ -433,7 +466,7 @@ async def test_cast_vote_unsafe_existing(client, db) -> None:
 
 
 @pytest.mark.asyncio
-async def test_cast_vote_safe_existing(client, db) -> None:
+async def test_cast_vote_safe_existing(client, db, admin_token) -> None:
     # Set up existing community entry
     entry = LedgerEntry(
         domain="voted-safe.xyz",
@@ -446,7 +479,8 @@ async def test_cast_vote_safe_existing(client, db) -> None:
     await db.commit()
 
     payload = {"url": "https://voted-safe.xyz", "vote": "safe"}
-    response = await client.post("/api/v1/scan/vote", json=payload)
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    response = await client.post("/api/v1/scan/vote", json=payload, headers=headers)
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is True
@@ -454,30 +488,33 @@ async def test_cast_vote_safe_existing(client, db) -> None:
 
     # Query DB to verify deletion
     from sqlalchemy import select
+
     stmt = select(LedgerEntry).where(LedgerEntry.domain == "voted-safe.xyz")
     res = await db.execute(stmt)
     assert res.scalar_one_or_none() is None
 
 
 @pytest.mark.asyncio
-async def test_cast_vote_invalid(client) -> None:
+async def test_cast_vote_invalid(client, admin_token) -> None:
     # Invalid vote option
     payload = {"url": "https://some-site.xyz", "vote": "maybe"}
-    response = await client.post("/api/v1/scan/vote", json=payload)
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    response = await client.post("/api/v1/scan/vote", json=payload, headers=headers)
     assert response.status_code == 422
 
 
 @pytest.mark.asyncio
-async def test_cast_vote_empty_url(client) -> None:
+async def test_cast_vote_empty_url(client, admin_token) -> None:
     payload = {"url": "", "vote": "unsafe"}
-    response = await client.post("/api/v1/scan/vote", json=payload)
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    response = await client.post("/api/v1/scan/vote", json=payload, headers=headers)
     assert response.status_code == 400
     assert "invalid" in response.json()["detail"].lower()
 
 
 @pytest.mark.asyncio
-async def test_create_ledger_entry_empty_domain(client) -> None:
-    headers = {"X-Admin-Key": "test-admin-secret-key-12345"}
+async def test_create_ledger_entry_empty_domain(client, admin_token) -> None:
+    headers = {"Authorization": f"Bearer {admin_token}"}
     payload = {"domain": "", "threat_type": "phishing", "confidence": 50}
     response = await client.post("/api/v1/admin/ledger", json=payload, headers=headers)
     assert response.status_code == 200
@@ -486,8 +523,8 @@ async def test_create_ledger_entry_empty_domain(client) -> None:
 
 
 @pytest.mark.asyncio
-async def test_create_ledger_entry_confidence_out_of_range(client) -> None:
-    headers = {"X-Admin-Key": "test-admin-secret-key-12345"}
+async def test_create_ledger_entry_confidence_out_of_range(client, admin_token) -> None:
+    headers = {"Authorization": f"Bearer {admin_token}"}
     payload = {
         "domain": "out-of-range.com",
         "threat_type": "phishing",

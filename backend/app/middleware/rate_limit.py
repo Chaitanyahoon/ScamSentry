@@ -2,7 +2,7 @@
 ScamSentry API — Rate Limiting Middleware
 
 Sliding-window rate limiter backed by Redis.
-Default limit: 20 requests per minute per IP for ``/api/v1/scan``.
+Per-endpoint limits defined in ``ROUTE_LIMITS``.
 """
 
 from __future__ import annotations
@@ -20,12 +20,28 @@ from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-RATE_LIMIT = 20  # requests
 WINDOW_SECONDS = 60  # per minute
+
+ROUTE_LIMITS: list[tuple[str, str, int]] = [
+    ("/api/v1/admin", "GET", 60),  # admin reads
+    ("/api/v1/admin", "POST", 60),  # admin writes (login)
+    ("/api/v1/scan", "POST", 20),  # scan submissions
+    ("/api/v1/incidents", "GET", 30),  # incident listing
+    ("/api/v1/ledger", "GET", 30),  # ledger queries
+    ("/api/v1/report", "GET", 20),  # report access
+    ("/api/v1/vote", "POST", 30),  # voting
+]
+
+
+def _match_limit(path: str, method: str) -> int | None:
+    for prefix, m, limit in ROUTE_LIMITS:
+        if path.startswith(prefix) and method == m:
+            return limit
+    return None
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    """Sliding-window rate limiter for /api/v1/scan endpoints."""
+    """Sliding-window rate limiter with per-endpoint limits."""
 
     def __init__(self, app, redis_client: aioredis.Redis | None = None):
         super().__init__(app)
@@ -49,12 +65,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
-        # Only rate-limit the scan endpoint
-        if not request.url.path.startswith("/api/v1/scan"):
-            return await call_next(request)
-
-        # Only rate-limit POST (the actual scan)
-        if request.method != "POST":
+        rate_limit = _match_limit(str(request.url.path), request.method)
+        if rate_limit is None:
             return await call_next(request)
 
         client_ip = request.client.host if request.client else "unknown"
@@ -74,12 +86,12 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             if current == 1:
                 await redis.expire(key, WINDOW_SECONDS)
 
-            if current > RATE_LIMIT:
+            if current > rate_limit:
                 retry_after = WINDOW_SECONDS - int(time.time() % WINDOW_SECONDS)
                 return JSONResponse(
                     status_code=429,
                     content={
-                        "detail": f"Rate limit exceeded ({RATE_LIMIT} req/min). Try again later.",
+                        "detail": f"Rate limit exceeded ({rate_limit} req/min). Try again later.",
                     },
                     headers={"Retry-After": str(retry_after)},
                 )
