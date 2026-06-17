@@ -32,11 +32,15 @@ if (typeof window !== "undefined" && firebaseConfig.apiKey) {
   db = getFirestore(app);
   storage = getStorage(app);
 
-  isSupported().then((supported) => {
-    if (supported) {
-      analytics = getAnalytics(app);
-    }
-  });
+  isSupported()
+    .then((supported) => {
+      if (supported) {
+        analytics = getAnalytics(app);
+      }
+    })
+    .catch((err) => {
+      console.warn("Firebase Analytics is not supported in this environment:", err);
+    });
 }
 
 export { app, auth, db, storage, analytics };
