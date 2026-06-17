@@ -9,7 +9,13 @@
       <img src="https://img.shields.io/badge/Live-Deployment-F59E0B.svg?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Deployment">
     </a>
     <a href="https://github.com/Chaitanyahoon/ScamSentry/actions">
-      <img src="https://img.shields.io/badge/Tests-162%20Passing-10B981.svg?style=for-the-badge&logo=jest&logoColor=white" alt="Tests passing">
+      <img src="https://img.shields.io/badge/Tests-198%20Passing-10B981.svg?style=for-the-badge&logo=jest&logoColor=white" alt="Tests passing">
+    </a>
+    <a href="https://github.com/Chaitanyahoon/ScamSentry/actions/workflows/frontend-ci.yml">
+      <img src="https://github.com/Chaitanyahoon/ScamSentry/actions/workflows/frontend-ci.yml/badge.svg" alt="Frontend CI">
+    </a>
+    <a href="https://github.com/Chaitanyahoon/ScamSentry/actions/workflows/backend-ci.yml">
+      <img src="https://github.com/Chaitanyahoon/ScamSentry/actions/workflows/backend-ci.yml/badge.svg" alt="Backend CI">
     </a>
   </p>
   
