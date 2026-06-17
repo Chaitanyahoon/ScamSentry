@@ -68,9 +68,7 @@ class Scan(Base):
     risk_level = Column(Enum(RiskLevel), nullable=True, index=True)
     processing_time_ms = Column(Integer, nullable=True)
 
-    __table_args__ = (
-        Index("ix_scans_status", "status"),
-    )
+    __table_args__ = (Index("ix_scans_status", "status"),)
 
     # Relationship
     results = relationship(

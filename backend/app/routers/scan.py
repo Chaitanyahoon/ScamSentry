@@ -233,7 +233,9 @@ async def get_scan(
     )
 
 
-@router.post("/vote", response_model=VoteResponse, dependencies=[Depends(verify_admin_key)])
+@router.post(
+    "/vote", response_model=VoteResponse, dependencies=[Depends(verify_admin_key)]
+)
 async def cast_vote(
     body: VoteRequest,
     db: AsyncSession = Depends(get_db),
