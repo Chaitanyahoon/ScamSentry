@@ -96,7 +96,13 @@ def _extract_issuer_org(cert: dict) -> str:
 
 def _check_ssl(hostname: str) -> dict:
     """Check SSL certificate validity for *hostname*."""
-    result = {"valid": False, "self_signed": False, "expired": False, "issuer_org": "", "error": None}
+    result = {
+        "valid": False,
+        "self_signed": False,
+        "expired": False,
+        "issuer_org": "",
+        "error": None,
+    }
     try:
         ctx = ssl.create_default_context()
         with socket.create_connection((hostname, 443), timeout=5) as sock:
@@ -202,15 +208,19 @@ async def check_dns(url: str) -> dict:
 
     # ── 4. DNS checks (A, AAAA, MX, SPF, DMARC via DoH) ────────────
     try:
-        a_answers, aaaa_answers, mx_answers, txt_answers, dmarc_answers = (
-            await asyncio.gather(
-                _query_doh(hostname, "A"),
-                _query_doh(hostname, "AAAA"),
-                _query_doh(hostname, "MX"),
-                _query_doh(hostname, "TXT"),
-                _query_doh(f"_dmarc.{hostname}", "TXT"),
-                return_exceptions=True,
-            )
+        (
+            a_answers,
+            aaaa_answers,
+            mx_answers,
+            txt_answers,
+            dmarc_answers,
+        ) = await asyncio.gather(
+            _query_doh(hostname, "A"),
+            _query_doh(hostname, "AAAA"),
+            _query_doh(hostname, "MX"),
+            _query_doh(hostname, "TXT"),
+            _query_doh(f"_dmarc.{hostname}", "TXT"),
+            return_exceptions=True,
         )
     except Exception:
         a_answers, aaaa_answers, mx_answers, txt_answers, dmarc_answers = (
@@ -256,9 +266,7 @@ async def check_dns(url: str) -> dict:
 
     if not has_a and not has_aaaa:
         score += 70
-        triggered.append(
-            "Domain does not resolve to any active IP address (NXDOMAIN)"
-        )
+        triggered.append("Domain does not resolve to any active IP address (NXDOMAIN)")
 
     # ── 6. Low trust SSL + ultra-new domain age combo ────────────────
     ssl_issuer = ssl_data.get("issuer_org", "").lower()
@@ -270,7 +278,10 @@ async def check_dns(url: str) -> dict:
             age_days = (datetime.now(UTC) - creation_date).days
 
         # If age is under 60 days and issuer is Let's Encrypt / ZeroSSL (commonly abused by burner phishing sites)
-        if age_days < 60 and any(keyword in ssl_issuer for keyword in ["let's encrypt", "zerossl", "cpanel", "sectigo"]):
+        if age_days < 60 and any(
+            keyword in ssl_issuer
+            for keyword in ["let's encrypt", "zerossl", "cpanel", "sectigo"]
+        ):
             score += 35
             triggered.append(
                 f"Suspicious combination: newly registered domain ({age_days} days) using temporary/free SSL issuer ({ssl_data.get('issuer_org')})"

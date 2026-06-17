@@ -63,11 +63,7 @@ export default async function DossierPage({
           </span>
         </Link>
         <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-xs font-medium"
-          >
+          <Button variant="outline" size="sm" className="text-xs font-medium">
             <FileText className="mr-2 h-4 w-4" /> Export JSON
           </Button>
           <Button
@@ -103,17 +99,18 @@ export default async function DossierPage({
                 </span>
               </div>
               <p className="text-muted-foreground text-sm flex items-center gap-2">
-                <Globe className="h-3 w-3 text-muted-foreground/70" /> Targeted Entity:{" "}
-                {dossier.type || "Generic Phishing"}
+                <Globe className="h-3 w-3 text-muted-foreground/70" /> Targeted
+                Entity: {dossier.type || "Generic Phishing"}
               </p>
               <div className="flex items-center gap-4 pt-2">
                 <div className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground uppercase bg-muted px-2.5 py-1.5 rounded-lg border border-border">
-                  <Layers className="h-3.5 w-3.5 text-muted-foreground/70" /> Hash: 0x
+                  <Layers className="h-3.5 w-3.5 text-muted-foreground/70" />{" "}
+                  Hash: 0x
                   {forensics.fingerprint?.hash}
                 </div>
                 <div className="flex items-center gap-2 text-[11px] text-muted-foreground uppercase bg-muted px-2.5 py-1.5 rounded-lg border border-border">
-                  <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" /> First Seen:{" "}
-                  {dossier.firstSeen?.toLocaleDateString()}
+                  <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" />{" "}
+                  First Seen: {dossier.firstSeen?.toLocaleDateString()}
                 </div>
               </div>
             </div>
@@ -220,8 +217,8 @@ export default async function DossierPage({
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
                 Our security engine has identified this infrastructure as part
-                of a recurring campaign. Shared traits discovered in infrastructure
-                setups and nameserver rotation patterns.
+                of a recurring campaign. Shared traits discovered in
+                infrastructure setups and nameserver rotation patterns.
               </p>
               <Button
                 variant="ghost"

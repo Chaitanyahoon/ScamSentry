@@ -13,7 +13,7 @@ import {
   ChevronRight,
   ShieldCheck,
   Cpu,
-  Info
+  Info,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -29,7 +29,8 @@ export default function ExtensionSetupPage() {
       detailedDesc: (
         <div className="space-y-4">
           <p>
-            Click the download button below to retrieve the official verified ScamSentry Shield extension.
+            Click the download button below to retrieve the official verified
+            ScamSentry Shield extension.
           </p>
           <div className="p-5 bg-card border border-border rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -37,8 +38,12 @@ export default function ExtensionSetupPage() {
                 <Download className="h-5 w-5 text-primary" />
               </div>
               <div className="text-left">
-                <p className="text-sm font-semibold text-white">ScamSentry-Extension.zip</p>
-                <p className="text-xs text-muted-foreground">Version 1.0.0 • Verified Local Build</p>
+                <p className="text-sm font-semibold text-white">
+                  ScamSentry-Extension.zip
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Version 1.0.0 • Verified Local Build
+                </p>
               </div>
             </div>
             <a
@@ -52,10 +57,13 @@ export default function ExtensionSetupPage() {
           </div>
           <p className="text-xs text-muted-foreground flex items-start gap-2 bg-muted/20 p-3 rounded-lg">
             <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-            Once downloaded, extract the contents of the ZIP archive into a dedicated folder on your local drive (e.g. <code>C:\ScamSentry-Extension</code>). Do not delete this folder after installation, as the browser loads it directly.
+            Once downloaded, extract the contents of the ZIP archive into a
+            dedicated folder on your local drive (e.g.{" "}
+            <code>C:\ScamSentry-Extension</code>). Do not delete this folder
+            after installation, as the browser loads it directly.
           </p>
         </div>
-      )
+      ),
     },
     {
       id: 2,
@@ -65,20 +73,28 @@ export default function ExtensionSetupPage() {
       detailedDesc: (
         <div className="space-y-4">
           <p>
-            Open a new tab in Google Chrome (or any Chromium browser such as Microsoft Edge, Brave, or Opera).
+            Open a new tab in Google Chrome (or any Chromium browser such as
+            Microsoft Edge, Brave, or Opera).
           </p>
           <p>
-            In the address bar, type the following and press <kbd className="px-1.5 py-0.5 bg-muted border border-border rounded text-[11px]">Enter</kbd>:
+            In the address bar, type the following and press{" "}
+            <kbd className="px-1.5 py-0.5 bg-muted border border-border rounded text-[11px]">
+              Enter
+            </kbd>
+            :
           </p>
           <div className="p-4 bg-muted/40 border border-border rounded-xl font-mono text-sm flex items-center justify-between">
             <code className="text-primary select-all">chrome://extensions</code>
-            <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Copy Address</span>
+            <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
+              Copy Address
+            </span>
           </div>
           <p className="text-sm text-muted-foreground">
-            For Edge, you can also use <code>edge://extensions</code>, and for Brave, <code>brave://extensions</code>.
+            For Edge, you can also use <code>edge://extensions</code>, and for
+            Brave, <code>brave://extensions</code>.
           </p>
         </div>
-      )
+      ),
     },
     {
       id: 3,
@@ -88,21 +104,26 @@ export default function ExtensionSetupPage() {
       detailedDesc: (
         <div className="space-y-4">
           <p>
-            In the extensions page, look at the top-right corner of the interface.
+            In the extensions page, look at the top-right corner of the
+            interface.
           </p>
           <p>
-            Locate the switch labeled <strong>"Developer mode"</strong> and toggle it to the <strong>ON</strong> position.
+            Locate the switch labeled <strong>"Developer mode"</strong> and
+            toggle it to the <strong>ON</strong> position.
           </p>
           <div className="p-4 bg-primary/5 border border-primary/20 rounded-2xl flex items-center gap-4">
             <div className="h-10 w-10 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center shrink-0">
               <ToggleRight className="h-5 w-5 text-primary animate-pulse" />
             </div>
             <p className="text-xs text-muted-foreground leading-normal">
-              Developer mode allows your browser to sideload unpacked source folders, bypassing standard app store download requirements. This is completely safe and standard practice for open-source utilities.
+              Developer mode allows your browser to sideload unpacked source
+              folders, bypassing standard app store download requirements. This
+              is completely safe and standard practice for open-source
+              utilities.
             </p>
           </div>
         </div>
-      )
+      ),
     },
     {
       id: 4,
@@ -112,21 +133,25 @@ export default function ExtensionSetupPage() {
       detailedDesc: (
         <div className="space-y-4">
           <p>
-            Once Developer Mode is enabled, a new top menu bar will slide in on the left side of the page.
+            Once Developer Mode is enabled, a new top menu bar will slide in on
+            the left side of the page.
           </p>
           <p>
             Click the button labeled <strong>"Load unpacked"</strong>.
           </p>
           <p>
-            In the file selection window that appears, navigate to and select the <strong>extracted folder</strong> containing the extension files (where the <code>manifest.json</code> is located).
+            In the file selection window that appears, navigate to and select
+            the <strong>extracted folder</strong> containing the extension files
+            (where the <code>manifest.json</code> is located).
           </p>
           <p className="text-xs text-emerald-500 font-bold flex items-center gap-1.5 bg-emerald-500/5 border border-emerald-500/10 p-3 rounded-lg">
             <ShieldCheck className="h-4 w-4" />
-            Done! The ScamSentry Shield icon will appear in your browser bar, instantly protecting you in real time.
+            Done! The ScamSentry Shield icon will appear in your browser bar,
+            instantly protecting you in real time.
           </p>
         </div>
-      )
-    }
+      ),
+    },
   ];
 
   return (
@@ -156,7 +181,9 @@ export default function ExtensionSetupPage() {
             Install ScamSentry Shield
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl">
-            Because ScamSentry is open-source and respects user sovereignty, we choose not to pay the corporate Web Store registration fees. Follow these simple steps to install the browser shield manually.
+            Because ScamSentry is open-source and respects user sovereignty, we
+            choose not to pay the corporate Web Store registration fees. Follow
+            these simple steps to install the browser shield manually.
           </p>
         </div>
 
@@ -176,8 +203,8 @@ export default function ExtensionSetupPage() {
                     isActive
                       ? "bg-card border-primary/40 shadow-lg shadow-primary/5"
                       : isPassed
-                      ? "bg-muted/10 border-border/60 hover:border-muted-foreground/35"
-                      : "bg-transparent border-transparent hover:bg-muted/10"
+                        ? "bg-muted/10 border-border/60 hover:border-muted-foreground/35"
+                        : "bg-transparent border-transparent hover:bg-muted/10"
                   }`}
                 >
                   <div
@@ -185,8 +212,8 @@ export default function ExtensionSetupPage() {
                       isActive
                         ? "bg-primary text-primary-foreground border-primary"
                         : isPassed
-                        ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                        : "bg-muted/30 text-muted-foreground border-border"
+                          ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                          : "bg-muted/30 text-muted-foreground border-border"
                     }`}
                   >
                     {isPassed ? <ShieldCheck className="h-4 w-4" /> : step.icon}
@@ -270,27 +297,48 @@ export default function ExtensionSetupPage() {
 
           <div className="grid sm:grid-cols-2 gap-8 text-left">
             <div className="space-y-3">
-              <h4 className="text-sm font-bold text-white">Why sideload instead of using the Web Store?</h4>
+              <h4 className="text-sm font-bold text-white">
+                Why sideload instead of using the Web Store?
+              </h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Google charges developers to register and upload extensions to the Web Store. Sideloading via Developer Mode allows ScamSentry to remain 100% free and open-source, bypassing store limits and avoiding any financial entry barriers.
+                Google charges developers to register and upload extensions to
+                the Web Store. Sideloading via Developer Mode allows ScamSentry
+                to remain 100% free and open-source, bypassing store limits and
+                avoiding any financial entry barriers.
               </p>
             </div>
             <div className="space-y-3">
-              <h4 className="text-sm font-bold text-white">Is it safe to enable Developer Mode?</h4>
+              <h4 className="text-sm font-bold text-white">
+                Is it safe to enable Developer Mode?
+              </h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Absolutely. Enabling Developer Mode simply lets you run extensions directly from source directories. ScamSentry runs entirely inside your sandbox and does not transmit your browsing history or private credentials.
+                Absolutely. Enabling Developer Mode simply lets you run
+                extensions directly from source directories. ScamSentry runs
+                entirely inside your sandbox and does not transmit your browsing
+                history or private credentials.
               </p>
             </div>
             <div className="space-y-3">
-              <h4 className="text-sm font-bold text-white">How do I update the extension?</h4>
+              <h4 className="text-sm font-bold text-white">
+                How do I update the extension?
+              </h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                To update, download the latest <code>ScamSentry-Extension.zip</code> from this page, extract and replace the files inside your installation folder, then click the refresh icon <RefreshCw className="h-3 w-3 inline" /> on the <code>chrome://extensions</code> page.
+                To update, download the latest{" "}
+                <code>ScamSentry-Extension.zip</code> from this page, extract
+                and replace the files inside your installation folder, then
+                click the refresh icon <RefreshCw className="h-3 w-3 inline" />{" "}
+                on the <code>chrome://extensions</code> page.
               </p>
             </div>
             <div className="space-y-3">
-              <h4 className="text-sm font-bold text-white">Does this work on mobile browsers?</h4>
+              <h4 className="text-sm font-bold text-white">
+                Does this work on mobile browsers?
+              </h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Chrome on mobile does not support extensions. However, on Android you can install browsers like Kiwibrowser or Yandex Browser that support Chromium extensions and sideload ScamSentry using the exact same steps.
+                Chrome on mobile does not support extensions. However, on
+                Android you can install browsers like Kiwibrowser or Yandex
+                Browser that support Chromium extensions and sideload ScamSentry
+                using the exact same steps.
               </p>
             </div>
           </div>

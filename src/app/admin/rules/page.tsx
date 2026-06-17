@@ -215,10 +215,7 @@ export default function RulesManagementPage() {
               </span>
             </div>
             <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight">
-              Detection{" "}
-              <span className="text-primary">
-                Protocols
-              </span>
+              Detection <span className="text-primary">Protocols</span>
             </h1>
             <p className="text-sm text-muted-foreground border-l-2 border-primary/50 pl-4 max-w-2xl">
               Configure heuristic weights and signal thresholds for the security
@@ -367,7 +364,8 @@ export default function RulesManagementPage() {
                                       variant="outline"
                                       className="bg-muted border-border text-[9px] font-semibold py-0 rounded-full text-muted-foreground uppercase"
                                     >
-                                      Confidence: {(rule.confidence * 100).toFixed(0)}%
+                                      Confidence:{" "}
+                                      {(rule.confidence * 100).toFixed(0)}%
                                     </Badge>
                                   )}
                                 </div>
@@ -490,10 +488,9 @@ export default function RulesManagementPage() {
                             {rule.lastUpdated && (
                               <div className="text-[10px] text-muted-foreground/40 uppercase tracking-wider pt-2 border-t border-border text-right">
                                 Last Modified:{" "}
-                                {
-                                  new Date(rule.lastUpdated)
-                                    .toLocaleDateString()
-                                }
+                                {new Date(
+                                  rule.lastUpdated,
+                                ).toLocaleDateString()}
                               </div>
                             )}
                           </div>

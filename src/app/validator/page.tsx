@@ -1,12 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Shield,
-  ArrowRight,
-  Loader2,
-  Link as LinkIcon,
-} from "lucide-react";
+import { Shield, ArrowRight, Loader2, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";

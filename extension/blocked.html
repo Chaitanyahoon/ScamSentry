@@ -1,211 +1,238 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <title>ScamSentry Shield — Threat Blocked</title>
-  <style>
-    :root {
-      --primary: #f97316;
-      --bg: #09090b;
-      --card: #121214;
-      --text: #f4f4f5;
-      --muted: #a1a1aa;
-      --border: #27272a;
-      --red: #ef4444;
-      --success: #10b981;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <title>ScamSentry Shield — Threat Blocked</title>
+    <style>
+      :root {
+        --primary: #f97316;
+        --bg: #09090b;
+        --card: #121214;
+        --text: #f4f4f5;
+        --muted: #a1a1aa;
+        --border: #27272a;
+        --red: #ef4444;
+        --success: #10b981;
+      }
 
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-sizing: border-box;
-      overflow-x: hidden;
-    }
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg);
+        color: var(--text);
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+        overflow-x: hidden;
+      }
 
-    .container {
-      width: 520px;
-      max-width: 90%;
-      padding: 40px;
-      background: linear-gradient(180deg, rgba(18, 18, 20, 0.9) 0%, rgba(9, 9, 11, 0.95) 100%);
-      border: 1px solid rgba(239, 68, 68, 0.2);
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(239, 68, 68, 0.08);
-      text-align: center;
-      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+      .container {
+        width: 520px;
+        max-width: 90%;
+        padding: 40px;
+        background: linear-gradient(
+          180deg,
+          rgba(18, 18, 20, 0.9) 0%,
+          rgba(9, 9, 11, 0.95) 100%
+        );
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: 20px;
+        box-shadow:
+          0 10px 40px rgba(0, 0, 0, 0.6),
+          0 0 30px rgba(239, 68, 68, 0.08);
+        text-align: center;
+        animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
 
-    .alert-icon-box {
-      width: 64px;
-      height: 64px;
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 24px auto;
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
-    }
+      .alert-icon-box {
+        width: 64px;
+        height: 64px;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px auto;
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+      }
 
-    .alert-icon {
-      width: 32px;
-      height: 32px;
-      background-color: var(--red);
-      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    }
+      .alert-icon {
+        width: 32px;
+        height: 32px;
+        background-color: var(--red);
+        clip-path: polygon(
+          50% 0%,
+          100% 25%,
+          100% 75%,
+          50% 100%,
+          0% 75%,
+          0% 25%
+        );
+      }
 
-    h1 {
-      font-size: 20px;
-      font-weight: 800;
-      margin: 0 0 8px 0;
-      letter-spacing: -0.02em;
-    }
+      h1 {
+        font-size: 20px;
+        font-weight: 800;
+        margin: 0 0 8px 0;
+        letter-spacing: -0.02em;
+      }
 
-    .subtitle {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
+      .subtitle {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 24px;
+        line-height: 1.5;
+      }
 
-    .domain-badge {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border);
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-family: SFMono-Regular, Consolas, monospace;
-      font-size: 13px;
-      word-break: break-all;
-      color: var(--text);
-      font-weight: 600;
-      margin-bottom: 24px;
-    }
+      .domain-badge {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border);
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-family: SFMono-Regular, Consolas, monospace;
+        font-size: 13px;
+        word-break: break-all;
+        color: var(--text);
+        font-weight: 600;
+        margin-bottom: 24px;
+      }
 
-    .details-box {
-      background: rgba(239, 68, 68, 0.03);
-      border: 1px solid rgba(239, 68, 68, 0.15);
-      border-radius: 14px;
-      padding: 18px;
-      text-align: left;
-      margin-bottom: 30px;
-    }
+      .details-box {
+        background: rgba(239, 68, 68, 0.03);
+        border: 1px solid rgba(239, 68, 68, 0.15);
+        border-radius: 14px;
+        padding: 18px;
+        text-align: left;
+        margin-bottom: 30px;
+      }
 
-    .details-title {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--red);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 10px;
-    }
+      .details-title {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--red);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 10px;
+      }
 
-    .indicators-list {
-      margin: 0;
-      padding-left: 20px;
-      font-size: 12px;
-      line-height: 1.6;
-      color: var(--muted);
-    }
+      .indicators-list {
+        margin: 0;
+        padding-left: 20px;
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--muted);
+      }
 
-    .indicators-list li {
-      margin-bottom: 6px;
-    }
+      .indicators-list li {
+        margin-bottom: 6px;
+      }
 
-    .btn-group {
-      display: flex;
-      gap: 14px;
-      margin-bottom: 20px;
-    }
+      .btn-group {
+        display: flex;
+        gap: 14px;
+        margin-bottom: 20px;
+      }
 
-    .btn {
-      flex: 1;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 12.5px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+      .btn {
+        flex: 1;
+        padding: 14px;
+        border-radius: 12px;
+        font-size: 12.5px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      }
 
-    .btn-safety {
-      background: var(--primary);
-      color: #ffffff;
-      border: none;
-      box-shadow: 0 4px 15px rgba(249, 115, 22, 0.2);
-    }
+      .btn-safety {
+        background: var(--primary);
+        color: #ffffff;
+        border: none;
+        box-shadow: 0 4px 15px rgba(249, 115, 22, 0.2);
+      }
 
-    .btn-safety:hover {
-      filter: brightness(1.1);
-      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.3);
-      transform: translateY(-1px);
-    }
+      .btn-safety:hover {
+        filter: brightness(1.1);
+        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.3);
+        transform: translateY(-1px);
+      }
 
-    .btn-safety:active {
-      transform: translateY(0);
-    }
+      .btn-safety:active {
+        transform: translateY(0);
+      }
 
-    .btn-bypass {
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--border);
-    }
+      .btn-bypass {
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--border);
+      }
 
-    .btn-bypass:hover {
-      color: var(--text);
-      border-color: var(--muted);
-    }
+      .btn-bypass:hover {
+        color: var(--text);
+        border-color: var(--muted);
+      }
 
-    .footer-text {
-      font-size: 10px;
-      color: var(--muted);
-      opacity: 0.6;
-    }
+      .footer-text {
+        font-size: 10px;
+        color: var(--muted);
+        opacity: 0.6;
+      }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.97); }
-      to { opacity: 1; transform: scale(1); }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="alert-icon-box">
-      <div class="alert-icon"></div>
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.97);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="alert-icon-box">
+        <div class="alert-icon"></div>
+      </div>
+      <h1>Security Threat Deflected</h1>
+      <div class="subtitle">
+        ScamSentry Shield has blocked access to this page because it has been
+        identified as hosting fraudulent content, credential phishing, or bad
+        faith recruitment hooks.
+      </div>
+
+      <div class="domain-badge" id="blocked-url">unknown-url.com</div>
+
+      <div class="details-box">
+        <div class="details-title">Forensic Indicators Detected</div>
+        <ul class="indicators-list" id="indicators-list">
+          <li>Matches known phishing campaigns in the ledger</li>
+        </ul>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-bypass" id="proceed-btn">
+          Proceed Anyway (Unsafe)
+        </button>
+        <button class="btn btn-safety" id="safety-btn">Back to Safety</button>
+      </div>
+
+      <div class="footer-text">
+        ScamSentry Real-Time Endpoint Protection v1.0.0
+      </div>
     </div>
-    <h1>Security Threat Deflected</h1>
-    <div class="subtitle">
-      ScamSentry Shield has blocked access to this page because it has been identified as hosting fraudulent content, credential phishing, or bad faith recruitment hooks.
-    </div>
 
-    <div class="domain-badge" id="blocked-url">
-      unknown-url.com
-    </div>
-
-    <div class="details-box">
-      <div class="details-title">Forensic Indicators Detected</div>
-      <ul class="indicators-list" id="indicators-list">
-        <li>Matches known phishing campaigns in the ledger</li>
-      </ul>
-    </div>
-
-    <div class="btn-group">
-      <button class="btn btn-bypass" id="proceed-btn">Proceed Anyway (Unsafe)</button>
-      <button class="btn btn-safety" id="safety-btn">Back to Safety</button>
-    </div>
-
-    <div class="footer-text">
-      ScamSentry Real-Time Endpoint Protection v1.0.0
-    </div>
-  </div>
-
-  <script src="blocked.js"></script>
-</body>
+    <script src="blocked.js"></script>
+  </body>
 </html>

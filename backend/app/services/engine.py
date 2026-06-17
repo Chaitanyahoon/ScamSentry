@@ -145,4 +145,3 @@ def _build_result(
         "layer_results": layer_results,
         "processing_time_ms": processing_time_ms,
     }
-

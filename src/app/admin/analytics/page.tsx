@@ -75,10 +75,7 @@ export default function AnalyticsDashboard() {
             </span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight">
-            System Intelligence{" "}
-            <span className="text-primary">
-              Metrics
-            </span>
+            System Intelligence <span className="text-primary">Metrics</span>
           </h1>
           <p className="text-sm text-muted-foreground border-l-2 border-primary/50 pl-4 max-w-xl">
             Real-time scan telemetry and system performance diagnostics.
@@ -146,7 +143,9 @@ export default function AnalyticsDashboard() {
               <div
                 className={`text-3xl font-bold ${kpi.color} mb-1 tracking-tight`}
               >
-                {typeof kpi.value === "number" ? kpi.value.toLocaleString() : kpi.value}
+                {typeof kpi.value === "number"
+                  ? kpi.value.toLocaleString()
+                  : kpi.value}
               </div>
               <div className="text-xs text-muted-foreground/60">
                 {kpi.detail}
