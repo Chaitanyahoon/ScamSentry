@@ -1,0 +1,60 @@
+name: ScamSentry Frontend CI
+
+on:
+  push:
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'next.config.mjs'
+      - 'tsconfig.json'
+      - '__tests__/**'
+      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'next.config.mjs'
+      - 'tsconfig.json'
+      - '__tests__/**'
+      - '.github/workflows/frontend-ci.yml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run Next.js Build (Typecheck & Compile)
+        run: npm run build
+        env:
+          # Disable firebase warning telemetry during build to speed up compilation
+          NEXT_TELEMETRY_DISABLED: 1
+          # Mock env vars for Next.js build setup (so validation passes)
+          BACKEND_API_URL: "http://localhost:8000"
+          NEXT_PUBLIC_FIREBASE_API_KEY: "mock-key"
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "mock.firebaseapp.com"
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: "mock"
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "mock.appspot.com"
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "12345"
+          NEXT_PUBLIC_FIREBASE_APP_ID: "1:12345:web:mock"
+          UPSTASH_REDIS_REST_URL: "https://mock.upstash.io"
+          UPSTASH_REDIS_REST_TOKEN: "mock-token"
+
+      - name: Run Jest Unit Tests
+        run: npm run test
