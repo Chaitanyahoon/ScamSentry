@@ -11,8 +11,20 @@ import { POST } from "@/app/api/validator/vote/route";
 import { NextResponse } from "next/server";
 
 describe("POST /api/validator/vote", () => {
+  let originalEnv: NodeJS.ProcessEnv;
+
+  beforeAll(() => {
+    originalEnv = { ...process.env };
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    delete process.env.BACKEND_API_URL;
+    delete process.env.NEXT_PUBLIC_API_URL;
   });
 
   it("should return 400 if url or vote is missing", async () => {
