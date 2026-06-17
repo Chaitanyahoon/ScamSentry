@@ -19,8 +19,8 @@ service cloud.firestore {
 
     // Match the reports collection
     match /scam_reports/{reportId} {
-      // READ: Allow anyone to view reports 
-      allow read: if true;
+      // READ: Allow authenticated users to view reports
+      allow read: if isAuthenticated();
       
       // CREATE: Allow anyone to submit a new report (Anonymous reporting)
       allow create: if true;

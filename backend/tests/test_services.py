@@ -28,6 +28,20 @@ def test_l1_heuristics_malicious() -> None:
     assert len(res["details"]["triggered_rules"]) > 0
 
 
+def test_l1_typosquatting() -> None:
+    # Mimics google with g00gle
+    res = check_heuristics("https://g00gle.com")
+    assert res["score"] >= 90
+    assert res["passed"] is False
+    assert any("Typosquatting" in rule for rule in res["details"]["triggered_rules"])
+
+    # Mimics microsoft with rnicrosoft
+    res2 = check_heuristics("https://rnicrosoft.com")
+    assert res2["score"] >= 90
+    assert res2["passed"] is False
+    assert any("Typosquatting" in rule for rule in res2["details"]["triggered_rules"])
+
+
 # ── L2 DNS / WHOIS / SSL Tests ────────────────────────────────────────
 
 
@@ -96,6 +110,40 @@ async def test_l2_dns_malicious() -> None:
         res = await check_dns("https://evil.tk")
         assert res["score"] == 75
         assert res["passed"] is False
+
+
+@pytest.mark.asyncio
+async def test_l2_low_reputation_tld() -> None:
+    mock_whois = {
+        "creation_date": None,
+        "registrar": "some-registrar",
+        "raw": {
+            "domain_name": "evil-site.click",
+            "registrar": "some-registrar",
+            "creation_date": None,
+        },
+    }
+    mock_ssl = {"valid": True, "self_signed": False, "expired": False, "error": None}
+
+    async def mock_query_doh(name, record_type):
+        if record_type in ("A", "AAAA"):
+            return ["192.0.2.1"]
+        if record_type == "MX":
+            return ["10 mail.example.com"]
+        if record_type == "TXT" and not name.startswith("_dmarc"):
+            return ["v=spf1 include:_spf.google.com ~all"]
+        if record_type == "TXT" and name.startswith("_dmarc"):
+            return ["v=DMARC1; p=reject"]
+        return []
+
+    with (
+        patch("app.services.l2_dns._whois_lookup", return_value=mock_whois),
+        patch("app.services.l2_dns._check_ssl", return_value=mock_ssl),
+        patch("app.services.l2_dns._query_doh", side_effect=mock_query_doh),
+    ):
+        res = await check_dns("https://evil-site.click")
+        assert res["score"] >= 30
+        assert any("Low-reputation TLD" in check for check in res["details"]["triggered_checks"])
 
 
 # ── L3 Google Safe Browsing Tests ─────────────────────────────────────

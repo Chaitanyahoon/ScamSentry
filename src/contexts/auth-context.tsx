@@ -56,33 +56,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Handle user authentication state
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firefbaseUser) => {
-      setUser(firefbaseUser);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
 
-      if (firefbaseUser) {
+      if (firebaseUser) {
         try {
           // Create or update admin user record
           await createOrUpdateAdminUser(
-            firefbaseUser.uid,
-            firefbaseUser.email || "",
-            firefbaseUser.displayName || undefined,
+            firebaseUser.uid,
+            firebaseUser.email || "",
+            firebaseUser.displayName || undefined,
           );
 
           // Get user role
-          const userRole = await getUserRole(firefbaseUser.uid);
+          const userRole = await getUserRole(firebaseUser.uid);
           setRole(userRole);
 
           // Log successful login
           if (ADMIN_CONFIG.ENABLE_AUDIT_LOG) {
             await logAuditAction({
-              userId: firefbaseUser.uid,
-              userEmail: firefbaseUser.email || "",
+              userId: firebaseUser.uid,
+              userEmail: firebaseUser.email || "",
               action: "ADMIN_LOGIN",
               resourceType: "auth",
-              resourceId: firefbaseUser.uid,
+              resourceId: firebaseUser.uid,
               details: {
                 role: userRole,
-                emailVerified: firefbaseUser.emailVerified,
+                emailVerified: firebaseUser.emailVerified,
               },
               status: "success",
             });

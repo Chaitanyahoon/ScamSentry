@@ -125,6 +125,79 @@ export default function ApiDashboardPage() {
     setMounted(true);
   }, []);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterRiskLevel, setFilterRiskLevel] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
+
+  const exportAsJSON = () => {
+    if (recentScans.length === 0) {
+      toast({
+        title: "Export Failed",
+        description: "No scans to export.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(recentScans, null, 2));
+    const downloadAnchor = document.createElement("a");
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `scamsentry_scans_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    toast({
+      title: "JSON Exported",
+      description: `Successfully exported all ${recentScans.length} scans to JSON.`,
+    });
+  };
+
+  const exportAsCSV = () => {
+    if (recentScans.length === 0) {
+      toast({
+        title: "Export Failed",
+        description: "No scans to export.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const headers = ["ID", "URL", "Safety Score", "Risk Level", "Timestamp"];
+    const rows = recentScans.map((scan) => [
+      scan.id || "",
+      scan.url,
+      scan.finalScore,
+      scan.riskLevel,
+      new Date(scan.timestamp).toISOString(),
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8,"
+      + [headers.join(","), ...rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const downloadAnchor = document.createElement("a");
+    downloadAnchor.setAttribute("href", encodedUri);
+    downloadAnchor.setAttribute("download", `scamsentry_scans_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    toast({
+      title: "CSV Exported",
+      description: `Successfully exported all ${recentScans.length} scans to CSV.`,
+    });
+  };
+
+  const filteredScans = recentScans.filter((scan) => {
+    const matchesSearch = scan.url.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRisk = filterRiskLevel === "all" || scan.riskLevel === filterRiskLevel;
+    return matchesSearch && matchesRisk;
+  });
+
+  const totalPages = Math.ceil(filteredScans.length / pageSize) || 1;
+  const paginatedScans = filteredScans.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   const chartData = metrics?.scanTrend?.length
     ? metrics.scanTrend.map((item: any) => ({
         date: item.date.substring(5),
@@ -1099,6 +1172,51 @@ export default function ApiDashboardPage() {
               </div>
             </div>
 
+            {/* Search and Filters Controls */}
+            <div className="p-4 border-b border-border/60 bg-muted/10 flex flex-wrap gap-4 items-center justify-between select-none">
+              <div className="flex flex-1 min-w-[240px] gap-2">
+                <input
+                  type="text"
+                  placeholder="Search target URL..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="flex-1 bg-background border border-border focus:border-primary/50 text-xs p-2.5 outline-none text-foreground placeholder:text-muted-foreground/35 rounded-lg transition-all"
+                />
+                <select
+                  value={filterRiskLevel}
+                  onChange={(e) => {
+                    setFilterRiskLevel(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="bg-background border border-border focus:border-primary/50 text-xs p-2.5 outline-none text-foreground rounded-lg cursor-pointer min-w-[120px]"
+                >
+                  <option value="all">All Risks</option>
+                  <option value="Secure">Secure</option>
+                  <option value="Suspicious">Suspicious</option>
+                  <option value="Critical Threat">Critical Threat</option>
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={exportAsCSV}
+                  className="text-xs h-9 px-3 rounded-lg border-border hover:bg-muted/50 cursor-pointer active:scale-95"
+                >
+                  Export CSV
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={exportAsJSON}
+                  className="text-xs h-9 px-3 rounded-lg border-border hover:bg-muted/50 cursor-pointer active:scale-95"
+                >
+                  Export JSON
+                </Button>
+              </div>
+            </div>
+
             <div className="flex-1 overflow-x-auto">
               <table className="w-full text-left border-collapse text-sm">
                 <thead>
@@ -1118,18 +1236,17 @@ export default function ApiDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
-                  {recentScans.length === 0 ? (
+                  {paginatedScans.length === 0 ? (
                     <tr>
                       <td
                         colSpan={4}
                         className="px-6 py-12 text-center text-sm text-muted-foreground"
                       >
-                        No telemetry logs available. Secure your endpoints with
-                        API scan queries.
+                        No telemetry logs match the current filters.
                       </td>
                     </tr>
                   ) : (
-                    recentScans.map((scan, idx) => (
+                    paginatedScans.map((scan, idx) => (
                       <tr
                         key={idx}
                         className="hover:bg-muted/20 transition-colors group"
@@ -1185,13 +1302,35 @@ export default function ApiDashboardPage() {
               </table>
             </div>
 
-            <div className="p-4 border-t border-border bg-muted/20 flex justify-center">
-              <Button
-                variant="ghost"
-                className="text-xs font-bold text-primary hover:bg-primary/5 rounded-lg py-1.5 px-4 flex items-center gap-2 transition-all"
-              >
-                View Full Forensic Ledger <ArrowUpRight className="h-4 w-4" />
-              </Button>
+            {/* Pagination Controls Footer */}
+            <div className="p-4 border-t border-border bg-muted/20 flex flex-col sm:flex-row items-center justify-between gap-4 select-none">
+              <div className="text-xs text-muted-foreground font-medium">
+                Showing {filteredScans.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} to{" "}
+                {Math.min(currentPage * pageSize, filteredScans.length)} of {filteredScans.length} scans
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="text-xs h-8 px-3 rounded-lg cursor-pointer active:scale-95"
+                >
+                  Previous
+                </Button>
+                <span className="text-xs font-bold text-foreground">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="text-xs h-8 px-3 rounded-lg cursor-pointer active:scale-95"
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           </div>
         </div>

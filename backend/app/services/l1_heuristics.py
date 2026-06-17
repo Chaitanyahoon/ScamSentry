@@ -140,6 +140,41 @@ def _normalize_homoglyphs(text: str) -> str:
     return "".join(HOMOGLYPH_MAP.get(c, c) for c in text)
 
 
+def _check_typosquatting(domain: str) -> str | None:
+    """Check if any label inside the domain mimics a monitored brand via typosquatting character replacements."""
+    domain_clean = domain.lower()
+    parts = re.split(r"[-.]", domain_clean)
+
+    # Common typosquatting replacements
+    # Order matters: replace longer patterns first (e.g. rn before r/n)
+    replacements = [
+        ("rn", "m"),
+        ("vv", "w"),
+        ("cl", "d"),
+        ("0", "o"),
+        ("1", "l"),
+        ("3", "e"),
+        ("4", "a"),
+        ("5", "s"),
+        ("9", "g"),
+    ]
+
+    for part in parts:
+        if not part:
+            continue
+        # Apply replacements
+        temp = part
+        for target, replacement in replacements:
+            temp = temp.replace(target, replacement)
+
+        for brand in MONITORED_BRANDS:
+            # If the normalized/replaced label matches a monitored brand,
+            # and it wasn't an exact match originally (so it's actually typosquatted)
+            if temp == brand and part != brand:
+                return brand
+    return None
+
+
 def _levenshtein_distance(a: str, b: str) -> int:
     if len(a) < len(b):
         return _levenshtein_distance(b, a)
@@ -411,6 +446,15 @@ def check_heuristics(url: str) -> dict:
             score += 35
             triggered.append(
                 "Domain name appears to be algorithmically generated (DGA pattern)"
+            )
+
+    # 20. Typosquatting / Character replacement detection → +90
+    if hostname:
+        typosquatted = _check_typosquatting(hostname)
+        if typosquatted:
+            score += 90
+            triggered.append(
+                f"Typosquatting detected: Hostname mimics monitored brand '{typosquatted}' via character replacement"
             )
 
     # Cap at MAX_L1_SCORE

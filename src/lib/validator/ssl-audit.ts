@@ -28,11 +28,6 @@ export function getCertificateInfo(
       // Fallback to original domain string
     }
 
-    const timer = setTimeout(() => {
-      socket.destroy();
-      resolve(null);
-    }, 3500);
-
     const socket = tls.connect(
       {
         host: host,
@@ -66,5 +61,10 @@ export function getCertificateInfo(
       socket.destroy();
       resolve(null);
     });
+
+    const timer = setTimeout(() => {
+      socket.destroy();
+      resolve(null);
+    }, 3500);
   });
 }

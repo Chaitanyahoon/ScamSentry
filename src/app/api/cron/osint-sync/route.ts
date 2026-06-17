@@ -1,22 +1,12 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import {
-  collection,
-  getDocs,
-  writeBatch,
-  doc,
-  query,
-  where,
-  orderBy,
-  limit,
-} from "firebase/firestore";
+import { getAdminDb } from "@/lib/firebase-admin";
+import * as admin from "firebase-admin";
 
 // Force dynamic execution for API route
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   try {
-    // 1. Authorization strictly gated to Vercel Cron or specific Admin secret
     const { searchParams } = new URL(req.url);
     const querySecret = searchParams.get("secret");
     const authHeader = req.headers.get("authorization");
@@ -29,8 +19,6 @@ export async function GET(req: Request) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    // 2. Fetch from URLhaus OSINT API
-    // We use the recent API which returns the most recent active threats
     const response = await fetch(
       "https://urlhaus-api.abuse.ch/v1/urls/recent/",
       {
@@ -40,7 +28,6 @@ export async function GET(req: Request) {
     );
 
     if (!response.ok) {
-      // If external OSINT provider is blocked / unavailable, skip this run.
       if (response.status === 401 || response.status === 403) {
         return NextResponse.json({
           success: true,
@@ -57,8 +44,6 @@ export async function GET(req: Request) {
       throw new Error(`Unexpected OSINT payload structure`);
     }
 
-    // We only take the top 100 recent online threats to prevent blowing up the free-tier DB quota
-    // and staying well within the Firestore 500 document batch limit.
     const recentOnlineThreats = data.urls
       .filter((t: any) => t.url_status === "online")
       .slice(0, 100);
@@ -71,43 +56,38 @@ export async function GET(req: Request) {
       });
     }
 
-    // 3. Prevent Duplicates
-    // Fetch recent OSINT reports from our DB to cross-check.
-    const q = query(
-      collection(db, "scam_reports"),
-      where("company", "==", "OSINT Threat Feed"),
-      orderBy("created_at", "desc"),
-      limit(500),
-    );
-    const existingSnapshot = await getDocs(q);
-    const existingUrls = new Set();
+    const adminDb = getAdminDb();
+
+    const existingSnapshot = await adminDb
+      .collection("scam_reports")
+      .where("company", "==", "OSINT Threat Feed")
+      .orderBy("created_at", "desc")
+      .limit(500)
+      .get();
+
+    const existingUrls = new Set<string>();
 
     existingSnapshot.forEach((doc) => {
       const reportData = doc.data();
-      // We store the raw URL in the title or a custom field. We'll extract it from the title.
-      // Title format: "OSINT: {url}"
       const title = reportData.title || "";
       if (title.startsWith("OSINT: ")) {
         existingUrls.add(title.replace("OSINT: ", "").trim());
       }
     });
 
-    // 4. Batch Insert New Threats
-    const batch = writeBatch(db);
+    const batch = adminDb.batch();
     let insertCount = 0;
 
     for (const threat of recentOnlineThreats) {
       if (!existingUrls.has(threat.url)) {
-        const newDocRef = doc(collection(db, "scam_reports"));
+        const newDocRef = adminDb.collection("scam_reports").doc();
 
-        let urlObj;
         let hostname = threat.url;
         try {
-          urlObj = new URL(threat.url);
-          hostname = urlObj.hostname;
+          new URL(threat.url);
         } catch (e) {}
 
-        const reportData = {
+        const reportData: Record<string, any> = {
           title: `OSINT: ${threat.url}`,
           company: "OSINT Threat Feed",
           scam_type: "Malware / Phishing",
@@ -123,11 +103,11 @@ export async function GET(req: Request) {
           anonymous: true,
           email: null,
           risk_level: "high",
-          created_at: new Date(),
+          created_at: admin.firestore.FieldValue.serverTimestamp(),
           helpful_votes: 0,
           flag_count: 0,
           views: 0,
-          trust_score: 0, // 0 trust means highly dangerous
+          trust_score: 0,
           status: "approved",
           evidence_urls: [threat.url],
         };

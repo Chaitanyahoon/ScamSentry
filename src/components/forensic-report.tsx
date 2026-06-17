@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 import {
   AlertTriangle,
   CheckSquare,
@@ -12,9 +13,49 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-export function ForensicReport({ report, finalScore, riskLevel }: any) {
+export function ForensicReport({ url, report, finalScore, riskLevel }: any) {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("L1");
   const [animatedScore, setAnimatedScore] = useState(0);
+  const [voting, setVoting] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false);
+
+  const handleVote = async (voteType: "safe" | "unsafe") => {
+    if (!url) {
+      toast({
+        title: "Voting Failed",
+        description: "No URL found to vote on.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setVoting(true);
+    try {
+      const res = await fetch("/api/validator/vote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url, vote: voteType }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to submit vote");
+
+      toast({
+        title: voteType === "safe" ? "Verified Safe" : "Flagged Unsafe",
+        description: data.message || `Your vote has been successfully registered.`,
+      });
+      setHasVoted(true);
+    } catch (err: any) {
+      toast({
+        title: "Vote Submission Error",
+        description: err.message || "Failed to submit vote.",
+        variant: "destructive",
+      });
+    } finally {
+      setVoting(false);
+    }
+  };
 
   // Animate the score counting up on load
   useEffect(() => {
@@ -181,6 +222,39 @@ export function ForensicReport({ report, finalScore, riskLevel }: any) {
           <p className="text-sm text-muted-foreground leading-relaxed border-l-2 border-primary/20 pl-4 py-0.5">
             {getVerdictSummary()}
           </p>
+
+          {/* Community Review Actions */}
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-3 border-t border-border/40 select-none">
+            <span className="text-xs font-semibold text-muted-foreground mr-1">
+              Community Review:
+            </span>
+            <button
+              onClick={() => handleVote("safe")}
+              disabled={voting || hasVoted}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50 disabled:pointer-events-none
+                ${
+                  hasVoted
+                    ? "bg-muted border-border text-muted-foreground"
+                    : "bg-success/10 border-success/30 text-success hover:bg-success/20"
+                }`}
+            >
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Verify Safe
+            </button>
+            <button
+              onClick={() => handleVote("unsafe")}
+              disabled={voting || hasVoted}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50 disabled:pointer-events-none
+                ${
+                  hasVoted
+                    ? "bg-muted border-border text-muted-foreground"
+                    : "bg-destructive/10 border-destructive/30 text-destructive hover:bg-destructive/20"
+                }`}
+            >
+              <AlertTriangle className="h-3.5 w-3.5" />
+              Flag Unsafe
+            </button>
+          </div>
         </div>
       </div>
 

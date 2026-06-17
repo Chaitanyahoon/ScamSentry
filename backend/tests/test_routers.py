@@ -388,3 +388,80 @@ async def test_trigger_scrape_incidents_success(client) -> None:
         data = response.json()
         assert data["success"] is True
         assert "queued" in data["message"].lower()
+
+
+@pytest.mark.asyncio
+async def test_cast_vote_unsafe_new(client, db) -> None:
+    payload = {"url": "https://new-scam-site.xyz", "vote": "unsafe"}
+    response = await client.post("/api/v1/scan/vote", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert "flagged" in data["message"].lower()
+    assert data["domain"] == "new-scam-site.xyz"
+    assert data["confidence"] == 10
+
+    # Query DB to verify
+    from sqlalchemy import select
+    stmt = select(LedgerEntry).where(LedgerEntry.domain == "new-scam-site.xyz")
+    res = await db.execute(stmt)
+    entry = res.scalar_one_or_none()
+    assert entry is not None
+    assert entry.confidence == 10
+    assert entry.source == "community"
+
+
+@pytest.mark.asyncio
+async def test_cast_vote_unsafe_existing(client, db) -> None:
+    # Set up existing community entry
+    entry = LedgerEntry(
+        domain="existing-scam.xyz",
+        threat_type="phishing",
+        confidence=30,
+        source="community",
+        verified=False,
+    )
+    db.add(entry)
+    await db.commit()
+
+    payload = {"url": "https://existing-scam.xyz", "vote": "unsafe"}
+    response = await client.post("/api/v1/scan/vote", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["confidence"] == 40
+
+
+@pytest.mark.asyncio
+async def test_cast_vote_safe_existing(client, db) -> None:
+    # Set up existing community entry
+    entry = LedgerEntry(
+        domain="voted-safe.xyz",
+        threat_type="phishing",
+        confidence=10,
+        source="community",
+        verified=False,
+    )
+    db.add(entry)
+    await db.commit()
+
+    payload = {"url": "https://voted-safe.xyz", "vote": "safe"}
+    response = await client.post("/api/v1/scan/vote", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert "removed" in data["message"].lower()
+
+    # Query DB to verify deletion
+    from sqlalchemy import select
+    stmt = select(LedgerEntry).where(LedgerEntry.domain == "voted-safe.xyz")
+    res = await db.execute(stmt)
+    assert res.scalar_one_or_none() is None
+
+
+@pytest.mark.asyncio
+async def test_cast_vote_invalid(client) -> None:
+    # Invalid vote option
+    payload = {"url": "https://some-site.xyz", "vote": "maybe"}
+    response = await client.post("/api/v1/scan/vote", json=payload)
+    assert response.status_code == 422

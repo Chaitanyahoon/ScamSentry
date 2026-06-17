@@ -22,7 +22,7 @@ async function handleUrlCheck(url) {
     const apiBaseUrl = settings.api_base_url || DEFAULT_API_URL;
 
     // 1. Check local cache
-    const cacheKey = `ss_cache_${btoa(url).substring(0, 32)}`;
+    const cacheKey = `ss_cache_${encodeURIComponent(url).substring(0, 32)}`;
     const cached = await chrome.storage.local.get(cacheKey);
 
     if (
@@ -36,6 +36,10 @@ async function handleUrlCheck(url) {
     // 2. Fetch from Forensic Engine
     console.log(`[ScamSentry] Scanning link: ${url}`);
 
+    // Retrieve API key from storage
+    const keySettings = await chrome.storage.local.get("api_key");
+    const apiKey = keySettings.api_key || "ss_ext_public_v1";
+
     // Extract domain from url for verify parameter
     let domain = "";
     try {
@@ -48,7 +52,7 @@ async function handleUrlCheck(url) {
       `${apiBaseUrl}/verify?domain=${encodeURIComponent(domain)}`,
       {
         headers: {
-          "x-api-key": "ss_ext_public_v1",
+          "x-api-key": apiKey,
         },
       },
     );
@@ -62,7 +66,7 @@ async function handleUrlCheck(url) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": "ss_ext_public_v1",
+          "x-api-key": apiKey,
         },
         body: JSON.stringify({ payload: url }),
       });

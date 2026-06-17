@@ -9,6 +9,31 @@ const hasRedisConfig = !!(
 
 const redisClient = hasRedisConfig ? Redis.fromEnv() : null;
 
+class InMemoryLimiter {
+  private hits: Map<string, { count: number; resetTime: number }> = new Map();
+  private maxRequests: number;
+  private windowMs: number;
+
+  constructor(maxRequests: number, windowSec: number) {
+    this.maxRequests = maxRequests;
+    this.windowMs = windowSec * 1000;
+  }
+
+  async limit(identifier: string): Promise<{ success: boolean }> {
+    const now = Date.now();
+    const record = this.hits.get(identifier);
+    if (!record || now > record.resetTime) {
+      this.hits.set(identifier, { count: 1, resetTime: now + this.windowMs });
+      return { success: true };
+    }
+    if (record.count >= this.maxRequests) {
+      return { success: false };
+    }
+    record.count++;
+    return { success: true };
+  }
+}
+
 // -- Free Tier Limiter: 5 requests per 60 seconds --
 export const freeTierLimiter = redisClient
   ? new Ratelimit({
@@ -16,7 +41,7 @@ export const freeTierLimiter = redisClient
       limiter: Ratelimit.slidingWindow(5, "60 s"),
       prefix: "scamsentry:free",
     })
-  : null;
+  : new InMemoryLimiter(5, 60);
 
 // -- Pro Tier Limiter: 60 requests per 60 seconds --
 export const proTierLimiter = redisClient
@@ -25,7 +50,7 @@ export const proTierLimiter = redisClient
       limiter: Ratelimit.slidingWindow(60, "60 s"),
       prefix: "scamsentry:pro",
     })
-  : null;
+  : new InMemoryLimiter(60, 60);
 
 // -- Enterprise Tier Limiter: 300 requests per 60 seconds --
 export const enterpriseTierLimiter = redisClient
@@ -34,4 +59,4 @@ export const enterpriseTierLimiter = redisClient
       limiter: Ratelimit.slidingWindow(300, "60 s"),
       prefix: "scamsentry:enterprise",
     })
-  : null;
+  : new InMemoryLimiter(300, 60);

@@ -36,3 +36,21 @@ class ScanResponse(BaseModel):
     submitted_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class VoteRequest(BaseModel):
+    """Payload for submitting a community vote on domain safety."""
+
+    url: str
+    vote: str
+    threat_type: str = "community_flagged"
+
+
+class VoteResponse(BaseModel):
+    """Response returned after processing a community vote."""
+
+    success: bool
+    message: str
+    domain: str
+    confidence: int
+    verified: bool

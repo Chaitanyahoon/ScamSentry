@@ -1,13 +1,6 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import {
-  collection,
-  addDoc,
-  query,
-  where,
-  getDocs,
-  Timestamp,
-} from "firebase/firestore";
+import { getAdminDb } from "@/lib/firebase-admin";
+import * as admin from "firebase-admin";
 
 export async function POST(req: Request) {
   try {
@@ -21,7 +14,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1. Verify API Key (Simulated B2B check)
     if (apiKey !== process.env.SCAM_SENTRY_B2B_KEY) {
       return NextResponse.json(
         { error: "Unauthorized B2B access" },
@@ -29,16 +21,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Register Monitoring Hook
-    const monitorRef = collection(db, "brand_monitoring");
+    const adminDb = getAdminDb();
+    const monitorRef = adminDb.collection("brand_monitoring");
 
-    // Check if already exists for this URL
-    const q = query(
-      monitorRef,
-      where("brandName", "==", brandName.toLowerCase()),
-      where("webhookUrl", "==", webhookUrl),
-    );
-    const existing = await getDocs(q);
+    const existing = await monitorRef
+      .where("brandName", "==", brandName.toLowerCase())
+      .where("webhookUrl", "==", webhookUrl)
+      .get();
 
     if (!existing.empty) {
       return NextResponse.json({
@@ -46,11 +35,11 @@ export async function POST(req: Request) {
       });
     }
 
-    const docRef = await addDoc(monitorRef, {
+    const docRef = await monitorRef.add({
       brandName: brandName.toLowerCase(),
       webhookUrl,
       status: "active",
-      createdAt: Timestamp.now(),
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     return NextResponse.json({

@@ -51,7 +51,7 @@ export function generateThreatFingerprint(
   const hash = createHash("sha256")
     .update(components.join("|"))
     .digest("hex")
-    .substring(0, 16);
+    .substring(0, 32);
 
   // Calculate Severity
   const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);

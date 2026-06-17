@@ -1,5 +1,4 @@
-import { collection, getDocs, query, limit, orderBy } from "firebase/firestore";
-import { db } from "../firebase";
+import { getAdminDb } from "../firebase-admin";
 
 export async function analyzeInternalGraph(inputUrl: string) {
   let score = 0;
@@ -17,10 +16,12 @@ export async function analyzeInternalGraph(inputUrl: string) {
   const domain = urlObj.hostname;
 
   try {
-    const reportsRef = collection(db, "scam_reports");
-    // Connect to global user reports.
-    const qRecent = query(reportsRef, orderBy("createdAt", "desc"), limit(100));
-    const snapshot = await getDocs(qRecent);
+    const db = getAdminDb();
+    const reportsRef = db.collection("scam_reports");
+    const snapshot = await reportsRef
+      .orderBy("createdAt", "desc")
+      .limit(100)
+      .get();
 
     let matchedEntities = 0;
 

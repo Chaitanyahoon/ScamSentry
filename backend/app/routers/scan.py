@@ -11,13 +11,15 @@ import logging
 import uuid
 from datetime import UTC, datetime
 
+from urllib.parse import urlparse
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.models.scan import Scan, ScanResult, ScanStatus, RiskLevel, LayerName
-from app.schemas.scan import ScanRequest, ScanResponse, LayerResult
+from app.models.ledger import LedgerEntry
+from app.schemas.scan import ScanRequest, ScanResponse, LayerResult, VoteRequest, VoteResponse
 from app.services.cache import get_cached_scan, set_cached_scan
 from app.services.engine import run_engine
 
@@ -175,4 +177,92 @@ async def get_scan(
         processing_time_ms=scan.processing_time_ms or 0,
         cached=False,
         submitted_at=scan.submitted_at,
+    )
+
+
+def _extract_domain(url: str) -> str:
+    try:
+        parsed = urlparse(url if "://" in url else f"http://{url}")
+        return (parsed.hostname or url).lower()
+    except Exception:
+        return url.lower()
+
+
+@router.post("/vote", response_model=VoteResponse)
+async def cast_vote(
+    body: VoteRequest,
+    db: AsyncSession = Depends(get_db),
+) -> VoteResponse:
+    """Cast a community vote ('safe' or 'unsafe') on a domain."""
+    url_str = body.url.strip()
+    vote_type = body.vote.lower().strip()
+
+    if vote_type not in ("safe", "unsafe"):
+        raise HTTPException(status_code=422, detail="Vote must be 'safe' or 'unsafe'")
+
+    domain = _extract_domain(url_str)
+    if not domain:
+        raise HTTPException(status_code=400, detail="Invalid URL or domain")
+
+    # Query existing ledger entry
+    stmt = select(LedgerEntry).where(LedgerEntry.domain == domain)
+    result = await db.execute(stmt)
+    entry = result.scalar_one_or_none()
+
+    success = True
+    message = ""
+    confidence = 0
+    verified = False
+
+    if vote_type == "unsafe":
+        if entry is None:
+            # Create a new community threat entry
+            entry = LedgerEntry(
+                domain=domain,
+                threat_type=body.threat_type,
+                confidence=10,
+                source="community",
+                verified=False,
+            )
+            db.add(entry)
+            message = "Domain successfully flagged by community."
+            confidence = 10
+        else:
+            # If it's a community entry, increase confidence
+            if entry.source == "community":
+                entry.confidence = min(entry.confidence + 10, 100)
+                message = f"Community flagging recorded. Confidence increased to {entry.confidence}%."
+            else:
+                message = f"Domain is already recorded in the threat ledger (source: {entry.source})."
+            confidence = entry.confidence
+            verified = entry.verified
+
+        await db.commit()
+
+    elif vote_type == "safe":
+        if entry is None:
+            message = "Domain is not in the threat ledger."
+        else:
+            if entry.source == "community":
+                entry.confidence -= 10
+                if entry.confidence <= 0:
+                    await db.delete(entry)
+                    message = "Domain removed from community threat ledger due to safety consensus."
+                    confidence = 0
+                else:
+                    message = f"Safety vote recorded. Threat confidence reduced to {entry.confidence}%."
+                    confidence = entry.confidence
+            else:
+                message = f"Safety vote recorded but overridden by {entry.source} authority."
+                confidence = entry.confidence
+                verified = entry.verified
+
+        await db.commit()
+
+    return VoteResponse(
+        success=success,
+        message=message,
+        domain=domain,
+        confidence=confidence,
+        verified=verified,
     )

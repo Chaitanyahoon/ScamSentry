@@ -117,6 +117,7 @@ export default function ValidatorPage() {
         {result && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <ForensicReport
+              url={input}
               report={result.forensicReport}
               finalScore={result.finalScore}
               riskLevel={result.riskLevel}

@@ -37,6 +37,18 @@ LOW_REPUTATION_REGISTRARS: list[str] = [
     "reg.ru",
 ]
 
+# TLDs frequently associated with disposable/spam registrations
+LOW_REPUTATION_TLDS: set[str] = {
+    ".xyz",
+    ".top",
+    ".click",
+    ".buzz",
+    ".club",
+    ".work",
+    ".online",
+    ".site",
+}
+
 
 # ── Internal helpers ──────────────────────────────────────────────────
 
@@ -286,6 +298,13 @@ async def check_dns(url: str) -> dict:
             triggered.append(
                 f"Suspicious combination: newly registered domain ({age_days} days) using temporary/free SSL issuer ({ssl_data.get('issuer_org')})"
             )
+
+    # ── 7. Low-reputation TLD check ───────────────────────────────
+    for tld in LOW_REPUTATION_TLDS:
+        if hostname.endswith(tld):
+            score += 30
+            triggered.append(f"Low-reputation TLD: {tld}")
+            break
 
     # Cap at MAX_L2_SCORE
     capped_score = min(score, MAX_L2_SCORE)
