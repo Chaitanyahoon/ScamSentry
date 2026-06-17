@@ -39,8 +39,8 @@ export default function PrivacyPage() {
               <p>
                 ScamSentry operates on a deterministic, zero-trust framework. We
                 do NOT log, store, or monitor any personal user details. Link
-                forensic scanning is performed on-the-fly and processed completely
-                locally.
+                forensic scanning is performed on-the-fly and processed
+                completely locally.
               </p>
             </section>
 
@@ -63,8 +63,8 @@ export default function PrivacyPage() {
                 3. Cookies & Tracking
               </h2>
               <p>
-                This platform utilizes zero advertising cookies, zero
-                analytical trackers, and zero third-party telemetry integrations.
+                This platform utilizes zero advertising cookies, zero analytical
+                trackers, and zero third-party telemetry integrations.
               </p>
             </section>
           </div>

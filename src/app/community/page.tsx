@@ -57,17 +57,20 @@ const DEFAULT_THREADS: ForumThread[] = [
     title: "Suspicious contract clause demanding IP transfer before payment",
     client: "apex-creative.co",
     category: "Contract Review",
-    content: "Has anyone worked with Apex Creative? They sent me a contract where section 4.2 states all intellectual property transfers to them immediately upon file delivery, but payment terms are Net-60. This seems like a massive scam vector for freelancers.",
+    content:
+      "Has anyone worked with Apex Creative? They sent me a contract where section 4.2 states all intellectual property transfers to them immediately upon file delivery, but payment terms are Net-60. This seems like a massive scam vector for freelancers.",
     author: "Elena R.",
     repliesCount: 3,
     createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
   },
   {
     id: "mock-thread-2",
-    title: "Beware: Fake Recruiter impersonating Talent Acquisition at TechCorp",
+    title:
+      "Beware: Fake Recruiter impersonating Talent Acquisition at TechCorp",
     client: "careers-techcorp.net",
     category: "Phishing Alert",
-    content: "Received an email from hr@careers-techcorp.net offering an unscheduled interview on Telegram. ScamSentry extension flagged the domain as a suspicious registrar registered only 2 days ago. Be careful, guys!",
+    content:
+      "Received an email from hr@careers-techcorp.net offering an unscheduled interview on Telegram. ScamSentry extension flagged the domain as a suspicious registrar registered only 2 days ago. Be careful, guys!",
     author: "Marcus K.",
     repliesCount: 1,
     createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
@@ -77,61 +80,71 @@ const DEFAULT_THREADS: ForumThread[] = [
     title: "Client refusing payment after project sign-off via Upwork",
     client: "Global Retail Solutions",
     category: "Payment Issue",
-    content: "Client approved the milestone but is now claiming the work is unsatisfactory and demanding a full refund. They are threatening negative reviews. What's the best way to handle Upwork dispute mediation here?",
+    content:
+      "Client approved the milestone but is now claiming the work is unsatisfactory and demanding a full refund. They are threatening negative reviews. What's the best way to handle Upwork dispute mediation here?",
     author: "Siddharth M.",
     repliesCount: 1,
     createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
-  }
+  },
 ];
 
 const DEFAULT_REPLIES: Record<string, ForumReply[]> = {
   "mock-thread-1": [
     {
       author: "David L.",
-      content: "Never agree to immediate transfer before payment. Request a clause stating IP transfers ONLY upon receipt of full payment. Standard protection.",
-      createdAt: new Date(Date.now() - 3600000 * 3).toISOString()
+      content:
+        "Never agree to immediate transfer before payment. Request a clause stating IP transfers ONLY upon receipt of full payment. Standard protection.",
+      createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
     },
     {
       author: "Elena R.",
-      content: "Thanks David. I asked them to modify it, but they're pushing back saying it is standard corporate policy. I think I will walk away.",
-      createdAt: new Date(Date.now() - 3600000 * 2).toISOString()
+      content:
+        "Thanks David. I asked them to modify it, but they're pushing back saying it is standard corporate policy. I think I will walk away.",
+      createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
     },
     {
       author: "Sarah W. (Advisor)",
-      content: "Walking away is the right move. Net-60 with pre-payment IP transfer is a classic scam checklist item. They can take the code, terminate the contract, and you have zero recourse.",
-      createdAt: new Date(Date.now() - 3600000 * 1).toISOString()
-    }
+      content:
+        "Walking away is the right move. Net-60 with pre-payment IP transfer is a classic scam checklist item. They can take the code, terminate the contract, and you have zero recourse.",
+      createdAt: new Date(Date.now() - 3600000 * 1).toISOString(),
+    },
   ],
   "mock-thread-2": [
     {
       author: "Jessica T.",
-      content: "TechCorp's actual domain is techcorp.com. They never use Telegram or Whatsapp for recruiter chats. Definitely phishing.",
-      createdAt: new Date(Date.now() - 3600000 * 20).toISOString()
-    }
+      content:
+        "TechCorp's actual domain is techcorp.com. They never use Telegram or Whatsapp for recruiter chats. Definitely phishing.",
+      createdAt: new Date(Date.now() - 3600000 * 20).toISOString(),
+    },
   ],
   "mock-thread-3": [
     {
       author: "Aman S.",
-      content: "Do not refund if the work met the original specifications. Submit all communications to Upwork support. They usually honor contract milestones if you submitted the work properly through the portal.",
-      createdAt: new Date(Date.now() - 3600000 * 40).toISOString()
-    }
-  ]
+      content:
+        "Do not refund if the work met the original specifications. Submit all communications to Upwork support. They usually honor contract milestones if you submitted the work properly through the portal.",
+      createdAt: new Date(Date.now() - 3600000 * 40).toISOString(),
+    },
+  ],
 };
 
 export default function CommunityPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  
+
   // Section routing states
-  const [activeSection, setActiveSection] = useState<"overview" | "forums" | "expert" | "alerts">("overview");
+  const [activeSection, setActiveSection] = useState<
+    "overview" | "forums" | "expert" | "alerts"
+  >("overview");
 
   // Discussion Forums states
   const [threads, setThreads] = useState<ForumThread[]>([]);
-  const [selectedThread, setSelectedThread] = useState<ForumThread | null>(null);
+  const [selectedThread, setSelectedThread] = useState<ForumThread | null>(
+    null,
+  );
   const [threadReplies, setThreadReplies] = useState<ForumReply[]>([]);
   const [isForumLoading, setIsForumLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  
+
   // Forum Form states
   const [newTitle, setNewTitle] = useState("");
   const [newClient, setNewClient] = useState("");
@@ -167,7 +180,11 @@ export default function CommunityPage() {
   const fetchThreads = async () => {
     setIsForumLoading(true);
     try {
-      const q = query(collection(db, "forum_threads"), orderBy("createdAt", "desc"), limit(50));
+      const q = query(
+        collection(db, "forum_threads"),
+        orderBy("createdAt", "desc"),
+        limit(50),
+      );
       const snapshot = await getDocs(q);
       const list: ForumThread[] = [];
       snapshot.forEach((doc) => {
@@ -180,7 +197,9 @@ export default function CommunityPage() {
           content: data.content,
           author: data.author,
           repliesCount: data.repliesCount || 0,
-          createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
+          createdAt: data.createdAt?.toDate
+            ? data.createdAt.toDate().toISOString()
+            : data.createdAt,
         });
       });
 
@@ -210,7 +229,7 @@ export default function CommunityPage() {
   const selectThread = async (thread: ForumThread) => {
     setSelectedThread(thread);
     setThreadReplies([]);
-    
+
     // Check if it's a mock thread
     if (thread.id.startsWith("mock-")) {
       setThreadReplies(DEFAULT_REPLIES[thread.id] || []);
@@ -220,7 +239,7 @@ export default function CommunityPage() {
     try {
       const q = query(
         collection(db, `forum_threads/${thread.id}/replies`),
-        orderBy("createdAt", "asc")
+        orderBy("createdAt", "asc"),
       );
       const snapshot = await getDocs(q);
       const list: ForumReply[] = [];
@@ -229,7 +248,9 @@ export default function CommunityPage() {
         list.push({
           author: data.author,
           content: data.content,
-          createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
+          createdAt: data.createdAt?.toDate
+            ? data.createdAt.toDate().toISOString()
+            : data.createdAt,
         });
       });
       setThreadReplies(list);
@@ -244,7 +265,12 @@ export default function CommunityPage() {
     if (!newTitle.trim() || !newContent.trim()) return;
 
     setIsSubmittingThread(true);
-    const authorName = isAnonymous ? "Anonymous Freelancer" : (newAuthor.trim() || user?.displayName || user?.email?.split("@")[0] || "Freelancer");
+    const authorName = isAnonymous
+      ? "Anonymous Freelancer"
+      : newAuthor.trim() ||
+        user?.displayName ||
+        user?.email?.split("@")[0] ||
+        "Freelancer";
 
     try {
       const newThreadData = {
@@ -300,7 +326,11 @@ export default function CommunityPage() {
     if (!selectedThread || !replyContent.trim()) return;
 
     setIsSubmittingReply(true);
-    const authorName = replyAuthor.trim() || user?.displayName || user?.email?.split("@")[0] || "Freelancer";
+    const authorName =
+      replyAuthor.trim() ||
+      user?.displayName ||
+      user?.email?.split("@")[0] ||
+      "Freelancer";
 
     try {
       const newReplyData = {
@@ -310,7 +340,10 @@ export default function CommunityPage() {
       };
 
       if (!selectedThread.id.startsWith("mock-")) {
-        await addDoc(collection(db, `forum_threads/${selectedThread.id}/replies`), newReplyData);
+        await addDoc(
+          collection(db, `forum_threads/${selectedThread.id}/replies`),
+          newReplyData,
+        );
       }
 
       toast({
@@ -410,7 +443,8 @@ export default function CommunityPage() {
 
       toast({
         title: "Preferences Saved",
-        description: "You have successfully subscribed to the early warning network.",
+        description:
+          "You have successfully subscribed to the early warning network.",
       });
     } catch (e) {
       console.error("Error saving alert configurations:", e);
@@ -425,10 +459,14 @@ export default function CommunityPage() {
 
   const getCategoryColor = (cat: string) => {
     switch (cat.toLowerCase()) {
-      case "contract review": return "text-orange-400 border-orange-500/20 bg-orange-500/10";
-      case "phishing alert": return "text-red-400 border-red-500/20 bg-red-500/10";
-      case "payment issue": return "text-amber-400 border-amber-500/20 bg-amber-500/10";
-      default: return "text-sky-400 border-sky-500/20 bg-sky-500/10";
+      case "contract review":
+        return "text-orange-400 border-orange-500/20 bg-orange-500/10";
+      case "phishing alert":
+        return "text-red-400 border-red-500/20 bg-red-500/10";
+      case "payment issue":
+        return "text-amber-400 border-amber-500/20 bg-amber-500/10";
+      default:
+        return "text-sky-400 border-sky-500/20 bg-sky-500/10";
     }
   };
 
@@ -451,12 +489,14 @@ export default function CommunityPage() {
               </div>
 
               <h1 className="text-4xl font-black tracking-tight text-foreground sm:text-5xl mb-6">
-                Freelancer Security <span className="text-primary">Network</span>
+                Freelancer Security{" "}
+                <span className="text-primary">Network</span>
               </h1>
 
               <p className="text-base text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                Connect with freelancers, swap client reviews, flag contract threats,
-                and receive real-time fraud updates to keep your workspaces safe.
+                Connect with freelancers, swap client reviews, flag contract
+                threats, and receive real-time fraud updates to keep your
+                workspaces safe.
               </p>
             </div>
 
@@ -471,7 +511,8 @@ export default function CommunityPage() {
                     Discussion Forums
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                    Review suspect contracts, flag bad-faith clients, and share details about active spoofing campaigns.
+                    Review suspect contracts, flag bad-faith clients, and share
+                    details about active spoofing campaigns.
                   </p>
                 </div>
                 <button
@@ -492,7 +533,8 @@ export default function CommunityPage() {
                     Expert Consultation
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                    Direct access to experienced freelancers and legal advisors for assistance with payment disputes and contract threats.
+                    Direct access to experienced freelancers and legal advisors
+                    for assistance with payment disputes and contract threats.
                   </p>
                 </div>
                 <button
@@ -513,7 +555,8 @@ export default function CommunityPage() {
                     Verified Companies
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                    A curated database of vetted organizations with verified prompt payments, safe contracts, and positive reviews.
+                    A curated database of vetted organizations with verified
+                    prompt payments, safe contracts, and positive reviews.
                   </p>
                 </div>
                 <Link
@@ -534,7 +577,8 @@ export default function CommunityPage() {
                     Early Warning System
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                    Configure instant notification alerts triggered when job alerts, bad contracts, or phishing hosts match your profile.
+                    Configure instant notification alerts triggered when job
+                    alerts, bad contracts, or phishing hosts match your profile.
                   </p>
                 </div>
                 <button
@@ -555,14 +599,16 @@ export default function CommunityPage() {
                 </h2>
               </div>
               <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed">
-                Subscribe to receive security alerts and news updates when new community protection features go live.
+                Subscribe to receive security alerts and news updates when new
+                community protection features go live.
               </p>
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   toast({
                     title: "Subscribed Successfully",
-                    description: "You have been registered for general updates.",
+                    description:
+                      "You have been registered for general updates.",
                   });
                   (e.target as any).reset();
                 }}
@@ -603,7 +649,8 @@ export default function CommunityPage() {
                     Discussion Forums
                   </h1>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Share telemetry details and verify suspect contract agreements.
+                    Share telemetry details and verify suspect contract
+                    agreements.
                   </p>
                 </div>
               </div>
@@ -624,13 +671,20 @@ export default function CommunityPage() {
                 {isForumLoading ? (
                   <div className="text-center py-20">
                     <div className="spinner mx-auto mb-4 border-2 border-primary/20 border-t-primary" />
-                    <p className="text-sm text-muted-foreground font-medium">Synchronizing forum archives...</p>
+                    <p className="text-sm text-muted-foreground font-medium">
+                      Synchronizing forum archives...
+                    </p>
                   </div>
                 ) : threads.length === 0 ? (
                   <div className="text-center py-20 border border-slate-900 rounded-2xl bg-slate-900/20">
                     <MessageSquare className="h-10 w-10 text-slate-700 mx-auto mb-3" />
-                    <p className="text-sm font-semibold text-slate-400">No discussions posted yet.</p>
-                    <p className="text-xs text-slate-500 mt-1">Be the first to post a contract clause audit or suspect client check!</p>
+                    <p className="text-sm font-semibold text-slate-400">
+                      No discussions posted yet.
+                    </p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Be the first to post a contract clause audit or suspect
+                      client check!
+                    </p>
                   </div>
                 ) : (
                   threads.map((thread) => (
@@ -641,7 +695,9 @@ export default function CommunityPage() {
                     >
                       <div className="space-y-2.5 flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className={`text-[10px] font-bold px-2 py-0.5 border rounded-full uppercase tracking-wider ${getCategoryColor(thread.category)}`}>
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 border rounded-full uppercase tracking-wider ${getCategoryColor(thread.category)}`}
+                          >
                             {thread.category}
                           </span>
                           {thread.client && thread.client !== "N/A" && (
@@ -657,20 +713,27 @@ export default function CommunityPage() {
                           {thread.content}
                         </p>
                         <div className="flex items-center gap-4 text-[10px] text-muted-foreground/60">
-                          <span className="font-semibold text-muted-foreground">{thread.author}</span>
+                          <span className="font-semibold text-muted-foreground">
+                            {thread.author}
+                          </span>
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            {new Date(thread.createdAt).toLocaleDateString(undefined, {
-                              month: "short",
-                              day: "numeric",
-                            })}
+                            {new Date(thread.createdAt).toLocaleDateString(
+                              undefined,
+                              {
+                                month: "short",
+                                day: "numeric",
+                              },
+                            )}
                           </span>
                         </div>
                       </div>
 
                       <div className="flex flex-col items-center gap-1 justify-center bg-slate-950/40 border border-slate-850 px-3 py-2 rounded-xl text-muted-foreground shrink-0 min-w-[50px]">
                         <MessageSquare className="h-4.5 w-4.5 text-primary/70" />
-                        <span className="text-xs font-black text-foreground">{thread.repliesCount}</span>
+                        <span className="text-xs font-black text-foreground">
+                          {thread.repliesCount}
+                        </span>
                       </div>
                     </div>
                   ))
@@ -689,7 +752,9 @@ export default function CommunityPage() {
                 {/* Original Post */}
                 <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl space-y-4">
                   <div className="flex flex-wrap items-center gap-2 justify-between">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 border rounded-full uppercase tracking-wider ${getCategoryColor(selectedThread.category)}`}>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 border rounded-full uppercase tracking-wider ${getCategoryColor(selectedThread.category)}`}
+                    >
                       {selectedThread.category}
                     </span>
                     <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-mono">
@@ -698,12 +763,17 @@ export default function CommunityPage() {
                     </span>
                   </div>
 
-                  <h2 className="text-xl font-bold text-foreground">{selectedThread.title}</h2>
-                  
+                  <h2 className="text-xl font-bold text-foreground">
+                    {selectedThread.title}
+                  </h2>
+
                   {selectedThread.client && selectedThread.client !== "N/A" && (
                     <div className="flex items-center gap-2 bg-slate-950 border border-slate-800 px-3 py-2 rounded-xl w-fit text-xs font-mono text-muted-foreground">
                       <Bookmark className="h-4 w-4 text-primary" />
-                      Target Entity: <span className="text-foreground font-semibold">{selectedThread.client}</span>
+                      Target Entity:{" "}
+                      <span className="text-foreground font-semibold">
+                        {selectedThread.client}
+                      </span>
                     </div>
                   )}
 
@@ -713,7 +783,9 @@ export default function CommunityPage() {
 
                   <div className="flex items-center gap-2 border-t border-slate-850 pt-4 text-xs text-muted-foreground">
                     <span>Audit Thread initiated by:</span>
-                    <span className="font-bold text-foreground">{selectedThread.author}</span>
+                    <span className="font-bold text-foreground">
+                      {selectedThread.author}
+                    </span>
                   </div>
                 </div>
 
@@ -727,16 +799,30 @@ export default function CommunityPage() {
                   <div className="space-y-3.5">
                     {threadReplies.length === 0 ? (
                       <div className="text-center py-8 border border-slate-900/50 rounded-2xl bg-slate-900/10">
-                        <p className="text-xs text-muted-foreground">No replies yet. Contribute your advice or review below.</p>
+                        <p className="text-xs text-muted-foreground">
+                          No replies yet. Contribute your advice or review
+                          below.
+                        </p>
                       </div>
                     ) : (
                       threadReplies.map((reply, index) => (
-                        <div key={index} className="bg-slate-900/30 border border-slate-900/60 p-4 rounded-xl space-y-2">
+                        <div
+                          key={index}
+                          className="bg-slate-900/30 border border-slate-900/60 p-4 rounded-xl space-y-2"
+                        >
                           <div className="flex justify-between items-center text-[10px] text-muted-foreground">
-                            <span className="font-bold text-foreground">{reply.author}</span>
-                            <span>{new Date(reply.createdAt).toLocaleDateString()} at {new Date(reply.createdAt).toLocaleTimeString()}</span>
+                            <span className="font-bold text-foreground">
+                              {reply.author}
+                            </span>
+                            <span>
+                              {new Date(reply.createdAt).toLocaleDateString()}{" "}
+                              at{" "}
+                              {new Date(reply.createdAt).toLocaleTimeString()}
+                            </span>
                           </div>
-                          <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{reply.content}</p>
+                          <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
+                            {reply.content}
+                          </p>
                         </div>
                       ))
                     )}
@@ -744,11 +830,18 @@ export default function CommunityPage() {
                 </div>
 
                 {/* Post Reply Form */}
-                <form onSubmit={handleCreateReply} className="bg-slate-900/50 border border-slate-900 p-5 rounded-2xl space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Add Audit Verdict</h4>
+                <form
+                  onSubmit={handleCreateReply}
+                  className="bg-slate-900/50 border border-slate-900 p-5 rounded-2xl space-y-4"
+                >
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Add Audit Verdict
+                  </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">Your Name (Optional)</label>
+                      <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">
+                        Your Name (Optional)
+                      </label>
                       <input
                         type="text"
                         value={replyAuthor}
@@ -759,7 +852,9 @@ export default function CommunityPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">Reply Content</label>
+                    <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">
+                      Reply Content
+                    </label>
                     <textarea
                       required
                       rows={3}
@@ -785,7 +880,9 @@ export default function CommunityPage() {
               <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 relative max-h-[90vh] overflow-y-auto">
                   <div className="flex justify-between items-center pb-2 border-b border-slate-850">
-                    <h3 className="text-lg font-bold text-foreground">Launch Security Thread</h3>
+                    <h3 className="text-lg font-bold text-foreground">
+                      Launch Security Thread
+                    </h3>
                     <button
                       onClick={() => setShowCreateModal(false)}
                       className="text-muted-foreground hover:text-foreground text-lg cursor-pointer"
@@ -797,7 +894,9 @@ export default function CommunityPage() {
                   <form onSubmit={handleCreateThread} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="col-span-2">
-                        <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">Thread Title *</label>
+                        <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">
+                          Thread Title *
+                        </label>
                         <input
                           type="text"
                           required
@@ -809,7 +908,9 @@ export default function CommunityPage() {
                       </div>
 
                       <div>
-                        <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">Target Client/Domain (Optional)</label>
+                        <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">
+                          Target Client/Domain (Optional)
+                        </label>
                         <input
                           type="text"
                           value={newClient}
@@ -820,13 +921,17 @@ export default function CommunityPage() {
                       </div>
 
                       <div>
-                        <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">Thread Category</label>
+                        <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">
+                          Thread Category
+                        </label>
                         <select
                           value={newCategory}
                           onChange={(e) => setNewCategory(e.target.value)}
                           className="w-full bg-slate-950 border border-slate-800 focus:border-primary/50 text-xs p-3 outline-none text-foreground rounded-xl cursor-pointer"
                         >
-                          <option value="Contract Review">Contract Review</option>
+                          <option value="Contract Review">
+                            Contract Review
+                          </option>
                           <option value="Phishing Alert">Phishing Alert</option>
                           <option value="Payment Issue">Payment Issue</option>
                           <option value="Vetting">Vetting / Reputation</option>
@@ -843,14 +948,19 @@ export default function CommunityPage() {
                           onChange={(e) => setIsAnonymous(e.target.checked)}
                           className="rounded border-slate-800 bg-slate-950 text-primary focus:ring-0 cursor-pointer h-4 w-4"
                         />
-                        <label htmlFor="anon-check" className="text-xs font-medium text-muted-foreground cursor-pointer select-none">
+                        <label
+                          htmlFor="anon-check"
+                          className="text-xs font-medium text-muted-foreground cursor-pointer select-none"
+                        >
                           Post anonymously as "Anonymous Freelancer"
                         </label>
                       </div>
 
                       {!isAnonymous && (
                         <div>
-                          <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">Your Name</label>
+                          <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">
+                            Your Name
+                          </label>
                           <input
                             type="text"
                             value={newAuthor}
@@ -863,7 +973,9 @@ export default function CommunityPage() {
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">Description details *</label>
+                      <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">
+                        Description details *
+                      </label>
                       <textarea
                         required
                         rows={5}
@@ -879,7 +991,9 @@ export default function CommunityPage() {
                       disabled={isSubmittingThread}
                       className="w-full py-3 bg-primary text-primary-foreground font-bold text-xs rounded-xl hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
                     >
-                      {isSubmittingThread ? "Submitting Post..." : "Publish Security Thread"}
+                      {isSubmittingThread
+                        ? "Submitting Post..."
+                        : "Publish Security Thread"}
                     </button>
                   </form>
                 </div>
@@ -908,24 +1022,32 @@ export default function CommunityPage() {
                   Expert Consultation
                 </h1>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Request specialized freelance dispute audits from legal advisors.
+                  Request specialized freelance dispute audits from legal
+                  advisors.
                 </p>
               </div>
             </div>
 
             {/* Content Form */}
             {!caseSubmittedId ? (
-              <form onSubmit={handleCreateExpertRequest} className="bg-slate-900/50 border border-slate-900 p-6 rounded-2xl space-y-5 shadow-lg">
+              <form
+                onSubmit={handleCreateExpertRequest}
+                className="bg-slate-900/50 border border-slate-900 p-6 rounded-2xl space-y-5 shadow-lg"
+              >
                 <div className="flex items-center gap-3 p-4 bg-emerald-500/5 border border-emerald-500/15 rounded-xl text-emerald-400">
                   <FileText className="h-5 w-5 shrink-0" />
                   <p className="text-xs leading-normal">
-                    Initiating a dispute audit requires detailed client data. All information remains confidential under legal security guidelines.
+                    Initiating a dispute audit requires detailed client data.
+                    All information remains confidential under legal security
+                    guidelines.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">Client / Organization Name *</label>
+                    <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">
+                      Client / Organization Name *
+                    </label>
                     <input
                       type="text"
                       required
@@ -937,7 +1059,9 @@ export default function CommunityPage() {
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">Client Domain / Web Address</label>
+                    <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">
+                      Client Domain / Web Address
+                    </label>
                     <input
                       type="text"
                       value={expDomain}
@@ -948,7 +1072,9 @@ export default function CommunityPage() {
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">Disputed Amount (INR/USD Equivalent) *</label>
+                    <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">
+                      Disputed Amount (INR/USD Equivalent) *
+                    </label>
                     <input
                       type="number"
                       required
@@ -960,7 +1086,9 @@ export default function CommunityPage() {
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">Your Contact Email *</label>
+                    <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">
+                      Your Contact Email *
+                    </label>
                     <input
                       type="email"
                       required
@@ -973,7 +1101,9 @@ export default function CommunityPage() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">Dispute Case Description *</label>
+                  <label className="text-[10px] font-bold text-muted-foreground block mb-1.5">
+                    Dispute Case Description *
+                  </label>
                   <textarea
                     required
                     rows={6}
@@ -989,7 +1119,9 @@ export default function CommunityPage() {
                   disabled={isSubmittingExpert}
                   className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md active:scale-[0.98]"
                 >
-                  {isSubmittingExpert ? "Registering Dispute..." : "Initiate Professional Dispute Audit"}
+                  {isSubmittingExpert
+                    ? "Registering Dispute..."
+                    : "Initiate Professional Dispute Audit"}
                 </button>
               </form>
             ) : (
@@ -998,21 +1130,31 @@ export default function CommunityPage() {
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mx-auto shadow-[0_0_15px_rgba(16,185,129,0.1)]">
                   <CheckCircle2 className="h-8 w-8" />
                 </div>
-                
+
                 <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-foreground">Dispute Case Audit Initiated</h3>
+                  <h3 className="text-lg font-bold text-foreground">
+                    Dispute Case Audit Initiated
+                  </h3>
                   <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
-                    Your details were registered and assigned to an experienced freelancer advocate directory.
+                    Your details were registered and assigned to an experienced
+                    freelancer advocate directory.
                   </p>
                 </div>
 
                 <div className="bg-slate-950 border border-slate-850 p-4 rounded-xl max-w-sm mx-auto font-mono text-xs">
-                  <div className="text-muted-foreground">DISPUTE_TRACKING_ID</div>
-                  <div className="text-emerald-400 font-extrabold text-base tracking-widest mt-1 select-all">{caseSubmittedId}</div>
+                  <div className="text-muted-foreground">
+                    DISPUTE_TRACKING_ID
+                  </div>
+                  <div className="text-emerald-400 font-extrabold text-base tracking-widest mt-1 select-all">
+                    {caseSubmittedId}
+                  </div>
                 </div>
 
                 <p className="text-[11px] text-muted-foreground/80 leading-relaxed max-w-md mx-auto">
-                  An advisor will review your submitted timeline details and reach out to you via <span className="text-foreground font-bold">{expEmail}</span> within 24-48 business hours with legal guidelines.
+                  An advisor will review your submitted timeline details and
+                  reach out to you via{" "}
+                  <span className="text-foreground font-bold">{expEmail}</span>{" "}
+                  within 24-48 business hours with legal guidelines.
                 </p>
 
                 <div className="flex gap-3 justify-center pt-2">
@@ -1066,17 +1208,23 @@ export default function CommunityPage() {
             </div>
 
             {/* Alerts form */}
-            <form onSubmit={handleSaveAlerts} className="bg-slate-900/50 border border-slate-900 p-6 rounded-2xl space-y-6 shadow-lg">
+            <form
+              onSubmit={handleSaveAlerts}
+              className="bg-slate-900/50 border border-slate-900 p-6 rounded-2xl space-y-6 shadow-lg"
+            >
               <div className="flex items-center gap-3 p-4 bg-red-500/5 border border-red-500/15 rounded-xl text-red-400">
                 <AlertTriangle className="h-5 w-5 shrink-0" />
                 <p className="text-xs leading-normal">
-                  Our early warning agents index bad faith contract patterns and new phishing templates in real-time.
+                  Our early warning agents index bad faith contract patterns and
+                  new phishing templates in real-time.
                 </p>
               </div>
 
               <div className="space-y-3.5">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Select Alert Categories</h3>
-                
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Select Alert Categories
+                </h3>
+
                 {/* Toggles */}
                 <div className="space-y-2.5">
                   <div
@@ -1084,11 +1232,19 @@ export default function CommunityPage() {
                     className="flex justify-between items-center p-3 border border-slate-900 bg-slate-950/40 hover:bg-slate-950/70 hover:border-slate-800 rounded-xl cursor-pointer select-none transition-all"
                   >
                     <div>
-                      <div className="text-xs font-bold text-foreground">Fake Recruiter Job Offers</div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5">Urgent interviews, Telegram recruiters, burner domains.</div>
+                      <div className="text-xs font-bold text-foreground">
+                        Fake Recruiter Job Offers
+                      </div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">
+                        Urgent interviews, Telegram recruiters, burner domains.
+                      </div>
                     </div>
-                    <div className={`h-4.5 w-9 rounded-full transition-all relative ${alertsJobOffer ? 'bg-red-500' : 'bg-slate-800'}`}>
-                      <div className={`h-3 w-3 bg-white rounded-full absolute top-[3px] transition-all ${alertsJobOffer ? 'left-[21px]' : 'left-[5px]'}`} />
+                    <div
+                      className={`h-4.5 w-9 rounded-full transition-all relative ${alertsJobOffer ? "bg-red-500" : "bg-slate-800"}`}
+                    >
+                      <div
+                        className={`h-3 w-3 bg-white rounded-full absolute top-[3px] transition-all ${alertsJobOffer ? "left-[21px]" : "left-[5px]"}`}
+                      />
                     </div>
                   </div>
 
@@ -1097,11 +1253,20 @@ export default function CommunityPage() {
                     className="flex justify-between items-center p-3 border border-slate-900 bg-slate-950/40 hover:bg-slate-950/70 hover:border-slate-800 rounded-xl cursor-pointer select-none transition-all"
                   >
                     <div>
-                      <div className="text-xs font-bold text-foreground">UPI & Payment Escrow Scams</div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5">Fake payment proofs, chargeback loops, fake escrow portals.</div>
+                      <div className="text-xs font-bold text-foreground">
+                        UPI & Payment Escrow Scams
+                      </div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">
+                        Fake payment proofs, chargeback loops, fake escrow
+                        portals.
+                      </div>
                     </div>
-                    <div className={`h-4.5 w-9 rounded-full transition-all relative ${alertsPaymentFraud ? 'bg-red-500' : 'bg-slate-800'}`}>
-                      <div className={`h-3 w-3 bg-white rounded-full absolute top-[3px] transition-all ${alertsPaymentFraud ? 'left-[21px]' : 'left-[5px]'}`} />
+                    <div
+                      className={`h-4.5 w-9 rounded-full transition-all relative ${alertsPaymentFraud ? "bg-red-500" : "bg-slate-800"}`}
+                    >
+                      <div
+                        className={`h-3 w-3 bg-white rounded-full absolute top-[3px] transition-all ${alertsPaymentFraud ? "left-[21px]" : "left-[5px]"}`}
+                      />
                     </div>
                   </div>
 
@@ -1110,11 +1275,20 @@ export default function CommunityPage() {
                     className="flex justify-between items-center p-3 border border-slate-900 bg-slate-950/40 hover:bg-slate-950/70 hover:border-slate-800 rounded-xl cursor-pointer select-none transition-all"
                   >
                     <div>
-                      <div className="text-xs font-bold text-foreground">Non-Payment Contract Clauses</div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5">Exploitative Net-90 clauses, complete IP buyout without downpayment.</div>
+                      <div className="text-xs font-bold text-foreground">
+                        Non-Payment Contract Clauses
+                      </div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">
+                        Exploitative Net-90 clauses, complete IP buyout without
+                        downpayment.
+                      </div>
                     </div>
-                    <div className={`h-4.5 w-9 rounded-full transition-all relative ${alertsContractScams ? 'bg-red-500' : 'bg-slate-800'}`}>
-                      <div className={`h-3 w-3 bg-white rounded-full absolute top-[3px] transition-all ${alertsContractScams ? 'left-[21px]' : 'left-[5px]'}`} />
+                    <div
+                      className={`h-4.5 w-9 rounded-full transition-all relative ${alertsContractScams ? "bg-red-500" : "bg-slate-800"}`}
+                    >
+                      <div
+                        className={`h-3 w-3 bg-white rounded-full absolute top-[3px] transition-all ${alertsContractScams ? "left-[21px]" : "left-[5px]"}`}
+                      />
                     </div>
                   </div>
 
@@ -1123,18 +1297,29 @@ export default function CommunityPage() {
                     className="flex justify-between items-center p-3 border border-slate-900 bg-slate-950/40 hover:bg-slate-950/70 hover:border-slate-800 rounded-xl cursor-pointer select-none transition-all"
                   >
                     <div>
-                      <div className="text-xs font-bold text-foreground">Targeted Phishing Campaigns</div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5">Spoofed domains mimicking major freelance agencies and banks.</div>
+                      <div className="text-xs font-bold text-foreground">
+                        Targeted Phishing Campaigns
+                      </div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">
+                        Spoofed domains mimicking major freelance agencies and
+                        banks.
+                      </div>
                     </div>
-                    <div className={`h-4.5 w-9 rounded-full transition-all relative ${alertsPhishing ? 'bg-red-500' : 'bg-slate-800'}`}>
-                      <div className={`h-3 w-3 bg-white rounded-full absolute top-[3px] transition-all ${alertsPhishing ? 'left-[21px]' : 'left-[5px]'}`} />
+                    <div
+                      className={`h-4.5 w-9 rounded-full transition-all relative ${alertsPhishing ? "bg-red-500" : "bg-slate-800"}`}
+                    >
+                      <div
+                        className={`h-3 w-3 bg-white rounded-full absolute top-[3px] transition-all ${alertsPhishing ? "left-[21px]" : "left-[5px]"}`}
+                      />
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-2.5 border-t border-slate-900 pt-4">
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">Notification Destination</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
+                  Notification Destination
+                </label>
                 <div className="flex gap-2">
                   <div className="bg-slate-950 border border-slate-850 p-2.5 rounded-xl flex items-center justify-center text-muted-foreground">
                     <Mail className="h-4.5 w-4.5" />
@@ -1155,7 +1340,9 @@ export default function CommunityPage() {
                 disabled={isSavingAlerts}
                 className="w-full py-3 bg-red-650 hover:bg-red-500 text-white font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md active:scale-[0.98]"
               >
-                {isSavingAlerts ? "Subscribing..." : "Enable Early Warning Alerts"}
+                {isSavingAlerts
+                  ? "Subscribing..."
+                  : "Enable Early Warning Alerts"}
               </button>
             </form>
           </div>

@@ -139,9 +139,7 @@ function StatsCard({
         <h4 className="text-2xl font-bold text-foreground tracking-tight">
           {value}
         </h4>
-        <p className="text-[10px] text-muted-foreground/60 mt-1">
-          {sub}
-        </p>
+        <p className="text-[10px] text-muted-foreground/60 mt-1">{sub}</p>
       </div>
     </div>
   );

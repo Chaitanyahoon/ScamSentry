@@ -63,13 +63,15 @@ async def create_scan(
         db.add(scan)
         await db.flush()
     except Exception as db_exc:
-        logger.warning("Database write failed on startup; running in stateless mode: %s", db_exc)
+        logger.warning(
+            "Database write failed on startup; running in stateless mode: %s", db_exc
+        )
         database_ok = False
 
     if database_ok:
         try:
             result = await run_engine(url_str, db=db)
-            
+
             # Save ScanResult rows per layer
             for lr in result["layer_results"]:
                 scan_result = ScanResult(
@@ -89,7 +91,7 @@ async def create_scan(
             scan.processing_time_ms = result["processing_time_ms"]
             await db.commit()
             await db.refresh(scan)
-            
+
             scan_id_str = str(scan.id)
             submitted_at_dt = scan.submitted_at
         except Exception as exc:

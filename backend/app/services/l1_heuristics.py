@@ -189,22 +189,22 @@ def _is_dga_domain(domain: str) -> bool:
     """Detect if a domain label looks algorithmically generated (DGA)."""
     if not domain:
         return False
-    
+
     # Extract the main second-level domain name (e.g., "paypal" in "sub.paypal.com")
-    parts = domain.lower().split('.')
+    parts = domain.lower().split(".")
     if len(parts) >= 2:
         sld = parts[-2]
     else:
         sld = domain.lower()
-    
+
     if len(sld) < 8:
         return False
-        
+
     # Calculate vowel ratio
     vowels = set("aeiou")
     vowel_count = sum(1 for char in sld if char in vowels)
     vowel_ratio = vowel_count / len(sld) if len(sld) > 0 else 0
-    
+
     # Calculate consonant runs
     consonant_run = 0
     max_consonant_run = 0
@@ -218,7 +218,7 @@ def _is_dga_domain(domain: str) -> bool:
 
     # High entropy check
     entropy = _calculate_entropy(sld)
-    
+
     # If entropy is high and vowel ratio is extremely low, or long consonant run, or digit ratio is high
     digit_count = sum(1 for char in sld if char.isdigit())
     digit_ratio = digit_count / len(sld) if len(sld) > 0 else 0
@@ -229,7 +229,7 @@ def _is_dga_domain(domain: str) -> bool:
         return True
     if len(sld) > 10 and digit_ratio > 0.4:
         return True
-        
+
     return False
 
 
@@ -409,7 +409,9 @@ def check_heuristics(url: str) -> dict:
     if hostname:
         if _is_dga_domain(hostname):
             score += 35
-            triggered.append("Domain name appears to be algorithmically generated (DGA pattern)")
+            triggered.append(
+                "Domain name appears to be algorithmically generated (DGA pattern)"
+            )
 
     # Cap at MAX_L1_SCORE
     capped_score = min(score, MAX_L1_SCORE)

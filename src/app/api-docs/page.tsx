@@ -103,9 +103,7 @@ export default function ApiDocsPage() {
         {/* Main Docs Content */}
         <div className="lg:col-span-2 space-y-10">
           <section>
-            <h2 className="text-xl font-bold mb-4 text-primary">
-              Overview
-            </h2>
+            <h2 className="text-xl font-bold mb-4 text-primary">Overview</h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
               The ScamSentry API is a blazing-fast, deterministic validation
               engine that processes URLs through 4 intensive OSINT layers

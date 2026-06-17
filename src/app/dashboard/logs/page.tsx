@@ -290,9 +290,7 @@ export default function ForensicLogsPage() {
               ></span>
               Status: {isPlaying ? "SCROLLING" : "HALTED"}
             </div>
-            <span className="text-[10px] text-muted-foreground/30">
-              |
-            </span>
+            <span className="text-[10px] text-muted-foreground/30">|</span>
             <span className="text-[10px] text-muted-foreground/50">
               Buffer: {filteredLogs.length} logs
             </span>

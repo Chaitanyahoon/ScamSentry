@@ -74,7 +74,10 @@ export async function POST(req: Request) {
       try {
         db = getAdminDb();
       } catch (firebaseErr) {
-        console.error("[VALIDATE] Firebase Admin not initialized:", firebaseErr);
+        console.error(
+          "[VALIDATE] Firebase Admin not initialized:",
+          firebaseErr,
+        );
         return NextResponse.json(
           { error: "Internal Server Error. Database connectivity offline." },
           { status: 500, headers: CORS_HEADERS },

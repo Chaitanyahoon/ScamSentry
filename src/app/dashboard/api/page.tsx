@@ -142,10 +142,19 @@ export default function ApiDashboardPage() {
 
   const layerData = metrics?.layerAccuracy
     ? [
-        { name: "Heuristics", rate: Math.round(metrics.layerAccuracy.heuristics) },
+        {
+          name: "Heuristics",
+          rate: Math.round(metrics.layerAccuracy.heuristics),
+        },
         { name: "DNS/SSL", rate: Math.round(metrics.layerAccuracy.forensics) },
-        { name: "Threat Intel", rate: Math.round(metrics.layerAccuracy.threatIntel) },
-        { name: "Ledger DB", rate: Math.round(metrics.layerAccuracy.internalGraph) },
+        {
+          name: "Threat Intel",
+          rate: Math.round(metrics.layerAccuracy.threatIntel),
+        },
+        {
+          name: "Ledger DB",
+          rate: Math.round(metrics.layerAccuracy.internalGraph),
+        },
       ]
     : [
         { name: "Heuristics", rate: 70 },
@@ -299,7 +308,7 @@ export default function ApiDashboardPage() {
       // 3. Fetch Payment Requests
       const paymentsQ = query(
         collection(db, "payment_requests"),
-        where("userId", "==", user.uid)
+        where("userId", "==", user.uid),
       );
       const paymentsSnapshot = await getDocs(paymentsQ).catch(() => null);
       const paymentsList: any[] = [];
@@ -316,7 +325,7 @@ export default function ApiDashboardPage() {
         });
         paymentsList.sort(
           (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
       }
       setPaymentRequests(paymentsList);
@@ -700,15 +709,20 @@ export default function ApiDashboardPage() {
                       ) : isPending ? (
                         <div className="w-full text-center py-2 px-3 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20 flex flex-col gap-0.5 select-none">
                           <span className="text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1">
-                            <Clock className="h-3 w-3 animate-spin text-amber-500" /> Pending Review
+                            <Clock className="h-3 w-3 animate-spin text-amber-500" />{" "}
+                            Pending Review
                           </span>
-                          <span className="text-[9px] text-muted-foreground/80 font-mono font-medium">UTR: {recentRequest.utrNumber}</span>
+                          <span className="text-[9px] text-muted-foreground/80 font-mono font-medium">
+                            UTR: {recentRequest.utrNumber}
+                          </span>
                         </div>
                       ) : isUpgrade ? (
                         <div className="space-y-1.5">
                           {isRejected && (
                             <div className="text-center py-1.5 px-2 bg-destructive/10 text-destructive border border-destructive/20 rounded-lg text-[9px] font-medium leading-tight">
-                              Verification failed (UTR: {recentRequest.utrNumber}). Please review payment details and retry.
+                              Verification failed (UTR:{" "}
+                              {recentRequest.utrNumber}). Please review payment
+                              details and retry.
                             </div>
                           )}
                           <Button
@@ -775,14 +789,22 @@ export default function ApiDashboardPage() {
                             UTR: {req.utrNumber}
                           </p>
                           <p className="text-[9px] text-muted-foreground/60">
-                            {new Date(req.createdAt).toLocaleDateString(undefined, {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })} at {new Date(req.createdAt).toLocaleTimeString(undefined, {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                            {new Date(req.createdAt).toLocaleDateString(
+                              undefined,
+                              {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              },
+                            )}{" "}
+                            at{" "}
+                            {new Date(req.createdAt).toLocaleTimeString(
+                              undefined,
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
                           </p>
                         </div>
                         <span
@@ -932,7 +954,7 @@ export default function ApiDashboardPage() {
                 <Activity className="h-5 w-5 text-primary" />
                 API Telemetry & Interception Analytics
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Scan Volume Area Chart */}
                 <div className="space-y-2">
@@ -941,21 +963,59 @@ export default function ApiDashboardPage() {
                   </h3>
                   <div className="h-48 w-full bg-slate-950/20 border border-border/40 rounded-xl p-2">
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                      <AreaChart
+                        data={chartData}
+                        margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                      >
                         <defs>
-                          <linearGradient id="colorScans" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#f97316" stopOpacity={0.2}/>
-                            <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                          <linearGradient
+                            id="colorScans"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="#f97316"
+                              stopOpacity={0.2}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="#f97316"
+                              stopOpacity={0}
+                            />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                        <XAxis dataKey="date" stroke="#9ca3af" fontSize={9} tickLine={false} />
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="rgba(255,255,255,0.05)"
+                        />
+                        <XAxis
+                          dataKey="date"
+                          stroke="#9ca3af"
+                          fontSize={9}
+                          tickLine={false}
+                        />
                         <YAxis stroke="#9ca3af" fontSize={9} tickLine={false} />
                         <Tooltip
-                          contentStyle={{ backgroundColor: "#0f172a", borderColor: "rgba(255,255,255,0.08)", borderRadius: "8px", fontSize: "11px" }}
+                          contentStyle={{
+                            backgroundColor: "#0f172a",
+                            borderColor: "rgba(255,255,255,0.08)",
+                            borderRadius: "8px",
+                            fontSize: "11px",
+                          }}
                           itemStyle={{ color: "#f97316" }}
                         />
-                        <Area type="monotone" dataKey="scans" stroke="#f97316" strokeWidth={2} fillOpacity={1} fill="url(#colorScans)" name="API Scans" />
+                        <Area
+                          type="monotone"
+                          dataKey="scans"
+                          stroke="#f97316"
+                          strokeWidth={2}
+                          fillOpacity={1}
+                          fill="url(#colorScans)"
+                          name="API Scans"
+                        />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -968,18 +1028,54 @@ export default function ApiDashboardPage() {
                   </h3>
                   <div className="h-48 w-full bg-slate-950/20 border border-border/40 rounded-xl p-2">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={layerData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                        <XAxis dataKey="name" stroke="#9ca3af" fontSize={8} tickLine={false} />
-                        <YAxis stroke="#9ca3af" fontSize={9} tickLine={false} domain={[0, 100]} />
+                      <BarChart
+                        data={layerData}
+                        margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="rgba(255,255,255,0.05)"
+                        />
+                        <XAxis
+                          dataKey="name"
+                          stroke="#9ca3af"
+                          fontSize={8}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          stroke="#9ca3af"
+                          fontSize={9}
+                          tickLine={false}
+                          domain={[0, 100]}
+                        />
                         <Tooltip
-                          contentStyle={{ backgroundColor: "#0f172a", borderColor: "rgba(255,255,255,0.08)", borderRadius: "8px", fontSize: "11px" }}
+                          contentStyle={{
+                            backgroundColor: "#0f172a",
+                            borderColor: "rgba(255,255,255,0.08)",
+                            borderRadius: "8px",
+                            fontSize: "11px",
+                          }}
                           itemStyle={{ color: "#f97316" }}
                         />
-                        <Bar dataKey="rate" fill="#f97316" radius={[4, 4, 0, 0]} name="Hit Rate %">
+                        <Bar
+                          dataKey="rate"
+                          fill="#f97316"
+                          radius={[4, 4, 0, 0]}
+                          name="Hit Rate %"
+                        >
                           {layerData.map((entry, index) => {
-                            const colors = ["#f97316", "#f59e0b", "#ef4444", "#3b82f6"];
-                            return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                            const colors = [
+                              "#f97316",
+                              "#f59e0b",
+                              "#ef4444",
+                              "#3b82f6",
+                            ];
+                            return (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={colors[index % colors.length]}
+                              />
+                            );
                           })}
                         </Bar>
                       </BarChart>

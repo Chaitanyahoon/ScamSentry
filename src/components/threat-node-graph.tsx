@@ -266,10 +266,12 @@ export default function ThreatNodeGraph({ reports }: ThreatNodeGraphProps) {
 
       <div className="mt-4 pt-4 border-t border-border flex justify-between items-center text-[10px] font-medium text-muted-foreground/60">
         <span className="flex items-center gap-1">
-          <div className="h-1.5 w-1.5 rounded-full bg-red-500" /> Critical Threats
+          <div className="h-1.5 w-1.5 rounded-full bg-red-500" /> Critical
+          Threats
         </span>
         <span className="flex items-center gap-1">
-          <div className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Suspicious Links
+          <div className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Suspicious
+          Links
         </span>
         <span className="flex items-center gap-1">
           <div className="h-1.5 w-1.5 rounded-full bg-yellow-500" /> Shared Hubs
