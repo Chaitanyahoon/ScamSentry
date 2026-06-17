@@ -35,7 +35,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 export default function ReportDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const { voteHelpful, flagReport, incrementViews } = useReports();
+  const { reports, voteHelpful, flagReport, incrementViews } = useReports();
   const { toast } = useToast();
 
   const [report, setReport] = useState<ScamReport | null>(null);
@@ -72,6 +72,19 @@ export default function ReportDetailPage() {
     // Pre-emptive view increment
     incrementViews(id as string);
 
+    if (!db) {
+      console.warn("Firebase Firestore is unavailable. Trying context lookup.");
+      const r = reports.find((x) => x.id === id);
+      if (r) {
+        setReport(r);
+        setError(false);
+      } else {
+        setError(true);
+      }
+      setLoading(false);
+      return;
+    }
+
     const docRef = doc(db, "scam_reports", id as string);
     const unsubscribe = onSnapshot(
       docRef,
@@ -93,7 +106,7 @@ export default function ReportDetailPage() {
 
     return () => unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, db, reports]);
 
   // consensus flash effect on helpful votes update
   useEffect(() => {

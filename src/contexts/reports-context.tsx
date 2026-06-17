@@ -278,6 +278,12 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
 
   // Listen to reports from Firebase in real-time
   useEffect(() => {
+    if (!db) {
+      console.warn("Firebase Firestore is unavailable. Falling back to local mock data.");
+      setReports(initialReports);
+      setIsLoadingReports(false);
+      return;
+    }
     setIsLoadingReports(true);
     const q = query(
       collection(db, "scam_reports"),

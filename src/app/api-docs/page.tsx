@@ -34,7 +34,7 @@ export default function ApiDocsPage() {
   }, [user]);
 
   const fetchUserKey = async () => {
-    if (!user) return;
+    if (!user || !db) return;
     const q = query(
       collection(db, "api_keys"),
       where("userId", "==", user.uid),
@@ -47,7 +47,7 @@ export default function ApiDocsPage() {
   };
 
   const generateKey = async () => {
-    if (!user) return;
+    if (!user || !db) return;
     setIsGenerating(true);
     try {
       const newKey =

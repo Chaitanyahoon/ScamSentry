@@ -56,6 +56,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Handle user authentication state
   useEffect(() => {
+    if (!auth) {
+      console.warn("Firebase Auth is unavailable.");
+      setLoading(false);
+      return;
+    }
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
 
