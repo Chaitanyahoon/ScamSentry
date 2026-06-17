@@ -108,7 +108,7 @@ export default function ExtensionSetupPage() {
             interface.
           </p>
           <p>
-            Locate the switch labeled <strong>"Developer mode"</strong> and
+            Locate the switch labeled <strong>&quot;Developer mode&quot;</strong> and
             toggle it to the <strong>ON</strong> position.
           </p>
           <div className="p-4 bg-primary/5 border border-primary/20 rounded-2xl flex items-center gap-4">
@@ -137,7 +137,7 @@ export default function ExtensionSetupPage() {
             the left side of the page.
           </p>
           <p>
-            Click the button labeled <strong>"Load unpacked"</strong>.
+            Click the button labeled <strong>&quot;Load unpacked&quot;</strong>.
           </p>
           <p>
             In the file selection window that appears, navigate to and select

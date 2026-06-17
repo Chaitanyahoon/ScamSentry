@@ -32,6 +32,35 @@ function useCountUp(end: number, duration: number = 1600) {
   return { count, ref };
 }
 
+function StatItem({ stat }: { stat: { label: string; value: number; sub: string; symbol: string } }) {
+  const { count, ref } = useCountUp(stat.value);
+  return (
+    <div
+      ref={ref}
+      className="glass-card p-6 rounded-2xl flex flex-col justify-between h-40"
+    >
+      <div>
+        <dt className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+          {stat.label}
+        </dt>
+        <dd className="mt-4 text-3xl font-bold tracking-tight text-foreground flex items-baseline gap-1">
+          {count.toLocaleString()}
+          {stat.symbol && (
+            <span className="text-primary text-lg font-semibold">
+              {stat.symbol}
+            </span>
+          )}
+        </dd>
+      </div>
+
+      <div className="pt-4 border-t border-border">
+        <p className="text-xs text-muted-foreground">{stat.sub}</p>
+      </div>
+    </div>
+  );
+}
+
 export function Stats() {
   const { reports } = useReports();
 
@@ -74,35 +103,9 @@ export function Stats() {
 
       <div className="container relative px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat) => {
-            const { count, ref } = useCountUp(stat.value);
-            return (
-              <div
-                key={stat.label}
-                ref={ref}
-                className="glass-card p-6 rounded-2xl flex flex-col justify-between h-40"
-              >
-                <div>
-                  <dt className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                    {stat.label}
-                  </dt>
-                  <dd className="mt-4 text-3xl font-bold tracking-tight text-foreground flex items-baseline gap-1">
-                    {count.toLocaleString()}
-                    {stat.symbol && (
-                      <span className="text-primary text-lg font-semibold">
-                        {stat.symbol}
-                      </span>
-                    )}
-                  </dd>
-                </div>
-
-                <div className="pt-4 border-t border-border">
-                  <p className="text-xs text-muted-foreground">{stat.sub}</p>
-                </div>
-              </div>
-            );
-          })}
+          {stats.map((stat) => (
+            <StatItem key={stat.label} stat={stat} />
+          ))}
         </div>
 
         {/* Global Live Indicators */}

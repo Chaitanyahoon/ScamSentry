@@ -5,7 +5,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "lint": "next lint",
+    "lint": "eslint src",
     "start": "next start",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -79,6 +79,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "baseline-browser-mapping": "^2.10.11",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.15",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
     "postcss": "^8.5",

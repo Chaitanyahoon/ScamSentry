@@ -75,7 +75,7 @@ export function Features() {
               <span className="text-primary italic">ScamSentry.</span>
             </h2>
             <p className="text-sm text-muted-foreground max-w-xl leading-relaxed">
-              Our forensic engine doesn't just scan; it dissects. From
+              Our forensic engine doesn&apos;t just scan; it dissects. From
               deterministic heuristics to neural intent detection, every URL
               passes through a gauntlet of verification.
             </p>

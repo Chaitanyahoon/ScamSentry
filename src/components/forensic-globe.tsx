@@ -242,7 +242,7 @@ export function ForensicGlobe({ reports: propReports }: ForensicGlobeProps) {
           </div>
 
           <p className="text-[10px] text-muted-foreground line-clamp-3 italic mb-4 border-l-2 border-primary/30 pl-3">
-            "{selectedIntel.description}"
+            &quot;{selectedIntel.description}&quot;
           </p>
 
           <Button

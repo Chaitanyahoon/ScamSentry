@@ -952,7 +952,7 @@ export default function CommunityPage() {
                           htmlFor="anon-check"
                           className="text-xs font-medium text-muted-foreground cursor-pointer select-none"
                         >
-                          Post anonymously as "Anonymous Freelancer"
+                          Post anonymously as &quot;Anonymous Freelancer&quot;
                         </label>
                       </div>
 
