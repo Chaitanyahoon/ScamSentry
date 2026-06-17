@@ -59,6 +59,13 @@ async def check_ledger(url: str, db: AsyncSession) -> dict:
         if "." in candidate:  # need at least a TLD
             candidates.append(candidate)
 
+    if not candidates:
+        return {
+            "score": 0,
+            "passed": True,
+            "details": {"domain": domain, "match": None},
+        }
+
     try:
         stmt = select(LedgerEntry).where(LedgerEntry.domain.in_(candidates))
         result = await db.execute(stmt)

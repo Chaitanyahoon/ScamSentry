@@ -14,6 +14,52 @@ export async function POST(req: Request) {
       );
     }
 
+    try {
+      const parsedUrl = new URL(webhookUrl);
+      if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+        return NextResponse.json(
+          { error: "Invalid webhook protocol (HTTP/HTTPS only)" },
+          { status: 400 },
+        );
+      }
+
+      const hostname = parsedUrl.hostname.toLowerCase();
+      if (
+        hostname === "localhost" ||
+        hostname === "127.0.0.1" ||
+        hostname === "[::1]" ||
+        hostname === "0.0.0.0" ||
+        hostname === "169.254.169.254"
+      ) {
+        return NextResponse.json(
+          { error: "SSRF prevention: Invalid webhook URL" },
+          { status: 400 },
+        );
+      }
+
+      const ipv4Pattern = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+      const match = hostname.match(ipv4Pattern);
+      if (match) {
+        const [, p1, p2] = match.map(Number);
+        if (
+          p1 === 10 ||
+          (p1 === 172 && p2 >= 16 && p2 <= 31) ||
+          (p1 === 192 && p2 === 168) ||
+          (p1 === 169 && p2 === 254)
+        ) {
+          return NextResponse.json(
+            { error: "SSRF prevention: Private IPv4 ranges are blocked" },
+            { status: 400 },
+          );
+        }
+      }
+    } catch (err) {
+      return NextResponse.json(
+        { error: "Invalid webhook URL format" },
+        { status: 400 },
+      );
+    }
+
     if (apiKey !== process.env.SCAM_SENTRY_B2B_KEY) {
       return NextResponse.json(
         { error: "Unauthorized B2B access" },

@@ -56,13 +56,15 @@ export function getCertificateInfo(
       },
     );
 
+    let timer: NodeJS.Timeout | undefined;
+
     socket.on("error", () => {
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
       socket.destroy();
       resolve(null);
     });
 
-    const timer = setTimeout(() => {
+    timer = setTimeout(() => {
       socket.destroy();
       resolve(null);
     }, 3500);

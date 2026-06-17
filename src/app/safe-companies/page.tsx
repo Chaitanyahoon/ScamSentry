@@ -142,7 +142,7 @@ export default function SafeCompaniesPage() {
     };
 
     fetchSafeCompanies();
-  }, []);
+  }, [toast]);
 
   return (
     <div className="min-h-screen bg-background py-16 relative overflow-hidden">

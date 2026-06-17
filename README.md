@@ -93,18 +93,18 @@ Every URL/Email submitted goes through a gauntlet of verification layers, engine
 
 The repository is structured as a clean monorepo:
 
-*   📂 **[src/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/src)**: Next.js Frontend Application
-    *   📂 **[app/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/src/app)**: Web page routes, layout templates, and API endpoints (e.g. validator, community, reports).
-    *   📂 **[components/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/src/components)**: Cyberpunk-themed widgets (Forensic Globe, Threat Node Graph, Recharts logs panels).
-    *   📂 **[lib/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/src/lib)**: Shared utility modules (Firebase admin client, rate-limit profiles, webhooks).
-*   📂 **[backend/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/backend)**: High-Performance FastAPI Scanner Server (Python 3.13)
-    *   📂 **[app/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/backend/app)**: Core Python logic including database models, routers, and layers L1–L4 engines.
-    *   📂 **[tests/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/backend/tests)**: Comprehensive Python pytest suites.
-*   📂 **[extension/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/extension)**: Real-time Chrome Interception Extension (Manifest v3)
-    *   📄 **[background.js](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/extension/background.js)**: Async service worker listening to tab transitions and triggering blocks.
-    *   📄 **[blocked.html](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/extension/blocked.html)**: Interactive block page warning users away from detected threats.
-*   📂 **[__tests__/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/__tests__)**: Jest Frontend automated tests folder.
-*   📂 **[scripts/](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/scripts)**: Batch scanning command line tools ([cli.ts](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/scripts/cli.ts)).
+*   📂 **[src/](src)**: Next.js Frontend Application
+    *   📂 **[app/](src/app)**: Web page routes, layout templates, and API endpoints (e.g. validator, community, reports).
+    *   📂 **[components/](src/components)**: Cyberpunk-themed widgets (Forensic Globe, Threat Node Graph, Recharts logs panels).
+    *   📂 **[lib/](src/lib)**: Shared utility modules (Firebase admin client, rate-limit profiles, webhooks).
+*   📂 **[backend/](backend)**: High-Performance FastAPI Scanner Server (Python 3.13)
+    *   📂 **[app/](backend/app)**: Core Python logic including database models, routers, and layers L1–L4 engines.
+    *   📂 **[tests/](backend/tests)**: Comprehensive Python pytest suites.
+*   📂 **[extension/](extension)**: Real-time Chrome Interception Extension (Manifest v3)
+    *   📄 **[background.js](extension/background.js)**: Async service worker listening to tab transitions and triggering blocks.
+    *   📄 **[blocked.html](extension/blocked.html)**: Interactive block page warning users away from detected threats.
+*   📂 **[__tests__/](__tests__)**: Jest Frontend automated tests folder.
+*   📂 **[scripts/](scripts)**: Batch scanning command line tools ([cli.ts](scripts/cli.ts)).
 
 ---
 
@@ -197,16 +197,16 @@ The repository is structured as a clean monorepo:
 ## 🤝 Contributing & Licensing
 
 We welcome all community contributions, security audits, and issue reports!
-*   Refer to our **[Contributing Guide](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/CONTRIBUTING.md)** for developer setup details, code formatting standards, and PR workflows.
-*   ScamSentry is licensed under the open-source **[MIT License](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/LICENSE)**.
+*   Refer to our **[Contributing Guide](CONTRIBUTING.md)** for developer setup details, code formatting standards, and PR workflows.
+*   ScamSentry is licensed under the open-source **[MIT License](LICENSE)**.
 
 ---
 
 ## 🧪 Continuous Integration (CI/CD)
 
 The repository runs automated quality checks on pull requests and commits to the `main` branch:
-*   **[Frontend CI/CD](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/.github/workflows/frontend-ci.yml)**: Validates ESLint standards, checks Next.js production builds, and runs the Jest unit testing suite.
-*   **[Backend CI/CD](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/.github/workflows/backend-ci.yml)**: Enforces Ruff linting and verifies scan engine pipelines using pytest.
+*   **[Frontend CI/CD](.github/workflows/frontend-ci.yml)**: Validates ESLint standards, checks Next.js production builds, and runs the Jest unit testing suite.
+*   **[Backend CI/CD](.github/workflows/backend-ci.yml)**: Enforces Ruff linting and verifies scan engine pipelines using pytest.
 
 ---
 

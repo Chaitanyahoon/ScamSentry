@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { db } from "@/lib/firebase";
 import {
@@ -27,13 +27,7 @@ export default function ApiDocsPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      fetchUserKey();
-    }
-  }, [user]);
-
-  const fetchUserKey = async () => {
+  const fetchUserKey = useCallback(async () => {
     if (!user || !db) return;
     const q = query(
       collection(db, "api_keys"),
@@ -44,7 +38,13 @@ export default function ApiDocsPage() {
     if (!snapshot.empty) {
       setApiKey(snapshot.docs[0].data());
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserKey();
+    }
+  }, [user, fetchUserKey]);
 
   const generateKey = async () => {
     if (!user || !db) return;

@@ -21,6 +21,15 @@ class InMemoryLimiter {
 
   async limit(identifier: string): Promise<{ success: boolean }> {
     const now = Date.now();
+
+    if (this.hits.size > 100) {
+      for (const [key, value] of this.hits.entries()) {
+        if (now > value.resetTime) {
+          this.hits.delete(key);
+        }
+      }
+    }
+
     const record = this.hits.get(identifier);
     if (!record || now > record.resetTime) {
       this.hits.set(identifier, { count: 1, resetTime: now + this.windowMs });

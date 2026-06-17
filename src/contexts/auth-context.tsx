@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useState,
   useRef,
+  useCallback,
 } from "react";
 import {
   User,
@@ -53,6 +54,76 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const sessionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const inactivityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const signOut = useCallback(async () => {
+    try {
+      if (user && ADMIN_CONFIG.ENABLE_AUDIT_LOG) {
+        await logAuditAction({
+          userId: user.uid,
+          userEmail: user.email || "",
+          action: "ADMIN_LOGOUT",
+          resourceType: "auth",
+          resourceId: user.uid,
+          details: {},
+          status: "success",
+        });
+      }
+
+      await firebaseSignOut(auth);
+      setRole(null);
+
+      // Clear timers
+      if (sessionTimeoutRef.current) clearTimeout(sessionTimeoutRef.current);
+      if (inactivityTimeoutRef.current)
+        clearTimeout(inactivityTimeoutRef.current);
+
+      router.push("/login");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  }, [user, router]);
+
+  const handleSessionTimeout = useCallback(async () => {
+    console.warn("[AUTH] Session timeout - logging out user");
+    if (user && ADMIN_CONFIG.ENABLE_AUDIT_LOG) {
+      await logAuditAction({
+        userId: user.uid,
+        userEmail: user.email || "",
+        action: "SESSION_TIMEOUT",
+        resourceType: "auth",
+        resourceId: user.uid,
+        details: { reason: "Session expired" },
+        status: "success",
+      });
+    }
+    await signOut();
+  }, [user, signOut]);
+
+  const handleInactivityTimeout = useCallback(async () => {
+    console.warn("[AUTH] Inactivity timeout - logging out user");
+    if (user && ADMIN_CONFIG.ENABLE_AUDIT_LOG) {
+      await logAuditAction({
+        userId: user.uid,
+        userEmail: user.email || "",
+        action: "SESSION_TIMEOUT",
+        resourceType: "auth",
+        resourceId: user.uid,
+        details: { reason: "Inactivity timeout" },
+        status: "success",
+      });
+    }
+    await signOut();
+  }, [user, signOut]);
+
+  const resetActivityTimer = useCallback(() => {
+    if (inactivityTimeoutRef.current) {
+      clearTimeout(inactivityTimeoutRef.current);
+    }
+
+    inactivityTimeoutRef.current = setTimeout(() => {
+      handleInactivityTimeout();
+    }, ADMIN_CONFIG.INACTIVITY_TIMEOUT_MS);
+  }, [handleInactivityTimeout]);
 
   // Handle user authentication state
   useEffect(() => {
@@ -111,7 +182,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [resetActivityTimer]);
 
   // Set up session timeout
   useEffect(() => {
@@ -124,7 +195,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (sessionTimeoutRef.current) clearTimeout(sessionTimeoutRef.current);
       };
     }
-  }, [user]);
+  }, [user, handleSessionTimeout]);
 
   // Set up inactivity timeout and activity tracking
   useEffect(() => {
@@ -150,77 +221,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (inactivityTimeoutRef.current)
         clearTimeout(inactivityTimeoutRef.current);
     };
-  }, [user]);
-
-  const resetActivityTimer = () => {
-    if (inactivityTimeoutRef.current) {
-      clearTimeout(inactivityTimeoutRef.current);
-    }
-
-    inactivityTimeoutRef.current = setTimeout(() => {
-      handleInactivityTimeout();
-    }, ADMIN_CONFIG.INACTIVITY_TIMEOUT_MS);
-  };
-
-  const handleSessionTimeout = async () => {
-    console.warn("[AUTH] Session timeout - logging out user");
-    if (user && ADMIN_CONFIG.ENABLE_AUDIT_LOG) {
-      await logAuditAction({
-        userId: user.uid,
-        userEmail: user.email || "",
-        action: "SESSION_TIMEOUT",
-        resourceType: "auth",
-        resourceId: user.uid,
-        details: { reason: "Session expired" },
-        status: "success",
-      });
-    }
-    await signOut();
-  };
-
-  const handleInactivityTimeout = async () => {
-    console.warn("[AUTH] Inactivity timeout - logging out user");
-    if (user && ADMIN_CONFIG.ENABLE_AUDIT_LOG) {
-      await logAuditAction({
-        userId: user.uid,
-        userEmail: user.email || "",
-        action: "SESSION_TIMEOUT",
-        resourceType: "auth",
-        resourceId: user.uid,
-        details: { reason: "Inactivity timeout" },
-        status: "success",
-      });
-    }
-    await signOut();
-  };
-
-  const signOut = async () => {
-    try {
-      if (user && ADMIN_CONFIG.ENABLE_AUDIT_LOG) {
-        await logAuditAction({
-          userId: user.uid,
-          userEmail: user.email || "",
-          action: "ADMIN_LOGOUT",
-          resourceType: "auth",
-          resourceId: user.uid,
-          details: {},
-          status: "success",
-        });
-      }
-
-      await firebaseSignOut(auth);
-      setRole(null);
-
-      // Clear timers
-      if (sessionTimeoutRef.current) clearTimeout(sessionTimeoutRef.current);
-      if (inactivityTimeoutRef.current)
-        clearTimeout(inactivityTimeoutRef.current);
-
-      router.push("/login");
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
+  }, [user, resetActivityTimer]);
 
   return (
     <AuthContext.Provider

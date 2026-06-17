@@ -465,3 +465,33 @@ async def test_cast_vote_invalid(client) -> None:
     payload = {"url": "https://some-site.xyz", "vote": "maybe"}
     response = await client.post("/api/v1/scan/vote", json=payload)
     assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_cast_vote_empty_url(client) -> None:
+    payload = {"url": "", "vote": "unsafe"}
+    response = await client.post("/api/v1/scan/vote", json=payload)
+    assert response.status_code == 400
+    assert "invalid" in response.json()["detail"].lower()
+
+
+@pytest.mark.asyncio
+async def test_create_ledger_entry_empty_domain(client) -> None:
+    headers = {"X-Admin-Key": "test-admin-secret-key-12345"}
+    payload = {"domain": "", "threat_type": "phishing", "confidence": 50}
+    response = await client.post("/api/v1/admin/ledger", json=payload, headers=headers)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["domain"] == ""
+
+
+@pytest.mark.asyncio
+async def test_create_ledger_entry_confidence_out_of_range(client) -> None:
+    headers = {"X-Admin-Key": "test-admin-secret-key-12345"}
+    payload = {
+        "domain": "out-of-range.com",
+        "threat_type": "phishing",
+        "confidence": 150,
+    }
+    response = await client.post("/api/v1/admin/ledger", json=payload, headers=headers)
+    assert response.status_code == 422

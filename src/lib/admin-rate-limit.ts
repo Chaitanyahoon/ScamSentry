@@ -75,6 +75,16 @@ const localWriteLimitMap = new Map<string, LocalRateLimitData>();
 const localDeleteLimitMap = new Map<string, LocalRateLimitData>();
 const localBatchLimitMap = new Map<string, LocalRateLimitData>();
 
+function cleanMapIfNeeded(map: Map<string, LocalRateLimitData>, now: number) {
+  if (map.size > 100) {
+    for (const [key, value] of map.entries()) {
+      if (now > value.resetTime) {
+        map.delete(key);
+      }
+    }
+  }
+}
+
 const LOCAL_READ_LIMIT = 100;
 const LOCAL_WRITE_LIMIT = 50;
 const LOCAL_DELETE_LIMIT = 20;
@@ -98,6 +108,7 @@ export async function checkAdminReadLimit(
 
   // Local dev fallback
   const now = Date.now();
+  cleanMapIfNeeded(localReadLimitMap, now);
   const key = `read:${adminUid}`;
   const data = localReadLimitMap.get(key);
 
@@ -137,6 +148,7 @@ export async function checkAdminWriteLimit(
 
   // Local dev fallback
   const now = Date.now();
+  cleanMapIfNeeded(localWriteLimitMap, now);
   const key = `write:${adminUid}`;
   const data = localWriteLimitMap.get(key);
 
@@ -176,6 +188,7 @@ export async function checkAdminDeleteLimit(
 
   // Local dev fallback
   const now = Date.now();
+  cleanMapIfNeeded(localDeleteLimitMap, now);
   const key = `delete:${adminUid}`;
   const data = localDeleteLimitMap.get(key);
 
@@ -215,6 +228,7 @@ export async function checkAdminBatchLimit(
 
   // Local dev fallback
   const now = Date.now();
+  cleanMapIfNeeded(localBatchLimitMap, now);
   const key = `batch:${adminUid}`;
   const data = localBatchLimitMap.get(key);
 

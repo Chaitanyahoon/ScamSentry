@@ -63,7 +63,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         redis = await self._get_redis()
         if redis is None:
-            # Redis unavailable — let the request through
+            logger.warning(
+                "Rate limiter degraded: Redis unavailable — rate limiting bypassed for %s",
+                client_ip,
+            )
             return await call_next(request)
 
         try:

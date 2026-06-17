@@ -321,6 +321,7 @@ export async function GET(req: Request) {
       { status: 200, headers: CORS_HEADERS },
     );
   } catch (error: any) {
+    console.error("Error in verify route:", error);
     return NextResponse.json(
       { error: "Internal Server Error", details: error.message },
       { status: 500, headers: CORS_HEADERS },

@@ -2,7 +2,7 @@
  * ScamSentry Global Incident & Compromise Scraper
  *
  * Scrapes cybersecurity incident bulletins from leading news portals (BleepingComputer, TheHackerNews, KrebsOnSecurity RSS),
- * parses brand names under active exploit, and provisions temporary brand lockdown forensices.
+ * parses brand names under active exploit, and provisions temporary brand lockdown forensics.
  *
  * 100% Offline-safe, zero-dependency regular-expression XML parser.
  */

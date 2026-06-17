@@ -12,7 +12,7 @@ import { MapPin } from "lucide-react";
 import Link from "next/link";
 
 // Dynamic import for react-globe.gl to avoid SSR issues with Three.js
-const Globe = dynamic(() => import("react-globe.gl"), {
+const Globe = dynamic<any>(() => import("react-globe.gl") as any, {
   ssr: false,
   loading: () => (
     <div className="flex flex-col items-center justify-center h-full w-full bg-[#060504]">
@@ -24,6 +24,23 @@ const Globe = dynamic(() => import("react-globe.gl"), {
   ),
 });
 
+interface IntelPoint extends ScamReport {
+  lat: number;
+  lng: number;
+  size: number;
+  color: string;
+  label: string;
+}
+
+interface IntelArc {
+  startLat: number;
+  startLng: number;
+  endLat: number;
+  endLng: number;
+  color: string;
+  name: string;
+}
+
 interface ForensicGlobeProps {
   reports?: ScamReport[];
 }
@@ -33,7 +50,7 @@ export function ForensicGlobe({ reports: propReports }: ForensicGlobeProps) {
   const reports = propReports ?? contextReports;
   const [scans, setScans] = useState<ScanEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedIntel, setSelectedIntel] = useState<any>(null);
+  const [selectedIntel, setSelectedIntel] = useState<ScamReport | null>(null);
   const globeRef = useRef<any>(null);
 
   useEffect(() => {
@@ -105,7 +122,7 @@ export function ForensicGlobe({ reports: propReports }: ForensicGlobeProps) {
       return targetNodes[idx];
     };
 
-    return scans.slice(0, 30).map((scan, idx) => {
+    return scans.slice(0, 30).map((scan, idx): IntelArc => {
       const source = attackSources[idx % attackSources.length];
       const target = getDeterministicTarget(scan.url);
 
@@ -125,13 +142,13 @@ export function ForensicGlobe({ reports: propReports }: ForensicGlobeProps) {
   }, [scans, reports]);
 
   // Points for "Forensic Intel"
-  const points = useMemo(() => {
+  const points = useMemo((): IntelPoint[] => {
     return reports
       .filter((r) => r.lat && r.lng)
-      .map((r) => ({
+      .map((r): IntelPoint => ({
         ...r, // Include all report data for the click handler
-        lat: r.lat,
-        lng: r.lng,
+        lat: r.lat!,
+        lng: r.lng!,
         size: r.riskLevel === "high" ? 0.8 : 0.4,
         color: r.riskLevel === "high" ? "#FF4D4D" : "#FFBF00",
         label: r.title,
@@ -264,22 +281,22 @@ export function ForensicGlobe({ reports: propReports }: ForensicGlobeProps) {
         bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
         backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
         arcsData={arcs}
-        arcColor={"color" as any}
+        arcColor="color"
         arcDashLength={0.4}
         arcDashGap={4}
         arcDashAnimateTime={2000}
         arcStroke={0.5}
         pointsData={points}
-        pointColor={"color" as any}
-        pointRadius={"size" as any}
+        pointColor="color"
+        pointRadius="size"
         pointsMerge={false}
         pointAltitude={0.01}
-        onPointClick={(point: any) => setSelectedIntel(point)}
+        onPointClick={(point: any) => setSelectedIntel(point as ScamReport)}
         ringsData={points.filter((p) => p.size > 0.5)}
         ringColor={() => "#FF4D4D"}
         ringMaxRadius={4}
         ringPropagationSpeed={2}
-        {...({ ringRepeat: 3 } as any)}
+        ringRepeat={3}
         hexBinPointsData={points}
         hexBinPointWeight="size"
         hexBinResolution={4}

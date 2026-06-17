@@ -6,7 +6,7 @@
  */
 
 import { getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
-import { UserRole } from "@/lib/admin-roles";
+import type { UserRole } from "@/lib/admin-roles";
 
 export interface VerifiedAdminUser {
   uid: string;

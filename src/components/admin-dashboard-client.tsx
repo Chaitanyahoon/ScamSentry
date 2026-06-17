@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   AreaChart,
   Area,
@@ -96,7 +96,7 @@ export default function AdminDashboardClient() {
   const [isLoadingPayments, setIsLoadingPayments] = useState(true);
   const [keySearchQuery, setKeySearchQuery] = useState("");
 
-  const fetchApiKeys = async () => {
+  const fetchApiKeys = useCallback(async () => {
     setIsLoadingKeys(true);
     try {
       const keysSnapshot = await getDocs(collection(db, "api_keys"));
@@ -122,9 +122,9 @@ export default function AdminDashboardClient() {
     } finally {
       setIsLoadingKeys(false);
     }
-  };
+  }, [toast]);
 
-  const fetchPaymentRequests = async () => {
+  const fetchPaymentRequests = useCallback(async () => {
     setIsLoadingPayments(true);
     try {
       const q = query(
@@ -149,7 +149,7 @@ export default function AdminDashboardClient() {
     } finally {
       setIsLoadingPayments(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const fetchSafeCompanies = async () => {
@@ -194,7 +194,7 @@ export default function AdminDashboardClient() {
     fetchSafeCompanies();
     fetchApiKeys();
     fetchPaymentRequests();
-  }, [toast]);
+  }, [toast, fetchApiKeys, fetchPaymentRequests]);
 
   const pendingReports = reports.filter(
     (report) => report.status === "pending",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useAuth } from "@/contexts/auth-context";
 import { db } from "@/lib/firebase";
 import {
@@ -1381,7 +1382,7 @@ export default function ApiDashboardPage() {
             {/* QR Code */}
             <div className="flex flex-col items-center gap-4 mb-6">
               <div className="bg-white p-3 rounded-xl shadow-md">
-                <img
+                <Image
                   src={getUpiQrUrl(
                     PLANS[selectedPlan].price,
                     PLANS[selectedPlan].name,

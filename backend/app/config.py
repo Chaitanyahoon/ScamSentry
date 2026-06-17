@@ -4,9 +4,11 @@ ScamSentry API — Configuration
 All application settings loaded from environment variables via pydantic-settings.
 """
 
+import logging
+import secrets
 from functools import lru_cache
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -43,14 +45,34 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = ""  # Optional — reserved for future L5 layer
 
     # ── Security ──────────────────────────────────────────────────────
-    API_SECRET_KEY: str = "change-me-in-production"
-    CORS_ALLOWED_ORIGINS: str = "*"  # Comma-separated list of allowed origins or "*"
+    API_SECRET_KEY: str = f"dev-{secrets.token_hex(16)}"
+    CORS_ALLOWED_ORIGINS: str = "http://localhost:3000"  # Comma-separated list of allowed origins
 
     # ── Environment ───────────────────────────────────────────────────
     ENVIRONMENT: str = "development"  # "development" | "production"
+
+    @model_validator(mode="after")
+    def validate_production_secret(self) -> "Settings":
+        if self.ENVIRONMENT == "production":
+            if not self.API_SECRET_KEY or self.API_SECRET_KEY.startswith("dev-"):
+                raise ValueError("API_SECRET_KEY must be set to a secure custom value in production!")
+        elif self.API_SECRET_KEY.startswith("dev-"):
+            logger = logging.getLogger(__name__)
+            logger.warning(
+                "API_SECRET_KEY is using a generated dev default. "
+                "Set a strong custom value before deploying to production."
+            )
+        return self
 
 
 @lru_cache
 def get_settings() -> Settings:
     """Return a cached Settings singleton."""
-    return Settings()
+    logger = logging.getLogger(__name__)
+    settings = Settings()
+    if settings.CORS_ALLOWED_ORIGINS == "*":
+        logger.warning(
+            "CORS_ALLOWED_ORIGINS is set to '*' — this is insecure for production. "
+            "Pin it to specific origins in production."
+        )
+    return settings

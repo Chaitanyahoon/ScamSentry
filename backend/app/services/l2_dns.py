@@ -28,7 +28,6 @@ MAX_L2_SCORE = 100
 # Registrars frequently associated with abuse / disposable registrations
 LOW_REPUTATION_REGISTRARS: list[str] = [
     "freenom",
-    "namecheap",  # specifically abuse cases
     "todaynic",
     "eranet",
     "cheapdomain",

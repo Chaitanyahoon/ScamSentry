@@ -1,6 +1,9 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-interface LogoProps extends React.ImgHTMLAttributes<HTMLImageElement> {}
+interface LogoProps extends Omit<React.ComponentPropsWithoutRef<typeof Image>, "src" | "alt"> {
+  className?: string;
+}
 
 /**
  * ScamSentry Brand Logo
@@ -8,9 +11,11 @@ interface LogoProps extends React.ImgHTMLAttributes<HTMLImageElement> {}
  */
 export function Logo({ className, ...props }: LogoProps) {
   return (
-    <img
+    <Image
       src="/logo-icon.png"
       alt="ScamSentry Logo"
+      width={24}
+      height={24}
       className={cn("object-contain", className)}
       {...props}
     />

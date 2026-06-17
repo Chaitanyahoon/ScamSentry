@@ -15,10 +15,10 @@ Please review the guidelines below to ensure a smooth contribution process.
    cd ScamSentry
    ```
 3. **Set Up the Next.js Frontend**:
-   * Refer to the Next.js setup instructions in the [README.md](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/README.md).
+   * Refer to the Next.js setup instructions in the [README.md](README.md).
    * Run `npm install` and run `npm run dev` to start the web app.
 4. **Set Up the FastAPI Backend**:
-   * Refer to the backend setup instructions in the [README.md](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/README.md).
+   * Refer to the backend setup instructions in the [README.md](README.md).
    * Create a python virtual environment, install `requirements.txt`, and start uvicorn.
 5. **Set Up the Chrome Extension**:
    * Load the unpacked `extension/` folder in Google Chrome under developer mode.

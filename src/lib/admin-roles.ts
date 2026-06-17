@@ -34,14 +34,21 @@ export interface AdminUser {
  */
 export async function getUserRole(uid: string): Promise<UserRole | null> {
   try {
-    const userDocRef = doc(db, "admin_users", uid);
-    const userDoc = await getDoc(userDocRef);
-
-    if (userDoc.exists()) {
-      const userData = userDoc.data() as AdminUser;
-      return userData.role;
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      const userDoc = await adminDb.collection("admin_users").doc(uid).get();
+      if (userDoc.exists) {
+        return (userDoc.data() as AdminUser).role;
+      }
+    } else {
+      const userDocRef = doc(db, "admin_users", uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data() as AdminUser;
+        return userData.role;
+      }
     }
-
     return null;
   } catch (error) {
     console.error("Failed to get user role:", error);
@@ -62,13 +69,20 @@ export async function isUserAdmin(uid: string): Promise<boolean> {
  */
 export async function getAdminUser(uid: string): Promise<AdminUser | null> {
   try {
-    const userDocRef = doc(db, "admin_users", uid);
-    const userDoc = await getDoc(userDocRef);
-
-    if (userDoc.exists()) {
-      return userDoc.data() as AdminUser;
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      const userDoc = await adminDb.collection("admin_users").doc(uid).get();
+      if (userDoc.exists) {
+        return userDoc.data() as AdminUser;
+      }
+    } else {
+      const userDocRef = doc(db, "admin_users", uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        return userDoc.data() as AdminUser;
+      }
     }
-
     return null;
   } catch (error) {
     console.error("Failed to get admin user:", error);
@@ -85,45 +99,85 @@ export async function createOrUpdateAdminUser(
   displayName?: string,
 ): Promise<AdminUser> {
   try {
-    const userDocRef = doc(db, "admin_users", uid);
-    const existingUser = await getDoc(userDocRef);
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      const admin = await import("firebase-admin");
+      const userDocRef = adminDb.collection("admin_users").doc(uid);
+      const existingUser = await userDocRef.get();
 
-    if (existingUser.exists()) {
-      // Update last login
-      const userData = existingUser.data() as AdminUser;
-      await updateDoc(userDocRef, {
-        lastLogin: serverTimestamp(),
-        loginCount: (userData.loginCount || 0) + 1,
-        failedLoginAttempts: 0, // Reset on successful login
-        lastFailedLoginAt: null,
-        isLockedOut: false,
-      });
+      if (existingUser.exists) {
+        const userData = existingUser.data() as AdminUser;
+        await userDocRef.update({
+          lastLogin: admin.firestore.FieldValue.serverTimestamp(),
+          loginCount: (userData.loginCount || 0) + 1,
+          failedLoginAttempts: 0,
+          lastFailedLoginAt: null,
+          isLockedOut: false,
+        });
 
-      return {
-        ...userData,
-        lastLogin: new Date(),
-        loginCount: (userData.loginCount || 0) + 1,
-      };
+        return {
+          ...userData,
+          lastLogin: new Date(),
+          loginCount: (userData.loginCount || 0) + 1,
+        };
+      } else {
+        const isPredefinedAdmin = email.toLowerCase() === "admin@scamsentry.io";
+        const newUser: AdminUser = {
+          uid,
+          email,
+          role: isPredefinedAdmin ? "admin" : "user",
+          displayName: displayName || email.split("@")[0],
+          isActive: true,
+          createdAt: admin.firestore.FieldValue.serverTimestamp() as any,
+          lastLogin: admin.firestore.FieldValue.serverTimestamp() as any,
+          loginCount: 1,
+          failedLoginAttempts: 0,
+          isLockedOut: false,
+          permissions: [],
+        };
+
+        await userDocRef.set(newUser);
+        return newUser;
+      }
     } else {
-      // Create new user (default role: user, not admin)
-      // Predefined admin@scamsentry.io email automatically gets admin role
-      const isPredefinedAdmin = email.toLowerCase() === "admin@scamsentry.io";
-      const newUser: AdminUser = {
-        uid,
-        email,
-        role: isPredefinedAdmin ? "admin" : "user",
-        displayName: displayName || email.split("@")[0],
-        isActive: true,
-        createdAt: serverTimestamp(),
-        lastLogin: serverTimestamp(),
-        loginCount: 1,
-        failedLoginAttempts: 0,
-        isLockedOut: false,
-        permissions: [],
-      };
+      const userDocRef = doc(db, "admin_users", uid);
+      const existingUser = await getDoc(userDocRef);
 
-      await setDoc(userDocRef, newUser);
-      return newUser as any;
+      if (existingUser.exists()) {
+        const userData = existingUser.data() as AdminUser;
+        await updateDoc(userDocRef, {
+          lastLogin: serverTimestamp(),
+          loginCount: (userData.loginCount || 0) + 1,
+          failedLoginAttempts: 0,
+          lastFailedLoginAt: null,
+          isLockedOut: false,
+        });
+
+        return {
+          ...userData,
+          lastLogin: new Date(),
+          loginCount: (userData.loginCount || 0) + 1,
+        };
+      } else {
+        const isPredefinedAdmin = email.toLowerCase() === "admin@scamsentry.io";
+        const newUser: AdminUser = {
+          uid,
+          email,
+          role: isPredefinedAdmin ? "admin" : "user",
+          displayName: displayName || email.split("@")[0],
+          isActive: true,
+          createdAt: serverTimestamp(),
+          lastLogin: serverTimestamp(),
+          loginCount: 1,
+          failedLoginAttempts: 0,
+          isLockedOut: false,
+          permissions: [],
+        };
+
+        await setDoc(userDocRef, newUser);
+        return newUser;
+      }
     }
   } catch (error) {
     console.error("Failed to create or update admin user:", error);
@@ -139,34 +193,62 @@ export async function recordFailedLoginAttempt(
   email: string,
 ): Promise<void> {
   try {
-    const userDocRef = doc(db, "admin_users", uid);
-    const userDoc = await getDoc(userDocRef);
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      const admin = await import("firebase-admin");
+      const userDocRef = adminDb.collection("admin_users").doc(uid);
+      const userDoc = await userDocRef.get();
 
-    let failedAttempts = 1;
-    if (userDoc.exists()) {
-      const userData = userDoc.data() as AdminUser;
-      failedAttempts = (userData.failedLoginAttempts || 0) + 1;
+      let failedAttempts = 1;
+      if (userDoc.exists) {
+        const userData = userDoc.data() as AdminUser;
+        failedAttempts = (userData.failedLoginAttempts || 0) + 1;
+        await userDocRef.update({
+          failedLoginAttempts: failedAttempts,
+          lastFailedLoginAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      } else {
+        await userDocRef.set({
+          uid,
+          email,
+          role: "user",
+          isActive: true,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          loginCount: 0,
+          failedLoginAttempts: 1,
+          lastFailedLoginAt: admin.firestore.FieldValue.serverTimestamp(),
+          isLockedOut: false,
+          permissions: [],
+        });
+      }
     } else {
-      // Create new user record
-      await setDoc(userDocRef, {
-        uid,
-        email,
-        role: "user",
-        isActive: true,
-        createdAt: serverTimestamp(),
-        loginCount: 0,
-        failedLoginAttempts: 1,
-        lastFailedLoginAt: serverTimestamp(),
-        isLockedOut: false,
-        permissions: [],
-      });
-      return;
-    }
+      const userDocRef = doc(db, "admin_users", uid);
+      const userDoc = await getDoc(userDocRef);
 
-    await updateDoc(userDocRef, {
-      failedLoginAttempts: failedAttempts,
-      lastFailedLoginAt: serverTimestamp(),
-    });
+      let failedAttempts = 1;
+      if (userDoc.exists()) {
+        const userData = userDoc.data() as AdminUser;
+        failedAttempts = (userData.failedLoginAttempts || 0) + 1;
+        await updateDoc(userDocRef, {
+          failedLoginAttempts: failedAttempts,
+          lastFailedLoginAt: serverTimestamp(),
+        });
+      } else {
+        await setDoc(userDocRef, {
+          uid,
+          email,
+          role: "user",
+          isActive: true,
+          createdAt: serverTimestamp(),
+          loginCount: 0,
+          failedLoginAttempts: 1,
+          lastFailedLoginAt: serverTimestamp(),
+          isLockedOut: false,
+          permissions: [],
+        });
+      }
+    }
   } catch (error) {
     console.error("Failed to record login attempt:", error);
   }
@@ -188,10 +270,18 @@ export async function promoteUserToAdmin(
       return false;
     }
 
-    const userDocRef = doc(db, "admin_users", uid);
-    await updateDoc(userDocRef, {
-      role: "admin",
-    });
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      await adminDb.collection("admin_users").doc(uid).update({
+        role: "admin",
+      });
+    } else {
+      const userDocRef = doc(db, "admin_users", uid);
+      await updateDoc(userDocRef, {
+        role: "admin",
+      });
+    }
 
     return true;
   } catch (error) {
@@ -222,10 +312,18 @@ export async function demoteAdminToUser(
       return false;
     }
 
-    const userDocRef = doc(db, "admin_users", uid);
-    await updateDoc(userDocRef, {
-      role: "user",
-    });
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      await adminDb.collection("admin_users").doc(uid).update({
+        role: "user",
+      });
+    } else {
+      const userDocRef = doc(db, "admin_users", uid);
+      await updateDoc(userDocRef, {
+        role: "user",
+      });
+    }
 
     return true;
   } catch (error) {
@@ -239,15 +337,26 @@ export async function demoteAdminToUser(
  */
 export async function getAdminsByRole(role: UserRole): Promise<AdminUser[]> {
   try {
-    const adminUsersCollection = collection(db, "admin_users");
-    const q = query(adminUsersCollection, where("role", "==", role));
-
-    const querySnapshot = await getDocs(q);
     const users: AdminUser[] = [];
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      const snapshot = await adminDb
+        .collection("admin_users")
+        .where("role", "==", role)
+        .get();
+      snapshot.forEach((doc) => {
+        users.push(doc.data() as AdminUser);
+      });
+    } else {
+      const adminUsersCollection = collection(db, "admin_users");
+      const q = query(adminUsersCollection, where("role", "==", role));
 
-    querySnapshot.forEach((doc) => {
-      users.push(doc.data() as AdminUser);
-    });
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        users.push(doc.data() as AdminUser);
+      });
+    }
 
     return users;
   } catch (error) {
@@ -271,10 +380,18 @@ export async function deactivateUser(
       return false;
     }
 
-    const userDocRef = doc(db, "admin_users", uid);
-    await updateDoc(userDocRef, {
-      isActive: false,
-    });
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      await adminDb.collection("admin_users").doc(uid).update({
+        isActive: false,
+      });
+    } else {
+      const userDocRef = doc(db, "admin_users", uid);
+      await updateDoc(userDocRef, {
+        isActive: false,
+      });
+    }
 
     return true;
   } catch (error) {

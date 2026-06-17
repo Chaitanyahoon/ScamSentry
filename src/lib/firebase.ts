@@ -14,24 +14,34 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "",
 };
 
+const dummyConfig = {
+  apiKey: "dummy-api-key",
+  authDomain: "dummy-auth-domain",
+  projectId: "dummy-project-id",
+  storageBucket: "dummy-storage-bucket",
+  messagingSenderId: "dummy-sender-id",
+  appId: "dummy-app-id",
+};
+
+const configToUse = firebaseConfig.apiKey ? firebaseConfig : dummyConfig;
+
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
 let storage: FirebaseStorage;
 let analytics: Analytics | null = null;
 
-// Initialize only on client with valid config (server-side SSR/build may not have env vars).
-if (typeof window !== "undefined" && firebaseConfig.apiKey) {
-  if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
-  } else {
-    app = getApp();
-  }
+if (!getApps().length) {
+  app = initializeApp(configToUse);
+} else {
+  app = getApp();
+}
 
-  auth = getAuth(app);
-  db = getFirestore(app);
-  storage = getStorage(app);
+auth = getAuth(app);
+db = getFirestore(app);
+storage = getStorage(app);
 
+if (typeof window !== "undefined" && configToUse.apiKey !== "dummy-api-key") {
   isSupported()
     .then((supported) => {
       if (supported) {

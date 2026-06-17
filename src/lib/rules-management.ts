@@ -62,16 +62,33 @@ export interface RuleConfig {
  */
 export async function getAllRules(): Promise<DetectionRule[]> {
   try {
-    const q = query(
-      collection(db, "detection_rules"),
-      where("enabled", "==", true),
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      lastUpdated: (doc.data().lastUpdated as any)?.toDate?.() || new Date(),
-    })) as DetectionRule[];
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      const snapshot = await adminDb
+        .collection("detection_rules")
+        .where("enabled", "==", true)
+        .get();
+      return snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          lastUpdated: data.lastUpdated?.toDate?.() || new Date(),
+        };
+      }) as DetectionRule[];
+    } else {
+      const q = query(
+        collection(db, "detection_rules"),
+        where("enabled", "==", true),
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        lastUpdated: (doc.data().lastUpdated as any)?.toDate?.() || new Date(),
+      })) as DetectionRule[];
+    }
   } catch (error) {
     console.error("Failed to fetch rules:", error);
     return [];
@@ -85,17 +102,35 @@ export async function getRulesByCategory(
   category: string,
 ): Promise<DetectionRule[]> {
   try {
-    const q = query(
-      collection(db, "detection_rules"),
-      where("category", "==", category),
-      where("enabled", "==", true),
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      lastUpdated: (doc.data().lastUpdated as any)?.toDate?.() || new Date(),
-    })) as DetectionRule[];
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      const snapshot = await adminDb
+        .collection("detection_rules")
+        .where("category", "==", category)
+        .where("enabled", "==", true)
+        .get();
+      return snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          lastUpdated: data.lastUpdated?.toDate?.() || new Date(),
+        };
+      }) as DetectionRule[];
+    } else {
+      const q = query(
+        collection(db, "detection_rules"),
+        where("category", "==", category),
+        where("enabled", "==", true),
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        lastUpdated: (doc.data().lastUpdated as any)?.toDate?.() || new Date(),
+      })) as DetectionRule[];
+    }
   } catch (error) {
     console.error(`Failed to fetch rules for ${category}:`, error);
     return [];
@@ -110,14 +145,28 @@ export async function createRule(
   userId: string,
 ): Promise<string> {
   try {
-    const newRule = {
-      ...rule,
-      detectionCount: 0,
-      lastUpdated: Timestamp.now(),
-      createdBy: userId,
-    };
-    const docRef = await addDoc(collection(db, "detection_rules"), newRule);
-    return docRef.id;
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      const admin = await import("firebase-admin");
+      const newRule = {
+        ...rule,
+        detectionCount: 0,
+        lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+        createdBy: userId,
+      };
+      const docRef = await adminDb.collection("detection_rules").add(newRule);
+      return docRef.id;
+    } else {
+      const newRule = {
+        ...rule,
+        detectionCount: 0,
+        lastUpdated: Timestamp.now(),
+        createdBy: userId,
+      };
+      const docRef = await addDoc(collection(db, "detection_rules"), newRule);
+      return docRef.id;
+    }
   } catch (error) {
     console.error("Failed to create rule:", error);
     throw error;
@@ -133,12 +182,23 @@ export async function updateRule(
   userId: string,
 ): Promise<void> {
   try {
-    const ruleRef = doc(db, "detection_rules", ruleId);
-    await updateDoc(ruleRef, {
-      ...updates,
-      lastUpdated: Timestamp.now(),
-      modifiedBy: userId,
-    });
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      const admin = await import("firebase-admin");
+      await adminDb.collection("detection_rules").doc(ruleId).update({
+        ...updates,
+        lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
+        modifiedBy: userId,
+      });
+    } else {
+      const ruleRef = doc(db, "detection_rules", ruleId);
+      await updateDoc(ruleRef, {
+        ...updates,
+        lastUpdated: Timestamp.now(),
+        modifiedBy: userId,
+      });
+    }
   } catch (error) {
     console.error("Failed to update rule:", error);
     throw error;
@@ -185,7 +245,13 @@ export async function updateRuleWeight(
  */
 export async function deleteRule(ruleId: string): Promise<void> {
   try {
-    await deleteDoc(doc(db, "detection_rules", ruleId));
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      await adminDb.collection("detection_rules").doc(ruleId).delete();
+    } else {
+      await deleteDoc(doc(db, "detection_rules", ruleId));
+    }
   } catch (error) {
     console.error("Failed to delete rule:", error);
     throw error;
@@ -197,17 +263,35 @@ export async function deleteRule(ruleId: string): Promise<void> {
  */
 export async function getRuleStats(ruleId: string): Promise<RuleStats | null> {
   try {
-    const statsQuery = query(
-      collection(db, "rule_stats"),
-      where("ruleId", "==", ruleId),
-    );
-    const snapshot = await getDocs(statsQuery);
+    let data: any;
+    let empty = true;
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      const snapshot = await adminDb
+        .collection("rule_stats")
+        .where("ruleId", "==", ruleId)
+        .get();
+      if (!snapshot.empty) {
+        empty = false;
+        data = snapshot.docs[0].data();
+      }
+    } else {
+      const statsQuery = query(
+        collection(db, "rule_stats"),
+        where("ruleId", "==", ruleId),
+      );
+      const snapshot = await getDocs(statsQuery);
+      if (!snapshot.empty) {
+        empty = false;
+        data = snapshot.docs[0].data();
+      }
+    }
 
-    if (snapshot.empty) {
+    if (empty || !data) {
       return null;
     }
 
-    const data = snapshot.docs[0].data();
     const triggered = data.triggered || 0;
     const totalScans = data.totalScans || 1;
     const falsePositives = data.falsePositives || 0;
@@ -297,26 +381,47 @@ export async function getLayerConfig(
   layerName: string,
 ): Promise<RuleConfig | null> {
   try {
-    const configQuery = query(
-      collection(db, "layer_configs"),
-      where("layerName", "==", layerName),
-    );
-    const snapshot = await getDocs(configQuery);
+    let data: any;
+    let configId = "";
+    let empty = true;
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      const snapshot = await adminDb
+        .collection("layer_configs")
+        .where("layerName", "==", layerName)
+        .get();
+      if (!snapshot.empty) {
+        empty = false;
+        data = snapshot.docs[0].data();
+        configId = snapshot.docs[0].id;
+      }
+    } else {
+      const configQuery = query(
+        collection(db, "layer_configs"),
+        where("layerName", "==", layerName),
+      );
+      const snapshot = await getDocs(configQuery);
+      if (!snapshot.empty) {
+        empty = false;
+        data = snapshot.docs[0].data();
+        configId = snapshot.docs[0].id;
+      }
+    }
 
-    if (snapshot.empty) {
+    if (empty || !data) {
       return null;
     }
 
-    const data = snapshot.docs[0].data();
     const rules = await getRulesByCategory(layerName);
 
     return {
-      id: snapshot.docs[0].id,
+      id: configId,
       layerName,
-      enabled: data.enabled || true,
+      enabled: data.enabled ?? true,
       rules,
       totalWeight: rules.reduce((sum, r) => sum + (r.weight || 0), 0),
-      lastModified: (data.lastModified as any)?.toDate?.() || new Date(),
+      lastModified: data.lastModified?.toDate?.() || new Date(),
       modifiedBy: data.modifiedBy || "system",
     };
   } catch (error) {
@@ -335,13 +440,26 @@ export async function logRuleChange(
   details?: Record<string, any>,
 ): Promise<void> {
   try {
-    await addDoc(collection(db, "rule_audit_log"), {
-      ruleId,
-      action,
-      userId,
-      timestamp: Timestamp.now(),
-      details: details || {},
-    });
+    if (typeof window === "undefined") {
+      const { getAdminDb } = await import("./firebase-admin");
+      const adminDb = getAdminDb();
+      const admin = await import("firebase-admin");
+      await adminDb.collection("rule_audit_log").add({
+        ruleId,
+        action,
+        userId,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        details: details || {},
+      });
+    } else {
+      await addDoc(collection(db, "rule_audit_log"), {
+        ruleId,
+        action,
+        userId,
+        timestamp: Timestamp.now(),
+        details: details || {},
+      });
+    }
   } catch (error) {
     console.error("Failed to create audit log:", error);
   }

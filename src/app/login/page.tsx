@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import {
@@ -328,9 +329,11 @@ export default function LoginPage() {
           <div className="text-center mb-6">
             <div className="flex items-center justify-center mb-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-background shadow-sm p-2">
-                <img
+                <Image
                   src="/logo-icon.png"
                   alt="ScamSentry Shield"
+                  width={32}
+                  height={32}
                   className="h-8 w-8 object-contain"
                 />
               </div>

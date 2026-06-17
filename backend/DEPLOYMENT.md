@@ -22,7 +22,7 @@ Ensure these variables are configured in your production hosting dashboard:
 
 ## 2. Option A: Deploying on Render (Recommended)
 
-We provide a **Render Blueprint** configuration ([render.yaml](file:///c:/Users/patil/OneDrive/Desktop/scam-sentry/ScamSentry/render.yaml)) at the root of the repository, which automatically links the FastAPI app, PostgreSQL, and Redis cache.
+We provide a **Render Blueprint** configuration ([render.yaml](render.yaml)) at the root of the repository, which automatically links the FastAPI app, PostgreSQL, and Redis cache.
 
 ### Steps:
 1. Push your repository to your GitHub account.

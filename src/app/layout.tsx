@@ -5,6 +5,7 @@ import "./globals.css";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Toaster } from "@/components/ui/toaster";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { ReportsProvider } from "@/contexts/reports-context";
 
 import { AuthProvider } from "@/contexts/auth-context";
@@ -62,7 +63,9 @@ export default function RootLayout({
         <ReportsProvider>
           <AuthProvider>
             <Header />
-            <main className="flex-1 w-full">{children}</main>
+            <ErrorBoundary>
+              <main className="flex-1 w-full">{children}</main>
+            </ErrorBoundary>
             <Footer />
             <Toaster />
           </AuthProvider>

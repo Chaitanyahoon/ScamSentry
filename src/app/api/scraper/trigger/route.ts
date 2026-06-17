@@ -43,7 +43,7 @@ export async function POST() {
             method: "POST",
             headers: {
               "X-Admin-Key":
-                process.env.API_SECRET_KEY || "test-admin-secret-key-12345",
+                process.env.API_SECRET_KEY || "",
             },
           },
         );

@@ -1,6 +1,9 @@
 import dns from "dns";
 import { promisify } from "util";
 import { getCertificateInfo } from "./ssl-audit";
+import { getAdminDb } from "../firebase-admin";
+import { getActiveBrandLockdowns } from "../services/incident-scraper";
+import { generateThreatFingerprint } from "../fingerprints";
 
 const resolve4 = promisify(dns.resolve4);
 const resolveTxt = promisify(dns.resolveTxt);
@@ -164,7 +167,6 @@ export async function analyzeDomainForensics(inputUrl: string) {
 
   // 4. OSINT Blocklist Check (NEW)
   try {
-    const { getAdminDb } = await import("../firebase-admin");
     const db = getAdminDb();
     const docId = domain.replace(/\./g, "_");
     const threatDoc = await db
@@ -281,8 +283,6 @@ export async function analyzeDomainForensics(inputUrl: string) {
 
   // NEW: Active Brand Lockdown Forensics
   try {
-    const { getActiveBrandLockdowns } =
-      await import("../services/incident-scraper");
     const activeLockdowns = await getActiveBrandLockdowns().catch(() => []);
 
     for (const brand of activeLockdowns) {
@@ -308,7 +308,6 @@ export async function analyzeDomainForensics(inputUrl: string) {
   }
 
   // 6. Threat Fingerprinting (NEW: Neural Cluster ID)
-  const { generateThreatFingerprint } = await import("../fingerprints");
   const fingerprint = generateThreatFingerprint(
     inputUrl,
     flags,

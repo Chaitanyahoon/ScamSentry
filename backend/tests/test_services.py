@@ -82,10 +82,10 @@ async def test_l2_dns_malicious() -> None:
     # Registrar is low-reputation (+30), SSL is self-signed (+45) -> total capped at 100
     mock_whois = {
         "creation_date": None,
-        "registrar": "namecheap",
+        "registrar": "freenom",
         "raw": {
             "domain_name": "evil.tk",
-            "registrar": "namecheap",
+            "registrar": "freenom",
             "creation_date": None,
         },
     }

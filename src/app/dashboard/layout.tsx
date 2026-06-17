@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Shield,
@@ -59,9 +60,11 @@ export default function DashboardLayout({
           <div className="p-6 border-b border-border">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="bg-primary/20 p-1 rounded-lg border border-primary/30 group-hover:border-primary/60 transition-colors w-10 h-10 flex items-center justify-center">
-                <img
+                <Image
                   src="/logo-icon.png"
                   alt="ScamSentry"
+                  width={28}
+                  height={28}
                   className="h-7 w-7 object-contain"
                 />
               </div>

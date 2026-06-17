@@ -28,7 +28,7 @@ services:
       - key: ENVIRONMENT
         value: production
       - key: CORS_ALLOWED_ORIGINS
-        value: "*" # Update this in Render dashboard settings with your live Vercel Next.js URL for CORS protection
+        value: "https://scam-sentry.vercel.app" # Update this with your live frontend URL
       - key: GOOGLE_SAFE_BROWSING_API_KEY
         sync: false # Set this value manually in the Render dashboard env variables settings
       - key: GEMINI_API_KEY

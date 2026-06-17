@@ -341,8 +341,6 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
 
         setReports((prev) => [newReport, ...prev]);
         return newReport;
-        setReports((prev) => [newReport, ...prev]);
-        return newReport;
       } catch (error) {
         console.error("Error adding report:", error);
         throw error;
@@ -398,7 +396,7 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
         variant: "destructive",
       });
     }
-  }, []);
+  }, [toast]);
 
   const voteHelpful = useCallback(async (id: string) => {
     try {

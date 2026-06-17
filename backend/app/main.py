@@ -12,8 +12,10 @@ import os
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse
 
 from app.config import get_settings
 from app.middleware.rate_limit import RateLimitMiddleware
@@ -98,6 +100,40 @@ app = FastAPI(
 )
 
 # ── Middleware Configuration ──────────────────────────────────────────
+
+# Security Headers Middleware
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "0"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        if get_settings().ENVIRONMENT == "production":
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
+
+# Request Body Size Limit Middleware
+MAX_BODY_SIZE = 1_048_576  # 1 MB
+
+
+class RequestBodySizeMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        content_length = request.headers.get("content-length")
+        if content_length and int(content_length) > MAX_BODY_SIZE:
+            return JSONResponse(
+                status_code=413,
+                content={"detail": f"Request body too large. Max: {MAX_BODY_SIZE} bytes."},
+            )
+        return await call_next(request)
+
+
+app.add_middleware(RequestBodySizeMiddleware)
 
 # CORS Middleware
 origins = [

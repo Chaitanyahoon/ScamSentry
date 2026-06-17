@@ -13,7 +13,24 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-export function ForensicReport({ url, report, finalScore, riskLevel }: any) {
+interface LayerData {
+  score: number;
+  flags?: string[];
+}
+
+interface ForensicReportProps {
+  url?: string;
+  report: {
+    layer1_Heuristics?: LayerData;
+    layer2_Forensics?: LayerData;
+    layer3_ThreatIntel?: LayerData;
+    layer4_InternalGraph?: LayerData;
+  };
+  finalScore: number;
+  riskLevel: string;
+}
+
+export function ForensicReport({ url, report, finalScore, riskLevel }: ForensicReportProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("L1");
   const [animatedScore, setAnimatedScore] = useState(0);
@@ -263,7 +280,8 @@ export function ForensicReport({ url, report, finalScore, riskLevel }: any) {
         {/* Navigation Tabs Bar */}
         <div className="bg-muted/30 border-b border-border flex flex-wrap select-none p-1 gap-1">
           {layers.map((layer) => {
-            const hasAnomalies = layer.data.score > 0;
+            const hasAnomalies = layer.data ? layer.data.score > 0 : false;
+            const scoreVal = layer.data ? layer.data.score : 0;
             const tabClass =
               activeTab === layer.id
                 ? "bg-card text-primary border border-border shadow-sm font-bold"
@@ -280,7 +298,7 @@ export function ForensicReport({ url, report, finalScore, riskLevel }: any) {
                 <span
                   className={`text-[9px] font-bold px-2 py-0.5 ml-1 rounded-full border ${hasAnomalies ? "border-destructive/20 bg-destructive/10 text-destructive" : "border-success/20 bg-success/10 text-success"}`}
                 >
-                  {hasAnomalies ? `-${layer.data.score} PTS` : "Clean"}
+                  {hasAnomalies ? `-${scoreVal} PTS` : "Clean"}
                 </span>
               </button>
             );
@@ -297,13 +315,13 @@ export function ForensicReport({ url, report, finalScore, riskLevel }: any) {
               </span>
               <span className="text-[10px] uppercase tracking-wider font-bold text-primary flex items-center gap-1.5">
                 <TrendingUp className="h-3.5 w-3.5" />
-                Score Contribution: -{currentLayer?.data.score} PTS
+                Score Contribution: -{currentLayer?.data ? currentLayer.data.score : 0} PTS
               </span>
             </div>
 
             {/* List of Flags/Anomalies */}
             <div className="space-y-3">
-              {currentLayer && currentLayer.data.flags.length > 0 ? (
+              {currentLayer && currentLayer.data?.flags && currentLayer.data.flags.length > 0 ? (
                 currentLayer.data.flags.map((flag: string, index: number) => {
                   const cleanFlag = flag
                     .replace("⚠️ ", "")
