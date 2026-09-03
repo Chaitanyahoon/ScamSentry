@@ -4,10 +4,15 @@ import { analyzeDomainForensics } from "@/lib/validator/forensics";
 import { analyzeThreatIntel } from "@/lib/validator/threat-intel";
 import { analyzeInternalGraph } from "@/lib/validator/internal-graph";
 
+export const dynamic = "force-dynamic";
+
+let lastScanFailureTime = 0;
+const SCAN_CIRCUIT_COOLDOWN_MS = 45 * 1000;
+
 /**
  * POST /api/validator
  * UI-Facing Forensic Scan Endpoint.
- * Executes the 4-layer threat validation pipeline offline/locally.
+ * Executes threat validation via FastAPI backend or fast local pipeline.
  */
 export async function POST(req: Request) {
   try {
@@ -21,81 +26,84 @@ export async function POST(req: Request) {
     }
 
     const input = body.input.trim();
+    const isCircuitOpen =
+      Date.now() - lastScanFailureTime < SCAN_CIRCUIT_COOLDOWN_MS;
 
-    // Attempt to query the FastAPI backend if BACKEND_API_URL or NEXT_PUBLIC_API_URL is configured
     const backendUrl =
       process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL;
-    if (backendUrl) {
+
+    if (backendUrl && !isCircuitOpen) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+
       try {
-        // Ensure URL starts with a valid scheme for Pydantic HttpUrl validation
         let targetUrl = input;
         if (!/^https?:\/\//i.test(targetUrl)) {
           targetUrl = `http://${targetUrl}`;
         }
 
-        console.log(
-          `Proxying scan request for: "${targetUrl}" to FastAPI backend: ${backendUrl}`,
-        );
         const backendResponse = await fetch(`${backendUrl}/api/v1/scan`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ url: targetUrl }),
+          signal: controller.signal,
         });
+
+        clearTimeout(timeoutId);
 
         if (backendResponse.ok) {
           const data = await backendResponse.json();
 
-          // Map backend response (ScanResponse) back to the frontend format
-          const L1 = data.layer_results.find(
+          const L1 = data.layer_results?.find(
             (lr: any) => lr.layer === "L1",
           ) || { score_contribution: 0, details: {} };
-          const L2 = data.layer_results.find(
+          const L2 = data.layer_results?.find(
             (lr: any) => lr.layer === "L2",
           ) || { score_contribution: 0, details: {} };
-          const L3 = data.layer_results.find(
+          const L3 = data.layer_results?.find(
             (lr: any) => lr.layer === "L3",
           ) || { score_contribution: 0, details: {} };
-          const L4 = data.layer_results.find(
+          const L4 = data.layer_results?.find(
             (lr: any) => lr.layer === "L4",
           ) || { score_contribution: 0, details: {} };
 
-          const finalScore = 100 - data.risk_score;
+          const finalScore = 100 - (data.risk_score || 0);
 
           let riskLevel: "Secure" | "Suspicious" | "Critical Threat" = "Secure";
           if (data.risk_level === "dangerous") riskLevel = "Critical Threat";
           else if (data.risk_level === "suspicious") riskLevel = "Suspicious";
 
-          // Map details to visual flags matching frontend component structure
-          const l1Flags = L1.details.triggered_rules || [];
-          const l2Flags = L2.details.triggered_checks || [];
+          const l1Flags = L1.details?.triggered_rules || [];
+          const l2Flags = L2.details?.triggered_checks || [];
 
           const l3Flags: string[] = [];
-          if (L3.details.matches && Array.isArray(L3.details.matches)) {
+          if (L3.details?.matches && Array.isArray(L3.details.matches)) {
             L3.details.matches.forEach((m: any) => {
               l3Flags.push(
                 `CRITICAL: Google Safe Browsing flagged threat: ${m.threat_type} on ${m.platform}`,
               );
             });
-          } else if (L3.details.error) {
+          } else if (L3.details?.error) {
             l3Flags.push(
-              `Warning: Threat Intel check skipped/failed: ${L3.details.error}`,
+              `Warning: Threat Intel check skipped: ${L3.details.error}`,
             );
           }
 
           const l4Flags: string[] = [];
-          if (L4.details.match) {
+          if (L4.details?.match) {
             const m = L4.details.match;
             const verifiedLabel = m.verified ? "Verified" : "Unverified";
             l4Flags.push(
-              `CRITICAL: Internal Graph Ledger Match: ${verifiedLabel} ${m.threat_type} (confidence: ${m.confidence}%)`,
+              `CRITICAL: Internal Graph Match: ${verifiedLabel} ${m.threat_type} (${m.confidence}% conf)`,
             );
           }
 
           return NextResponse.json(
             {
               success: true,
+              engine: "backend-cloud",
               finalScore,
               riskLevel,
               forensicReport: {
@@ -120,43 +128,55 @@ export async function POST(req: Request) {
             { status: 200 },
           );
         } else {
-          const errText = await backendResponse.text();
-          console.warn(
-            `Backend responded with error status ${backendResponse.status}: ${errText}. Falling back to local analysis.`,
-          );
+          lastScanFailureTime = Date.now();
         }
-      } catch (err) {
-        console.error(
-          "Error connecting to backend. Falling back to local analysis:",
-          err,
+      } catch (err: any) {
+        clearTimeout(timeoutId);
+        lastScanFailureTime = Date.now();
+        console.warn(
+          `[API:Validator] Backend scan unavailable (${err.name || "Error"}), executing fast local pipeline.`,
         );
       }
     }
 
-    // ── FALLBACK: Execute Local Next.js Threat Validation Pipeline ──
-
-    // 1. Execute L1 Heuristics
+    // ── FALLBACK: Execute Fast Local Next.js Validation Pipeline ──
     const L1 = analyzeHeuristics(input);
 
-    // Extract nested URLs if scanning text body
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const urls = input.match(urlRegex) || [];
 
-    // 2. Parallel execution of L2 DNS Forensics, L3 Threat Intel, and L4 Internal Trust Ledger
-    const [L2, L4, L3] = await Promise.all([
-      analyzeDomainForensics(input),
-      analyzeInternalGraph(input),
-      analyzeThreatIntel(urls),
-    ]);
+    // Run external forensics with a 2500ms safety timeout budget
+    let L2 = { score: 0, flags: [] as string[] };
+    let L4 = { score: 0, flags: [] as string[] };
+    let L3 = { score: 0, flags: [] as string[] };
 
-    // 3. Score aggregation
+    try {
+      const forensicsPromise = Promise.all([
+        analyzeDomainForensics(input).catch(() => ({ score: 0, flags: [] })),
+        analyzeInternalGraph(input).catch(() => ({ score: 0, flags: [] })),
+        analyzeThreatIntel(urls).catch(() => ({ score: 0, flags: [] })),
+      ]);
+
+      const timeoutPromise = new Promise<null>((resolve) =>
+        setTimeout(() => resolve(null), 2500),
+      );
+
+      const result = await Promise.race([forensicsPromise, timeoutPromise]);
+      if (result) {
+        [L2, L4, L3] = result;
+      } else {
+        L2.flags.push("Notice: Domain network lookup reached safe timeout threshold");
+      }
+    } catch (e) {
+      console.warn("[API:Validator] Local auxiliary check failed gracefully:", e);
+    }
+
     const combinedRisk = Math.min(
       L1.score + L2.score + L3.score + L4.score,
       100,
     );
     const finalScore = 100 - combinedRisk;
 
-    // 4. Map risk thresholds (inverse: high score is secure, low score is threat)
     let riskLevel: "Secure" | "Suspicious" | "Critical Threat" = "Secure";
     if (finalScore <= 30) riskLevel = "Critical Threat";
     else if (finalScore <= 70) riskLevel = "Suspicious";
@@ -164,6 +184,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: true,
+        engine: "local-heuristic",
         finalScore,
         riskLevel,
         forensicReport: {

@@ -23,7 +23,16 @@ const dummyConfig = {
   appId: "dummy-app-id",
 };
 
-const configToUse = firebaseConfig.apiKey ? firebaseConfig : dummyConfig;
+export const isFirebaseConfigured = Boolean(
+  firebaseConfig.apiKey &&
+    firebaseConfig.apiKey !== "dummy-api-key" &&
+    firebaseConfig.apiKey !== "mock-key" &&
+    firebaseConfig.projectId &&
+    firebaseConfig.projectId !== "dummy-project-id" &&
+    firebaseConfig.projectId !== "mock",
+);
+
+const configToUse = isFirebaseConfigured ? firebaseConfig : dummyConfig;
 
 let app: FirebaseApp;
 let auth: Auth;
@@ -41,16 +50,20 @@ auth = getAuth(app);
 db = getFirestore(app);
 storage = getStorage(app);
 
-if (typeof window !== "undefined" && configToUse.apiKey !== "dummy-api-key") {
+if (typeof window !== "undefined" && isFirebaseConfigured) {
   isSupported()
     .then((supported) => {
-      if (supported) {
+      if (supported && app) {
         analytics = getAnalytics(app);
       }
     })
     .catch((err) => {
       console.warn("Firebase Analytics is not supported in this environment:", err);
     });
+} else if (typeof window !== "undefined" && !isFirebaseConfigured) {
+  console.info(
+    "[Firebase] Running in local/demo mode: Firebase credentials not configured in environment.",
+  );
 }
 
 export { app, auth, db, storage, analytics };

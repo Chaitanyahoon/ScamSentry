@@ -152,6 +152,16 @@ app.add_middleware(RequestBodySizeMiddleware)
 origins = [
     o.strip() for o in get_settings().CORS_ALLOWED_ORIGINS.split(",") if o.strip()
 ]
+default_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://scam-sentry.vercel.app",
+    "https://scamsentry.vercel.app",
+]
+for d in default_origins:
+    if d not in origins and "*" not in origins:
+        origins.append(d)
+
 allow_credentials = True
 if "*" in origins:
     allow_credentials = False
@@ -159,6 +169,7 @@ if "*" in origins:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"^https:\/\/scamsentry(-[a-zA-Z0-9-]+)?\.vercel\.app$",
     allow_credentials=allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -195,10 +206,13 @@ app.include_router(incident_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["system"])
-async def health_check(format: str | None = None):
-    """Return system health. Use ?format=text for a minimal text response."""
+async def health_check(format: str | None = None, lightweight: bool = False):
+    """Return system health. Use ?format=text or ?lightweight=true for a minimal response."""
     if format == "text":
         return Response(content="OK", media_type="text/plain")
+
+    if lightweight:
+        return {"status": "ok", "timestamp": datetime.now(UTC).isoformat()}
 
     health: dict = {
         "status": "ok",

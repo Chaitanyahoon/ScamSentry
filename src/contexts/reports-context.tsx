@@ -8,7 +8,7 @@ import {
   useState,
   useCallback,
 } from "react";
-import { db } from "@/lib/firebase"; // Import Firebase db
+import { db, isFirebaseConfigured } from "@/lib/firebase"; // Import Firebase db
 import {
   collection,
   getDocs,
@@ -219,6 +219,7 @@ const initialReports: ScamReport[] = [
     views: 156,
     riskLevel: "high",
     trustScore: 92,
+    evidenceUrls: [],
   },
   {
     id: "2",
@@ -243,6 +244,7 @@ const initialReports: ScamReport[] = [
     views: 89,
     riskLevel: "medium",
     trustScore: 87,
+    evidenceUrls: [],
   },
   {
     id: "3",
@@ -268,6 +270,7 @@ const initialReports: ScamReport[] = [
     views: 42,
     riskLevel: "low",
     trustScore: 65,
+    evidenceUrls: [],
   },
 ];
 
@@ -278,8 +281,8 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
 
   // Listen to reports from Firebase in real-time
   useEffect(() => {
-    if (!db) {
-      console.warn("Firebase Firestore is unavailable. Falling back to local mock data.");
+    if (!isFirebaseConfigured) {
+      console.info("[Reports] Running in local demo mode: Serving initial verified reports.");
       setReports(initialReports);
       setIsLoadingReports(false);
       return;
@@ -324,10 +327,28 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
       >,
     ): Promise<ScamReport | null> => {
       try {
+        if (!isFirebaseConfigured) {
+          const newReport: ScamReport = {
+            id: `demo-${Date.now()}`,
+            ...reportData,
+            status: "approved",
+            createdAt: new Date().toISOString(),
+            helpfulVotes: 0,
+            flagCount: 0,
+            views: 0,
+            trustScore: 50,
+          };
+          setReports((prev) => [newReport, ...prev]);
+          toast({
+            title: "Report Submitted (Demo Mode)",
+            description: "Saved locally. Add Firebase keys to sync to cloud.",
+          });
+          return newReport;
+        }
+
         const payload = scamReportToDbInsert(reportData);
         const docRef = await addDoc(collection(db, "scam_reports"), payload);
 
-        // Construct the new report object to update local state immediately
         const newReport: ScamReport = {
           id: docRef.id,
           ...reportData,
@@ -346,127 +367,126 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
     },
-    [],
+    [toast],
   );
 
   const approveReport = useCallback(async (id: string) => {
+    setReports((prev) =>
+      prev.map((r) =>
+        r.id === id ? { ...r, status: "approved" as const } : r,
+      ),
+    );
+    if (!isFirebaseConfigured) return;
     try {
       const reportRef = doc(db, "scam_reports", id);
       await updateDoc(reportRef, { status: "approved" });
-      setReports((prev) =>
-        prev.map((r) =>
-          r.id === id ? { ...r, status: "approved" as const } : r,
-        ),
-      );
     } catch (error) {
       console.error("Error approving report:", error);
     }
   }, []);
 
   const rejectReport = useCallback(async (id: string) => {
+    setReports((prev) =>
+      prev.map((report) =>
+        report.id === id
+          ? { ...report, status: "rejected" as const }
+          : report,
+      ),
+    );
+    if (!isFirebaseConfigured) return;
     try {
       const reportRef = doc(db, "scam_reports", id);
       await updateDoc(reportRef, { status: "rejected" });
-      setReports((prev) =>
-        prev.map((report) =>
-          report.id === id
-            ? { ...report, status: "rejected" as const }
-            : report,
-        ),
-      );
     } catch (error) {
       console.error("Error rejecting report:", error);
     }
   }, []);
 
   const deleteReport = useCallback(async (id: string) => {
-    console.log("Attempting to delete report with ID:", id);
+    setReports((prev) => prev.filter((report) => report.id !== id));
+    toast({
+      title: "Report Deleted",
+      description: "The report has been permanently removed.",
+    });
+    if (!isFirebaseConfigured) return;
     try {
       await deleteDoc(doc(db, "scam_reports", id));
-      setReports((prev) => prev.filter((report) => report.id !== id));
-      toast({
-        title: "Report Deleted",
-        description: "The report has been permanently removed.",
-      });
     } catch (error: any) {
-      console.error("Error deleting report:", error);
-      toast({
-        title: "Deletion Failed",
-        description: `Could not delete report: ${error.message}.`,
-        variant: "destructive",
-      });
+      console.error("Error deleting report from Firestore:", error);
     }
   }, [toast]);
 
   const voteHelpful = useCallback(async (id: string) => {
+    setReports((prev) =>
+      prev.map((report) =>
+        report.id === id
+          ? {
+              ...report,
+              helpfulVotes: report.helpfulVotes + 1,
+              trustScore: Math.min(100, report.trustScore + 2),
+            }
+          : report,
+      ),
+    );
+    if (!isFirebaseConfigured) return;
     try {
       const reportRef = doc(db, "scam_reports", id);
       await updateDoc(reportRef, {
         helpful_votes: increment(1),
         trust_score: increment(2),
       });
-
-      setReports((prev) =>
-        prev.map((report) =>
-          report.id === id
-            ? {
-                ...report,
-                helpfulVotes: report.helpfulVotes + 1,
-                trustScore: Math.min(100, report.trustScore + 2),
-              }
-            : report,
-        ),
-      );
     } catch (error) {
       console.error("Error voting helpful:", error);
     }
   }, []);
 
   const flagReport = useCallback(async (id: string) => {
+    setReports((prev) =>
+      prev.map((report) =>
+        report.id === id
+          ? {
+              ...report,
+              flagCount: report.flagCount + 1,
+              trustScore: Math.max(0, report.trustScore - 5),
+            }
+          : report,
+      ),
+    );
+    if (!isFirebaseConfigured) return;
     try {
       const reportRef = doc(db, "scam_reports", id);
       await updateDoc(reportRef, {
         flag_count: increment(1),
         trust_score: increment(-5),
       });
-
-      setReports((prev) =>
-        prev.map((report) =>
-          report.id === id
-            ? {
-                ...report,
-                flagCount: report.flagCount + 1,
-                trustScore: Math.max(0, report.trustScore - 5),
-              }
-            : report,
-        ),
-      );
     } catch (error) {
       console.error("Error flagging report:", error);
     }
   }, []);
 
   const resolveReportFlags = useCallback(async (id: string) => {
+    setReports((prev) =>
+      prev.map((report) =>
+        report.id === id ? { ...report, flagCount: 0 } : report,
+      ),
+    );
+    if (!isFirebaseConfigured) return;
     try {
       const reportRef = doc(db, "scam_reports", id);
       await updateDoc(reportRef, { flag_count: 0 });
-      setReports((prev) =>
-        prev.map((report) =>
-          report.id === id ? { ...report, flagCount: 0 } : report,
-        ),
-      );
     } catch (error) {
       console.error("Error resolving report flags:", error);
     }
   }, []);
 
   const incrementViews = useCallback(async (id: string) => {
+    setReports((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, views: r.views + 1 } : r)),
+    );
+    if (!isFirebaseConfigured) return;
     try {
       const reportRef = doc(db, "scam_reports", id);
       await updateDoc(reportRef, { views: increment(1) });
-      setReports((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, views: r.views + 1 } : r)),
-      );
     } catch (error) {
       console.error("Error incrementing views:", error);
     }
@@ -529,6 +549,9 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
     searchReportsByCity,
     uploadEvidence: async (file: File) => {
       try {
+        if (!storage) {
+          return URL.createObjectURL(file);
+        }
         const storageRef = ref(storage, `evidence/${Date.now()}_${file.name}`);
         const snapshot = await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(snapshot.ref);

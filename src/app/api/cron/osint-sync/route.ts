@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminDb } from "@/lib/firebase-admin";
+import { getAdminDb, isFirebaseAdminAvailable } from "@/lib/firebase-admin";
 import * as admin from "firebase-admin";
 
 // Force dynamic execution for API route
@@ -53,6 +53,14 @@ export async function GET(req: Request) {
         success: true,
         processed: 0,
         message: "No active threats found",
+      });
+    }
+
+    if (!isFirebaseAdminAvailable()) {
+      return NextResponse.json({
+        success: true,
+        skipped: true,
+        message: "Firebase Admin is not configured. OSINT cron skipped safely.",
       });
     }
 

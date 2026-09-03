@@ -2,6 +2,8 @@ name: ScamSentry Frontend CI
 
 on:
   push:
+    branches:
+      - main
     paths:
       - 'src/**'
       - 'package.json'
@@ -11,6 +13,8 @@ on:
       - '__tests__/**'
       - '.github/workflows/frontend-ci.yml'
   pull_request:
+    branches:
+      - main
     paths:
       - 'src/**'
       - 'package.json'
@@ -19,6 +23,10 @@ on:
       - 'tsconfig.json'
       - '__tests__/**'
       - '.github/workflows/frontend-ci.yml'
+
+concurrency:
+  group: frontend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build-and-test:
@@ -43,9 +51,7 @@ jobs:
       - name: Run Next.js Build (Typecheck & Compile)
         run: npm run build
         env:
-          # Disable firebase warning telemetry during build to speed up compilation
           NEXT_TELEMETRY_DISABLED: 1
-          # Mock env vars for Next.js build setup (so validation passes)
           BACKEND_API_URL: "http://localhost:8000"
           NEXT_PUBLIC_FIREBASE_API_KEY: "mock-key"
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "mock.firebaseapp.com"

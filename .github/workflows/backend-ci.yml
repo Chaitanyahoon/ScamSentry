@@ -2,18 +2,25 @@ name: ScamSentry Backend CI
 
 on:
   push:
+    branches:
+      - main
     paths:
       - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
   pull_request:
+    branches:
+      - main
     paths:
       - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+
+concurrency:
+  group: backend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
-
-    # Note: Tests use SQLite and mock Redis (fakeredis), so we don't strictly need Postgres/Redis services here.
-    # This keeps the CI fast and lightweight.
 
     defaults:
       run:
@@ -36,7 +43,6 @@ jobs:
           pip install -r requirements.txt
           pip install pytest-github-actions-annotate-failures
 
-
       - name: Run Linting (Ruff)
         run: |
           ruff check app/
@@ -54,5 +60,3 @@ jobs:
           ENVIRONMENT: "development"
         run: |
           pytest tests/ --ignore=tests/manual -v --asyncio-mode=auto
-
-

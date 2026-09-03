@@ -58,17 +58,7 @@ export default function SafeCompaniesPage() {
       let fetchedFromBackend = false;
 
       try {
-        const backendUrl =
-          process.env.BACKEND_API_URL ||
-          process.env.NEXT_PUBLIC_API_URL ||
-          "https://scamsentry-backend-j7a8.onrender.com";
-        console.log(
-          `[SAFE_COMPANIES] Attempting to fetch brand lockdowns from FastAPI backend: ${backendUrl}`,
-        );
-        const res = await fetch(`${backendUrl}/api/v1/brand-lockdowns`, {
-          next: { revalidate: 30 },
-        });
-
+        const res = await fetch("/api/brand-lockdowns");
         if (res.ok) {
           const data = await res.json();
           if (data && data.length > 0) {
@@ -83,57 +73,46 @@ export default function SafeCompaniesPage() {
             }));
             setCompanies(mapped);
             fetchedFromBackend = true;
-            console.log(
-              `[SAFE_COMPANIES] Successfully loaded ${mapped.length} brand lockdowns from FastAPI.`,
-            );
           }
         }
       } catch (err) {
-        console.error(
-          "[SAFE_COMPANIES] Failed to fetch brand lockdowns from backend, falling back to Firestore:",
-          err,
-        );
+        console.warn("[SAFE_COMPANIES] Brand lockdowns proxy notice:", err);
       }
 
       if (!fetchedFromBackend) {
-        try {
-          const q = query(
-            collection(db, "safe_companies"),
-            where("status", "==", "approved"),
-            orderBy("verified_score", "desc"),
-          );
-
-          const querySnapshot = await getDocs(q);
-          const fetchedCompanies: SafeCompany[] = [];
-
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            fetchedCompanies.push({
-              id: doc.id,
-              name: data.name,
-              industry: data.industry,
-              description: data.description,
-              website: data.website,
-              verified_score: data.verified_score,
-              tags: data.tags,
-            });
-          });
-
-          setCompanies(fetchedCompanies);
-        } catch (error: any) {
-          if (
-            error.code === "permission-denied" ||
-            error.message?.includes("Missing or insufficient permissions")
-          ) {
-            console.warn(
-              "Firebase permissions missing. Falling back to mock data.",
+        if (db) {
+          try {
+            const q = query(
+              collection(db, "safe_companies"),
+              where("status", "==", "approved"),
+              orderBy("verified_score", "desc"),
             );
-            toast({
-              title: "Offline Directory",
-              description: "Currently showing cached verified directory.",
-              variant: "default",
+
+            const querySnapshot = await getDocs(q);
+            const fetchedCompanies: SafeCompany[] = [];
+
+            querySnapshot.forEach((doc) => {
+              const data = doc.data();
+              fetchedCompanies.push({
+                id: doc.id,
+                name: data.name,
+                industry: data.industry,
+                description: data.description,
+                website: data.website,
+                verified_score: data.verified_score,
+                tags: data.tags || [],
+              });
             });
+
+            if (fetchedCompanies.length > 0) {
+              setCompanies(fetchedCompanies);
+            } else {
+              setCompanies(mockSafeCompanies);
+            }
+          } catch (error: any) {
+            setCompanies(mockSafeCompanies);
           }
+        } else {
           setCompanies(mockSafeCompanies);
         }
       }

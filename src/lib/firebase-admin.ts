@@ -3,6 +3,21 @@ import * as admin from "firebase-admin";
 let adminApp: admin.app.App | null = null;
 
 /**
+ * Check if Firebase Admin credentials are configured in the environment
+ */
+export function isFirebaseAdminAvailable(): boolean {
+  if (typeof window !== "undefined") return false;
+  const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+  if (!key || key.trim() === "") return false;
+  try {
+    JSON.parse(key);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Initialize Firebase Admin SDK
  * Uses service account from environment variable FIREBASE_SERVICE_ACCOUNT_KEY
  */
@@ -33,7 +48,7 @@ export function initializeFirebaseAdmin(): admin.app.App {
 
     adminApp = admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      databaseURL: `https://${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseio.com`,
+      databaseURL: `https://${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "default"}.firebaseio.com`,
     });
 
     return adminApp;

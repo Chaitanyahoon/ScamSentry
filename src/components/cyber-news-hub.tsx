@@ -167,9 +167,12 @@ export function CyberNewsHub() {
         }));
         setIncidents(decoded);
         setLockdowns(data.lockdowns || []);
+        if (data.backendStatus === "waking_up") {
+          setTimeout(() => fetchData(), 15000);
+        }
       }
     } catch (e) {
-      console.error("[NEWS_HUB] Failed to fetch cybersecurity news", e);
+      console.warn("[NEWS_HUB] Sync using cached feed baseline", e);
     } finally {
       setLoading(false);
       setRefreshing(false);
