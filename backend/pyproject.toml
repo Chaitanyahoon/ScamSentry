@@ -1,0 +1,10 @@
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = [
+    "E402",  # Module level import not at top of file
+    "B008",  # Do not perform function calls in argument defaults (FastAPI Depends)
+]
